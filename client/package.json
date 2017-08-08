@@ -1,0 +1,24 @@
+{
+  "name": "supremacy.web",
+  "config": {
+    "prefix": "./public"
+  },
+  "version": "0.0.1",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "backbone": "^1.3.3",
+    "backbone.marionette": "^3.4.0",
+    "backbone.radio": "^2.0.0",
+    "jquery": "^3.2.1",
+    "requirejs": "^2.3.4",
+    "requirejs-text": "^2.0.15",
+    "requirejs-underscore-tpl": "^0.2.0",
+    "underscore": "^1.8.3"
+  }
+}
