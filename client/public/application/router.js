@@ -1,5 +1,13 @@
 define(['backbone.marionette',
-       'solarsystem/layout'], function(Marionette, SystemOverview) {
+       'solarsystem/layout',
+       'overview/layout',
+       'surface/layout',
+       'shipyard/layout'],
+       function(Marionette,
+                SystemOverview,
+                PlanetOverview,
+                PlanetSurface,
+                Shipyard) {
 	'use strict';
 
 	var app = function()
@@ -7,18 +15,76 @@ define(['backbone.marionette',
 		return require('application')();
 	}
 
-	var Router = Marionette.AppRouter.extend({
+	var PlanetRouter = Marionette.AppRouter.extend({
+
 		routes: {
-			'':               'index',
-			'System':        'system',
-			'Planet':        'planet',
-			'*notFound':     'notFound'
+			'Planet/:planet/Overview':     'overview',
+			'Planet/:planet/Surface':      'surface',
 		},
 
 		initialize: function(options)
 		{
 			Marionette.AppRouter.prototype.initialize.call(this, options);
 			console.log("Router initialized");
+		},
+
+		overview: function(planet)
+		{
+			this.loadPlanet(planet, function(model, response, options) {
+				app().show(new PlanetOverview({
+					model: model
+				}));
+			});
+		},
+
+		surface: function(planet)
+		{
+			this.loadPlanet(planet, function(model, response, options) {
+				app().show(new PlanetSurface({
+					model: model
+				}));
+			});
+		},
+
+		loadPlanet: function(planet, callback)
+		{
+			// Load the planet information, and display the view
+			var Planets = require('data/planets');
+
+			var planet = new (Planets.prototype.model)({ id: planet });
+
+			this.listenToOnce(planet, 'sync', callback);
+
+			this.listenToOnce(planet, 'error', function(model, response, options) {
+				app().show(new Marionette.View({
+					model: new Backbone.Model(response.responseJSON),
+					template: _.template('<p><%- message %></p>')
+				}))
+			});
+
+			this.listenToOnce(planet, 'sync error', function(model) {
+				this.stopListening(model);
+			});
+			planet.fetch();
+		}
+	});
+
+
+
+	var Router = Marionette.AppRouter.extend({
+		routes: {
+			'':                     'index',
+			'System':               'system',
+			'Shipyard':             'shipyard',
+			'*notFound':            'notFound'
+		},
+
+		initialize: function(options)
+		{
+			Marionette.AppRouter.prototype.initialize.call(this, options);
+			console.log("Router initialized");
+
+			new PlanetRouter();
 		},
 
 		index: function()
@@ -34,9 +100,9 @@ define(['backbone.marionette',
 			app().show(new SystemOverview());
 		},
 
-		planet: function()
+		shipyard: function()
 		{
-
+			app().show(new Shipyard());
 		},
 
 		notFound: function()

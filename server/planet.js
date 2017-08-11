@@ -23,11 +23,10 @@ class Planet extends EventEmitter
 		debug("Planet constructed");
 	}
 
-	terraform(player, name)
+	terraform(player, attributes)
 	{
-		debug("Terraform", this.id, this.name, player.name);
-		this.type = 'terran';
-		this.name = name;
+		this.type = 'metropolis'; // tropical, desert, volcanic
+		this.name = _.isString(attributes) ? attributes : '';
 		this.owner = player;
 		this.population = 1000;
 		this.taxRate = 25;
@@ -35,6 +34,13 @@ class Planet extends EventEmitter
 		// this.energy;
 		// this.fuel;
 		// this.materials;
+
+		if (_.isObject(attributes))
+		{
+			_.extend(this, attributes);
+		}
+
+		debug("Terraformed", this.id, this.name, player.name);
 	}
 
 	get attributes()

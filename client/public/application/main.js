@@ -20,5 +20,7 @@ requirejs(['application'], function(application) {
 
 	_.defer(app.start.bind(app));
 }, function(err) {
-	$('main').text(err);
+	// $('main').text("ERROR " + err);
+	document.getElementsByTagName('main')[0].innerHTML = err;
+	console.error(err);
 });

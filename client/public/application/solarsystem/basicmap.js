@@ -1,4 +1,7 @@
-define(['backbone.marionette', 'data/planets'], function(Marionette, Planets) {
+define(['backbone.marionette',
+       'data/planets'],
+       function(Marionette,
+                Planets) {
 	'use strict';
 
 	var SystemMap = Backbone.Marionette.NextCollectionView.extend({
@@ -10,7 +13,7 @@ define(['backbone.marionette', 'data/planets'], function(Marionette, Planets) {
 			template: _.template('<a data-control="planet"><%- name %></a>'),
 
 			triggers: {
-				'click a[data-control=planet]': 'select:planet'
+				'click a[data-control=planet]': 'planet:selected'
 			}
 		},
 
@@ -20,11 +23,20 @@ define(['backbone.marionette', 'data/planets'], function(Marionette, Planets) {
 
 			this.collection = new Planets();
 			this.collection.fetch();
+
+			this.listenToOnce(this.collection, 'sync', function(collection) {
+				// Auto-select the final planet (This is by default the players Starbase)
+				var child = this.children.findByModel(collection.last());
+				if (child)
+				{
+					this.triggerMethod('childview:planet:selected', child);
+				}
+			});
 		},
 
-		onChildviewSelectPlanet: function(view, event)
+		onChildviewPlanetSelected: function(view, event)
 		{
-			console.log("Selected", view.model.get('name'));
+			console.log("Selected '%s'", view.model.get('name'), view.model);
 		}
 	});
 
