@@ -9,6 +9,7 @@ define(['backbone'], function(Backbone) {
 
 	var Ships = Backbone.Collection.extend({
 		url: 'app/ships',
+		model: Ship,
 
 		initialize: function(models, options)
 		{

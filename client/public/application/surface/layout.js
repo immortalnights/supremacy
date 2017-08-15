@@ -2,11 +2,13 @@ define(['backbone',
        'backbone.marionette',
        'shared/table',
        'data/ships',
+       'shared/slots',
        'tpl!surface/templates/layout.html'],
        function(Backbone,
                 Marionette,
                 Table,
                 Ships,
+                slots,
                 template) {
 	'use strict';
 
@@ -64,22 +66,8 @@ define(['backbone',
 				});
 			}
 
-			var slots = function(data, max) {
-				var items = new Backbone.Collection();
-				items.listenTo(data, 'sync', function(collection, response, options) {
-					items.set(collection.models);
-
-					_.each(_.range(max - items.length), function() {
-						items.push({
-							name: "Empty"
-						});
-					});
-				});
-				return items;
-			}
-
 			var dockList = new List({
-				collection: slots(dockedShips, 3)
+				collection: slots(dockedShips, 3, "Empty")
 			});
 			this.showChildView('dockLocation', dockList);
 
@@ -88,7 +76,7 @@ define(['backbone',
 			});
 
 			var surfaceList = new List({
-				collection: slots(surfaceShips, 6)
+				collection: slots(surfaceShips, 6, "Empty")
 			});
 
 			this.showChildView('surfaceLocation', surfaceList);

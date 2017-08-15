@@ -2,11 +2,14 @@ define(['backbone.marionette',
        'solarsystem/layout',
        'overview/layout',
        'surface/layout',
-       'shipyard/layout'],
+       'fleet/layout',
+       'shipyard/layout',
+       ],
        function(Marionette,
                 SystemOverview,
                 PlanetOverview,
                 PlanetSurface,
+                Fleet,
                 Shipyard) {
 	'use strict';
 
@@ -20,6 +23,7 @@ define(['backbone.marionette',
 		routes: {
 			'Planet/:planet/Overview':     'overview',
 			'Planet/:planet/Surface':      'surface',
+			'Planet/:planet/Fleet':        'fleet',
 		},
 
 		initialize: function(options)
@@ -30,30 +34,31 @@ define(['backbone.marionette',
 
 		overview: function(planet)
 		{
-			this.loadPlanet(planet, function(model, response, options) {
-				app().show(new PlanetOverview({
-					model: model
-				}));
-			});
+			this.loadPlanet(planet, PlanetOverview);
 		},
 
 		surface: function(planet)
 		{
-			this.loadPlanet(planet, function(model, response, options) {
-				app().show(new PlanetSurface({
-					model: model
-				}));
-			});
+			this.loadPlanet(planet, PlanetSurface);
 		},
 
-		loadPlanet: function(planet, callback)
+		fleet: function(planet)
+		{
+			this.loadPlanet(planet, Fleet);
+		},
+
+		loadPlanet: function(planet, Screen)
 		{
 			// Load the planet information, and display the view
 			var Planets = require('data/planets');
 
 			var planet = new (Planets.prototype.model)({ id: planet });
 
-			this.listenToOnce(planet, 'sync', callback);
+			this.listenToOnce(planet, 'sync', function(model, response, options) {
+				app().show(new Screen({
+					model: model
+				}));
+			});
 
 			this.listenToOnce(planet, 'error', function(model, response, options) {
 				app().show(new Marionette.View({

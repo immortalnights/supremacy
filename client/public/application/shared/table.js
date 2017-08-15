@@ -2,17 +2,22 @@ define(['backbone.marionette'],
        function(Marionette) {
 	'use strict';
 
-	var TableRow = Marionette.View.extend({
-		tagName: 'tr',
-
-		triggers: {
-			'click': 'row:selected'
-		}
-	});
-
 	var TableBody = Marionette.NextCollectionView.extend({
 		tagName: 'tbody',
-		childView: TableRow
+		childView: Marionette.View,
+		childViewOptions: {
+			tagName: 'tr',
+			triggers: {
+				'click': 'clicked'
+			}
+		},
+
+		initialize: function(options)
+		{
+			// Apply childViewOption defaults. options.childViewOptions has already been applied to `this`
+			_.extend(this.childViewOptions, TableBody.prototype.childViewOptions);
+			Marionette.NextCollectionView.prototype.initialize.call(this, options);
+		}
 	});
 
 	var Table = Marionette.View.extend({
@@ -39,7 +44,7 @@ define(['backbone.marionette'],
 			});
 			this.showChildView('tableBody', body);
 
-			this.listenTo(body, 'childview:row:selected', _.partial(this.triggerMethod, 'row:selected'));
+			this.listenTo(body, 'childview:clicked', _.partial(this.triggerMethod, 'row:selected'));
 		}
 	});
 
