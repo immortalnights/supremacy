@@ -1,3 +1,11 @@
+
+.inventory > * {
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	cursor: pointer;
+	user-select: none;
+}
+
 .grid {
 	display: flex;
 	flex-flow: column wrap;
@@ -6,19 +14,15 @@
 	align-items: left;
 	justify-content: center;
 	align-content: flex-start;
-	user-select: none;
 }
 
 .grid > div {
 	width: 120px;
-	min-height: 18px;
-	white-space: nowrap;
 	overflow: hidden;
-	text-overflow: ellipsis;
+	min-height: 18px;
 	padding: 2px 5px;
 	margin: 2px;
 	border-style: solid;
 	border-color: blue;
 	border-width: 0px 1px 1px 0px;
-	cursor: pointer;
 }

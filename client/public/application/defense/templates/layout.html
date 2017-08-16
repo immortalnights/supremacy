@@ -1,0 +1,39 @@
+<dl>
+	<dt>Planet</dt>
+	<dd><%- name %></dd>
+</dl>
+
+Docking Bay
+<div id="dockingbay"></div>
+
+<div id="shipdetails"></div>
+
+<div id="messages"></div>
+
+<div id="platoons"></div>
+
+<div id="strengthscaler"></div>
+
+<dl>
+	<dt>Your total strength</dt>
+	<dd><%- 0 %></dd>
+	<dt>Enemy total strength</dt>
+	<dd><%- 0 %></dd>
+	<dt>Your troops left</dt>
+	<dd><%- 0 %></dd>
+	<dt>Scaling factor</dt>
+	<dd><%- 0 %></dd>
+</dl>
+
+Aggression
+<button data-control="increaseaggression">UP</button>
+<button data-control="decreaseaggression">DOWN</button>
+<div class="icon"></div>
+
+<ul>
+	<li><a href="#/Planet/<%- id %>/Platoons">Platoons</a></li>
+	<li><a href="#/Planet/<%- id %>/Fleet">Fleet</a></li>
+	<li><a href="#/Planet/<%- id %>/Overview">Overview</a></li>
+	<li><a href="#/Planet/<%- id %>/Dock">Dock</a></li>
+	<li><a href="#/Planet/<%- id %>/Surface">Surface</a></li>
+</ul>

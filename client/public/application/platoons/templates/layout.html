@@ -1,0 +1,56 @@
+Platoon
+<select name="platoon">
+	<%
+	var displayName = function(value) {
+		var name;
+		switch (value)
+		{
+			case 1:
+			case 21:
+			case 31:
+			case 41:
+			{
+				name = value + 'st';
+				break;
+			}
+			case 2:
+			case 22:
+			case 32:
+			case 42:
+			{
+				name = value + 'nd';
+				break;
+			}
+			case 3:
+			case 23:
+			case 33:
+			case 43:
+			{
+				name = value + 'rd';
+				break;
+			}
+			default:
+			{
+				name = value + 'th';
+				break;
+			}
+		}
+
+		return name;
+	}
+
+	_.each(_.range(1, 51), function(value) {
+		%><option value="<%- value %>"><%- displayName(value) %></option><%
+	});
+	%>
+</select>
+
+Troops
+<input type="number" name="troops" min="0" max="200" /> <button data-control="maxtroops">MAX</button>
+
+Civilians
+<%- population %>
+
+<div id="platoondetails"></div>
+
+<a href="#/Planet/<%- id %>/Defense">Defense</a>

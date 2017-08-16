@@ -1,11 +1,13 @@
 define(['backbone.marionette',
        'data/ships',
+       'shared/dockingbay',
        'shared/slots',
        'shared/grid',
        'tpl!fleet/templates/layout.html',
        'tpl!fleet/templates/shipdetails.html'],
        function(Marionette,
                 Ships,
+                DockingBay,
                 slots,
                 Grid,
                 template,
@@ -16,6 +18,7 @@ define(['backbone.marionette',
 		template: template,
 
 		regions: {
+			dockingBayLocation: '#dockingbay',
 			shipDetailsLocation: '#shipdetails',
 			inventoryLocation: '#inventory'
 		},
@@ -27,6 +30,13 @@ define(['backbone.marionette',
 
 		onRender: function()
 		{
+			var dockingBay = new DockingBay({
+				planet: this.model.id
+			});
+			this.showChildView('dockingBayLocation', dockingBay);
+
+			this.listenTo(dockingBay, 'childview:clicked', this.onShipSelected);
+
 			var ships = new Ships();
 			var grid = new Grid({
 				collection: slots(ships, 32, ""),

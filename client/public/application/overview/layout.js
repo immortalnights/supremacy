@@ -1,13 +1,17 @@
 define(['backbone.marionette',
+       'shared/grid',
+       'shared/list',
+       'shared/slots',
        'data/planets',
        'data/ships',
-       'shared/table',
        'tpl!overview/templates/layout.html',
        'tpl!overview/templates/planetdetails.html'],
        function(Marionette,
+                Grid,
+                List,
+                slots,
                 Planets,
                 Ships,
-                Table,
                 template,
                 planetDetailsTemplate) {
 	'use strict';
@@ -45,17 +49,19 @@ define(['backbone.marionette',
 				this.showPlanetInventory(location);
 			});
 
-			// Display planet table (TODO highlight selected)
 			var planets = new Planets();
+			var grid = new Grid({
+				collection: slots(planets, 32, ""),
+				childViewOptions: {
+					template: _.template('<%- name %>')
+				}
+			});
+
 			planets.fetch();
 
-			var planetTable = new Table({
-				template: _.template('<table><thead></thead><tbody></tbody><tfoot></tfoot></table>'),
-				collection: planets,
-			});
-			this.showChildView('systemPlanetsLocation', planetTable);
+			this.showChildView('systemPlanetsLocation', grid);
 
-			this.listenTo(planetTable, 'row:selected', function(view) {
+			this.listenTo(grid, 'childview:clicked', function(view, event) {
 				// this.triggerMethod('planet:selected', view.model);
 				Backbone.history.navigate('#/Planet/' + view.model.id + '/Overview');
 			});
@@ -68,15 +74,16 @@ define(['backbone.marionette',
 			// Display planet inventory (orbit by default)
 			var ships = new Ships();
 			ships.fetch({
+				reset: true,
 				data: {
 					'location.planet': this.model.id,
 					'location.position': location
 				}
 			});
 
-			this.showChildView('planetInventoryLocation', new Table({
-				template: _.template('<table><thead></thead><tbody></tbody><tfoot></tfoot></table>'),
-				collection: ships
+			this.showChildView('planetInventoryLocation', new List({
+				className: 'inventory',
+				collection: slots(ships, 6, "Empty")
 			}));
 		}
 	});

@@ -1,34 +1,18 @@
 define(['backbone',
        'backbone.marionette',
-       'shared/table',
-       'data/ships',
+       'shared/dockingbay',
+       'shared/list',
        'shared/slots',
+       'data/ships',
        'tpl!surface/templates/layout.html'],
        function(Backbone,
                 Marionette,
-                Table,
-                Ships,
+                DockingBay,
+                List,
                 slots,
+                Ships,
                 template) {
 	'use strict';
-
-	var List = Marionette.NextCollectionView.extend({
-		tagName: 'ul',
-		childView: Marionette.View,
-		childViewOptions: {
-			tagName: 'li',
-			template: _.template('<%- name %>'),
-
-			triggers: {
-				'click': 'clicked'
-			}
-		},
-
-		initialize: function(options)
-		{
-			Marionette.NextCollectionView.prototype.initialize.call(this, options);
-		}
-	});
 
 	var Layout = Marionette.View.extend({
 		template: template,
@@ -47,17 +31,9 @@ define(['backbone',
 		{
 			var planet = this.model.id;
 
-			var dockedShips = new Ships();
 			var surfaceShips = new Ships();
 
 			var refresh = function() {
-				dockedShips.fetch({
-					data: {
-						'location.planet': planet,
-						'location.position': 'dock'
-					}
-				});
-
 				surfaceShips.fetch({
 					data: {
 						'location.planet': planet,
@@ -66,23 +42,39 @@ define(['backbone',
 				});
 			}
 
-			var dockList = new List({
-				collection: slots(dockedShips, 3, "Empty")
+			var dockingBay = new DockingBay({
+				planet: this.model.id
 			});
-			this.showChildView('dockLocation', dockList);
+			this.showChildView('dockLocation', dockingBay);
 
-			this.listenTo(dockList, 'childview:clicked', function(view) {
-				Backbone.ajax(view.model.url() + '/land/invoke').then(refresh);
+			this.listenTo(dockingBay, 'childview:clicked', function(view) {
+				var ship = view.model;
+				if (ship instanceof Ships.prototype.model)
+				{
+					Backbone.ajax(view.model.url() + '/land/invoke').then(function() {
+						refresh();
+						dockingBay.render();
+					});
+				}
 			});
 
 			var surfaceList = new List({
+				className: 'inventory',
 				collection: slots(surfaceShips, 6, "Empty")
 			});
 
 			this.showChildView('surfaceLocation', surfaceList);
 
 			this.listenTo(surfaceList, 'childview:clicked', function(view) {
-				Backbone.ajax(view.model.url() + '/dock/invoke').then(refresh);
+				var ship = view.model;
+				if (ship instanceof Ships.prototype.model)
+				{
+					Backbone.ajax(view.model.url() + '/dock/invoke').then(function() {
+						refresh();
+						// view.render();
+						dockingBay.render();
+					});
+				}
 			});
 
 			refresh();

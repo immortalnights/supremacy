@@ -3,7 +3,7 @@ define(['backbone.marionette'],
 	'use strict';
 
 	var Grid = Marionette.NextCollectionView.extend({
-		className: 'grid',
+		className: 'inventory grid',
 		childView: Marionette.View,
 		childViewOptions: {
 			triggers: {

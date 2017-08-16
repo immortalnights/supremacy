@@ -3,14 +3,19 @@ define(['backbone.marionette',
        'overview/layout',
        'surface/layout',
        'fleet/layout',
+       'dock/layout',
+       'defense/layout',
        'shipyard/layout',
-       ],
+       'platoons/layout'],
        function(Marionette,
-                SystemOverview,
-                PlanetOverview,
-                PlanetSurface,
+                System,
+                Overview,
+                Surface,
                 Fleet,
-                Shipyard) {
+                Dock,
+                Defense,
+                Shipyard,
+                Platoons) {
 	'use strict';
 
 	var app = function()
@@ -24,6 +29,10 @@ define(['backbone.marionette',
 			'Planet/:planet/Overview':     'overview',
 			'Planet/:planet/Surface':      'surface',
 			'Planet/:planet/Fleet':        'fleet',
+			'Planet/:planet/Dock':         'dock',
+			'Planet/:planet/Defense':      'defense',
+			'Planet/:planet/Shipyard':     'shipyard',
+			'Planet/:planet/Platoons':     'platoons'
 		},
 
 		initialize: function(options)
@@ -34,17 +43,37 @@ define(['backbone.marionette',
 
 		overview: function(planet)
 		{
-			this.loadPlanet(planet, PlanetOverview);
+			this.loadPlanet(planet, Overview);
 		},
 
 		surface: function(planet)
 		{
-			this.loadPlanet(planet, PlanetSurface);
+			this.loadPlanet(planet, Surface);
 		},
 
 		fleet: function(planet)
 		{
 			this.loadPlanet(planet, Fleet);
+		},
+
+		dock: function(planet)
+		{
+			this.loadPlanet(planet, Dock);
+		},
+
+		defense: function(planet)
+		{
+			this.loadPlanet(planet, Defense);
+		},
+
+		shipyard: function(planet)
+		{
+			this.loadPlanet(planet, Shipyard);
+		},
+
+		platoons: function(planet)
+		{
+			this.loadPlanet(planet, Platoons);
 		},
 
 		loadPlanet: function(planet, Screen)
@@ -80,7 +109,6 @@ define(['backbone.marionette',
 		routes: {
 			'':                     'index',
 			'System':               'system',
-			'Shipyard':             'shipyard',
 			'*notFound':            'notFound'
 		},
 
@@ -102,12 +130,7 @@ define(['backbone.marionette',
 		{
 			console.log("router:system");
 
-			app().show(new SystemOverview());
-		},
-
-		shipyard: function()
-		{
-			app().show(new Shipyard());
+			app().show(new System());
 		},
 
 		notFound: function()
