@@ -4,6 +4,7 @@ require.config({
 	paths: {
 		'requireLib': '../node_modules/requirejs/require',
 		'jquery': '../node_modules/jquery/dist/jquery',
+		'cookies': '../node_modules/js-cookie/src/js.cookie',
 		'underscore': '../node_modules/underscore/underscore',
 		'text': '../node_modules/requirejs-text/text',
 		'tpl': '../node_modules/requirejs-underscore-tpl/underscore-tpl',
