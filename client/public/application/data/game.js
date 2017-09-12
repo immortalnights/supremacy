@@ -3,7 +3,7 @@ define(['backbone'],
 	'use strict';
 
 	var Game = Backbone.Model.extend({
-		url: 'app/game',
+		urlRoot: 'app/game',
 
 		initialize: function(attributes, options)
 		{

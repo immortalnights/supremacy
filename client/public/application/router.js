@@ -2,11 +2,13 @@ define(['backbone.marionette',
        'routers/core',
        'routers/planet',
        'menu/layout',
+       'solarsystem/layout',
        'cookies'],
        function(Marionette,
                 CoreRouter,
                 PlanetRouter,
                 Menu,
+                System,
                 Cookies) {
 	'use strict';
 
@@ -33,7 +35,8 @@ define(['backbone.marionette',
 		index: function()
 		{
 			console.log("router:index");
-			app().show(new Menu());
+			// app().show(new Menu());
+			Backbone.history.navigate('#/System');
 		},
 
 		system: function()

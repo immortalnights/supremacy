@@ -11,8 +11,15 @@ class Game extends EventEmitter
 	constructor(seed)
 	{
 		super();
+		this._date = {
+			day: 1,
+			year: 2010
+		};
+
 		this.running = false;
 		this.seed = seed;
+		this.speedMultiplier = 1;
+		this.speed = 5000;
 
 		this._players = [new Player('AI_easy'), new Player(null)];
 		this._planets = [];
@@ -59,58 +66,19 @@ class Game extends EventEmitter
 		});
 	}
 
-	// automatically filtered for the human player
+	get date()
+	{
+		return this._date;
+	}
+
 	get planets()
 	{
 		return this._planets;
-		// var result = [];
-
-		// var player = this.getPlayer();
-
-		// debug("player", player);
-
-		// _.each(this._planets, function(planet) {
-		// 	debug("Check", planet.owner, planet.id);
-		// 	if (planet.owner === player)
-		// 	{
-		// 		debug("Planet owned", planet.id);
-		// 		result.push(planet.attributes);
-		// 	}
-		// 	else if (planet.owner)
-		// 	{
-		// 		debug("Planet classified", planet.id);
-		// 		var info = _.pick(planet, 'id');
-		// 		info.name = 'Classified';
-		// 		result.push(info);
-		// 	}
-		// 	else
-		// 	{
-		// 		debug("Planet unidentified", planet.id);
-		// 		result.push(_.pick(planet, 'id', 'name'));
-		// 	}
-		// });
-
-		// return result;
 	}
 
-	// automatically filtered for the human player
 	get ships()
 	{
 		return this._ships;
-		// var result = [];
-
-		// var player = this.getPlayer();
-
-		// debug("player", player);
-
-		// _.each(this._ships, function(ship) {
-		// 	if (ship.owner === player)
-		// 	{
-		// 		result.push(ship.attributes);
-		// 	}
-		// });
-
-		// return result;
 	}
 
 	get blueprints()
@@ -159,7 +127,17 @@ class Game extends EventEmitter
 	tick()
 	{
 		this.lastTick = _.now();
-		this.ticker = _.delay(_.bind(this.onTick, this), 1000);
+
+		++this._date.day;
+		if (this._date.day === 65)
+		{
+			++this._date.year;
+			this._date.day = 1;
+		}
+
+		// Default 5s per day
+		var tickDelay = this.speed * this.speedMultiplier;
+		this.ticker = _.delay(_.bind(this.onTick, this), tickDelay);
 	}
 
 	onTick()

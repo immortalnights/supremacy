@@ -1,8 +1,12 @@
 define(['backbone.marionette',
        'solarsystem/basicmap',
+       'data/game',
+       'backbone.poller',
        'tpl!solarsystem/templates/layout.html'],
        function(Marionette,
                 BasicMap,
+                Game,
+                Poller,
                 template) {
 	'use strict';
 
@@ -11,6 +15,7 @@ define(['backbone.marionette',
 
 		regions: {
 			mapLocation: '#map',
+			dateLocation: '#date',
 			planetPreviewLocation: '#planetpreview'
 		},
 
@@ -27,6 +32,21 @@ define(['backbone.marionette',
 		{
 			var map = new BasicMap();
 			this.showChildView('mapLocation', map);
+
+			var game = new Game({ id: 'default', date: '' });
+			this.showChildView('dateLocation', new Marionette.View({
+				template: _.template('<%- date.day %>/<%- date.year %>'),
+				model: game,
+				modelEvents: {
+					change: 'render'
+				}
+			}));
+
+			var poller = Poller.get(game, { delay: 1000 });
+			poller.start();
+			this.on('destroy', function() { poller.destroy(); });
+
+
 
 			// Have the main layout proxy the planet selection as the current planet needs to be remembered for later navigation
 			this.listenTo(map, 'childview:planet:selected', _.partial(this.triggerMethod, 'planet:selected'));

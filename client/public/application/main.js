@@ -11,6 +11,7 @@ require.config({
 		'backbone': '../node_modules/backbone/backbone',
 		'backbone.marionette': '../node_modules/backbone.marionette/lib/backbone.marionette',
 		'backbone.radio': '../node_modules/backbone.radio/build/backbone.radio',
+		'backbone.poller': '../node_modules/backbone-poller/backbone.poller.min'
 	}
 });
 

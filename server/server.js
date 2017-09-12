@@ -28,6 +28,17 @@ const filter = function(list, attributes) {
 	});
 }
 
+class GameController
+{
+	constructor(router, game)
+	{
+		router.get('/game/:id', (request, response) => {
+			response.writeHead(200, { 'Content-Type': 'application/json' });
+			response.end(JSON.stringify({ date: game.date }));
+		});
+	}
+}
+
 class PlanetController
 {
 	constructor(router, game)
@@ -239,6 +250,7 @@ class ShopContoller
 	}
 }
 
+new GameController(router, game);
 new PlanetController(router, game);
 new ShipContoller(router, game);
 new ShopContoller(router, game);
@@ -254,6 +266,5 @@ new ShopContoller(router, game);
 // });
 
 http.createServer(router).listen(2000, '127.0.0.1');
-
 
 debug("Server running at http://127.0.0.1:2000/");

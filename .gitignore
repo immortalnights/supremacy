@@ -2,3 +2,4 @@ node_modules
 client/node_modules
 client/nginx.exe
 client/nginx/logs/*
+supremacy.sublime-workspace

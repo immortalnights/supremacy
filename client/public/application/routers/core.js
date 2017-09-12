@@ -5,24 +5,24 @@ define(['backbone.marionette',
 	'use strict';
 
 	var CoreRouter = Marionette.AppRouter.extend({
-		execute: function(callback, args, name)
-		{
-			var gameId = Cookies.get('gameId');
+		// execute: function(callback, args, name)
+		// {
+		// 	var gameId = Cookies.get('gameId');
 
-			if (name === 'index' && !_.isEmpty(gameId))
-			{
-				Backbone.history.navigate('#/System');
-			}
-			else if (name !== 'index' && _.isEmpty(gameId))
-			{
-				Backbone.history.navigate('');
-			}
-			else
-			{
-				// Continue to requested page
-				Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
-			}
-		}
+		// 	if (name === 'index' && !_.isEmpty(gameId))
+		// 	{
+		// 		Backbone.history.navigate('#/System');
+		// 	}
+		// 	else if (name !== 'index' && _.isEmpty(gameId))
+		// 	{
+		// 		Backbone.history.navigate('');
+		// 	}
+		// 	else
+		// 	{
+		// 		// Continue to requested page
+		// 		Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
+		// 	}
+		// }
 	});
 
 	return CoreRouter;
