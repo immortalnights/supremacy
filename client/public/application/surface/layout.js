@@ -51,7 +51,8 @@ define(['backbone',
 				var ship = view.model;
 				if (ship instanceof Ships.prototype.model)
 				{
-					Backbone.ajax(view.model.url() + '/land/invoke').then(function() {
+					ship.invoke('land')
+					.then(function() {
 						refresh();
 						dockingBay.render();
 					});
@@ -69,7 +70,8 @@ define(['backbone',
 				var ship = view.model;
 				if (ship instanceof Ships.prototype.model)
 				{
-					Backbone.ajax(view.model.url() + '/dock/invoke').then(function() {
+					ship.invoke('dock')
+					.then(function() {
 						refresh();
 						// view.render();
 						dockingBay.render();
@@ -78,11 +80,6 @@ define(['backbone',
 			});
 
 			refresh();
-		},
-
-		onChildviewTransferToSurface: function()
-		{
-			debugger;
 		}
 	});
 

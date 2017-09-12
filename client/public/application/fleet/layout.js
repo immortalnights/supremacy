@@ -17,10 +17,22 @@ define(['backbone.marionette',
 	var Layout = Marionette.View.extend({
 		template: template,
 
+		ui: {
+			shipControls: 'fieldset[data-role="shipcontrols"]'
+		},
+
 		regions: {
 			dockingBayLocation: '#dockingbay',
 			shipDetailsLocation: '#shipdetails',
 			inventoryLocation: '#inventory'
+		},
+
+		events: {
+			'click [data-control="launch"]': 'onLaunchShip',
+			'click [data-control="transfer"]': 'onTransferShip',
+			'click [data-control="dock"]': 'onDockShip',
+			'click [data-control="cencelmission"]': 'onCancelShipMission',
+			'click [data-control="rename"]': 'onRenameShip'
 		},
 
 		initialize: function(options)
@@ -62,7 +74,40 @@ define(['backbone.marionette',
 					template: shipDetailsTemplate,
 					model: ship
 				}));
+
+				this.ui.shipControls.prop('disabled', false);
 			}
+
+			// use member to remember the selected ship
+			this.selectedShip = ship;
+		},
+
+		onLaunchShip: function()
+		{
+			this.selectedShip.invoke('launch');
+		},
+
+		onTransferShip: function()
+		{
+			// original version updated the grid to display planets and required the user to select one...
+			// this.selectedShip.invoke('transfer');
+		},
+
+		onDockShip: function()
+		{
+			this.selectedShip.invoke('dock');
+		},
+
+		onCancelShipMission: function()
+		{
+			this.selectedShip.invoke('cancelmission');
+		},
+
+		onRenameShip: function()
+		{
+			// Display dialog for rename
+			// this.selectedShip.set('name', newName);
+			// this.selectedShip.save();
 		}
 	});
 

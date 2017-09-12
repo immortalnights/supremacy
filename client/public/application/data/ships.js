@@ -4,6 +4,15 @@ define(['backbone'], function(Backbone) {
 		initialize: function(attributes, options)
 		{
 			Backbone.Collection.prototype.initialize.call(this, attributes, options);
+		},
+
+		invoke: function(action, data)
+		{
+			return Backbone.ajax(this.url() + '/' + action + '/invoke', {
+				method: 'put',
+				data: JSON.stringify(data || {}),
+				contentType: 'application/json'
+			});
 		}
 	});
 

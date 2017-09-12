@@ -130,7 +130,7 @@ class ShipContoller
 			}
 		});
 
-		router.get('/ships/:id/launch/invoke', (request, response) => {
+		router.put('/ships/:id/launch/invoke', (request, response) => {
 			var result = filter(this.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())
@@ -154,12 +154,11 @@ class ShipContoller
 			}
 		});
 
-		router.get('/ships/:id/land/invoke', (request, response) => {
+		router.put('/ships/:id/land/invoke', (request, response) => {
 			var result = filter(this.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())
 			{
-				console.log("b");
 				result.move('surface')
 				.then(function() {
 					response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -180,7 +179,7 @@ class ShipContoller
 			}
 		});
 
-		router.get('/ships/:id/dock/invoke', (request, response) => {
+		router.put('/ships/:id/dock/invoke', (request, response) => {
 			var result = filter(this.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())
