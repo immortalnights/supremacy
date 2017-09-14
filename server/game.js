@@ -126,6 +126,7 @@ class Game extends EventEmitter
 
 	tick()
 	{
+		var delta = this.lastTick - _.now();
 		this.lastTick = _.now();
 
 		++this._date.day;
@@ -134,6 +135,16 @@ class Game extends EventEmitter
 			++this._date.year;
 			this._date.day = 1;
 		}
+
+		// update all plants
+		_.each(this.planets, (planet) => {
+			planet.update(this._date, delta);
+		});
+
+		// update all ships
+		_.each(this.ships, (ship) => {
+			ship.update(this._date, delta);
+		});
 
 		// Default 5s per day
 		var tickDelay = this.speed * this.speedMultiplier;

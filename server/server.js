@@ -71,8 +71,12 @@ class PlanetController
 				// Ensure the player is asking for their own planet
 				if (result.owner === game.getPlayer())
 				{
+					// add the game date to the attributes
+					var data = result.attributes;
+					data.date = game.date;
+
 					response.writeHead(200, { 'Content-Type': 'application/json' });
-					response.end(JSON.stringify(result.attributes));
+					response.end(JSON.stringify(data));
 				}
 				else if (result.owner)
 				{

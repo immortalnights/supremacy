@@ -1,4 +1,5 @@
 define(['backbone.marionette',
+       'backbone.poller',
        'shared/grid',
        'shared/list',
        'shared/slots',
@@ -7,6 +8,7 @@ define(['backbone.marionette',
        'tpl!overview/templates/layout.html',
        'tpl!overview/templates/planetdetails.html'],
        function(Marionette,
+                Poller,
                 Grid,
                 List,
                 slots,
@@ -37,11 +39,23 @@ define(['backbone.marionette',
 
 		onRender: function()
 		{
+			var poller = Poller.get(this.model, {
+				delay: 1000
+			});
+			poller.start();
+
+			this.on('destroy', function() {
+				poller.destroy();
+			});
+
 			// Display planet information
 			// TODO only 'select' own planets
 			this.showChildView('planetDetailsLocation', new Marionette.View({
 				model: this.model,
-				template: planetDetailsTemplate
+				template: planetDetailsTemplate,
+				modelEvents: {
+					change: 'render'
+				}
 			}));
 
 			this.on('change:view', function(view, event) {
