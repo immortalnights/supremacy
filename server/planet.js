@@ -33,6 +33,7 @@ class Planet extends EventEmitter
 		this.population = 1950; // 1772
 		this.taxRate = 25;
 		this.moral = 75;
+		this.growth = 13;
 
 		this.credits = 0;
 		this.food = 3400; 
@@ -78,18 +79,40 @@ class Planet extends EventEmitter
 				this.moral = 1;
 			}
 
-			// max growth is 50% @ 100% tax
+			// min growth is 50% @ 100% tax
+			// max growth is 33% @ 0% tax
 			// every 1% moral === 2% growth
 			// base line 40% tax 60% moral == 0% growth
 
 
 
 			// update the food
+			if (this.food > 0)
+			{
+				this.food = Max.max(Math.floor(this.food - (this.population * 0.004)), 0);
+			}
 
-			// apply growth every even days
-
+			if (day % 2 === 0)
+			{
+				// apply growth every even days
+				if (this.population !== 0)
+				{
+					if (this.growth > 0)
+					{
+						this.population += 	1+Math.floor(this.population*(0.25*(this.growth/100)));
+					}
+					else if (this.growth < 0)
+					{
+						this.population += Math.floor(this.population*(0.25*(this.growth/100)));
+						if (this.population < 0)
+						{
+							this.population = 0;
+						}
+					}
+				}
+			}
 			// apply credits every odd day
-			if (day % 2 !== 0)
+			else if ( this.taxRate > 0)
 			{
 				// income = (0.8c per population) * tax rate
 				this.credits += Math.floor((0.8 * this.population) * (this.taxRate / 100));
