@@ -6,6 +6,18 @@ define(['backbone'], function(Backbone) {
 		initialize: function(attributes, options)
 		{
 			Backbone.Model.prototype.initialize.call(this, attributes, options);
+		},
+
+		terraform: function()
+		{
+			var self = this;
+			return Backbone.ajax(this.url() + '/terraform/invoke', {
+				method: 'put',
+				data: JSON.stringify(data || {}),
+				contentType: 'application/json'
+			}).then(function(data, textStatus, xhr) {
+				self.set(data);
+			});
 		}
 	});
 

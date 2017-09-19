@@ -1,9 +1,8 @@
 const debug = require('debug')('ship');
-const EventEmitter = require('events');
+const Backbone = require('backbone');
 const _ = require('underscore');
 
-class Ship extends EventEmitter
-{
+module.exports = class Ship extends Backbone.Model {
 	constructor(options)
 	{
 		super()
@@ -33,7 +32,7 @@ class Ship extends EventEmitter
 		// debug("Ship updated", delta);
 	}
 
-	move(position, toPlanet)
+	moveTo(position, toPlanet)
 	{
 		return new Promise((resolve, reject) => {
 			switch (position)
@@ -45,7 +44,7 @@ class Ship extends EventEmitter
 					if (this.location.planet)
 					{
 						this.location.position = 'dock';
-						resolve();
+						resolve(this);
 					}
 					else
 					{
@@ -60,7 +59,7 @@ class Ship extends EventEmitter
 					if (this.location.planet)
 					{
 						this.location.position = 'orbit';
-						resolve();
+						resolve(this);
 					}
 					else
 					{
@@ -75,7 +74,7 @@ class Ship extends EventEmitter
 					if (this.location.planet)
 					{
 						this.location.position = 'surface';
-						resolve();
+						resolve(this);
 					}
 					else
 					{
@@ -106,5 +105,3 @@ class Ship extends EventEmitter
 		});
 	}
 };
-
-module.exports = Ship;

@@ -18,7 +18,8 @@ define(['backbone.marionette',
 		template: template,
 
 		ui: {
-			shipControls: 'fieldset[data-role="shipcontrols"]'
+			shipControls: 'fieldset[data-role="shipcontrols"]',
+			message: '#messages'
 		},
 
 		regions: {
@@ -68,14 +69,25 @@ define(['backbone.marionette',
 		{
 			var ship = view.model;
 
+			this.stopListening(this.selectedShip);
+
 			if (ship instanceof Ships.prototype.model)
 			{
-				this.showChildView('shipDetailsLocation', new Marionette.View({
-					template: shipDetailsTemplate,
-					model: ship
-				}));
+				this.listenTo(ship, 'change:location', function(ship) {
+					this.ui.message.text(ship.get('location').summary);
+				});
+				
+				this.listenToOnce(ship, 'sync', function(model) {
+					this.ui.message.text(ship.get('location').summary);
 
-				this.ui.shipControls.prop('disabled', false);
+					this.showChildView('shipDetailsLocation', new Marionette.View({
+						template: shipDetailsTemplate,
+						model: model
+					}));
+
+					this.ui.shipControls.prop('disabled', false);
+				})
+				ship.fetch();
 			}
 
 			// use member to remember the selected ship

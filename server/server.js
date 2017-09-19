@@ -10,19 +10,21 @@ game.start();
 
 var router = Router();
 
-const filter = function(list, attributes) {
+const filter = function(collection, attr) {
 	const property = function(obj, key) {
 		// debug("check", key, obj);
 		return key.split('.').reduce(function(o, i) {
+			// debug("o", o, "i", i, "o[i]", o[i])
 			return o[i];
 		}, obj);
 	}
 
-	return _.filter(list, function(item) {
-		// debug("Filter", item, attributes);
-		return _.every(attributes, function(value, key) {
-			var attribute = property(item, key);
-			// debug("check value", attribute, value);
+	debug("Filter", collection.length, "by", attr);
+	return collection.filter(function(item) {
+		// debug("Filter", item.attributes, attr);
+		return _.isEmpty(attr) || _.every(item.attributes, function(value, key) {
+			var attribute = property(item.attributes, key);
+			debug("check value", attribute, value);
 			return !_.isUndefined(attribute) && attribute == value;
 		});
 	});
@@ -43,19 +45,17 @@ class PlanetController
 {
 	constructor(router, game)
 	{
-		this.planets = game.planets;
-
-		router.get('/planets', (request, response) => {
-			var results = filter(this.planets, request.get);
+		router.get('/planets', function(request, response) {
+			var results = filter(game.planets, request.get);
 
 			results = _.map(results, function(planet) {
 				if (planet.owner === game.getPlayer())
 				{
-					return planet.attributes;
+					return planet.toJSON();
 				}
 				else
 				{
-					return _.pick(planet.attributes, 'id', 'name');
+					return planet.pick('id', 'name');
 				}
 			});
 
@@ -63,8 +63,8 @@ class PlanetController
 			response.end(JSON.stringify(results));
 		});
 
-		router.get('/planets/:id', (request, response) => {
-			var result = filter(this.planets, { id: request.params.id })[0];
+		router.get('/planets/:id', function(request, response) {
+			var result = filter(game.planets, { id: request.params.id })[0];
 
 			if (result)
 			{
@@ -72,7 +72,7 @@ class PlanetController
 				if (result.owner === game.getPlayer())
 				{
 					// add the game date to the attributes
-					var data = result.attributes;
+					var data = result.toJSON();
 					data.date = game.date;
 
 					response.writeHead(200, { 'Content-Type': 'application/json' });
@@ -106,14 +106,46 @@ class PlanetController
 	}
 }
 
+const formatLocationSumamry = function(ship, planet) {
+	var result = "";
+	switch (ship.location.position)
+	{
+		case 'dock':
+		{
+			result = ship.name + " is in a docking bay on " + planet.name;
+			break;
+		}
+		case 'orbit':
+		{
+			result = ship.name + " is now in orbit above " + planet.name;
+			break;
+		}
+		case 'transit':
+		{
+			result = ship.name + " is now in transit to " + planet.name;
+			break;
+		}
+		case 'surface':
+		{
+			result = ship.name + " is on the surface of " + planet.name;
+			break;
+		}
+	}
+	return result;
+}
+
+const updateShipLocationSummary = function(ship, planets) {
+	var planet = _.findWhere(planets, { id: ship.location.planet });
+	console.assert(planet);
+	ship.location.summary = formatLocationSumamry(ship, planet);
+}
+
 class ShipContoller
 {
 	constructor(router, game)
 	{
-		this.ships = game.ships;
-
-		router.get('/ships', (request, response) => {
-			var results = filter(this.ships, request.get);
+		router.get('/ships', function(request, response) {
+			var results = filter(game.ships, request.get);
 
 			results = _.filter(results, function(ship) {
 				return (ship.owner === game.getPlayer());
@@ -127,11 +159,13 @@ class ShipContoller
 			response.end(JSON.stringify(results));
 		});
 
-		router.get('/ships/:id', (request, response) => {
-			var result = filter(this.ships, { id: request.params.id })[0];
+		router.get('/ships/:id', function(request, response) {
+			var result = filter(game.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())
 			{
+				updateShipLocationSummary(result, game.planets);
+
 				response.writeHead(200, { 'Content-Type': 'application/json' });
 				response.end(JSON.stringify(result.attributes));
 			}
@@ -145,68 +179,53 @@ class ShipContoller
 			}
 		});
 
-		router.put('/ships/:id/launch/invoke', (request, response) => {
-			var result = filter(this.ships, { id: request.params.id })[0];
+		router.put('/ships/:id/:action/invoke', function(request, response) {
+			var result = filter(game.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())
 			{
-				result.move('orbit')
-				.then(function() {
-						response.writeHead(200, { 'Content-Type': 'application/json' });
-						response.end(JSON.stringify(result.attributes));
-				}, function(err) {
-						response.writeHead(400, { 'Content-Type': 'text/plain' });
-						response.end(err);
-				});
-			}
-			else
-			{
-				// Don't indicate that the id is a valid ship
-				response.writeHead(404, { 'Content-Type': 'application/json' });
-				response.end(JSON.stringify({
-					message: "Ship " + request.params.id + " does not exist."
-				}));
-			}
-		});
+				var promise;
+				switch (request.params.action)
+				{
+					case 'launch':
+					{
+						promise = result.moveTo('orbit');
+						break;
+					}
+					case 'land':
+					{
+						promise = result.moveTo('surface');
+						break;
+					}
+					case 'dock':
+					{
+						promise = result.moveTo('dock');
+						break;
+					}
+					default:
+					{
+						response.writeHead(404, { 'Content-Type': 'application/json' });
+						response.end(JSON.stringify({
+							message: "Invalid action '" + request.params.action + "' for ship."
+						}));
+						break;
+					}
+				}
 
-		router.put('/ships/:id/land/invoke', (request, response) => {
-			var result = filter(this.ships, { id: request.params.id })[0];
+				if (promise)
+				{
+					promise
+					.then(function(ship) {
+							updateShipLocationSummary(ship, game.planets);
 
-			if (result && result.owner === game.getPlayer())
-			{
-				result.move('surface')
-				.then(function() {
-					response.writeHead(200, { 'Content-Type': 'application/json' });
-					response.end(JSON.stringify(result.attributes));
-				})
-				.catch(function(err) {
-					response.writeHead(400, { 'Content-Type': 'text/plain' });
-					response.end(err);
-				});
-			}
-			else
-			{
-				// Don't indicate that the id is a valid ship
-				response.writeHead(404, { 'Content-Type': 'application/json' });
-				response.end(JSON.stringify({
-					message: "Ship " + request.params.id + " does not exist."
-				}));
-			}
-		});
-
-		router.put('/ships/:id/dock/invoke', (request, response) => {
-			var result = filter(this.ships, { id: request.params.id })[0];
-
-			if (result && result.owner === game.getPlayer())
-			{
-				result.move('dock')
-				.then(function() {
-						response.writeHead(200, { 'Content-Type': 'application/json' });
-						response.end(JSON.stringify(result.attributes));
-				}, function(err) {
-						response.writeHead(400, { 'Content-Type': 'text/plain' });
-						response.end(err);
-				});
+							response.writeHead(200, { 'Content-Type': 'application/json' });
+							response.end(JSON.stringify(ship.attributes));
+					})
+					.catch(function(err) {
+							response.writeHead(400, { 'Content-Type': 'text/plain' });
+							response.end(err);
+					});
+				}
 			}
 			else
 			{

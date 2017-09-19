@@ -1,17 +1,13 @@
 const debug = require('debug')('ship');
-const EventEmitter = require('events');
+const Backbone = require('backbone');
 const _ = require('underscore');
 
-class Blueprints extends EventEmitter
-{
+module.exports = class Blueprints extends Backbone.Collection {
 	constructor()
 	{
 		super()
-	}
 
-	get available()
-	{
-		return [
+		this.set([
 			{
 				id: 0,
 				name: 'B-29 Battle Cruiser',
@@ -94,8 +90,6 @@ class Blueprints extends EventEmitter
 			// 	requiredCrew: 0,
 			// 	maximumFuel: 0
 			// },
-		];
+		]);
 	}
 }
-
-module.exports = Blueprints;

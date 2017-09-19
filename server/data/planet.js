@@ -1,56 +1,55 @@
 const debug = require('debug')('planet');
-const EventEmitter = require('events');
+const Backbone = require('backbone');
 const _ = require('underscore');
+const shortid = require('shortid');
 
-class Planet extends EventEmitter
-{
+module.exports = class Planet extends Backbone.Model {
 	constructor(options)
 	{
 		super()
-		this.id = undefined;
-		this.name = 'Undefined';
-		this.type = 'Unknown';
-		this.owner = null;
-		this.population = 0;
-		this.moral = 0;
-		this.taxRate = 0;
-		this.food = 0;
-		this.materials = 0;
-		this.fuel = 0;
-		this.energy = 0;
+		this.set({
+			id: shortid.generate(),
+			name: 'Undefined',
+			type: 'Unknown',
+			population: 0,
+			moral: 0,
+			taxRate: 0,
+			food: 0,
+			materials: 0,
+			fuel: 0,
+			energy: 0
+		});
 
-		_.extend(this, options);
+		this.owner = null;
 
 		debug("Planet constructed");
 	}
 
 	terraform(player, attributes)
 	{
-		this.type = 'metropolis'; // tropical, desert, volcanic
-		this.name = _.isString(attributes) ? attributes : '';
+		this.set({
+			type: 'metropolis', // tropical, desert, volcanic
+			name: _.isString(attributes) ? attributes : '',
+
+			population: 1950, // 1772
+			taxRate: 25,
+			moral: 75,
+
+			credits: 0,
+			food: 3400,
+			materials: 3408, // 2988 4316
+			fuel: 3862, // 3232 5224
+			energy: 4316, // 3476 6132
+		});
+
 		this.owner = player;
-
-		this.population = 1950; // 1772
-		this.taxRate = 25;
-		this.moral = 75;
-
-		this.credits = 0;
-		this.food = 3400; 
-		this.materials = 3408; // 2988 4316
-		this.fuel = 3862; // 3232 5224
-		this.energy = 4316; // 3476 6132
 
 		if (_.isObject(attributes))
 		{
-			_.extend(this, attributes);
+			this.set(attributes);
 		}
 
-		debug("Terraformed", this.id, this.name, player.name);
-	}
-
-	get attributes()
-	{
-		return _.pick(this, 'id', 'name', 'type', 'population', 'taxRate', 'moral', 'credits', 'food', 'materials', 'fuel', 'energy');
+		debug("Terraformed", this.id, this.get('name'), player.name);
 	}
 
 	update(day, delta)
@@ -97,5 +96,3 @@ class Planet extends EventEmitter
 		}
 	}
 };
-
-module.exports = Planet;

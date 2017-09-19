@@ -20,7 +20,8 @@ define(['backbone.marionette',
 		},
 
 		events: {
-			'click a[data-control=nav]': 'onNavigate'
+			'click a[data-control=nav]': 'onNavigate',
+			'click a[data-control=terraform]': 'onTerraform'
 		},
 
 		initialize: function(options)
@@ -46,8 +47,6 @@ define(['backbone.marionette',
 			poller.start();
 			this.on('destroy', function() { poller.destroy(); });
 
-
-
 			// Have the main layout proxy the planet selection as the current planet needs to be remembered for later navigation
 			this.listenTo(map, 'childview:planet:selected', _.partial(this.triggerMethod, 'planet:selected'));
 		},
@@ -72,6 +71,14 @@ define(['backbone.marionette',
 				var href = $(event.target).attr('href');
 				href = href.replace(':id', this.planet.id);
 				Backbone.history.navigate(href);
+			}
+		},
+
+		onTerraform: function()
+		{
+			if (this.plent)
+			{
+				this.planet.terraform();
 			}
 		}
 	});

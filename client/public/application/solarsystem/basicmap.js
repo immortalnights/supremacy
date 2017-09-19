@@ -1,13 +1,15 @@
-define(['backbone.marionette',
-       'data/planets'],
-       function(Marionette,
-                Planets) {
+define(['shared/list',
+       'data/planets',
+       'backbone.poller'],
+       function(List,
+                Planets,
+                Poller) {
 	'use strict';
 
-	var SystemMap = Backbone.Marionette.NextCollectionView.extend({
+	var SystemMap = List.extend({
 		tagName: 'ol',
+		className: 'inventory',
 
-		childView: Marionette.View,
 		childViewOptions: {
 			tagName: 'li',
 			template: _.template('<a data-control="planet"><%- name %></a>'),
@@ -19,10 +21,17 @@ define(['backbone.marionette',
 
 		initialize: function(options)
 		{
-			Marionette.NextCollectionView.prototype.initialize.call(this, options);
+			List.prototype.initialize.call(this, options);
+		},
 
+		onRender: function()
+		{
 			this.collection = new Planets();
-			this.collection.fetch();
+			var poller = Poller.get(this.collection, { delay: 1000, delayed: 0 }).start();
+
+			this.on('destroy', function() {
+				poller.destroy();
+			})
 
 			this.listenToOnce(this.collection, 'sync', function(collection) {
 				// Auto-select the final planet (This is by default the players Starbase)

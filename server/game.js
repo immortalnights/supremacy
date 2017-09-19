@@ -2,9 +2,9 @@ const debug = require('debug')('game');
 const _ = require('underscore');
 const EventEmitter = require('events');
 const Player = require('./player');
-const Planet = require('./planet');
-const Blueprints = require('./blueprints');
-const Ship = require('./ship');
+const Planets = require('./data/planets');
+const Blueprints = require('./data/blueprints');
+const Ships = require('./data/ships');
 
 class Game extends EventEmitter
 {
@@ -22,8 +22,8 @@ class Game extends EventEmitter
 		this.speed = 5000;
 
 		this._players = [new Player('AI_easy'), new Player(null)];
-		this._planets = [];
-		this._ships = [];
+		this._planets = new Planets();
+		this._ships = new Ships();
 
 		// Blueprints are shared across all players
 		this._blueprints = new Blueprints();
@@ -33,27 +33,16 @@ class Game extends EventEmitter
 
 	populate(size)
 	{
-		var self = this;
-		this._planets = _.map(_.range(size), function(index) {
-			var planet = new Planet({
-				id: index
-			});
-
-			// Update planets on the 'update' event
-			// this.on('update', _.bind(planet, planet.update));
-			self.on('update', _.bind(planet.update, planet));
-
-			return planet;
-		});
+		this._planets.set(_.map(_.range(size), function(index) { return {}; }));
 
 		// The Enemy starts at the 1st planet
-		_.first(this._planets).terraform(_.first(this._players), {
+		this._planets.first().terraform(_.first(this._players), {
 			name: 'EnemyBase',
 			primary: true
 		});
 
-		// The player starts at the last planet
-		_.last(this._planets).terraform(_.last(this._players), {
+		// // The player starts at the last planet
+		this._planets.last().terraform(_.last(this._players), {
 			name: 'Starbase',
 			primary: true
 		});
@@ -83,14 +72,22 @@ class Game extends EventEmitter
 
 	get blueprints()
 	{
-		return this._blueprints.available;
+		return this._blueprints;
 	}
 
 	buildShip(blueprint, player)
 	{
-		console.log(blueprint);
+		if ('atmos' === blueprint.type)
+		{
+
+		}
+		else
+		{
+
+		}
+
+
 		var ship = new Ship(_.clone(blueprint));
-		console.log(ship);
 		// Assign a new Id
 		// TODO assign new name
 		ship.id = this._ships.length;
@@ -137,14 +134,14 @@ class Game extends EventEmitter
 		}
 
 		// update all plants
-		_.each(this.planets, (planet) => {
-			planet.update(this._date, delta);
-		});
+		// _.each(this.planets, (planet) => {
+		// 	planet.update(this._date, delta);
+		// });
 
 		// update all ships
-		_.each(this.ships, (ship) => {
-			ship.update(this._date, delta);
-		});
+		// _.each(this.ships, (ship) => {
+		// 	ship.update(this._date, delta);
+		// });
 
 		// Default 5s per day
 		var tickDelay = this.speed * this.speedMultiplier;
