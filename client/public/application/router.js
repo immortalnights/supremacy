@@ -35,15 +35,26 @@ define(['backbone.marionette',
 		index: function()
 		{
 			console.log("router:index");
-			// app().show(new Menu());
+
+			// Automatically start and join a game...
+			// TODO
 			Backbone.history.navigate('#/System');
+
+			// app().show(new Menu());
 		},
 
 		system: function()
 		{
 			console.log("router:system");
 
-			app().show(new System());
+			if (this.checkGame())
+			{
+				app().show(new System());
+			}
+			else
+			{
+				Backbone.history.navigate('', true);
+			}
 		},
 
 		notFound: function()

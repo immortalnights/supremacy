@@ -80,28 +80,36 @@ define(['routers/core',
 
 		loadPlanet: function(planet, Screen)
 		{
-			// Load the planet information, and display the view
-			var Planets = require('data/planets');
+			var game = this.checkGame();
+			if (game)
+			{
+				// Load the planet information, and display the view
+				var Planets = require('data/planets');
 
-			var planet = new (Planets.prototype.model)({ id: planet });
+				var planet = new (Planets.prototype.model)({ id: planet });
 
-			this.listenToOnce(planet, 'sync', function(model, response, options) {
-				app().show(new Screen({
-					model: model
-				}));
-			});
+				this.listenToOnce(planet, 'sync', function(model, response, options) {
+					app().show(new Screen({
+						model: model
+					}));
+				});
 
-			this.listenToOnce(planet, 'error', function(model, response, options) {
-				app().show(new Marionette.View({
-					model: new Backbone.Model(response.responseJSON),
-					template: _.template('<p><%- message %></p>')
-				}))
-			});
+				this.listenToOnce(planet, 'error', function(model, response, options) {
+					app().show(new Marionette.View({
+						model: new Backbone.Model(response.responseJSON),
+						template: _.template('<p><%- message %></p>')
+					}))
+				});
 
-			this.listenToOnce(planet, 'sync error', function(model) {
-				this.stopListening(model);
-			});
-			planet.fetch();
+				this.listenToOnce(planet, 'sync error', function(model) {
+					this.stopListening(model);
+				});
+				planet.fetch();
+			}
+			else
+			{
+				Backbone.history.navigate('');
+			}
 		}
 	});
 

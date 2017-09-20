@@ -23,6 +23,29 @@ define(['backbone.marionette',
 		// 		Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
 		// 	}
 		// }
+
+		/**
+		 * @returns true if player is in a game (has a game Id cookie)
+		 */
+		checkGame: function()
+		{
+			// var result = false;
+
+			// var cookie = Cookies.get('gameId');
+			// console.log("Game ID", cookie);
+			
+			// if (cookie)
+			// {
+			// 	// validate the game
+			// 	var game = new Game({
+			// 		id: cookie
+			// 	});
+
+			// 	result = game.fetch();
+			// }
+
+			return true;
+		}
 	});
 
 	return CoreRouter;

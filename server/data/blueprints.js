@@ -1,6 +1,7 @@
 const debug = require('debug')('ship');
 const Backbone = require('backbone');
 const _ = require('underscore');
+const shortid = require('shortid');
 
 module.exports = class Blueprints extends Backbone.Collection {
 	constructor()
@@ -9,7 +10,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 
 		this.set([
 			{
-				id: 0,
+				id: shortid.generate(),
 				name: 'B-29 Battle Cruiser',
 				type: 'cruiser',
 				desc: "Carries four fully equipped platoons into battle.",
@@ -21,7 +22,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 			},
 
 			{
-				id: 1,
+				id: shortid.generate(),
 				name: 'Solar-sat',
 				type: 'generator',
 				desc: "Transmits solar energy back to the planet from orbit.",
@@ -33,7 +34,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 			},
 
 			{
-				id: 2,
+				id: shortid.generate(),
 				name: 'Atmosphere Processor',
 				type: 'atmos',
 				desc: "Generates new living planets from lifeless ones.",
@@ -45,7 +46,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 			},
 
 			{
-				id: 3,
+				id: shortid.generate(),
 				name: 'Carrier',
 				type: 'carrier',
 				desc: "Deep space heavy duty cargo / personnel carrier.",
@@ -57,7 +58,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 			},
 
 			{
-				id: 4,
+				id: shortid.generate(),
 				name: 'Mining Station',
 				type: 'mining',
 				desc: "Generates fuels and minerals when running on surface.",
@@ -69,7 +70,7 @@ module.exports = class Blueprints extends Backbone.Collection {
 			},
 
 			{
-				id: 5,
+				id: shortid.generate(),
 				name: 'Horticultural Station',
 				type: 'horticultural',
 				desc: "Generates food supplies when running on surface",

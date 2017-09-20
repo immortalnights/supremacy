@@ -13,7 +13,7 @@ module.exports = class Planet extends Backbone.Model {
 			type: 'Unknown',
 			population: 0,
 			moral: 0,
-			taxRate: 0,
+			tax: 0,
 			food: 0,
 			materials: 0,
 			fuel: 0,
@@ -25,13 +25,20 @@ module.exports = class Planet extends Backbone.Model {
 		debug("Planet constructed");
 	}
 
-	terraform(player, attributes)
+	terraform(player, name, primary)
 	{
+		// metropolis tropical, desert, volcanic
+		var type;
+		if (primary === true)
+		{
+			type = 'metropolis';
+		}
+
 		this.set({
-			type: 'metropolis', // tropical, desert, volcanic
-			name: _.isString(attributes) ? attributes : '',
+			type: type,
+			name: name,
 			population: 1950, // 1772
-			taxRate: 25,
+			tax: 25,
 			moral: 75,
 			growth: 13,
 			credits: 0,
@@ -39,41 +46,44 @@ module.exports = class Planet extends Backbone.Model {
 			materials: 3408, // 2988 4316
 			fuel: 3862, // 3232 5224
 			energy: 4316, // 3476 6132
+			primary: primary === true
 		});
 
 		this.owner = player;
-
-		if (_.isObject(attributes))
-		{
-			this.set(attributes);
-		}
 
 		debug("Terraformed", this.id, this.get('name'), player.name);
 	}
 
 	update(day, delta)
 	{
+		var population = this.get('population');
+		var tax = this.get('tax');
+		var moral = this.get('moral');
+		var growth = this.get('growth');
+		var food = this.get('food');
+		var credits = this.get('credits');
+
 		// debug("Planet updated", delta);
 		// nothing happens to a planet if there is no population
-		if (this.population)
+		if (population)
 		{
 			// update moral
 			// if food runs out, moral jumps to 1%, otherwise moral increases or decreases by 1% per day - depending on the tax rate
-			var targetMoral = 100 - this.taxRate;
-			if (this.food > 0)
+			var targetMoral = 100 - tax;
+			if (food > 0)
 			{
-				if (this.moral < targetMoral)
+				if (moral < targetMoral)
 				{
-					++this.moral;
+					++moral;
 				}
-				else (this.moral > targetMoral)
+				else (moral > targetMoral)
 				{
-					--this.moral;
+					--moral;
 				}
 			}
 			else
 			{
-				this.moral = 1;
+				moral = 1;
 			}
 
 			// min growth is 50% @ 100% tax
@@ -82,36 +92,45 @@ module.exports = class Planet extends Backbone.Model {
 			// base line 40% tax 60% moral == 0% growth
 
 			// update the food
-			if (this.food > 0)
+			if (food > 0)
 			{
-				this.food = Max.max(Math.floor(this.food - (this.population * 0.004)), 0);
+				food = Max.max(Math.floor(food - (population * 0.004)), 0);
 			}
 
 			if (day % 2 === 0)
 			{
 				// apply growth every even days
-				if (this.population !== 0)
+				if (population !== 0)
 				{
-					if (this.growth > 0)
+					if (growth > 0)
 					{
-						this.population += 	1+Math.floor(this.population*(0.25*(this.growth/100)));
+						population += 	1+Math.floor(population*(0.25*(growth/100)));
 					}
-					else if (this.growth < 0)
+					else if (growth < 0)
 					{
-						this.population += Math.floor(this.population*(0.25*(this.growth/100)));
-						if (this.population < 0)
+						population += Math.floor(population*(0.25*(growth/100)));
+						if (population < 0)
 						{
-							this.population = 0;
+							population = 0;
 						}
 					}
 				}
 			}
 			// apply credits every odd day
-			else if ( this.taxRate > 0)
+			else if (tax > 0)
 			{
 				// income = (0.8c per population) * tax rate
-				this.credits += Math.floor((0.8 * this.population) * (this.taxRate / 100));
+				credits += Math.floor((0.8 * population) * (tax / 100));
 			}
 		}
+
+		this.set({
+			population: population,
+			tax: tax,
+			moral: moral,
+			growth: growth,
+			food: food,
+			credits: credits
+		});
 	}
 };

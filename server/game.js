@@ -1,16 +1,15 @@
 const debug = require('debug')('game');
 const _ = require('underscore');
-const EventEmitter = require('events');
-const Player = require('./player');
+const Player = require('./data/player');
 const Planets = require('./data/planets');
 const Blueprints = require('./data/blueprints');
 const Ships = require('./data/ships');
 
-class Game extends EventEmitter
+class Game
 {
 	constructor(seed)
 	{
-		super();
+		// super();
 		this._date = {
 			day: 1,
 			year: 2010
@@ -36,16 +35,10 @@ class Game extends EventEmitter
 		this._planets.set(_.map(_.range(size), function(index) { return {}; }));
 
 		// The Enemy starts at the 1st planet
-		this._planets.first().terraform(_.first(this._players), {
-			name: 'EnemyBase',
-			primary: true
-		});
+		this._planets.first().terraform(_.first(this._players), 'EnemyBase', true);
 
-		// // The player starts at the last planet
-		this._planets.last().terraform(_.last(this._players), {
-			name: 'Starbase',
-			primary: true
-		});
+		// The player starts at the last planet
+		this._planets.first().terraform(_.last(this._players), 'Starbase', true);
 	}
 
 	getPlayer()
@@ -112,13 +105,10 @@ class Game extends EventEmitter
 	{
 		this.running = true;
 		this.tick();
-		this.emit('start');
 	}
 
 	end()
 	{
-		this.emit('end');
-		this.removeAllListeners();
 	}
 
 	tick()
@@ -152,9 +142,6 @@ class Game extends EventEmitter
 	{
 		var delta = _.now() - this.lastTick;
 		this.lastTick = _.now();
-
-		// debug("Update", delta);
-		this.emit('update', delta);
 
 		if (this.running)
 		{

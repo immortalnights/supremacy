@@ -184,22 +184,22 @@ class ShipContoller
 
 			if (result && result.owner === game.getPlayer())
 			{
-				var promise;
+				var result;
 				switch (request.params.action)
 				{
 					case 'launch':
 					{
-						promise = result.moveTo('orbit');
+						result = result.moveTo('orbit');
 						break;
 					}
 					case 'land':
 					{
-						promise = result.moveTo('surface');
+						result = result.moveTo('surface');
 						break;
 					}
 					case 'dock':
 					{
-						promise = result.moveTo('dock');
+						result = result.moveTo('dock');
 						break;
 					}
 					default:
@@ -212,19 +212,19 @@ class ShipContoller
 					}
 				}
 
-				if (promise)
+				if (result === true)
 				{
-					promise
-					.then(function(ship) {
-							updateShipLocationSummary(ship, game.planets);
+					updateShipLocationSummary(ship, game.planets);
 
-							response.writeHead(200, { 'Content-Type': 'application/json' });
-							response.end(JSON.stringify(ship.attributes));
-					})
-					.catch(function(err) {
-							response.writeHead(400, { 'Content-Type': 'text/plain' });
-							response.end(err);
-					});
+					response.writeHead(200, { 'Content-Type': 'application/json' });
+					response.end(JSON.stringify(ship.attributes));
+				}
+				else
+				{
+					response.writeHead(400, { 'Content-Type': 'application/json' });
+					response.end(JSON.stringify({
+						message: result
+					}));
 				}
 			}
 			else
