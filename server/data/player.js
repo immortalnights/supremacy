@@ -9,8 +9,10 @@ module.exports = class Player extends Backbone.Model {
 		super();
 
 		this.set({
-			id: shortid,
+			id: shortid.generate(),
 			name: brain ? brain.name : 'human'
 		});
+
+		debug("Player created", this.id);
 	}
 }

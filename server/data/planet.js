@@ -21,8 +21,6 @@ module.exports = class Planet extends Backbone.Model {
 		});
 
 		this.owner = null;
-
-		debug("Planet constructed");
 	}
 
 	terraform(player, name, primary)

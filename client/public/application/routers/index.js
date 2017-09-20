@@ -1,15 +1,15 @@
 define(['backbone.marionette',
        'routers/core',
        'routers/planet',
+       'data/game',
        'menu/layout',
-       'solarsystem/layout',
-       'cookies'],
+       'solarsystem/layout'],
        function(Marionette,
                 CoreRouter,
                 PlanetRouter,
+                Game,
                 Menu,
-                System,
-                Cookies) {
+                System) {
 	'use strict';
 
 	var app = function()
@@ -37,8 +37,13 @@ define(['backbone.marionette',
 			console.log("router:index");
 
 			// Automatically start and join a game...
-			// TODO
-			Backbone.history.navigate('#/System');
+			// Assumes hosting cannot fail!
+			this.getApp().game = Game.host({
+				type: 'singleplayer',
+				opponent: 'wotok'
+			});
+
+			Backbone.history.navigate('#/System', true);
 
 			// app().show(new Menu());
 		},
@@ -46,15 +51,7 @@ define(['backbone.marionette',
 		system: function()
 		{
 			console.log("router:system");
-
-			if (this.checkGame())
-			{
-				app().show(new System());
-			}
-			else
-			{
-				Backbone.history.navigate('', true);
-			}
+			app().show(new System());
 		},
 
 		notFound: function()

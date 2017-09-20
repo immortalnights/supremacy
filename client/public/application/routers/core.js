@@ -5,46 +5,33 @@ define(['backbone.marionette',
 	'use strict';
 
 	var CoreRouter = Marionette.AppRouter.extend({
-		// execute: function(callback, args, name)
-		// {
-		// 	var gameId = Cookies.get('gameId');
-
-		// 	if (name === 'index' && !_.isEmpty(gameId))
-		// 	{
-		// 		Backbone.history.navigate('#/System');
-		// 	}
-		// 	else if (name !== 'index' && _.isEmpty(gameId))
-		// 	{
-		// 		Backbone.history.navigate('');
-		// 	}
-		// 	else
-		// 	{
-		// 		// Continue to requested page
-		// 		Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
-		// 	}
-		// }
-
-		/**
-		 * @returns true if player is in a game (has a game Id cookie)
-		 */
-		checkGame: function()
+		initialize: function(options)
 		{
-			// var result = false;
+			Marionette.AppRouter.prototype.initialize.call(this, options);
+		},
 
-			// var cookie = Cookies.get('gameId');
-			// console.log("Game ID", cookie);
-			
-			// if (cookie)
-			// {
-			// 	// validate the game
-			// 	var game = new Game({
-			// 		id: cookie
-			// 	});
+		getApp: function()
+		{
+			return require('application')();
+		},
 
-			// 	result = game.fetch();
-			// }
+		execute: function(callback, args, name)
+		{
+			var game = this.getApp().getGame();
 
-			return true;
+			if (name === 'index' && game)
+			{
+				Backbone.history.navigate('#/System');
+			}
+			else if (name !== 'index' && !game)
+			{
+				Backbone.history.navigate('');
+			}
+			else
+			{
+				// Continue to requested page
+				Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
+			}
 		}
 	});
 

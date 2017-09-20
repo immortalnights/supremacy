@@ -1,4 +1,9 @@
-define(['backbone.marionette', 'router'], function(Marionette, Router) {
+define(['backbone.marionette',
+       'routers/index',
+       'data/game'],
+       function(Marionette,
+                Router,
+                Game) {
 	'use strict';
 
 	var RootLayout = Marionette.View.extend({
@@ -11,7 +16,6 @@ define(['backbone.marionette', 'router'], function(Marionette, Router) {
 
 		onRender: function()
 		{
-
 		}
 	})
 
@@ -23,12 +27,41 @@ define(['backbone.marionette', 'router'], function(Marionette, Router) {
 			new Router();
 		},
 
+		getGame: function()
+		{
+			return this.game;
+		},
+
 		onStart: function()
 		{
 			console.log("Started...");
 			this.rootLayout = new RootLayout();
 
+			var game = Game.resume();
+
+			if (game)
+			{
+				game.fetch()
+				.then(_.bind(function(game) {
+					this.game = game;
+					console.log("Successfully loaded / joined game");
+				}, this))
+				.catch(function() {
+					console.log("Failed to load / join game");
+				})
+				.always(_.bind(this.onPreloadComplete, this));
+			}
+			else
+			{
+				console.log("No game to resume");
+				this.onPreloadComplete();
+			}
+		},
+
+		onPreloadComplete: function()
+		{
 			// Start routing
+			console.log("Starting Backbone.history");
 			Backbone.history.start();
 		},
 
