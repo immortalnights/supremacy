@@ -20,11 +20,6 @@ define(['routers/core',
                 Platoons) {
 	'use strict';
 
-	var app = function()
-	{
-		return require('application')();
-	}
-
 	var Router = CoreRouter.extend({
 
 		routes: {
@@ -86,13 +81,13 @@ define(['routers/core',
 			var planet = new (Planets.prototype.model)({ id: planet });
 
 			this.listenToOnce(planet, 'sync', function(model, response, options) {
-				app().show(new Screen({
+				this.getApp().show(new Screen({
 					model: model
 				}));
 			});
 
 			this.listenToOnce(planet, 'error', function(model, response, options) {
-				app().show(new Marionette.View({
+				this.getApp().show(new Marionette.View({
 					model: new Backbone.Model(response.responseJSON),
 					template: _.template('<p><%- message %></p>')
 				}))

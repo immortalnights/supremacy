@@ -1,13 +1,10 @@
 const debug = require('debug')('server');
+const controller = require('../controller');
 const _ = require('underscore');
 const Backbone = require('backbone');
 
 module.exports = class Core {
-	constructor()
-	{
-	}
-
-	bind(router)
+	constructor(router)
 	{
 		// router(function(req, res, next) {
 		// 	// Catch all;
@@ -19,43 +16,42 @@ module.exports = class Core {
 		// });
 	}
 
-	getGameId(request)
+	get controller()
 	{
-		var id;
-		var cookies = request.headers['cookie'] || '';
-		var match = cookies.match(/gameId=([\w-]+)/);
-		if (match)
-		{
-			id = match[1];
-		}
-		return id;
+		return controller();
 	}
 
-	getPlayerId(request)
+	parseCookies(request)
 	{
-		var id;
-		var cookies = request.headers['cookie'] || '';
-		var match = cookies.match(/playerId=([\w-]+)/);
-		if (match)
+		var result = {};
+
+		var regex = /([\w]+)=([\{\w-\}]+);?/g;
+		var cookie;
+		do
 		{
-			id = match[1];
-		}
-		return id;
+			cookie = regex.exec(request.headers['cookie']);
+			result[cookie[1]] = cookie[2];
+		} while (cookie);
+
+		return result;
 	}
 
-	findGame(request, response)
+	getPlayerGame(request, response)
 	{
-		var gameId = this.getGameId(request);
-		var playerId = this.getPlayerId(request);
+		var cookies = this.parseCookies(request);
+		var game = this.controller.games[cookies.gameId];
 
-		var game = this.collection.get(gameId);
-		if (!game)
+		if (!game && response)
 		{
-			this.writeResponse(response, 404, "Failed to find game '" + gameId + "'");
+			this.writeResponse(response, 404, "Failed to find game '" + cookies.gameId + "'");
 		}
-		else if (!game.players.get(playerId))
+		else
 		{
-			this.writeResponse(response, 404, "Failed to find player '" + playerId + "' in game '" + gameId + "'");
+			var player = game.players.get(cookies.playerId);
+			if (!player && response)
+			{
+				this.writeResponse(response, 404, "Failed to find player '" + cookies.playerId + "' in game '" + cookies.gameId + "'");
+			}
 		}
 
 		return game;
@@ -85,6 +81,8 @@ module.exports = class Core {
 
 	onGetList(collection, request, response, checkPermissions)
 	{
+		this.parseCookies(request);
+		return;
 		var results = this.filter(collection, request.get);
 		const playerId = this.getPlayerId(request);
 

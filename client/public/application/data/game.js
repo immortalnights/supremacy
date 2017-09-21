@@ -16,7 +16,7 @@ define(['backbone',
 	Game.resume = function() {
 		var result;
 		var gameId = Cookies.get('gameId');
-console.log("cookie", Cookies.get());
+
 		if (gameId)
 		{
 			result = new Game({
@@ -38,7 +38,11 @@ console.log("cookie", Cookies.get());
 	}
 
 	Game.join = function(options) {
+		var game = new Game({
+			id: options.id
+		});
 
+		return game.fetch();
 	}
 
 	return Game;

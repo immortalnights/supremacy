@@ -3,14 +3,10 @@ const Core = require('./core');
 const _ = require('underscore');
 
 module.exports = class ShopContoller extends Core {
-	constructor(games)
+	constructor(router)
 	{
-		super();
-		this.collection = games;
-	}
+		super(router);
 
-	bind(router)
-	{
 		router.get('/blueprints', _.bind(this.onGetBlueprints, this));
 		router.get('/blueprints/:id', _.bind(this.onGetBlueprint, this));
 		router.post('/blueprints/:id/build/invoke', _.bind(this.onBuild, this));

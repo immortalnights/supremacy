@@ -17,28 +17,51 @@ define(['backbone.marionette',
 
 		onStartGame: function()
 		{
-			var game = new Game({
-				players: 1
+			// Assumes hosting cannot fail!
+			Game.host({
+				type: 'singleplayer',
+				opponent: 'wotok'
+			})
+			.then(this.onJoinedGame)
+			.catch(function(data, textStatus, xhr) {
+				console.error(textStatus, data);
 			});
-			game.save();
 		},
 
 		onHostGame: function()
 		{
-			var game = new Game({
-				players: 1,
-				name: 'My Game'
+			// Assumes hosting cannot fail!
+			Game.host({
+				type: 'multiplayer'
+			})
+			.then(this.onJoinedGame)
+			.catch(function(data, textStatus, xhr) {
+				console.error(textStatus, data);
 			});
-			game.save();
 		},
 
 		onJoinGame: function()
 		{
 			var selectedGameId = 'unknown-id';
-			var game = new Game({
+
+			Game.join({
 				id: selectedGameId
+			})
+			.then(this.onJoinedGame)
+			.catch(function(data, textStatus, xhr) {
+				console.error(textStatus, data);
 			});
-			game.fetch();
+		},
+
+		onJoinedGame: function(data, textStatus, xhr)
+		{
+			/*
+			 * Prevent Backbone from handling the unavoidable hash-change event.
+			 */
+			Backbone.history.stop();
+
+			window.location = window.location.protocol + '//' + window.location.host + '/#/System';
+			window.location.reload();
 		}
 	});
 

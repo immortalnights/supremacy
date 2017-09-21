@@ -1,9 +1,11 @@
 define(['backbone.marionette',
        'routers/index',
-       'data/game'],
+       'data/game',
+       'cookies'],
        function(Marionette,
                 Router,
-                Game) {
+                Game,
+                Cookies) {
 	'use strict';
 
 	var RootLayout = Marionette.View.extend({
@@ -25,6 +27,11 @@ define(['backbone.marionette',
 			Marionette.Application.prototype.initialize.call(this, options);
 			console.log("Application initialized");
 			new Router();
+
+			// Reduce the global request timeout
+			Backbone.$.ajaxSetup({
+				timeout: 5000
+			});
 		},
 
 		getGame: function()
@@ -41,12 +48,18 @@ define(['backbone.marionette',
 
 			if (game)
 			{
+				// Don't want too long for the game to load 'cause it blocks the user
 				game.fetch()
 				.then(_.bind(function(game) {
 					this.game = game;
 					console.log("Successfully loaded / joined game");
 				}, this))
 				.catch(function() {
+
+					// Could be done using 'game.leave'
+					Cookies.remove('gameId');
+					Cookies.remove('playerId');
+
 					console.log("Failed to load / join game");
 				})
 				.always(_.bind(this.onPreloadComplete, this));

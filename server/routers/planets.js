@@ -3,14 +3,10 @@ const Core = require('./core');
 const _ = require('underscore');
 
 module.exports = class Controller extends Core {
-	constructor(games)
+	constructor(router)
 	{
-		super();
-		this.collection = games;
-	}
+		super(router);
 
-	bind(router)
-	{
 		router.get('/planets', _.bind(this.onGetPlanets, this));
 		router.get('/planets/:id', _.bind(this.onGetPlanet, this));
 	}

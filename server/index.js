@@ -1,10 +1,7 @@
-const Server = require('./server');
-const Games = require('./data/games');
-const _ = require('underscore');
+const api = require('./api');
 
+// It all starts with starting the API server
 (function() {
-	// Initialize the collection of games
-	var games = new Games();
-	var server = new Server()
-	server.start(games, {});
+	// The API is a single-instance class.
+	api().start();
 })();

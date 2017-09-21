@@ -37,14 +37,10 @@ const updateShipLocationSummary = function(ship, planets) {
 }
 
 module.exports = class ShipContoller extends Core {
-	constructor(games)
+	constructor(router)
 	{
-		super();
-		this.collection = games;
-	}
+		super(router);
 
-	bind(router)
-	{
 		router.get('/ships', _.bind(this.onGetShips, this));
 		router.get('/ships/:id', _.bind(this.onGetShip, this));
 		router.put('/ships/:id/:action/invoke', _.bind(this.onShipAction, this));
