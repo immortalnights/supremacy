@@ -2,6 +2,9 @@ const debug = require('debug')('server');
 const Core = require('./core');
 const _ = require('underscore');
 
+/**
+ * Handles Blueprints related API routes
+ */
 module.exports = class ShopContoller extends Core {
 	constructor(router)
 	{

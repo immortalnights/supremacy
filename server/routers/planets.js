@@ -2,6 +2,9 @@ const debug = require('debug')('server');
 const Core = require('./core');
 const _ = require('underscore');
 
+/**
+ * Handles Planets related API routes
+ */
 module.exports = class Controller extends Core {
 	constructor(router)
 	{

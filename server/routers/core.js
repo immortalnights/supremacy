@@ -3,6 +3,10 @@ const controller = require('../controller');
 const _ = require('underscore');
 const Backbone = require('backbone');
 
+/**
+ * Base class for all Routers
+ * TODO Handles catchall and error routes
+ */
 module.exports = class Core {
 	constructor(router)
 	{

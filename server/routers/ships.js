@@ -36,6 +36,9 @@ const updateShipLocationSummary = function(ship, planets) {
 	ship.location.summary = formatLocationSumamry(ship, planet);
 }
 
+/**
+ * Handles Ships related API routes
+ */
 module.exports = class ShipContoller extends Core {
 	constructor(router)
 	{

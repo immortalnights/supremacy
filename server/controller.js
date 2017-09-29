@@ -1,4 +1,11 @@
+const debug = require('debug')('controller');
+const _ = require('underscore');
+const Server = require('./server');
 
+/**
+ * System controller
+ * Manages list of game servers
+ */
 class Controller
 {
 	constructor()
@@ -15,6 +22,10 @@ class Controller
 	{
 		var game;
 		console.log("Create game", options);
+
+		
+
+
 		// create a new game give the options
 
 		return game;

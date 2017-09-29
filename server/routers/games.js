@@ -4,6 +4,9 @@ const Game = require('../data/game');
 const Player = require('../data/player');
 const _ = require('underscore');
 
+/**
+ * Handles Games related API routes
+ */
 module.exports = class Controller extends Core {
 	constructor(router)
 	{
@@ -58,8 +61,6 @@ module.exports = class Controller extends Core {
 		}
 		else
 		{
-			console.log("Create game", request.body);
-
 			var game = this.controller.create(data);
 
 			if (game)
