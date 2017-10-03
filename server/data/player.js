@@ -4,14 +4,15 @@ const _ = require('underscore');
 const shortid = require('shortid');
 
 module.exports = class Player extends Backbone.Model {
-	constructor(brain)
+	constructor(options, brain)
 	{
 		super();
 
 		this.set({
-			id: shortid.generate(),
-			name: brain ? brain.name : 'human'
+			id: shortid.generate()
 		});
+		
+		this.set(options);
 
 		debug("Player created", this.id);
 	}

@@ -44,37 +44,38 @@ module.exports = class ShipContoller extends Core {
 	{
 		super(router);
 
-		router.get('/ships', _.bind(this.onGetShips, this));
-		router.get('/ships/:id', _.bind(this.onGetShip, this));
-		router.put('/ships/:id/:action/invoke', _.bind(this.onShipAction, this));
+		this.register.get('/ships',                    this.onGetShips);
+		this.register.get('/ships/:id',                this.onGetShip);
+		this.register.put('/ships/:id/:action/invoke', this.onShipAction);
 	}
 
 	onGetShips(request, response)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
-			this.onGetList(game.ships, request, response);
+			this.onGetList(server.game.ships, request, response);
 		}
 	}
 
 	onGetShip(request, response)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
-			this.onGetSingle(game.ships, request, response);
+			this.onGetSingle(server.game.ships, request, response);
 		}
 	}
 
 	onShipAction(router, game)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
+			var game = server.game;
 			var result = this.filter(game.ships, { id: request.params.id })[0];
 
 			if (result && result.owner === game.getPlayer())

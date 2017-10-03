@@ -15,12 +15,12 @@ define(['backbone',
 
 	Game.resume = function() {
 		var result;
-		var gameId = Cookies.get('gameId');
+		var serverId = Cookies.get('serverId');
 
-		if (gameId)
+		if (serverId)
 		{
 			result = new Game({
-				id: gameId
+				id: serverId
 			});
 		}
 

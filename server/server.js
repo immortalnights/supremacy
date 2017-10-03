@@ -1,9 +1,7 @@
 const debug = require('debug')('game-server');
 const _ = require('underscore');
 const shortid = require('shortid');
-const Player = require('./data/player');
-const Planets = require('./data/planets');
-const Ships = require('./data/ships');
+const Game = require('./data/game');
 const Blueprints = require('./data/blueprints');
 
 /**
@@ -13,115 +11,73 @@ class Server
 {
 	constructor(options)
 	{
-		options = _.extend({
-			size: 8,
-			opponent: null
-		}, options);
+		this.running = false;
+		this.speedMultiplier = 1;
+		this.speed = 5000;
+		this.lastTick = 0;
 
-		// In single player games, the opponent dictates the number of planets
-		switch (options.opponent)
-		{
-			case 'wotok':
-			{
-				options.size = 8;
-				break;
-			}
-			case 'smine':
-			{
-				options.size = 16;
-				break;
-			}
-			case 'krart':
-			case 'rorn':
-			{
-				options.size = 32;
-				break;
-			}
-		}
+		this._game = new Game(options.name, options.type, options.seed);
 
-		// Collection of planets
-		this._planets = new Planets();
-		// Collection of ships
-		this._ships = new Ships();
+		this._players = [];
 		// Collection of blueprints (shared across all players)
 		this._blueprints = new Blueprints();
-
-		// Initialize planets
-		this._planets.set(_.map(_.range(options.size), function(index) { return {}; }));
-
-		return true;
 	}
 
-	addAI(name)
+	get id()
 	{
-		var brain;
-		switch (name)
-		{
-			case 'wotok':
-			case 'smine':
-			case 'krart':
-			case 'rorn':
-			{
-				brain = {};
-				break;
-			}
-			default:
-			{
-				// Invalid single player opponent
-				break;
-			}
-		}
-
-		if (brain)
-		{
-			var ai = new Player();
-			this.join(ai, 'EnemyBase');
-		}
-
-		return !!brain;
+		return this._game.id;
 	}
 
-	join(player, homebaseName)
+	get game()
 	{
-		homebaseName = homebaseName || 'Starbase';
+		return this._game;
+	}
 
+	join(player)
+	{
 		var result = false;
-		// Join first player (host)
-		if (this.players.length === 0)
+		if (this.players.length >= 2)
 		{
-			this.planets.first().terraform(player, homebaseName, true);
-			this.players.add(player);
-			result = true;
-			debug("Player", player.id, "joined game", this.id);
-		}
-		else if (this.players.length === 1)
-		{
-			this.planets.last().terraform(player, homebaseName, true);
-			this.players.add(player);
-			result = true;
-			debug("Player", player.id, "joined game", this.id);
+			throw new Error("Unable to join game. Game is full");
 		}
 		else
 		{
-			result = false;
+			this.players.push(player);
+			debug("Player", player.id, "joined game", this.id);
+			result = true;
+
+			if (this.players.length === 2)
+			{
+				this.game.set('status', 'eWAITING_FOR_HOST');
+			}
 		}
 
 		return result;
 	}
-	
+
+	leave()
+	{
+		// TODO
+	}
+
+	start()
+	{
+		console.assert(this.players.length === 2);
+
+		// Host is always on the last planet (bottom)
+		var player1 = this.players[0];
+		this.game.planets.last().terraform(player1, player1.get('homebase'), true);
+		var player2 = this.players[1];
+		this.game.planets.first().terraform(player2, player2.get('homebase'), true);
+
+		this.running = true;
+		this.game.set('status', 'eRUNNING');
+		this.tick();
+	}
+
 	get players()
 	{
 		return this._players;
-	}
-
-	get planets()
-	{
-		return this._planets;
-	}
-
-	get ships()
-	{
-		return this._ships;
 	}
 
 	get blueprints()
@@ -202,12 +158,6 @@ class Server
 		return result;
 	}
 
-	start()
-	{
-		this.running = true;
-		this.tick();
-	}
-
 	end()
 	{
 	}
@@ -216,26 +166,6 @@ class Server
 	{
 		var delta = this.lastTick - _.now();
 		this.lastTick = _.now();
-
-		var date = this.get('date');
-		++date.day;
-		if (date.day === 65)
-		{
-			++date.year;
-			date.day = 1;
-		}
-
-		this.set('date', date);
-
-		// update all plants
-		// _.each(this.planets, (planet) => {
-		// 	planet.update(this._date, delta);
-		// });
-
-		// update all ships
-		// _.each(this.ships, (ship) => {
-		// 	ship.update(this._date, delta);
-		// });
 
 		// Default 5s per day
 		var tickDelay = this.speed * this.speedMultiplier;

@@ -10,14 +10,74 @@ const Backbone = require('backbone');
 module.exports = class Core {
 	constructor(router)
 	{
-		// router(function(req, res, next) {
-		// 	// Catch all;
-		// 	res.send('404');
-		// });
+		// Called with request as context
+		const parseCookies = function() {
+			let result = {};
+			const regex = /([\w]+)=([\{\w-\}]+);?/g;
 
-		// router(function(err, req, res, next) {
-		// 	res.send(err);
-		// });
+			debug("Parse", this.headers['cookie']);
+			let cookie;
+			do
+			{
+				cookie = regex.exec(this.headers['cookie']);
+				if (cookie)
+				{
+					result[cookie[1]] = cookie[2];
+				}
+			} while (cookie);
+
+			return result;
+		}
+
+		// Wrap each registered path / callback to parse cookies and lookup server
+		const wrapper = function(callback, restricted) {
+			return (request, response) => {
+				request.cookies = parseCookies.call(request);
+
+				console.log("SESSION", request.nsr_session);
+
+				let server;
+				if (request.cookies.serverId)
+				{
+					server = this.controller.servers[request.cookies.serverId];
+
+					if (server && !_.find(server.players, function(player) {
+						return player.id === request.cookies.playerId
+					}))
+					{
+						// Invalid player id
+						server = null;
+					}
+				}
+
+				// Restricted paths are only available if the user is in a valid game
+				if (server || restricted === false)
+				{
+					callback.call(this, request, response, server);
+				}
+				else
+				{
+					this.writeResponse(response, '403', "Access Denied");
+				}
+			}
+		};
+
+		let self = this;
+		// Define object to allow URL path registrations with wrapper
+		this.register = {
+			get: function(path, callback, restricted) {
+				debug("Register", path);
+				router.get(path, wrapper.call(self, callback, restricted));
+			},
+			put: function(path, callback, restricted) {
+				debug("Register", path);
+				router.put(path, wrapper.call(self, callback, restricted));
+			},
+			post: function(path, callback, restricted) {
+				debug("Register", path);
+				router.post(path, wrapper.call(self, callback, restricted));
+			}
+		}
 	}
 
 	get controller()
@@ -25,24 +85,8 @@ module.exports = class Core {
 		return controller();
 	}
 
-	parseCookies(request)
-	{
-		var result = {};
-
-		var regex = /([\w]+)=([\{\w-\}]+);?/g;
-		var cookie;
-		do
-		{
-			cookie = regex.exec(request.headers['cookie']);
-			result[cookie[1]] = cookie[2];
-		} while (cookie);
-
-		return result;
-	}
-
 	getPlayerGame(request, response)
 	{
-		var cookies = this.parseCookies(request);
 		var game = this.controller.games[cookies.gameId];
 
 		if (!game && response)
@@ -154,12 +198,20 @@ module.exports = class Core {
 				{
 					rawData = JSON.stringify(data.toJSON());
 				}
+				else if (data instanceof Error)
+				{
+					rawData = JSON.stringify({
+						message: data.message,
+						stack: data.stack
+					});
+				}
 				else
 				{
 					rawData = JSON.stringify(data);
 				}
 			}
 
+			// console.log("responseData", rawData);
 			response.end(rawData);
 		}
 	}

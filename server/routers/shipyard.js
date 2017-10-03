@@ -10,37 +10,38 @@ module.exports = class ShopContoller extends Core {
 	{
 		super(router);
 
-		router.get('/blueprints', _.bind(this.onGetBlueprints, this));
-		router.get('/blueprints/:id', _.bind(this.onGetBlueprint, this));
-		router.post('/blueprints/:id/build/invoke', _.bind(this.onBuild, this));
+		this.register.get('/blueprints',                   this.onGetBlueprints);
+		this.register.get('/blueprints/:id',               this.onGetBlueprint);
+		this.register.post('/blueprints/:id/build/invoke', this.onBuild);
 	}
 
 	onGetBlueprints(request, response)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
-			this.onGetList(game.blueprints, request, response);
+			this.onGetList(server.game.blueprints, request, response);
 		}
 	}
 
 	onGetBlueprint(request, response)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
-			this.onGetSingle(game.blueprints, request, response);
+			this.onGetSingle(server.game.blueprints, request, response);
 		}
 	}
 
 	onBuild(request, response)
 	{
-		var game = this.findGame(request, response);
+		var server = this.findServer(request, response);
 
-		if (game)
+		if (server)
 		{
+			var game = server.game;
 			var blueprint = this.filter(game.blueprints, { id: request.params.id })[0];
 
 			if (blueprint)

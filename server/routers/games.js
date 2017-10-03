@@ -12,17 +12,17 @@ module.exports = class Controller extends Core {
 	{
 		super(router);
 
-		router.get('/games', _.bind(this.onGetGames, this));
-		router.get('/games/:id', _.bind(this.onGetGame, this));
-		router.get('/games/:id/Join/Invoke', _.bind(this.onJoinGame, this));
-		router.post('/games', _.bind(this.onCreate, this));
+		this.register.get('/games',                 this.onGetGames, false);
+		this.register.get('/games/:id',             this.onGetGame, false);
+		this.register.get('/games/:id/Join/Invoke', this.onJoinGame, false);
+		this.register.post('/games',                this.onCreate, false);
 	}
 
 	onGetGames(request, response)
 	{
-		var games = this.controller.games;
-		var result = _.map(games, function(value, key) {
-			return value;
+		var servers = this.controller.servers;
+		var result = _.map(servers, function(server, key) {
+			return server.game;
 		});
 
 		this.writeResponse(response, 200, result);
@@ -30,11 +30,11 @@ module.exports = class Controller extends Core {
 
 	onGetGame(request, response)
 	{
-		var game = this.controller.games[request.params.id];
+		var server = this.controller.servers[request.params.id];
 
-		if (game)
+		if (server)
 		{
-			this.writeResponse(response, 200, game);
+			this.writeResponse(response, 200, server.game);
 		}
 		else
 		{
@@ -42,110 +42,70 @@ module.exports = class Controller extends Core {
 		}
 	}
 
-	onCreate(request, response)
+	onCreate(request, response, server)
 	{
-		const isValidType = function(type) {
-			return type === 'singleplayer'; // || type === 'multiplayer';
-		};
+		// TODO fail if server
 
-		var data = request.body
-		if (!_.isString(data.name) || _.isEmpty(data.name))
+		var data = request.body;
+		try
 		{
-			console.log("Invalid name");
-			this.writeResponse(response, 400, "Invalid game name '" + data.name + "'");
-		}
-		else if (!data.type || !isValidType(data.type))
-		{
-			console.log("Invalid type");
-			this.writeResponse(response, 400, "Invalid game type '" + data.type + "'");
-		}
-		else
-		{
-			var game = this.controller.create(data);
+			var server = this.controller.create(data);
 
-			if (game)
+			var player = new Player({
+				name: 'host',
+				homebase: 'StarBase'
+			});
+			server.join(player);
+
+			if (data.type === 'singleplayer')
 			{
-				var player = new Player();
+				// Join AI player
+				var ai = this.controller.createAIPlayer(data.opponent);
+				server.join(ai);
 
-				if (data.type === 'singleplayer' && !game.addAI(data.opponent))
-				{
-					console.log("Failed to add AI");
-					this.writeResponse(response, 400, "Invalid AI opponent '" + data.opponent + "'");
-				}
-				else if (!game.join(player))
-				{
-					console.log("Failed to add player");
-					this.writeResponse(response, 400, "Failed to join created game");
-				}
-				else
-				{
+				var options = {
+					size: ai.get('systemSize')
+				};
 
-					// Begin successful response
-					response.setHeader('Set-Cookie', ["gameId=" + game.id + "; path=/", "playerId=" + player.id + "; path=/"]);
-					this.writeResponse(response, 201, game);
-				}
+				// Automatically set up the game
+				server.game.setup(options);
+				// Automatically start the game
+				server.start();
 			}
 
-			// Create the game
-			// var game = new Game(_.pick(data, 'name', 'type'));
-
-			// // Setup
-			// if (!game || !game.setup(_.pick(data, 'size', 'opponent')))
-			// {
-			// 	console.log("Failed setup");
-			// 	this.writeResponse(400, "Failed to setup game");
-			// }
-			// // Add AI (single player)
-			// else if (data.type === 'singleplayer' && !game.addAI(data.opponent))
-			// {
-			// 	console.log("Failed to add AI");
-			// 	this.writeResponse(response, 400, {
-			// 		message: "Invalid AI opponent '" + data.opponent + "'"
-			// 	});
-			// }
-			// else
-			// {
-			// 	// Automatically join the game
-			// 	var player = new Player();
-			// 	if (game.join(player))
-			// 	{
-			// 		this.collection.add(game);
-
-			// 		// Begin successful response
-			// 		response.setHeader('Set-Cookie', ["gameId=" + game.id + "; path=/", "playerId=" + player.id + "; path=/"]);
-			// 		this.writeResponse(response, 201, game);
-			// 	}
-			// 	else
-			// 	{
-			// 		console.log("Failed to add player");
-			// 		this.writeResponse(response, 400, "Failed to join created game");
-			// 	}
-			// }
+			// Begin successful response
+			response.setHeader('Set-Cookie', ["serverId=" + server.id + "; path=/", "playerId=" + player.id + "; path=/"]);
+			this.writeResponse(response, 201, server.game);
+		}
+		catch (err)
+		{
+			console.log("***", err);
+			this.writeResponse(response, 400, err);
 		}
 	}
 
 	onJoinGame(request, response)
 	{
-		var game = this.getGame(request.params.id)[0];
+		var server = this.findServer(request.params.id)[0];
 
-		if (game)
+		if (server)
 		{
 			var playerId = this.getPlayerId(request);
-			var player = game.players.get(playerId);
+			var player = server.game.players.get(playerId);
 
 			if (player)
 			{
-				this.writeResponse(response, 200, game);
+				this.writeResponse(response, 200, server.game);
 			}
 			else
 			{
 				// Create a new player and join the game
 				var player = new Player();
 
-				if (game.join(player))
+				if (sever.join(player))
 				{
-					response.setHeader('Set-Cookie', ["gameId=" + game.id + "; path=/", "playerId=" + player.id + "; path=/"]);
-					this.writeResponse(response, 200, game);
+					response.setHeader('Set-Cookie', ["serverId=" + server.id + "; path=/", "playerId=" + player.id + "; path=/"]);
+					this.writeResponse(response, 200, server.game);
 				}
 				else
 				{
