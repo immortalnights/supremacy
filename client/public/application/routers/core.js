@@ -25,10 +25,12 @@ define(['backbone.marionette',
 			}
 			else if (name !== 'index' && !game)
 			{
-				Backbone.history.navigate('');
+				console.log("null", name);
+				Backbone.history.navigate('', true);
 			}
 			else
 			{
+				console.log("continue");
 				// Continue to requested page
 				Marionette.AppRouter.prototype.execute.call(this, callback, args, name);
 			}

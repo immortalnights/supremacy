@@ -1,12 +1,14 @@
 define(['backbone.marionette',
+       'backbone.poller',
+       'cookies',
        'solarsystem/basicmap',
        'data/game',
-       'backbone.poller',
        'tpl!solarsystem/templates/layout.html'],
        function(Marionette,
+                Poller,
+                Cookies,
                 BasicMap,
                 Game,
-                Poller,
                 template) {
 	'use strict';
 
@@ -34,7 +36,7 @@ define(['backbone.marionette',
 			var map = new BasicMap();
 			this.showChildView('mapLocation', map);
 
-			var game = new Game({ id: 'default', date: '' });
+			var game = new Game({ id: Cookies.get('serverId'), date: { day: 1, year: 2010} });
 			this.showChildView('dateLocation', new Marionette.View({
 				template: _.template('<%- date.day %>/<%- date.year %>'),
 				model: game,

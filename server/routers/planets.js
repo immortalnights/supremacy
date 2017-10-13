@@ -18,11 +18,8 @@ module.exports = class Controller extends Core {
 	{
 		console.assert(server);
 
-		var game = server.game;
-		var results = this.filter(game.planets, request.get);
 		const playerId = request.cookies.playerId;
-
-		results = _.map(results, function(item) {
+		var results = server.game.planets.map(function(item) {
 			if (item.owner && item.owner.id === playerId)
 			{
 				return item.toJSON();
@@ -33,7 +30,7 @@ module.exports = class Controller extends Core {
 			}
 		});
 
-		this.writeResponse(response, 200, results);
+		this.writeResponse(response, 200, _.where(results, request.get));
 	}
 
 	onGetPlanet(request, response, server)
@@ -41,7 +38,7 @@ module.exports = class Controller extends Core {
 		console.assert(server);
 
 		var game = server.game;
-		var result = this.filter(game.planets, { id: request.params.id })[0];
+		var result = game.planets.get(request.params.id);
 
 		if (result)
 		{

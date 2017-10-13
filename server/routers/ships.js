@@ -49,78 +49,67 @@ module.exports = class ShipContoller extends Core {
 		this.register.put('/ships/:id/:action/invoke', this.onShipAction);
 	}
 
-	onGetShips(request, response)
+	onGetShips(request, response, server)
 	{
-		var server = this.findServer(request, response);
-
-		if (server)
-		{
-			this.onGetList(server.game.ships, request, response);
-		}
+		console.assert(server);
+		this.onGetList(server.game.ships, request, response);
 	}
 
-	onGetShip(request, response)
+	onGetShip(request, response, server)
 	{
-		var server = this.findServer(request, response);
-
-		if (server)
-		{
-			this.onGetSingle(server.game.ships, request, response);
-		}
+		console.assert(server);
+		this.onGetSingle(server.game.ships, request, response);
 	}
 
-	onShipAction(router, game)
+	onShipAction(router, game, server)
 	{
-		var server = this.findServer(request, response);
+		console.assert(server);
 
-		if (server)
+		var game = server.game;
+		var result = game.ships.filterByParam({ id: request.params.id })[0];
+
+		if (result && result.owner === game.getPlayer())
 		{
-			var game = server.game;
-			var result = this.filter(game.ships, { id: request.params.id })[0];
-
-			if (result && result.owner === game.getPlayer())
+			var result;
+			switch (request.params.action)
 			{
-				var result;
-				switch (request.params.action)
+				case 'launch':
 				{
-					case 'launch':
-					{
-						result = result.moveTo('orbit');
-						break;
-					}
-					case 'land':
-					{
-						result = result.moveTo('surface');
-						break;
-					}
-					case 'dock':
-					{
-						result = result.moveTo('dock');
-						break;
-					}
-					default:
-					{
-						result = "Invalid action '" + request.params.action + "' for ship.";
-						break;
-					}
+					result = result.moveTo('orbit');
+					break;
 				}
+				case 'land':
+				{
+					result = result.moveTo('surface');
+					break;
+				}
+				case 'dock':
+				{
+					result = result.moveTo('dock');
+					break;
+				}
+				default:
+				{
+					result = "Invalid action '" + request.params.action + "' for ship.";
+					break;
+				}
+			}
 
-				if (result === true)
-				{
-					updateShipLocationSummary(ship, game.planets);
+			if (result === true)
+			{
+				updateShipLocationSummary(ship, game.planets);
 
-					this.writeResponse(response, 200, ship);
-				}
-				else
-				{
-					this.writeResponse(response, 400, result);
-				}
+				this.writeResponse(response, 200, ship);
 			}
 			else
 			{
-				// Don't indicate that the id is a valid ship
-				this.writeResponse(response, 404, "Ship " + request.params.id + " does not exist.");
+				this.writeResponse(response, 400, result);
 			}
+		}
+		else
+		{
+			// Don't indicate that the id is a valid ship
+			this.writeResponse(response, 404, "Ship " + request.params.id + " does not exist.");
 		}
 	}
 }

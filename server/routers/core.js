@@ -34,16 +34,14 @@ module.exports = class Core {
 			return (request, response) => {
 				request.cookies = parseCookies.call(request);
 
-				console.log("SESSION", request.nsr_session);
+				// console.log("SESSION", request.nsr_session);
 
 				let server;
 				if (request.cookies.serverId)
 				{
 					server = this.controller.servers[request.cookies.serverId];
 
-					if (server && !_.find(server.players, function(player) {
-						return player.id === request.cookies.playerId
-					}))
+					if (server && !server.players.get(request.cookies.playerId))
 					{
 						// Invalid player id
 						server = null;
@@ -85,62 +83,24 @@ module.exports = class Core {
 		return controller();
 	}
 
-	getPlayerGame(request, response)
-	{
-		var game = this.controller.games[cookies.gameId];
-
-		if (!game && response)
-		{
-			this.writeResponse(response, 404, "Failed to find game '" + cookies.gameId + "'");
-		}
-		else
-		{
-			var player = game.players.get(cookies.playerId);
-			if (!player && response)
-			{
-				this.writeResponse(response, 404, "Failed to find player '" + cookies.playerId + "' in game '" + cookies.gameId + "'");
-			}
-		}
-
-		return game;
-	}
-
-	// TODO may be better as part of Collection
-	filter(collection, attr)
-	{
-		const property = function(obj, key) {
-			// debug("property", key, obj);
-			return key.split('.').reduce(function(o, i) {
-				// debug("o", o, "i", i, "o[i]", o[i])
-				return o[i];
-			}, obj);
-		}
-
-		// debug("Filter", collection.length, "by", attr);
-		return _.isEmpty(attr) ? collection.models : collection.filter(function(item) {
-			// debug("Filter against", item.attributes);
-			return _.every(attr, function(value, key) {
-				var attribute = property(item.attributes, key);
-				// debug("check value", attribute, value);
-				return attribute == value;
-			});
-		});
-	}
-
 	onGetList(collection, request, response, checkPermissions)
 	{
-		this.parseCookies(request);
-		return;
-		var results = this.filter(collection, request.get);
-		const playerId = this.getPlayerId(request);
+		var results;
 
-		if (checkPermissions === false)
+		// Check permissions
+		if (checkPermissions !== false)
 		{
-			results = _.filter(results, function(item) {
+			const playerId = request.cookies.playerId;
+
+			results = collection.filter(function(item) {
 				return !item.owner || (item.owner.id === playerId);
 			});
 		}
 
+		// Filter by query
+		results = _.where(results, request.get);
+
+		// serialize
 		results = _.map(results, function(item) {
 			return item.toJSON();
 		});
@@ -150,11 +110,11 @@ module.exports = class Core {
 
 	onGetSingle(collection, request, response, checkPermissions)
 	{
-		var item = this.filter(collection, { id: request.params.id })[0];
+		var item = collection.get(request.params.id);
 
 		if (item)
 		{
-			const playerId = this.getPlayerId(request);
+			const playerId = request.cookies.playerId;
 			if (checkPermissions === false || !item.owner || (playerId && item.owner === playerId))
 			{
 				this.writeResponse(response, 200, item);

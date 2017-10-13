@@ -15,47 +15,44 @@ module.exports = class ShopContoller extends Core {
 		this.register.post('/blueprints/:id/build/invoke', this.onBuild);
 	}
 
-	onGetBlueprints(request, response)
+	onGetBlueprints(request, response, server)
 	{
-		var server = this.findServer(request, response);
+		console.assert(server);
 
-		if (server)
-		{
-			this.onGetList(server.game.blueprints, request, response);
-		}
+		this.onGetList(server.blueprints, request, response);
 	}
 
-	onGetBlueprint(request, response)
+	onGetBlueprint(request, response, server)
 	{
-		var server = this.findServer(request, response);
+		console.assert(server);
 
-		if (server)
-		{
-			this.onGetSingle(server.game.blueprints, request, response);
-		}
+		this.onGetSingle(server.blueprints, request, response);
 	}
 
-	onBuild(request, response)
+	onBuild(request, response, server)
 	{
-		var server = this.findServer(request, response);
+		console.assert(server);
 
-		if (server)
+		var blueprint = server.blueprints.get(request.params.id);
+
+		if (blueprint)
 		{
-			var game = server.game;
-			var blueprint = this.filter(game.blueprints, { id: request.params.id })[0];
+			const playerId = request.cookies.playerId;
 
-			if (blueprint)
+			try
 			{
-				const playerId = this.getPlayerId(request);
-
-				const ship = game.buildShip(blueprint, playerId);
-
+				const ship = server.buildShip(blueprint, playerId);
 				this.writeResponse(response, 201, ship);
 			}
-			else
+			catch (err)
 			{
-				this.writeResponse(response, 404, "Blueprint " + request.params.id + " does not exist.");
+				console.error(err);
+				this.writeResponse(response, 201, err);
 			}
+		}
+		else
+		{
+			this.writeResponse(response, 404, "Blueprint " + request.params.id + " does not exist.");
 		}
 	}
 }

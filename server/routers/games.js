@@ -90,7 +90,7 @@ module.exports = class Controller extends Core {
 
 		if (server)
 		{
-			var playerId = this.getPlayerId(request);
+			var playerId = request.cookies.playerId;
 			var player = server.game.players.get(playerId);
 
 			if (player)

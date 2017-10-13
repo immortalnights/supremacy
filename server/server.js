@@ -1,8 +1,11 @@
 const debug = require('debug')('game-server');
 const _ = require('underscore');
+const Backbone = require('backbone');
 const shortid = require('shortid');
+const Random = require('random-seed');
 const Game = require('./data/game');
 const Blueprints = require('./data/blueprints');
+const Ship = require('./data/ship');
 
 /**
  * Game server
@@ -13,12 +16,14 @@ class Server
 	{
 		this.running = false;
 		this.speedMultiplier = 1;
-		this.speed = 5000;
+		this.speed = 3600;
 		this.lastTick = 0;
 
-		this._game = new Game(options.name, options.type, options.seed);
+		this.generator = new Random('seed');
+		// TODO generator.done() when server closes
+		this._game = new Game(options.name, options.type, this.generator);
 
-		this._players = [];
+		this._players = new Backbone.Collection();
 		// Collection of blueprints (shared across all players)
 		this._blueprints = new Blueprints();
 	}
@@ -33,6 +38,16 @@ class Server
 		return this._game;
 	}
 
+	get players()
+	{
+		return this._players;
+	}
+
+	get blueprints()
+	{
+		return this._blueprints;
+	}
+
 	join(player)
 	{
 		var result = false;
@@ -42,7 +57,7 @@ class Server
 		}
 		else
 		{
-			this.players.push(player);
+			this.players.add(player);
 			debug("Player", player.id, "joined game", this.id);
 			result = true;
 
@@ -65,33 +80,24 @@ class Server
 		console.assert(this.players.length === 2);
 
 		// Host is always on the last planet (bottom)
-		var player1 = this.players[0];
-		this.game.planets.last().terraform(player1, player1.get('homebase'), true);
-		var player2 = this.players[1];
-		this.game.planets.first().terraform(player2, player2.get('homebase'), true);
+		var player1 = this.players.first();
+		this.game.planets.last().terraform(player1, player1.get('homebase'), true, this.generator);
+		var player2 = this.players.last();
+		this.game.planets.first().terraform(player2, player2.get('homebase'), true, this.generator);
 
 		this.running = true;
 		this.game.set('status', 'eRUNNING');
 		this.tick();
 	}
 
-	get players()
-	{
-		return this._players;
-	}
-
-	get blueprints()
-	{
-		return this._blueprints;
-	}
-
 	buildShip(blueprint, playerId)
 	{
-		var result;
+		console.log("Attempting to build", blueprint.get('name'));
+		let ship;
 
 		// 
 		const canBuild = function(blueprint, player, ships) {
-			var result = true;
+			let result = true;
 			if ('atmos' === blueprint.get('type'))
 			{
 				// Can only have one atmos
@@ -112,11 +118,11 @@ class Server
 		var player = this.players.get(playerId);
 		if (!player)
 		{
-			result = "Failed to find player '" + playerId + "'";
+			throw new Error("Invalid player");
 		}
 		else
 		{
-			var planet = this.planets.find(function(planet) {
+			var planet = this.game.planets.find(function(planet) {
 				var found = false;
 				if (planet.owner && planet.owner.id === player.id)
 				{
@@ -125,23 +131,25 @@ class Server
 						found = true;
 					}
 				}
+
+				return found;
 			});
 
 			if (!planet)
 			{
-				result = "Failed to find primary planet for player '" + player.id + "'";
+				throw new Error("Failed to find primary planet for player");
 			}
 			else if (!canBuild(blueprint, player))
 			{
-				result = "Cannot build another '" + blueprint.get('name') + "'";
+				throw new Error("Cannot build ship");
 			}
 			else if (!canAfford(blueprint, planet))
 			{
-				result = "Cannot afford '" + blueprint.get('name') + "'";
+				throw new Error("Cannot afford ship");
 			}
 			else
 			{
-				var ship = new Ship(_.clone(blueprint));
+				ship = new Ship(_.clone(blueprint));
 				ship.owner = player;
 
 				ship.set('location', {
@@ -149,13 +157,11 @@ class Server
 					position: 'dock'
 				});
 
-				this.ships.push(ship);
-
-				result = ship;
+				this.game.ships.push(ship);
 			}
 		}
 
-		return result;
+		return ship;
 	}
 
 	end()
@@ -168,13 +174,15 @@ class Server
 		this.lastTick = _.now();
 
 		// Default 5s per day
-		var tickDelay = this.speed * this.speedMultiplier;
+		var tickDelay = this.speed / this.speedMultiplier;
 		this.ticker = _.delay(_.bind(function() {
 			var delta = _.now() - this.lastTick;
 			this.lastTick = _.now();
 
 			if (this.running)
 			{
+				console.log("Tick", delta);
+				this.game.tick(delta);
 				this.tick();
 			}
 		}, this), tickDelay);

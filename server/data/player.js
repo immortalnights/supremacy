@@ -11,7 +11,7 @@ module.exports = class Player extends Backbone.Model {
 		this.set({
 			id: shortid.generate()
 		});
-		
+
 		this.set(options);
 
 		debug("Player created", this.id);

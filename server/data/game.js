@@ -6,9 +6,10 @@ const Planets = require('./planets');
 const Ships = require('./ships');
 
 module.exports = class Game extends Backbone.Model {
-	constructor(name, type, seed)
+	constructor(name, type, random)
 	{
 		super();
+		this.random = random;
 		this.set({
 			id: shortid.generate(),
 			name: name,
@@ -17,8 +18,7 @@ module.exports = class Game extends Backbone.Model {
 			date: {
 				day: 1,
 				year: 2010
-			},
-			seed: seed || Math.random()
+			}
 		});
 
 		debug("Game created", this.id);
@@ -49,8 +49,11 @@ module.exports = class Game extends Backbone.Model {
 	tick(delta)
 	{
 		const incDate = function(date) {
-			let day = date.day++;
+			let day = date.day;
 			let year = date.year;
+
+			++day;
+
 			if (date.day === 65)
 			{
 				++year;
@@ -64,6 +67,7 @@ module.exports = class Game extends Backbone.Model {
 		}
 
 		var date = incDate(this.get('date'));
+		console.log("game tick", date);
 		this.set('date', date);
 
 		// update all plants

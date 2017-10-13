@@ -23,7 +23,7 @@ module.exports = class Planet extends Backbone.Model {
 		this.owner = null;
 	}
 
-	terraform(player, name, primary)
+	terraform(player, name, primary, random)
 	{
 		// metropolis tropical, desert, volcanic
 		var type;
@@ -32,18 +32,25 @@ module.exports = class Planet extends Backbone.Model {
 			type = 'metropolis';
 		}
 
+		this.track = {
+			population: [],
+			credits: []
+		};
+
 		this.set({
 			type: type,
 			name: name,
-			population: 1950, // 1772
+			status: '',
+			population: 2028, // random.intBetween(1600, 2100)
 			tax: 25,
 			moral: 75,
 			growth: 13,
-			credits: 0,
-			food: 3400,
-			materials: 3408, // 2988 4316
-			fuel: 3862, // 3232 5224
-			energy: 4316, // 3476 6132
+			credits: 69994, // random.intBetween(50000, 70000),
+			food: 3293, // random.intBetween(2500, 3500),
+			materials: random.intBetween(3400, 4500),
+			fuel: random.intBetween(3100, 6500),
+			energy: random.intBetween(1600, 2100),
+			defense: 0,
 			primary: primary === true
 		});
 
@@ -52,19 +59,26 @@ module.exports = class Planet extends Backbone.Model {
 		debug("Terraformed", this.id, this.get('name'), player.name);
 	}
 
-	update(day, delta)
+	update(date, delta)
 	{
-		var population = this.get('population');
-		var tax = this.get('tax');
-		var moral = this.get('moral');
-		var growth = this.get('growth');
-		var food = this.get('food');
-		var credits = this.get('credits');
+		const occupied = function(planet) {
+			return planet.owner && planet.get('population');
+		};
 
-		// debug("Planet updated", delta);
-		// nothing happens to a planet if there is no population
-		if (population)
+		// nothing happens to a planet if there is no owner or population
+		if (occupied(this))
 		{
+			var population = this.get('population');
+			var tax = this.get('tax');
+			var moral = this.get('moral');
+			var growth = this.get('growth');
+			var food = this.get('food');
+			var credits = this.get('credits');
+
+			// track population and credits
+			this.track.population.push(population);
+			this.track.credits.push(credits);
+
 			// update moral
 			// if food runs out, moral jumps to 1%, otherwise moral increases or decreases by 1% per day - depending on the tax rate
 			var targetMoral = 100 - tax;
@@ -92,17 +106,17 @@ module.exports = class Planet extends Backbone.Model {
 			// update the food
 			if (food > 0)
 			{
-				food = Max.max(Math.floor(food - (population * 0.004)), 0);
+				food = Math.max(Math.floor(food - (population * 0.004)), 0);
 			}
 
-			if (day % 2 === 0)
+			if (date.day % 2 === 0)
 			{
 				// apply growth every even days
 				if (population !== 0)
 				{
 					if (growth > 0)
 					{
-						population += 	1+Math.floor(population*(0.25*(growth/100)));
+						population += 1+Math.floor(population*(0.25*(growth/100)));
 					}
 					else if (growth < 0)
 					{
@@ -113,6 +127,7 @@ module.exports = class Planet extends Backbone.Model {
 						}
 					}
 				}
+				console.log("Growth %i => %i", this.get('population'), population);
 			}
 			// apply credits every odd day
 			else if (tax > 0)

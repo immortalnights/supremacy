@@ -24,7 +24,8 @@ class API
 			serve_static: false,
 			list_dir: false,
 			serve_cgi: false,
-			serve_php: false
+			serve_php: false,
+			logging: false
 		});
 
 		// router.setSessionHandler(function() {
