@@ -59,6 +59,8 @@ module.exports = class Controller extends Core {
 
 			if (data.type === 'singleplayer')
 			{
+				// server.setDifficulty('easy');
+
 				// Join AI player
 				var ai = this.controller.createAIPlayer(data.opponent);
 				server.join(ai);

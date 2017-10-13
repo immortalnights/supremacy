@@ -47,7 +47,7 @@ module.exports = class ShopContoller extends Core {
 			catch (err)
 			{
 				console.error(err);
-				this.writeResponse(response, 201, err);
+				this.writeResponse(response, 400, err);
 			}
 		}
 		else

@@ -4,9 +4,9 @@ const _ = require('underscore');
 const shortid = require('shortid');
 
 module.exports = class Planet extends Backbone.Model {
-	constructor(options)
+	constructor(attributes, options)
 	{
-		super()
+		super(attributes, options)
 		this.set({
 			id: shortid.generate(),
 			name: 'Undefined',
@@ -26,7 +26,7 @@ module.exports = class Planet extends Backbone.Model {
 	terraform(player, name, primary, random)
 	{
 		// metropolis tropical, desert, volcanic
-		var type;
+		let type;
 		if (primary === true)
 		{
 			type = 'metropolis';
@@ -68,12 +68,12 @@ module.exports = class Planet extends Backbone.Model {
 		// nothing happens to a planet if there is no owner or population
 		if (occupied(this))
 		{
-			var population = this.get('population');
-			var tax = this.get('tax');
-			var moral = this.get('moral');
-			var growth = this.get('growth');
-			var food = this.get('food');
-			var credits = this.get('credits');
+			let population = this.get('population');
+			let tax = this.get('tax');
+			let moral = this.get('moral');
+			let growth = this.get('growth');
+			let food = this.get('food');
+			let credits = this.get('credits');
 
 			// track population and credits
 			this.track.population.push(population);
@@ -81,7 +81,7 @@ module.exports = class Planet extends Backbone.Model {
 
 			// update moral
 			// if food runs out, moral jumps to 1%, otherwise moral increases or decreases by 1% per day - depending on the tax rate
-			var targetMoral = 100 - tax;
+			let targetMoral = 100 - tax;
 			if (food > 0)
 			{
 				if (moral < targetMoral)
@@ -135,15 +135,15 @@ module.exports = class Planet extends Backbone.Model {
 				// income = (0.8c per population) * tax rate
 				credits += Math.floor((0.8 * population) * (tax / 100));
 			}
-		}
 
-		this.set({
-			population: population,
-			tax: tax,
-			moral: moral,
-			growth: growth,
-			food: food,
-			credits: credits
-		});
+			this.set({
+				population: population,
+				tax: tax,
+				moral: moral,
+				growth: growth,
+				food: food,
+				credits: credits
+			});
+		}
 	}
 };

@@ -4,13 +4,16 @@ const _ = require('underscore');
 const shortid = require('shortid');
 
 module.exports = class Ship extends Backbone.Model {
-	constructor(options)
+	constructor(attributes, options)
 	{
-		super()
+		super(attributes, options)
 		this.set({
 			id: shortid.generate(),
-			name: 'Undefined',
-			type: 'Unknown',
+			crew: 0,
+			fuel: 0,
+			passengers: 0,
+			value: 0,
+			payload: null,
 			location: {
 				// can be null when traveling
 				planet: undefined,
@@ -27,6 +30,11 @@ module.exports = class Ship extends Backbone.Model {
 	update(delta)
 	{
 		// debug("Ship updated", delta);
+		let value = this.get('value');
+		if (value > 0)
+		{
+			this.set('value', --value);
+		}
 	}
 
 	/**

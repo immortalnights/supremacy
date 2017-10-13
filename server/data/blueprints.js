@@ -4,92 +4,133 @@ const _ = require('underscore');
 const shortid = require('shortid');
 
 module.exports = class Blueprints extends Backbone.Collection {
-	constructor()
+	constructor(models, options)
 	{
-		super()
+		super(models, options)
 
 		this.set([
 			{
 				id: shortid.generate(),
-				name: 'B-29 Battle Cruiser',
+				class: 'B-29 Battle Cruiser',
+				shortName: 'Battle',
 				type: 'cruiser',
 				desc: "Carries four fully equipped platoons into battle.",
-				cost: 5250,
+				cost: {
+					credits: 5250,
+					materials: 95,
+					energy: 365
+				},
 				capacity: 600,
-				payload: null,
 				requiredCrew: 21,
-				maximumFuel: 1000
+				maximumFuel: 1000,
+				seats: 4500,
+				range: 2000
 			},
 
 			{
 				id: shortid.generate(),
-				name: 'Solar-sat',
+				class: 'Solar-sat',
+				shortName: 'Solar',
 				type: 'generator',
 				desc: "Transmits solar energy back to the planet from orbit.",
-				cost: 975,
+				cost: {
+					credits: 975,
+					materials: 7,
+					energy: 92
+				},
 				capacity: 0,
-				payload: null,
 				requiredCrew: 0,
-				maximumFuel: 0
+				maximumFuel: 0,
+				seats: 0,
+				range: 0
 			},
 
 			{
 				id: shortid.generate(),
-				name: 'Atmosphere Processor',
+				class: 'Atmosphere Processor',
+				shortName: 'Atmos',
 				type: 'atmos',
 				desc: "Generates new living planets from lifeless ones.",
-				cost: 26753,
+				cost: {
+					credits: 26753,
+					materials: 75,
+					energy: 999
+				},
 				capacity: 0,
-				payload: null,
 				requiredCrew: 0,
-				maximumFuel: 0
+				maximumFuel: 0,
+				seats: 0,
+				range: 0
 			},
 
 			{
 				id: shortid.generate(),
-				name: 'Carrier',
+				class: 'Carrier',
+				shortName: 'Cargo',
 				type: 'carrier',
 				desc: "Deep space heavy duty cargo / personnel carrier.",
-				cost: 15400,
+				cost: {
+					credits: 15400,
+					materials: 125,
+					energy: 465
+				},
 				capacity: 2250,
-				payload: null,
 				requiredCrew: 11,
-				maximumFuel: 1250
+				maximumFuel: 1250,
+				seats: 1850,
+				range: 3750
 			},
 
 			{
 				id: shortid.generate(),
-				name: 'Mining Station',
+				class: 'Mining Station',
+				shortName: 'Mining',
 				type: 'mining',
 				desc: "Generates fuels and minerals when running on surface.",
-				cost: 17999,
+				cost: {
+					credits: 17999,
+					materials: 600,
+					energy: 875
+				},
 				capacity: 950,
-				payload: null,
 				requiredCrew: 294,
-				maximumFuel: 1400
+				maximumFuel: 1400,
+				seats: 0,
+				range: 4200
 			},
 
 			{
 				id: shortid.generate(),
-				name: 'Horticultural Station',
+				class: 'Horticultural Station',
+				shortName: 'Farming',
 				type: 'horticultural',
-				desc: "Generates food supplies when running on surface",
-				cost: 16995,
+				desc: "Generates food supplies when running on surface.",
+				cost: {
+					credits: 16995,
+					materials: 540,
+					energy: 970
+				},
 				capacity: 950,
-				payload: null,
 				requiredCrew: 175,
-				maximumFuel: 750
+				maximumFuel: 750,
+				seats: 0,
+				range: 3000
 			},
 
 			// {
-			// 	name: '',
+			// 	class: '',
 			// 	type: '',
 			// 	desc: "",
-			// 	cost: 0,
+			// 	cost: {
+			// 		credits: 0,
+			// 			materials: 0,
+			// 			energy: 0
+			// 	},
 			// 	capacity: 0,
-			// 	payload: null,
 			// 	requiredCrew: 0,
-			// 	maximumFuel: 0
+			// 	maximumFuel: 0,
+			// 	seats: 0,
+			// 	range: 0
 			// },
 		]);
 	}

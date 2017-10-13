@@ -111,19 +111,74 @@ class Server
 			return result;
 		};
 
-		const canAfford = function(blueprint, planet) {
-			return true;
+		let difficulty = 'easy';
+		const build = function(blueprint, planet) {
+			let result;
+			let cost = blueprint.get('cost');
+
+			let credits = planet.get('credits');
+			let energy = planet.get('energy');
+			let materials = planet.get('materials');
+
+			console.log(cost, ":", credits, energy, materials)
+
+			switch (difficulty)
+			{
+				case 'easy':
+				{
+					if (cost.credits <= credits)
+					{
+						planet.set('credits', credits - cost.credits);
+						result = true;
+					}
+					break;
+				}
+				case 'medium':
+				{
+					if (cost.credits <= credits && cost.energy <= energy)
+					{
+						planet.set('credits', credits - cost.credits);
+						planet.set('energy', energy - cost.energy);
+						result = true;
+					}
+					break;
+				}
+				case 'hard':
+				{
+					if (cost.credits <= credits && cost.energy <= energy && cost.materials <= materials)
+					{
+						planet.set('credits', credits - cost.credits);
+						planet.set('energy', energy - cost.energy);
+						planet.set('materials', materials - cost.materials);
+						result = true;
+					}
+					break;
+				}
+				case 'extreme':
+				{
+					if (cost.credits <= credits && cost.energy <= energy && cost.materials <= materials)
+					{
+						planet.set('credits', credits - cost.credits);
+						planet.set('energy', energy - cost.energy);
+						planet.set('materials', materials - cost.materials);
+						result = true;
+					}
+					break;
+				}
+			}
+
+			return result;
 		};
 
-		var player = this.players.get(playerId);
+		let player = this.players.get(playerId);
 		if (!player)
 		{
 			throw new Error("Invalid player");
 		}
 		else
 		{
-			var planet = this.game.planets.find(function(planet) {
-				var found = false;
+			let planet = this.game.planets.find(function(planet) {
+				let found = false;
 				if (planet.owner && planet.owner.id === player.id)
 				{
 					if (planet.get('primary'))
@@ -143,19 +198,26 @@ class Server
 			{
 				throw new Error("Cannot build ship");
 			}
-			else if (!canAfford(blueprint, planet))
+			else if (!build(blueprint, planet))
 			{
 				throw new Error("Cannot afford ship");
 			}
 			else
 			{
-				ship = new Ship(_.clone(blueprint));
-				ship.owner = player;
+				var attr = blueprint.omit('id', 'name', 'shortName', 'desc', 'cost');
+				console.log(attr);
 
+				ship = new Ship(attr);
+
+				ship.owner = player;
+				ship.set('name', blueprint.get('shortName'));
+				ship.set('value', blueprint.get('cost').credits);
 				ship.set('location', {
 					planet: planet.id,
 					position: 'dock'
 				});
+
+				console.log(ship.attributes);
 
 				this.game.ships.push(ship);
 			}

@@ -3,9 +3,9 @@ const Backbone = require('backbone');
 const Planet = require('./planet');
 
 module.exports = class Planets  extends Backbone.Collection {
-	constructor()
+	constructor(models, options)
 	{
-		super()
+		super(models, options)
 		this.model = Planet;
 	}
 };

@@ -3,6 +3,26 @@ const controller = require('../controller');
 const _ = require('underscore');
 const Backbone = require('backbone');
 
+const filter = function(list, attr) {
+	const property = function(obj, key) {
+		debug("check", key, obj);
+		return key.split('.').reduce(function(o, i) {
+			debug("o", o, "i", i, "o[i]", o[i])
+			return o[i];
+		}, obj);
+	}
+
+	debug("Filter", list.length, "by", attr);
+	return _.filter(list, function(item) {
+		debug("Filter", item.attributes, attr);
+		return _.isEmpty(attr) || _.every(attr, function(value, key) {
+			var attribute = property(item.attributes, key);
+			debug("check value", attribute, value);
+			return attribute == value;
+		});
+	});
+}
+
 /**
  * Base class for all Routers
  * TODO Handles catchall and error routes
@@ -98,7 +118,7 @@ module.exports = class Core {
 		}
 
 		// Filter by query
-		results = _.where(results, request.get);
+		results = filter(results, request.get);
 
 		// serialize
 		results = _.map(results, function(item) {
@@ -115,13 +135,15 @@ module.exports = class Core {
 		if (item)
 		{
 			const playerId = request.cookies.playerId;
-			if (checkPermissions === false || !item.owner || (playerId && item.owner === playerId))
+			if (checkPermissions === false || !item.owner || (playerId && item.owner.id === playerId))
 			{
 				this.writeResponse(response, 200, item);
 			}
 			else
 			{
-				this.writeResponse(response, 403);
+				this.writeResponse(response, 404, {
+					message: "Resource '" + request.params.id + "' does not exist."
+				});
 			}
 		}
 		else
@@ -160,6 +182,7 @@ module.exports = class Core {
 				}
 				else if (data instanceof Error)
 				{
+					console.error(data);
 					rawData = JSON.stringify({
 						message: data.message,
 						stack: data.stack

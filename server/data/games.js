@@ -3,9 +3,9 @@ const Backbone = require('backbone');
 const Game = require('./game');
 
 module.exports = class Games  extends Backbone.Collection {
-	constructor()
+	constructor(models, options)
 	{
-		super()
+		super(models, options)
 		this.model = Game;
 	}
 };
