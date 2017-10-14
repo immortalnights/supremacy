@@ -1,0 +1,23 @@
+difficulties {
+	easy: {
+		opponent: 'wotok'
+		// array of format times
+		planets: [ 0, 34, 9, 52, 67, 19, 41, 0 ],
+		cost: [ 'credits' ]
+	},
+	medium: {
+		opponent: 'smine',
+		planets: [ 0, 29, 34, 99, 9, 88, 52, 52, 79, 30, 19, 85, 81, 44, 27, 0 ],
+		cost: [ 'credit', 'energy' ]
+	},
+	hard: {
+		opponent: 'krart',
+		planets: [ 0, 45, 29, 13, 34, 10, 99, 70, 9, 42, 88, 38, 52, 87, 52, 90, 79, 17, 30, 55, 19, 87, 85, 51, 81, 53, 44, 64, 27, 33, 5, 0 ],
+		cost: [ 'credits', 'energy', 'materials']
+	},
+	extreme: {
+		opponent: 'rorn',
+		planets: [ 0, 45, 29, 13, 34, 10, 99, 70, 9, 42, 88, 38, 52, 87, 52, 90, 79, 17, 30, 55, 19, 87, 85, 51, 81, 53, 44, 64, 27, 33, 5, 0 ],
+		cost: [ 'credits', 'energy', 'materials']
+	}
+}

@@ -78,7 +78,7 @@ define(['backbone.marionette',
 
 		onTerraform: function()
 		{
-			if (this.plent)
+			if (this.planet)
 			{
 				this.planet.terraform();
 			}

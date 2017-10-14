@@ -3,21 +3,60 @@
 <div>
 	<button data-control="previous" title="Previous">&lt;</button>
 	<button data-control="build">Build</button>
-	<p><%- desc %></p>
-	<p>Type: <%- name %></p>
+	<div style="display:inline-block">
+		<p><%- desc %></p>
+		<p><label>Type</label>: <%- obj.class %></p>
+	</div>
 	<button data-control="next" title="Next">&gt;</button>
 
-	<dl>
-		<dt>Credits</dt>
-		<dd></dd>
+	<div>
+		<h5>Starbase</h5>
+		<div id="starbasedetails"></div>
+	</div>
 
-		<dt>Cost</dt>
-		<dd><%- cost %></dd>
+	<div>
+		<h5>Cost</h5>
+		<dl>
+			<dt>Credits</dt>
+			<dd><%- cost.credits %></dd>
 
-		<dt>Capacity</dt>
-		<dd><%- capacity %></dd>
+			<% if (cost.energy) { %>
+				<dt>Energy</dt>
+				<dd><%- cost.energy %></dd>
+			<% } %>
 
-		<dt>Owned</dt>
-		<dd></dd>
-	</dl>
+			<% if (cost.materials) { %>
+				<dt>Materials</dt>
+				<dd><%- cost.materials %></dd>
+			<% } %>
+		</dl>
+	</div>
+
+	<div>
+		<h5>Capacity</h5>
+		<dl>
+			<dt>Crew</dt>
+			<dd><%- requiredCrew %></dd>
+
+			<dt>Payload</dt>
+			<dd><%- capacity %></dd>
+
+			<dt>Fuel</dt>
+			<dd><%- maximumFuel %></dd>
+		</dl>
+	</div>
+
+	<div>
+		<h5>Data</h5>
+		<dl>
+			<dt>Owned</dt>
+			<dd>-</dd>
+
+			<dt>Range</dt>
+			<dd><%- range %></dd>
+
+			<dt>Seats</dt>
+			<dd><%- seats %></dd>
+		</dl>
+	</div>
 </div>

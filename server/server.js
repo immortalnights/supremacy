@@ -101,11 +101,12 @@ class Server
 			if ('atmos' === blueprint.get('type'))
 			{
 				// Can only have one atmos
-				if (!ships.some(function(ship) {
-					return ship.owner.id === player.id && ship.get('type') === atmos;
+				if (ships.find(function(ship) {
+					return ship.owner === player && ship.get('type') === 'atmos';
 				}))
 				{
 					// Player already has an atmos
+					result = false;
 				}
 			}
 			return result;
@@ -194,7 +195,7 @@ class Server
 			{
 				throw new Error("Failed to find primary planet for player");
 			}
-			else if (!canBuild(blueprint, player))
+			else if (!canBuild(blueprint, player, this.game.ships))
 			{
 				throw new Error("Cannot build ship");
 			}
@@ -244,7 +245,7 @@ class Server
 			if (this.running)
 			{
 				console.log("Tick", delta);
-				this.game.tick(delta);
+				this.game.tick(delta, this.generator);
 				this.tick();
 			}
 		}, this), tickDelay);

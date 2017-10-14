@@ -46,7 +46,24 @@ module.exports = class Game extends Backbone.Model {
 		debug("Game %s setup (%i)", this.id, this.planets.length);
 	}
 
-	tick(delta)
+	getTravelDetails(from, to)
+	{
+		let fromIndex = this.planets.findIndex(function(planet) {
+			return planet.id === from;
+		});
+		let toIndex = this.planets.findIndex(function(planet) {
+			return planet.id === to;
+		});
+
+		let distance = Math.abs(fromIndex - toIndex);
+		console.log("From %s to %s = %i", from, to, distance);
+		return {
+			fuel: distance * 50,
+			eta: distance
+		};
+	}
+
+	tick(delta, random)
 	{
 		const incDate = function(date) {
 			let day = date.day;
@@ -72,6 +89,33 @@ module.exports = class Game extends Backbone.Model {
 
 		// update all plants
 		this.planets.each((planet) => {
+			if (planet.get('status') === 'terraforming')
+			{
+				let atmos = this.ships.find(function (ship) {
+					return ship.get('type') === 'atmos' && ship.get('location').planet === planet.id;
+				});
+
+				if (!atmos)
+				{
+					
+				}
+				else if (atmos.get('location').position === 'surface')
+				{
+					let eta = planet.get('formatEta');
+					--eta;
+
+					// reduce the eta
+					if (eta === 0)
+					{
+						planet.terraform(atmos.owner, 'planet', false, random);
+					}
+					else
+					{
+						planet.set('formatEta', eta);
+					}
+				}
+			}
+
 			planet.update(date, delta);
 		});
 
@@ -83,6 +127,8 @@ module.exports = class Game extends Backbone.Model {
 
 			if (planet)
 			{
+				let planetType = planet.get('type');
+
 				// TODO account for bonuses / events
 				if (type === 'generator' && location.position === 'orbit')
 				{
@@ -94,7 +140,7 @@ module.exports = class Game extends Backbone.Model {
 					if (type === 'horticultural')
 					{
 						let food = planet.get('food');
-						planet.set('food', food + 12);
+						planet.set('food', food + 12); // 9.5 for dessert
 					}
 					else if (type === 'mining')
 					{

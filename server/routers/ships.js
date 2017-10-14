@@ -48,6 +48,7 @@ module.exports = class ShipContoller extends Core {
 
 		this.register.get('/ships',                     this.onGetShips);
 		this.register.get('/ships/:id',                 this.onGetShip);
+		this.register.delete('/ships/:id',              this.onDeleteShip);
 		this.register.put('/ships/build/invoke',        this.onBuild);
 		this.register.put('/ships/:id/launch/invoke',   this.onLaunchShip);
 		this.register.put('/ships/:id/dock/invoke',     this.onDockShip);
@@ -94,7 +95,68 @@ module.exports = class ShipContoller extends Core {
 
 	onTransferShip(request, response, server)
 	{
-		this.performShipAction('transfer', request, response, server);
+		console.assert(server);
+
+		const playerId = request.cookies.playerId;
+		let ship = server.game.ships.get(request.params.id);
+
+		try
+		{
+			if (!ship || ship.owner.id !== playerId)
+			{
+				this.writeResponse(response, 404, "Failed to find ship '" + request.params.id + "'.");
+			}
+			else
+			{
+				let location = ship.get('location');
+				if (location.position !== 'orbit')
+				{
+					this.writeResponse(response, 400, "Ship is not in orbit.");
+				}
+				else
+				{
+					let planet = server.game.planets.get(request.body.planet);
+
+					if (!planet)
+					{
+						this.writeResponse(response, 404, "Failed to find planet '" + request.body.planet + "'.");
+					}
+					else if (location.planet === planet.id)
+					{
+						this.writeResponse(response, 400, "Ship is already there.");
+					}
+					else
+					{
+						// calculate fuel
+						let details = server.game.getTravelDetails(location.planet, planet.id);
+
+						if (ship.get('fuel') !== 'nuclear' && details.fuel > ship.get('fuel'))
+						{
+							this.writeResponse(response, 400, "Ship does not have enough fuel (required " + details.fuel + "T).");
+						}
+						else
+						{
+							ship.set({
+								location: {
+									planet: null,
+									position: null
+								},
+								travel: {
+									planet: planet.id,
+									eta: details.eta
+								}
+							});
+
+							this.writeResponse(response, 200, ship);
+						}
+					}
+				}
+			}
+		}
+		catch (err)
+		{
+			this.writeResponse(response, 500, err);
+		}
 	}
 
 	onCrewShip(request, response, server)
@@ -188,8 +250,6 @@ module.exports = class ShipContoller extends Core {
 		const playerId = request.cookies.playerId;
 		let ship = server.game.ships.get(request.params.id);
 
-		const fuelRequired = ship.get('maximumFuel') !== 0;
-
 		try
 		{
 
@@ -215,14 +275,14 @@ module.exports = class ShipContoller extends Core {
 				{
 					case 'launch':
 					{
-						if (fuelRequired && ship.get('fuel') < 100)
+						if (fuel !== 'nuclear' && fuel < 100)
 						{
 							throw new Error("Ship '" + request.params.id + "' does not have enough fuel.");
 						}
 						else
 						{
 							// Costs 100 fuel to launch (where ship uses fuel)
-							if (fuelRequired)
+							if (fuel !== 'nuclear')
 							{
 								ship.set('fuel', fuel - 100);
 							}

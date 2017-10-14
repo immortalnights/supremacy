@@ -1,14 +1,16 @@
 <div class="icon"></div>
 
-Crew
-<input type="number" min="0" value="" />
+<fieldset data-role="shipcontrols">
+	<label>Passengers</label>
+	<input type="number" min="0" max="<%- seats %>" value="<%- passengers %>" />
 
-Fuel
-<input type="number" min="0" value="<%- fuel %>" />
+	<label>Fuel</label>
+	<input type="number" min="0" max="<%- maximumFuel %>" value="<%- fuel %>" />
 
-<button>Crew</button>
-<button>Unload</button>
-<button>Decommission</button>
+	<button data-control="crew">Crew</button>
+	<button data-control="unload">Unload</button>
+	<button data-control="delete">Decommission</button>
+</fieldset>
 
 Class
-<%- type %>
+<%- obj.class %>

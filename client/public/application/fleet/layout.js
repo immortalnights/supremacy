@@ -1,5 +1,6 @@
 define(['backbone.marionette',
        'data/ships',
+       'data/planets',
        'shared/dockingbay',
        'shared/slots',
        'shared/grid',
@@ -7,6 +8,7 @@ define(['backbone.marionette',
        'tpl!fleet/templates/shipdetails.html'],
        function(Marionette,
                 Ships,
+                Planets,
                 DockingBay,
                 slots,
                 Grid,
@@ -76,7 +78,7 @@ define(['backbone.marionette',
 				this.listenTo(ship, 'change:location', function(ship) {
 					this.ui.message.text(ship.get('location').summary);
 				});
-				
+
 				this.listenToOnce(ship, 'sync', function(model) {
 					this.ui.message.text(ship.get('location').summary);
 
@@ -86,7 +88,7 @@ define(['backbone.marionette',
 					}));
 
 					this.ui.shipControls.prop('disabled', false);
-				})
+				});
 				ship.fetch();
 			}
 
@@ -101,8 +103,24 @@ define(['backbone.marionette',
 
 		onTransferShip: function()
 		{
-			// original version updated the grid to display planets and required the user to select one...
-			// this.selectedShip.invoke('transfer');
+			var planets = new Planets();
+			var grid = new Grid({
+				collection: slots(planets, 32, ""),
+				childViewOptions: {
+					template: _.template('<%- name %>')
+				}
+			});
+
+			planets.fetch();
+
+			this.showChildView('inventoryLocation', grid);
+
+			this.listenToOnce(grid, 'childview:clicked', function(view, event) {
+				console.log("Transfer", this.selectedShip.id, "to", view.model.id);
+
+				this.selectedShip.invoke('transfer', { planet: view.model.id });
+			});
+
 		},
 
 		onDockShip: function()

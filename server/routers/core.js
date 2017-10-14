@@ -94,6 +94,10 @@ module.exports = class Core {
 			post: function(path, callback, restricted) {
 				debug("Register", path);
 				router.post(path, wrapper.call(self, callback, restricted));
+			},
+			delete: function(path, callback, restricted) {
+				debug("Register", path);
+				router.delete(path, wrapper.call(self, callback, restricted));
 			}
 		}
 	}

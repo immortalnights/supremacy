@@ -22,6 +22,12 @@ module.exports = class Ship extends Backbone.Model {
 			}
 		});
 
+		let type = this.get('type');
+		if (type === 'atmos' || type === 'generator')
+		{
+			this.set('fuel', 'nuclear');
+		}
+
 		this.owner = null;
 
 		debug("Ship constructed");
@@ -34,6 +40,39 @@ module.exports = class Ship extends Backbone.Model {
 		if (value > 0)
 		{
 			this.set('value', --value);
+		}
+
+		let travel = this.get('travel');
+		if (travel)
+		{
+			let fuel = this.get('fuel');
+			if (fuel !== 'nuclear')
+			{
+				this.set('fuel', fuel - 50);
+			}
+
+			// reduce the eta
+			--travel.eta;
+
+			// check arrived
+			if (travel.eta === 0)
+			{
+				let data = {
+					location: {
+						planet: travel.planet,
+						position: 'surface'
+					},
+					travel: null
+				};
+
+				if (this.get('type') === 'atmos')
+				{
+					// land automatically
+					data.location.position = 'surface';
+				}
+
+				this.set(data);
+			}
 		}
 	}
 

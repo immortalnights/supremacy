@@ -8,7 +8,7 @@ define(['backbone'], function(Backbone) {
 			Backbone.Model.prototype.initialize.call(this, attributes, options);
 		},
 
-		terraform: function()
+		terraform: function(data)
 		{
 			var self = this;
 			return Backbone.ajax(this.url() + '/terraform/invoke', {
