@@ -1,0 +1,35 @@
+{
+	"maximum_population": 30000,
+	"maximum_population_growth": 33,
+	"minimum_population_growth": -33,
+  // population increase is population * base_growth * growth
+  "base_population_growth": 0.25,
+
+
+	// maximum change in moral per day
+	"moral_change_per_day": 1,
+	// lowest moral required before growth becomes negative
+	"minimum_moral": 60,
+	// population reduction percentage per point of moral over the minimum
+	"population_reduction_per_moral": 0.5,
+
+	// days between each tax payment
+	"tax_cycle": 2,
+	"tax_per_population": 0.8,
+	// tax level in which population revolts ()
+
+	"energy_per_generator": 6,
+	"horticultural_food_increase": 12,
+	"horticultural_energy_use": 1,
+
+	"mine_minerals_produced": 2,
+	"mine_fuel_produced": 7,
+	"mine_energy_cost": 1,
+
+	// fuel cost to launch a ship into orbit
+	"launch_fuel": 100,
+	"fuel_per_day": 50,
+	// flight time per planet passed
+	"flight_time": 1,
+
+}

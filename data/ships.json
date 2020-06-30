@@ -1,0 +1,98 @@
+{
+	"battlecruiser":
+	{
+		"type": "B-29 Battle Cruiser",
+		"crew": 21,
+		"seats": 4500,
+		"capacity": 600,
+		"fuel_capacity": 1000,
+		"cost": 5250,
+		"platoon_space": false,
+
+		"harvester": null
+	},
+	"generator":
+	{
+		"type": "Solar-Satellite Generator",
+		"crew": 0,
+		"seats": 0,
+		"capacity": 0,
+		"fuel_capacity": -1,
+		"cost": 975,
+		"platoon_space": false,
+
+		"harvester": {
+			"location": "surface",
+			"cost": 0,
+
+			"food": 0,
+			"minerals": 0,
+			"fuel": 0,
+			"energy": 800
+		}
+	},
+	"atmos":
+	{
+		"type": "Atmosphere Processor",
+		"crew": 0,
+		"seats": 0,
+		"capacity": 0,
+		"fuel_capacity": 1500,
+		"cost": 26753,
+		"platoon_space": false,
+
+		"harvester": null
+	},
+	"carrier":
+	{
+		"type": "Cargo Store / Carrier",
+		"crew": 11,
+		"seats": 1850,
+		"capacity": 2250,
+		"fuel_capacity": 1250,
+		"cost": 15400,
+		"platoon_space": false,
+
+		"harvester": null
+	},
+	"miningstation":
+	{
+		"type": "Core Mining Station",
+		"crew": 294,
+		"seats": 0,
+		"capacity": 950,
+		"fuel_capacity": 1400,
+		"cost": 17999,
+		"platoon_space": false,
+
+		"harvester": {
+			"location": "surface",
+			"cost": 200,
+
+			"food": 0,
+			"minerals": 2000,
+			"fuel": 1000,
+			"energy": 0
+		}
+	},
+	"horticultural":
+	{
+		"type": "Horticultural Station",
+		"crew": 175,
+		"seats": 0,
+		"capacity": 950,
+		"fuel_capacity": 750,
+		"cost": 16995,
+		"platoon_space": false,
+
+		"harvester": {
+			"location": "surface",
+			"cost": 200,
+
+			"food": 2000,
+			"minerals": 0,
+			"fuel": 0,
+			"energy": 0
+		}
+	}
+}
