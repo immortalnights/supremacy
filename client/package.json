@@ -16,7 +16,7 @@
     "backbone-poller": "^1.1.4",
     "backbone.marionette": "^3.4.4",
     "backbone.radio": "^2.0.x",
-    "jquery": "^3.2.x",
+    "jquery": "^3.5.x",
     "js-cookie": "^2.1.4",
     "requirejs": "^2.3.x",
     "requirejs-text": "^2.0.x",
