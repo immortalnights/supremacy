@@ -1,28 +1,55 @@
-import React, { useReducer } from 'react';
-import { useRouter, useMatchmakingRouter } from 'seventh-component-library';
-import './App.css';
+import React, { useEffect, useReducer } from 'react'
+import { RecoilRoot, useRecoilState, useRecoilSnapshot } from 'recoil'
+import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
+import initializeState from './state/initialState'
+import store from './state/store'
+import Overview from './screens/overview/'
+import './App.css'
+
+const Tick = props => {
+	const [date, setDate] = useRecoilState(store.date);
+
+	useEffect(() => {
+		setTimeout(() => {
+			console.log(date)
+			const newDate = { ...date }
+			newDate.m = newDate.m + 1
+			setDate(newDate)
+		}, 1000)
+	}, [date])
+
+	return false
+}
 
 const Game = (props) => {
-	return useRouter({
+	// const snapshot = useRecoilSnapshot()
+	// console.log("State", snapshot.getLoadable(store.planets).contents)
+
+	const content = useRouter({
 		routes: {
-			'/': id => (<div>solarsystem</div>),
-			'/combat/:planet': (id, planet) => (<div>combat {planet}</div>),
-			'/dock/:planet': (id, planet) => (<div>dock {planet}</div>),
-			'/fleet/:planet': (id, planet) => (<div>fleet {planet}</div>),
-			'/overview/:planet': (id, planet) => (<div>overview {planet}</div>),
-			'/shipyard/:planet': (id, planet) => (<div>shipyard {planet}</div>),
-			'/surface/:planet': (id, planet) => (<div>surface {planet}</div>),
-			'/training/:planet': (id, planet) => (<div>training {planet}</div>)
+			'/': () => (<div>solarsystem</div>),
+			'/combat/:planet': ({planet}) => (<div>combat {planet}</div>),
+			'/dock/:planet': ({planet}) => (<div>dock {planet}</div>),
+			'/fleet/:planet': ({planet}) => (<div>fleet {planet}</div>),
+			'/overview/:planet': ({planet}) => (<Overview id={planet} />),
+			'/shipyard/:planet': ({planet}) => (<div>shipyard {planet}</div>),
+			'/surface/:planet': ({planet}) => (<div>surface {planet}</div>),
+			'/training/:planet': ({planet}) => (<div>training {planet}</div>)
 		}
-	});
-};
+	})
+
+	return (<React.Fragment><Tick />{content}</React.Fragment>)
+}
 
 function App() {
-	const content = useMatchmakingRouter(undefined, undefined, Game);
+	const content = useMatchmakingRouter(undefined, undefined, Game)
+
 
 	return (
-		<div>{content}</div>
-	);
-};
+		<RecoilRoot initializeState={initializeState}>
+			<React.Fragment>{content}</React.Fragment>
+		</RecoilRoot>
+	)
+}
 
-export default App;
+export default App
