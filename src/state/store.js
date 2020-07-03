@@ -1,13 +1,21 @@
-import { atom } from 'recoil'
+import { atom, atomFamily } from 'recoil'
+
+const game = atom({
+	key: 'game',
+	default: {
+		id: null,
+		planets: 0
+	}
+})
 
 const date = atom({
 	key: 'date',
 	default: { m: 1, y: 2050 }
 })
 
-const planets = atom({
+const planets = atomFamily({
 	key: 'planets',
-	default: []
+	default: id => null
 })
 
 const platoons = atom({
@@ -15,4 +23,4 @@ const platoons = atom({
 	default: []
 })
 
-export default { date, planets, platoons }
+export default { game, date, planets, platoons }

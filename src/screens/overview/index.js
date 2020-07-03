@@ -6,9 +6,13 @@ import './styles.css'
 
 const PlanetOverview = props => {
 	const date = useRecoilValue(store.date)
-	const platoons = useRecoilValue(store.platoons)
-	const planets = useRecoilValue(store.planets)
-	const planet = planets[props.id]
+	// const platoons = useRecoilValue(store.platoons)
+	const planet = useRecoilValue(store.planets(props.id))
+
+	if (!planet)
+	{
+		return (<div>Planet {props.id} does not exist</div>)
+	}
 
 	return (
 		<div>
@@ -65,7 +69,7 @@ const OverviewSurfaceSlots = () => {
 }
 
 const PlanetGrid = () => {
-	const planets = useRecoilValue(store.planets)
+	// const planets = useRecoilValue(store.planets('a'))
 
 	return (<div>Planets</div>)
 }
@@ -96,9 +100,7 @@ const Overview = props => {
 					<Button>Dock</Button>
 				</div>
 				<OverviewSurfaceSlots id={props.id} />
-
 			</div>
-
 		</div>
 	)
 }

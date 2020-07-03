@@ -1,4 +1,5 @@
-@echo off
+:: @echo off
 
-npm link seventh-component-library
+
 start npm start
+npm link seventh-component-library

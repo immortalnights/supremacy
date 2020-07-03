@@ -23,11 +23,20 @@ const initializeState = ({set}) => {
 		}
 	]
 
+	const planetCount = 8
+	const game = {
+		id: 0,
+		planets: []
+	}
+
 	const planets = []
-	for (let index = 0; index < 8; index++)
+	for (let index = 0; index < planetCount; index++)
 	{
+		const id = (index + 10).toString(36)
+		game.planets.push(id)
+
 		planets.push({
-			id: index,
+			id,
 			owner: null,
 			name: '',
 			habitable: false,
@@ -47,6 +56,7 @@ const initializeState = ({set}) => {
 			}
 		})
 	}
+	console.log(game)
 
 	// AI claims the first planet
 	claimPlanet(players[0], planets[0], "EnemyBase", 1000)
@@ -54,7 +64,12 @@ const initializeState = ({set}) => {
 	// player claims the last planet
 	claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
 
-	set(store.planets, planets)
+	// set
+	set(store.game, game)
+
+	planets.forEach(p => {
+		set(store.planets(p.id), p)
+	})
 }
 
 export default initializeState

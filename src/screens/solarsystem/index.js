@@ -1,0 +1,17 @@
+import React from 'react'
+import { useRecoilValue } from 'recoil'
+import { A } from 'hookrouter'
+import store from '../../state/store'
+
+const SolarSystem = props => {
+	const game = useRecoilValue(store.game);
+
+	return (<div>
+		<div>Solar System</div>
+		<ul>
+			{game.planets.map(id => (<li key={id}><A href={'/game/0/overview/' + id}>{id}</A></li>))}
+		</ul>
+	</div>)
+}
+
+export default SolarSystem

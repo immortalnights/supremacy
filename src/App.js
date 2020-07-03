@@ -3,20 +3,31 @@ import { RecoilRoot, useRecoilState, useRecoilSnapshot } from 'recoil'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
 import store from './state/store'
+import SolarSystem from './screens/solarsystem/'
 import Overview from './screens/overview/'
 import './App.css'
 
 const Tick = props => {
-	const [date, setDate] = useRecoilState(store.date);
+	// const [date, setDate] = useRecoilState(store.date);
+	const [planet, setPlanet] = useRecoilState(store.planets('a'));
 
+	// useEffect(() => {
+	// 	setTimeout(() => {
+	// 		console.log(date)
+	// 		const newDate = { ...date }
+	// 		newDate.m = newDate.m + 1
+	// 		setDate(newDate)
+	// 	}, 1000)
+	// }, [date, setDate])
+
+	// modify planet 0 should not cause the players planet (0) to re-render
 	useEffect(() => {
 		setTimeout(() => {
-			console.log(date)
-			const newDate = { ...date }
-			newDate.m = newDate.m + 1
-			setDate(newDate)
+			const clone = { ...planet };
+			clone.population = clone.population + 1
+			setPlanet(clone)
 		}, 1000)
-	}, [date])
+	}, [planet, setPlanet])
 
 	return false
 }
@@ -27,7 +38,7 @@ const Game = (props) => {
 
 	const content = useRouter({
 		routes: {
-			'/': () => (<div>solarsystem</div>),
+			'/': () => (<SolarSystem />),
 			'/combat/:planet': ({planet}) => (<div>combat {planet}</div>),
 			'/dock/:planet': ({planet}) => (<div>dock {planet}</div>),
 			'/fleet/:planet': ({planet}) => (<div>fleet {planet}</div>),
