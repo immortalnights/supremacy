@@ -1,4 +1,5 @@
 import store from './store'
+import nav from './nav'
 
 const claimPlanet = (player, planet, name, pop) => {
 	// validate planet can be claimed
@@ -63,6 +64,24 @@ const initializeState = ({set}) => {
 
 	// player claims the last planet
 	claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
+
+	let pathName = window.location.pathname
+	pathName = pathName.replace(/\/game\/([\d]+)?/, '')
+
+	const location = {
+		screen: 'solarsystem',
+		planet: null
+	}
+
+	if (pathName)
+	{
+		const match = pathName.match(/([\w]+)\/([\w\d]+)/)
+		location.screen = match[1]
+		location.planet = match[2]
+	}
+	// console.log(pathName, '->', location)
+
+	set(nav.view, location)
 
 	// set
 	set(store.game, game)

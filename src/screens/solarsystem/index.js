@@ -9,7 +9,7 @@ const SolarSystem = props => {
 	return (<div>
 		<div>Solar System</div>
 		<ul>
-			{game.planets.map(id => (<li key={id}><A href={'/game/0/overview/' + id}>{id}</A></li>))}
+			{game.planets.map(id => (<li key={id}><a href={'overview/' + id}>{id}</a></li>))}
 		</ul>
 	</div>)
 }
