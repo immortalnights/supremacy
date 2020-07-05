@@ -1,7 +1,8 @@
 import React from 'react'
-import { useRecoilValue } from 'recoil'
+import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { Button } from 'seventh-component-library'
 import store from '../../state/store'
+import { A } from '../../state/nav'
 import './styles.css'
 
 const PlanetOverview = props => {
@@ -94,10 +95,11 @@ const Overview = props => {
 				</div>
 			</div>
 			<div>
-				<div>
-					<Button>Send to Orbit</Button>
-					<Button>Send to Surface</Button>
-					<Button>Dock</Button>
+				<div style={{ display: 'none' }}>
+					<A screen='training' planet={props.id}>Platoons</A>
+					<A screen='fleet' planet={props.id}>Fleet</A>
+					<A screen='dock' planet={props.id}>Dock</A>
+					<A screen='solarsystem'>Home</A>
 				</div>
 				<OverviewSurfaceSlots id={props.id} />
 			</div>

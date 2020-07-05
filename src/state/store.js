@@ -18,9 +18,14 @@ const planets = atomFamily({
 	default: id => null
 })
 
+const ships = atomFamily({
+	key: 'ships',
+	default: id => null
+})
+
 const platoons = atom({
 	key: 'platoons',
 	default: []
 })
 
-export default { game, date, planets, platoons }
+export default { game, date, planets, ships, platoons }

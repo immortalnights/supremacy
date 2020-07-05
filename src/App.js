@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { RecoilRoot, useRecoilState, useRecoilSnapshot } from 'recoil'
-import { useRoutes, A } from 'hookrouter'
+import { RecoilRoot, useRecoilState, useRecoilValue, useRecoilSnapshot } from 'recoil'
+import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
 import store from './state/store'
-import nav from './state/nav'
+import { viewAtom, A } from './state/nav'
 import SolarSystem from './screens/solarsystem/'
 import Overview from './screens/overview/'
+import Shipyard from './screens/shipyard/'
 import './App.css'
 
 const Tick = props => {
@@ -34,8 +35,24 @@ const Tick = props => {
 	return false
 }
 
+const Navigation = props => {
+	const planet = props.planet || 'h'
+	return (
+		<nav className="navigation">
+			<A screen='solarsystem'>Home</A>
+			<A href={'overview/' + planet} screen="overview" planet={planet}>Overview</A>
+			<A href={'shipyard/' + planet} screen="shipyard" planet={planet}>Shipyard</A>
+			<A href={'fleet/' + planet} screen="fleet" planet={planet}>Fleet</A>
+			<A href={'training/' + planet} screen="training" planet={planet}>Training</A>
+			<A href={'cargo/' + planet} screen="cargo" planet={planet}>Cargo</A>
+			<A href={'surface/' + planet} screen="surface" planet={planet}>Surface</A>
+			<A screen='dock' planet={planet}>Dock</A>
+		</nav>
+	)
+}
+
 const Game = (props) => {
-	const [view, setView] = useRecoilState(nav.view);
+	const view = useRecoilValue(viewAtom);
 
 	const routes = {
 		'/': () => (<SolarSystem />),
@@ -51,7 +68,6 @@ const Game = (props) => {
 	// const content = useRoutes(routes)
 
 	let content;
-	console.log(view.screen)
 	switch (view.screen)
 	{
 		case 'solarsystem':
@@ -81,7 +97,7 @@ const Game = (props) => {
 		}
 		case 'shipyard':
 		{
-			content = (<div>shipyard {view.planet}</div>)
+			content = (<Shipyard id={view.planet} />)
 			break
 		}
 		case 'surface':
@@ -96,16 +112,21 @@ const Game = (props) => {
 		}
 		default:
 		{
+			console.error(`Cannot find view ${view.screen}`)
 			content = (<div>Not Found</div>)
 		}
 	}
 
-	return (<React.Fragment><Tick />{content}</React.Fragment>)
+	return (<React.Fragment><Tick />{content}<Navigation planet={view.planet} /></React.Fragment>)
+}
+
+const MockBrowser = props => {
+	return (<div><a href="/game/0">Game</a></div>)
 }
 
 function App() {
 	console.log("App.render")
-	const content = useMatchmakingRouter(undefined, undefined, Game)
+	const content = useMatchmakingRouter(MockBrowser, undefined, Game)
 
 	return (
 		<RecoilRoot initializeState={initializeState}>

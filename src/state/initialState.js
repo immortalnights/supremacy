@@ -1,5 +1,5 @@
 import store from './store'
-import nav from './nav'
+import { viewAtom } from './nav'
 
 const claimPlanet = (player, planet, name, pop) => {
 	// validate planet can be claimed
@@ -76,12 +76,15 @@ const initializeState = ({set}) => {
 	if (pathName)
 	{
 		const match = pathName.match(/([\w]+)\/([\w\d]+)/)
-		location.screen = match[1]
-		location.planet = match[2]
+		if (match)
+		{
+			location.screen = match[1]
+			location.planet = match[2]
+		}
 	}
 	// console.log(pathName, '->', location)
 
-	set(nav.view, location)
+	set(viewAtom, location)
 
 	// set
 	set(store.game, game)
