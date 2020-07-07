@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
-import { useRecoilValue } from 'recoil'
+import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil'
 import { Button } from 'seventh-component-library'
-import shipsAtom from '../../state/ships'
+import store from '../../state/atoms'
+import { shipBlueprints, useBuyShip } from '../../state/shipyard'
+
+
 
 const Shipyard = props => {
-	const ships = useRecoilValue(shipsAtom)
-	const [ index, setIndex ] = useState('battlecruiser')
-
+	const ships = useRecoilValue(shipBlueprints)
 	const indexes = Object.keys(ships)
+	const [ index, setIndex ] = useState(indexes[0])
+	const buyShip = useBuyShip()
 
 	const onClickNext = () => {
 		const nextIndex = indexes.indexOf(index) + 1
@@ -34,6 +37,11 @@ const Shipyard = props => {
 		}
 	}
 
+	const onClickBuy = () => {
+		console.log(`buy ${index}`)
+		buyShip(index)
+	}
+
 	// console.log(ships, index, ships[index])
 	const ship = ships[index]
 	return (
@@ -43,7 +51,7 @@ const Shipyard = props => {
 				<img src="" alt={index} />
 				<div>
 					<Button onClick={onClickPrevious}>&lt;=</Button>
-					<Button>Buy</Button>
+					<Button onClick={onClickBuy}>Buy</Button>
 					<div>
 						<p>{ship.description}</p>
 						<p>Type {ship.type}</p>

@@ -4,6 +4,7 @@ const game = atom({
 	key: 'game',
 	default: {
 		id: null,
+		players: null,
 		planets: 0
 	}
 })
@@ -15,15 +16,15 @@ const date = atom({
 
 const planets = atomFamily({
 	key: 'planets',
-	default: id => null
+	default: []
 })
 
 const ships = atomFamily({
 	key: 'ships',
-	default: id => null
+	default: []
 })
 
-const platoons = atom({
+const platoons = atomFamily({
 	key: 'platoons',
 	default: []
 })

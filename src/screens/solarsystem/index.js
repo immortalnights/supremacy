@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
-import store from '../../state/store'
+import store from '../../state/atoms'
 import { A } from '../../state/nav'
 
 const SolarSystem = props => {

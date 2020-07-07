@@ -1,7 +1,12 @@
-import store from './store'
+import store from './atoms'
 import { viewAtom } from './nav'
 
 const claimPlanet = (player, planet, name, pop) => {
+	if (!player.capitalPlanet)
+	{
+		player.capitalPlanet = planet.id
+	}
+
 	// validate planet can be claimed
 	// validate ship and ship population
 	planet.owner = player.id
@@ -12,22 +17,28 @@ const claimPlanet = (player, planet, name, pop) => {
 	planet.moral = .75
 	planet.tax = .5
 	planet.status = ''
+	planet.resources.credits = 10000
 }
 
 const initializeState = ({set}) => {
 	const players = [
 		{
-			id: 0
+			id: 0,
+			type: 'ai',
+			capitalPlanet: ''
 		},
 		{
-			id: 1
+			id: 1,
+			type: 'human',
+			capitalPlanet: ''
 		}
 	]
 
 	const planetCount = 8
 	const game = {
 		id: 0,
-		planets: []
+		planets: [],
+		players: players
 	}
 
 	const planets = []
@@ -57,7 +68,6 @@ const initializeState = ({set}) => {
 			}
 		})
 	}
-	console.log(game)
 
 	// AI claims the first planet
 	claimPlanet(players[0], planets[0], "EnemyBase", 1000)

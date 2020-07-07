@@ -3,7 +3,7 @@ import { RecoilRoot, useRecoilState, useRecoilValue, useRecoilSnapshot } from 'r
 import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
-import store from './state/store'
+import store from './state/atoms'
 import { viewAtom, A } from './state/nav'
 import SolarSystem from './screens/solarsystem/'
 import Overview from './screens/overview/'

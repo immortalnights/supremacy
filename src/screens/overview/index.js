@@ -1,7 +1,7 @@
 import React from 'react'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { Button } from 'seventh-component-library'
-import store from '../../state/store'
+import store from '../../state/atoms'
 import { A } from '../../state/nav'
 import './styles.css'
 
@@ -24,7 +24,7 @@ const PlanetOverview = props => {
 				<dt>Date</dt>
 				<dd>{planet.status}</dd>
 				<dt>Status</dt>
-				<dd>{planet.credits}</dd>
+				<dd>{planet.resources.credits}</dd>
 				<dt>Credits</dt>
 
 				<dd>{planet.resources.foodChange} {planet.resources.food} T.</dd>
