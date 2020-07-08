@@ -1,5 +1,6 @@
-import { atom, selector, useRecoilCallback } from 'recoil'
+import { atom, selector, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
 import store from './atoms'
+import { capitalSelector } from './planets'
 import shipData from '../data/ships.json'
 
 export const shipBlueprints = atom({
@@ -7,7 +8,30 @@ export const shipBlueprints = atom({
 	default: shipData
 })
 
-export const useBuyShip = () => {
+export const useBuyShip = (player) => {
+	const ships = useRecoilValue(shipBlueprints)
+	const [ capital, setCapital ] = useRecoilState(capitalSelector(player))
+
+	return (key) => {
+		const ship = ships[key]
+		console.log(capital, ship)
+
+		if (capital.resources.credits > ship.cost)
+		{
+			const resources = { ...capital.resources }
+			resources.credits = resources.credits - ship.cost
+
+			setCapital({ ...capital, resources: resources })
+			// set(store.ships(1), { ...ship })
+		}
+		else
+		{
+			console.log("not enough credits on home planet")
+		}
+	}
+}
+
+export const useBuyShip_OLD = (player, key) => {
 	return useRecoilCallback(({ snapshot, set }) => key => {
 		const ships = snapshot.getLoadable(shipBlueprints).contents
 		const game = snapshot.getLoadable(store.game).contents
