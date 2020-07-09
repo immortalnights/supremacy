@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { RecoilRoot, useRecoilState, useRecoilValue, useRecoilSnapshot } from 'recoil'
-import { useRoutes } from 'hookrouter'
+import React from 'react'
+import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
+// import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
+// import atoms from './state/atoms'
 import store from './state/atoms'
 import { viewAtom, A } from './state/nav'
+import { selectPopulatedPlanets } from './state/planets'
 import SolarSystem from './screens/solarsystem/'
 import Overview from './screens/overview/'
 import Shipyard from './screens/shipyard/'
+import Fleet from './screens/fleet/'
 import './App.css'
 
 const Tick = props => {
@@ -24,13 +27,13 @@ const Tick = props => {
 	// }, [date, setDate])
 
 	// modify planet 0 should not cause the players planet (0) to re-render
-	useEffect(() => {
-		setTimeout(() => {
-			const clone = { ...planet };
-			clone.population = clone.population + 1
-			setPlanet(clone)
-		}, 1000)
-	}, [planet, setPlanet])
+	// useEffect(() => {
+	// 	setTimeout(() => {
+	// 		const clone = { ...planet };
+	// 		clone.population = clone.population + 1
+	// 		setPlanet(clone)
+	// 	}, 1000)
+	// }, [planet, setPlanet])
 
 	return false
 }
@@ -58,7 +61,7 @@ const Game = (props) => {
 		'/': () => (<SolarSystem />),
 		'/combat/:planet': ({planet}) => (<div>combat {planet}</div>),
 		'/dock/:planet': ({planet}) => (<div>dock {planet}</div>),
-		'/fleet/:planet': ({planet}) => (<div>fleet {planet}</div>),
+		'/fleet/:planet': ({planet}) => (<Fleet id={planet} />),
 		'/overview/:planet': ({planet}) => (<Overview id={planet} />),
 		'/shipyard/:planet': ({planet}) => (<div>shipyard {planet}</div>),
 		'/surface/:planet': ({planet}) => (<div>surface {planet}</div>),
@@ -87,7 +90,7 @@ const Game = (props) => {
 		}
 		case 'fleet':
 		{
-			content = (<div>fleet {view.planet}</div>)
+			content = (<Fleet id={view.planet} />)
 			break
 		}
 		case 'overview':

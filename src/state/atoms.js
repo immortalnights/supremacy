@@ -2,11 +2,7 @@ import { atom, atomFamily } from 'recoil'
 
 const game = atom({
 	key: 'game',
-	default: {
-		id: null,
-		players: null,
-		planets: 0
-	}
+	default: null
 })
 
 const date = atom({

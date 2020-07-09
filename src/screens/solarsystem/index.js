@@ -22,12 +22,12 @@ const SolarSystem = props => {
 			<A href={'overview/' + focusPlanet} screen="overview" planet={focusPlanet}>Overview</A>
 			<A href={'shipyard/' + focusPlanet} screen="shipyard" planet={focusPlanet}>Shipyard</A>
 			<A href={'fleet/' + focusPlanet} screen="fleet" planet={focusPlanet}>Fleet</A>
-			<a>Scan</a>
+			<button>Scan</button>
 			<A href={'training/' + focusPlanet} screen="training" planet={focusPlanet}>Training</A>
 			<A href={'cargo/' + focusPlanet} screen="cargo" planet={focusPlanet}>Cargo</A>
 			<A href={'surface/' + focusPlanet} screen="surface" planet={focusPlanet}>Surface</A>
-			<a>Spy</a>
-			<a>Save</a>
+			<button>Spy</button>
+			<button>Save</button>
 		</div>
 	</div>)
 }

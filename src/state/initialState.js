@@ -37,8 +37,12 @@ const initializeState = ({set}) => {
 	const planetCount = 8
 	const game = {
 		id: 0,
+		players: players,
 		planets: [],
-		players: players
+		nextShipId: 0,
+		ships: [],
+		nextPlatoonId: 0,
+		platoons: []
 	}
 
 	const planets = []
@@ -92,7 +96,6 @@ const initializeState = ({set}) => {
 			location.planet = match[2]
 		}
 	}
-	// console.log(pathName, '->', location)
 
 	set(viewAtom, location)
 

@@ -1,56 +1,49 @@
-import { atom, selector, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
-import store from './atoms'
-import { capitalSelector } from './planets'
+import { atom, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
+import atoms from './atoms'
+import { selectCapitalPlanet } from './planets'
 import shipData from '../data/ships.json'
+import cloneDeep from 'lodash/cloneDeep';
 
-export const shipBlueprints = atom({
-	key: 'shipBlueprints',
+export const blueprints = atom({
+	key: 'blueprints',
 	default: shipData
 })
 
 export const useBuyShip = (player) => {
-	const ships = useRecoilValue(shipBlueprints)
-	const [ capital, setCapital ] = useRecoilState(capitalSelector(player))
+	const bps = useRecoilValue(blueprints)
+	const [ game, setGame ] = useRecoilState(atoms.game)
+	const [ capital, setCapital ] = useRecoilState(selectCapitalPlanet(player))
+	const createShip = useRecoilCallback(({ set }) => ship => {
+		set(atoms.ships(ship.id), ship)
+	})
 
 	return (key) => {
-		const ship = ships[key]
-		console.log(capital, ship)
+		const bp = bps[key]
+		// console.log(capital, bp)
 
-		if (capital.resources.credits > ship.cost)
+		if (capital.resources.credits > bp.cost)
 		{
 			const resources = { ...capital.resources }
-			resources.credits = resources.credits - ship.cost
+			resources.credits = resources.credits - bp.cost
 
 			setCapital({ ...capital, resources: resources })
-			// set(store.ships(1), { ...ship })
+
+			const player = game.players.find(p => p.type === 'human')
+
+			// console.log(game.nextShipId)
+			const id = game.nextShipId
+			setGame({
+				...game,
+				nextShipId: game.nextShipId + 1,
+				ships: [ ...game.ships, id ]
+			})
+
+			// console.log(id, game.nextShipId)
+			createShip({ id, owner: player.id, ...cloneDeep(bp) })
 		}
 		else
 		{
 			console.log("not enough credits on home planet")
 		}
 	}
-}
-
-export const useBuyShip_OLD = (player, key) => {
-	return useRecoilCallback(({ snapshot, set }) => key => {
-		const ships = snapshot.getLoadable(shipBlueprints).contents
-		const game = snapshot.getLoadable(store.game).contents
-		const planet = snapshot.getLoadable(store.planets(game.players.find(p => p.type === 'human').capitalPlanet)).contents
-		// why is key not set?
-		console.log(planet, key)
-		const ship = ships[key]
-		if (planet.resources.credits > ship.cost)
-		{
-			const resources = { ...planet.resources }
-			resources.credits = resources.credits - ship.cost
-
-			set(store.planets(planet.id), { ...planet, resources: resources })
-			set(store.ships(1), { ...ship })
-		}
-		else
-		{
-			console.log("not enough credits on home planet")
-		}
-		return () => {}
-	})
 }

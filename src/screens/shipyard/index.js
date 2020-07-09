@@ -2,14 +2,14 @@ import React, { useState } from 'react'
 import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil'
 import { Button } from 'seventh-component-library'
 import store from '../../state/atoms'
-import { humanPlayerSelector } from '../../state/game'
-import { shipBlueprints, useBuyShip } from '../../state/shipyard'
+import { selectHumanPlayer } from '../../state/game'
+import { blueprints, useBuyShip } from '../../state/shipyard'
 
 const Shipyard = props => {
-	const ships = useRecoilValue(shipBlueprints)
-	const indexes = Object.keys(ships)
+	const bps = useRecoilValue(blueprints)
+	const indexes = Object.keys(bps)
 	const [ index, setIndex ] = useState(indexes[0])
-	const buyShip = useBuyShip(useRecoilValue(humanPlayerSelector))
+	const buyShip = useBuyShip(useRecoilValue(selectHumanPlayer))
 
 	const onClickNext = () => {
 		const nextIndex = indexes.indexOf(index) + 1
@@ -41,8 +41,8 @@ const Shipyard = props => {
 		buyShip(index)
 	}
 
-	// console.log(ships, index, ships[index])
-	const ship = ships[index]
+	// console.log(bps, index, bps[index])
+	const ship = bps[index]
 	return (
 		<div>
 			<div>Shipyard</div>
