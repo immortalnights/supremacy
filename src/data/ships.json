@@ -2,6 +2,7 @@
 	"battlecruiser":
 	{
 		"type": "B-29 Battle Cruiser",
+		"shortName": "Battle",
 		"crew": 21,
 		"seats": 4500,
 		"capacity": 600,
@@ -14,6 +15,7 @@
 	"generator":
 	{
 		"type": "Solar-Satellite Generator",
+		"shortName": "Solar",
 		"crew": 0,
 		"seats": 0,
 		"capacity": 0,
@@ -34,6 +36,7 @@
 	"atmos":
 	{
 		"type": "Atmosphere Processor",
+		"shortName": "Atmos",
 		"crew": 0,
 		"seats": 0,
 		"capacity": 0,
@@ -46,6 +49,7 @@
 	"carrier":
 	{
 		"type": "Cargo Store / Carrier",
+		"shortName": "Cargo",
 		"crew": 11,
 		"seats": 1850,
 		"capacity": 2250,
@@ -58,6 +62,7 @@
 	"miningstation":
 	{
 		"type": "Core Mining Station",
+		"shortName": "Mining",
 		"crew": 294,
 		"seats": 0,
 		"capacity": 950,
@@ -78,6 +83,7 @@
 	"horticultural":
 	{
 		"type": "Horticultural Station",
+		"shortName": "Farming",
 		"crew": 175,
 		"seats": 0,
 		"capacity": 950,

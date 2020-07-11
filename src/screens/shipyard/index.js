@@ -3,46 +3,74 @@ import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil'
 import { Button } from 'seventh-component-library'
 import store from '../../state/atoms'
 import { selectHumanPlayer } from '../../state/game'
-import { blueprints, useBuyShip } from '../../state/shipyard'
+import { blueprints, selectNextShipName, useBuyShip } from '../../state/shipyard'
 
 const Shipyard = props => {
 	const bps = useRecoilValue(blueprints)
 	const indexes = Object.keys(bps)
 	const [ index, setIndex ] = useState(indexes[0])
+	const ship = bps[index]
+	const [ buying, setBuying ] = useState(false)
 	const buyShip = useBuyShip(useRecoilValue(selectHumanPlayer))
+	const nextShipName = useRecoilValue(selectNextShipName(ship))
 
 	const onClickNext = () => {
-		const nextIndex = indexes.indexOf(index) + 1
+		if (!buying)
+		{
+			const nextIndex = indexes.indexOf(index) + 1
 
-		if (nextIndex >= indexes.length)
-		{
-			setIndex(indexes[0])
-		}
-		else
-		{
-			setIndex(indexes[nextIndex])
+			if (nextIndex >= indexes.length)
+			{
+				setIndex(indexes[0])
+			}
+			else
+			{
+				setIndex(indexes[nextIndex])
+			}
 		}
 	}
 
 	const onClickPrevious = () => {
-		const previousIndex = indexes.indexOf(index) - 1
-		if (previousIndex < 0)
+		if (!buying)
 		{
-			setIndex(indexes[indexes.length - 1])
-		}
-		else
-		{
-			setIndex(indexes[previousIndex])
+			const previousIndex = indexes.indexOf(index) - 1
+			if (previousIndex < 0)
+			{
+				setIndex(indexes[indexes.length - 1])
+			}
+			else
+			{
+				setIndex(indexes[previousIndex])
+			}
 		}
 	}
 
 	const onClickBuy = () => {
 		console.log(`buy ${index}`)
-		buyShip(index)
+		setBuying(true)
+	}
+
+	const onKeyDown = e => {
+		switch (e.key)
+		{
+			case 'Enter':
+			{
+				if (e.target.value)
+				{
+					buyShip(index, e.target.value)
+					setBuying(false)
+				}
+				break
+			}
+			case 'Escape':
+			{
+				setBuying(false)
+				break
+			}
+		}
 	}
 
 	// console.log(bps, index, bps[index])
-	const ship = bps[index]
 	return (
 		<div>
 			<div>Shipyard</div>
@@ -51,6 +79,7 @@ const Shipyard = props => {
 				<div>
 					<Button onClick={onClickPrevious}>&lt;=</Button>
 					<Button onClick={onClickBuy}>Buy</Button>
+					{buying ? <input name="name" onKeyDown={onKeyDown} defaultValue={nextShipName} autoFocus /> : ""}
 					<div>
 						<p>{ship.description}</p>
 						<p>Type {ship.type}</p>

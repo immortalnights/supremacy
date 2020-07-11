@@ -1,5 +1,6 @@
-import { atom, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
+import { atom, selectorFamily, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
 import atoms from './atoms'
+import { selectHumanPlayer } from './game'
 import { selectCapitalPlanet } from './planets'
 import shipData from '../data/ships.json'
 import cloneDeep from 'lodash/cloneDeep';
@@ -7,6 +8,27 @@ import cloneDeep from 'lodash/cloneDeep';
 export const blueprints = atom({
 	key: 'blueprints',
 	default: shipData
+})
+
+export const selectNextShipName = selectorFamily({
+	key: 'nextShipName',
+	get: ship => ({ get }) => {
+		const bps = get(blueprints)
+		const player = get(selectHumanPlayer)
+		const game = get(atoms.game)
+
+		let count = 1
+		let shortName = ship.shortName
+		game.ships.forEach(id => {
+			const gameShip = get(atoms.ships(id))
+			if (gameShip.owner === player.id && gameShip.type == ship.type)
+			{
+				count ++
+			}
+		})
+
+		return shortName.substring(0, 10) + " " + count
+	}
 })
 
 export const useBuyShip = (player) => {
@@ -17,7 +39,7 @@ export const useBuyShip = (player) => {
 		set(atoms.ships(ship.id), ship)
 	})
 
-	return (key) => {
+	return (key, name) => {
 		const bp = bps[key]
 		// console.log(capital, bp)
 
@@ -39,7 +61,7 @@ export const useBuyShip = (player) => {
 			})
 
 			// console.log(id, game.nextShipId)
-			createShip({ id, owner: player.id, ...cloneDeep(bp) })
+			createShip({ id, owner: player.id, name: name, ...cloneDeep(bp) })
 		}
 		else
 		{
