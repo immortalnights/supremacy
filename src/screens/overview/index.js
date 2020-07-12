@@ -1,12 +1,13 @@
 import React from 'react'
 import { useRecoilValue, useSetRecoilState } from 'recoil'
 import { Button } from 'seventh-component-library'
+import StarDate from '../../components/date'
+import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
 import { A } from '../../state/nav'
 import './styles.css'
 
 const PlanetOverview = props => {
-	const date = useRecoilValue(store.date)
 	// const platoons = useRecoilValue(store.platoons)
 	const planet = useRecoilValue(store.planets(props.id))
 
@@ -20,7 +21,7 @@ const PlanetOverview = props => {
 			<dl>
 				<dd>{planet.name}</dd>
 				<dt>Planet</dt>
-				<dd>{date.m} / {date.y}</dd>
+				<dd><StarDate /></dd>
 				<dt>Date</dt>
 				<dd>{planet.status}</dd>
 				<dt>Status</dt>
@@ -67,12 +68,6 @@ const OverviewSurfaceSlots = () => {
 			Surface Slots
 		</div>
 	)
-}
-
-const PlanetGrid = () => {
-	// const planets = useRecoilValue(store.planets('a'))
-
-	return (<div>Planets</div>)
 }
 
 const Overview = props => {

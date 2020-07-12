@@ -1,4 +1,4 @@
-import { selector } from 'recoil'
+import { selector, selectorFamily } from 'recoil'
 import { selectHumanPlayer } from './game'
 import atoms from './atoms'
 
@@ -18,5 +18,12 @@ export const selectPlayerShips = selector({
 		})
 
 		return ships
+	}
+})
+
+export const selectDockedShips = selectorFamily({
+	key: 'dockedShips',
+	get: planet => ({ get }) => {
+		return []
 	}
 })

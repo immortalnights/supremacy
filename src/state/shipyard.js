@@ -13,7 +13,6 @@ export const blueprints = atom({
 export const selectNextShipName = selectorFamily({
 	key: 'nextShipName',
 	get: ship => ({ get }) => {
-		const bps = get(blueprints)
 		const player = get(selectHumanPlayer)
 		const game = get(atoms.game)
 
@@ -21,7 +20,7 @@ export const selectNextShipName = selectorFamily({
 		let shortName = ship.shortName
 		game.ships.forEach(id => {
 			const gameShip = get(atoms.ships(id))
-			if (gameShip.owner === player.id && gameShip.type == ship.type)
+			if (gameShip.owner === player.id && gameShip.type === ship.type)
 			{
 				count ++
 			}

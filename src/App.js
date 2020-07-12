@@ -3,7 +3,7 @@ import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 // import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
-// import atoms from './state/atoms'
+import atoms from './state/atoms'
 import store from './state/atoms'
 import { viewAtom, A } from './state/nav'
 import { selectPopulatedPlanets } from './state/planets'
@@ -56,6 +56,8 @@ const Navigation = props => {
 
 const Game = (props) => {
 	const view = useRecoilValue(viewAtom);
+	const planet = useRecoilValue(atoms.planets(view.planet))
+	// console.log("planet", planet)
 
 	const routes = {
 		'/': () => (<SolarSystem />),
@@ -90,7 +92,7 @@ const Game = (props) => {
 		}
 		case 'fleet':
 		{
-			content = (<Fleet id={view.planet} />)
+			content = (<Fleet planet={planet} />)
 			break
 		}
 		case 'overview':

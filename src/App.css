@@ -6,15 +6,3 @@ nav a {
 	margin: .125em;
 	padding: .25em .5em;
 }
-
-table.grid tr {
-	height: 1.5em;
-}
-
-table.grid td {
-	width: 8em;
-	border-width: 1px;
-	border-style: none solid solid none;
-	border-color: purple;
-	cursor: pointer;
-}

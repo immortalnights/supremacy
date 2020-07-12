@@ -84,7 +84,7 @@ const Shipyard = props => {
 						<p>{ship.description}</p>
 						<p>Type {ship.type}</p>
 					</div>
-					<Button onClick={onClickNext}>&gt;=</Button>
+					<Button onClick={onClickNext}>=&gt;</Button>
 				</div>
 				<div>
 					<label>Starbase</label>

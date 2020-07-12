@@ -11,6 +11,22 @@ export const selectCapitalPlanet = selectorFamily({
 	}
 })
 
+export const selectPlanets = selector({
+	key: 'allPlanets',
+	get: ({ get }) => {
+		const game = get(atoms.game)
+		const planets = []
+
+		game.planets.forEach(id => {
+			const planet = get(atoms.planets(id))
+			planets.push(planet)
+		})
+
+		console.log(planets)
+		return planets
+	}
+})
+
 export const selectPopulatedPlanets = selector({
 	key: 'populatedPlanets',
 	get: ({ get }) => {
