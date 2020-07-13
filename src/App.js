@@ -56,6 +56,7 @@ const Navigation = props => {
 
 const Game = (props) => {
 	const view = useRecoilValue(viewAtom);
+	// may not want the entire planet, as tick updates will cause screen re-render
 	const planet = useRecoilValue(atoms.planets(view.planet))
 	// console.log("planet", planet)
 

@@ -12,17 +12,17 @@ const date = atom({
 
 const planets = atomFamily({
 	key: 'planets',
-	default: []
+	default: null
 })
 
 const ships = atomFamily({
 	key: 'ships',
-	default: []
+	default: null
 })
 
 const platoons = atomFamily({
 	key: 'platoons',
-	default: []
+	default: null
 })
 
 export default { game, date, planets, ships, platoons }

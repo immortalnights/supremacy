@@ -59,8 +59,15 @@ export const useBuyShip = (player) => {
 				ships: [ ...game.ships, id ]
 			})
 
+			// set the location of the new ship
+			// Plant only has three docking bays
+			const location = {
+				planet: capital.id,
+				position: 'dock'
+			}
+
 			// console.log(id, game.nextShipId)
-			createShip({ id, owner: player.id, name: name, ...cloneDeep(bp) })
+			createShip({ id, owner: player.id, name: name, location, ...cloneDeep(bp) })
 		}
 		else
 		{

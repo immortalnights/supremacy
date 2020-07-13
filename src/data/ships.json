@@ -24,7 +24,7 @@
 		"platoon_space": false,
 
 		"harvester": {
-			"location": "surface",
+			"location": "orbit",
 			"cost": 0,
 
 			"food": 0,

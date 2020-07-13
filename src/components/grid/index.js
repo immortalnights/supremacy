@@ -6,7 +6,6 @@ import './styles.css'
 
 const Grid = props => {
 	const rows = []
-		console.log("***")
 	for (let rowIndex = 0; rowIndex < 8; rowIndex++)
 	{
 		const row = []

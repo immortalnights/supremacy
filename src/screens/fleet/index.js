@@ -1,12 +1,22 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import StarDate from '../../components/date'
 import atoms from '../../state/atoms'
-import { selectPlayerShips } from '../../state/ships'
+import { useChangeShipPosition, selectPlayerShips, selectShipsAtPlanetPosition } from '../../state/ships'
+import './styles.css'
 
 const DockingBay = props => {
+	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'dock' }))
+
+	const bays = []
+	for (let bay = 0; bay < 3; bay++)
+	{
+		const ship = ships[bay]
+		bays.push(<li key={bay} className="bay" title={ship ? ship.name : ''} onClick={() => props.onSelect(ship)}>{ship ? ship.name : ''}</li>)
+	}
+
 	return (
 		<div>
 			<div className="">
@@ -16,9 +26,7 @@ const DockingBay = props => {
 			<div className="docking-bays">
 				<label>Docking Bays</label>
 				<ol>
-					<li></li>
-					<li></li>
-					<li></li>
+					{bays}
 				</ol>
 			</div>
 		</div>
@@ -66,6 +74,7 @@ const Fleet = props => {
 	const ships = useRecoilValue(selectPlayerShips)
 	const [ selected, setSelected ] = useState(null)
 	const [ action, setAction ] = useState(null)
+	const changeShipPosition = useChangeShipPosition()
 
 	const onSelectShip = ship => {
 		console.log(ship)
@@ -82,6 +91,10 @@ const Fleet = props => {
 	}
 
 	const onClickLaunch = () => {
+		if (selected)
+		{
+			changeShipPosition(selected, 'space')
+		}
 		// setAction('launch')
 	}
 
@@ -90,7 +103,7 @@ const Fleet = props => {
 	}
 
 	const onClickLand = () => {
-		// setAction('land')
+		changeShipPosition(selected, 'dock')
 	}
 
 	let grid;
@@ -110,9 +123,9 @@ const Fleet = props => {
 				<div>
 					<div>
 						<div>
-							<Button onClick={onClickLaunch}>Launch</Button>
-							<Button onClick={onClickTransfer}>Transfer</Button>
-							<Button onClick={onClickLand}>Land</Button>
+							<Button onClick={onClickLaunch} disabled={!selected}>Launch</Button>
+							<Button onClick={onClickTransfer} disabled={!selected}>Transfer</Button>
+							<Button onClick={onClickLand} disabled={!selected}>Land</Button>
 						</div>
 						<div>
 							<label>Ship</label>
@@ -128,8 +141,8 @@ const Fleet = props => {
 						</div>
 					</div>
 					<div>
-						<Button>Decommission</Button>
-						<Button>Rename</Button>
+						<Button disabled={!selected}>Decommission</Button>
+						<Button disabled={!selected}>Rename</Button>
 					</div>
 				</div>
 			</div>
