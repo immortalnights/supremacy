@@ -18,6 +18,8 @@ const claimPlanet = (player, planet, name, pop) => {
 	planet.tax = .5
 	planet.status = ''
 	planet.resources.credits = 10000
+
+	return planet
 }
 
 const initializeState = ({set}) => {
@@ -73,11 +75,48 @@ const initializeState = ({set}) => {
 		})
 	}
 
+	const playerFleet = [
+		{
+			"id": 0,
+			"owner": undefined,
+			"name": "Solar 1",
+			"type": "Solar-Satellite Generator",
+			"shortName": "Solar",
+			"crew": 0,
+			"seats": 0,
+			"capacity": 0,
+			"fuel_capacity": -1,
+			"cost": 975,
+			"platoon_space": false,
+			"location": {
+				planet: undefined
+			},
+			"harvester": {
+				"location": "surface",
+				"cost": 0,
+				"food": 0,
+				"minerals": 0,
+				"fuel": 0,
+				"energy": 800
+			}
+		}
+	]
+
 	// AI claims the first planet
-	claimPlanet(players[0], planets[0], "EnemyBase", 1000)
+	const computerCapital = claimPlanet(players[0], planets[0], "EnemyBase", 1000)
 
 	// player claims the last planet
-	claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
+	const playerCapital = claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
+
+	playerFleet.forEach(ship => {
+		ship.owner = players[1].id
+		ship.location = {
+			planet: playerCapital.id,
+			position: 'dock'
+		}
+		game.ships.push(ship.id)
+	})
+
 
 	let pathName = window.location.pathname
 	pathName = pathName.replace(/\/game\/([\d]+)?/, '')
@@ -104,6 +143,10 @@ const initializeState = ({set}) => {
 
 	planets.forEach(p => {
 		set(store.planets(p.id), p)
+	})
+
+	playerFleet.forEach(ship => {
+		set(store.ships(ship.id), ship)
 	})
 }
 

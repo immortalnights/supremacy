@@ -23,7 +23,7 @@ export const A = props => {
 		})
 	}
 
-	return (<a href="/" onClick={onAClick}>{props.children}</a>)
+	return (<a href={props.href} onClick={onAClick}>{props.children}</a>)
 }
 
 export default { viewAtom }

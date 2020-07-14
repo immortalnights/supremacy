@@ -23,7 +23,7 @@ export const selectPlayerShips = selector({
 
 export const selectShipsAtPlanetPosition = selectorFamily({
 	key: 'shipsAtPlanetPosition',
-	get: (key) => ({ get }) => {
+	get: key => ({ get }) => {
 		const game = get(atoms.game)
 		const ships = []
 

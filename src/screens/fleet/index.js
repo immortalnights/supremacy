@@ -3,72 +3,11 @@ import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import StarDate from '../../components/date'
+import DockingBays from '../../components/dockingbays/'
+import ShipHeading from './shipheading'
 import atoms from '../../state/atoms'
-import { useChangeShipPosition, selectPlayerShips, selectShipsAtPlanetPosition } from '../../state/ships'
+import { useChangeShipPosition, selectPlayerShips } from '../../state/ships'
 import './styles.css'
-
-const DockingBay = props => {
-	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'dock' }))
-
-	const bays = []
-	for (let bay = 0; bay < 3; bay++)
-	{
-		const ship = ships[bay]
-		bays.push(<li key={bay} className="bay" title={ship ? ship.name : ''} onClick={() => props.onSelect(ship)}>{ship ? ship.name : ''}</li>)
-	}
-
-	return (
-		<div>
-			<div className="">
-				<label>Planet</label>
-				{props.planet.name}
-			</div>
-			<div className="docking-bays">
-				<label>Docking Bays</label>
-				<ol>
-					{bays}
-				</ol>
-			</div>
-		</div>
-	)
-}
-
-const ShipHeading = props => {
-	const values = {
-		name: '',
-		from: '',
-		to: '',
-		eda: '',
-		fuel: '',
-	}
-
-	if (props.ship && props.ship.heading)
-	{
-		values.name = props.ship.name
-		values.from = props.ship.heading.from
-		values.to = props.ship.heading.to
-		values.etd = props.ship.heading.eda
-		values.fuel = props.ship.fuel
-	}
-
-	return (
-		<div>
-			<label>Heading</label>
-			<dl>
-				<dd>{values.name}</dd>
-				<dt>Ship</dt>
-				<dd>{values.from}</dd>
-				<dt>From</dt>
-				<dd>{values.to}</dd>
-				<dt>To</dt>
-				<dd>{values.eda}</dd>
-				<dt>EDA</dt>
-				<dd>{values.fuel}</dd>
-				<dt>Fuel</dt>
-			</dl>
-		</div>
-	)
-}
 
 const Fleet = props => {
 	const ships = useRecoilValue(selectPlayerShips)
@@ -119,7 +58,7 @@ const Fleet = props => {
 	return (
 		<div>
 			<div>
-				<DockingBay planet={props.planet.id} onSelect={onSelectBay} />
+				<DockingBays planet={props.planet} onSelect={onSelectBay} />
 				<div>
 					<div>
 						<div>

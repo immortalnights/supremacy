@@ -76,7 +76,7 @@ const Overview = props => {
 			<div>
 				<Button>Rename</Button>
 				<Button>Transfer Credits</Button>
-				<PlanetOverview id={props.id} />
+				<PlanetOverview id={props.planet} />
 			</div>
 			<div>
 				<div>Messages</div>
@@ -91,12 +91,12 @@ const Overview = props => {
 			</div>
 			<div>
 				<div style={{ display: 'none' }}>
-					<A screen='training' planet={props.id}>Platoons</A>
-					<A screen='fleet' planet={props.id}>Fleet</A>
-					<A screen='dock' planet={props.id}>Dock</A>
+					<A screen='training' id={props.planet}>Platoons</A>
+					<A screen='fleet' id={props.planet}>Fleet</A>
+					<A screen='dock' id={props.planet}>Dock</A>
 					<A screen='solarsystem'>Home</A>
 				</div>
-				<OverviewSurfaceSlots id={props.id} />
+				<OverviewSurfaceSlots id={props.planet} />
 			</div>
 		</div>
 	)

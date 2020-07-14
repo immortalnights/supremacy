@@ -7,10 +7,14 @@ import atoms from './state/atoms'
 import store from './state/atoms'
 import { viewAtom, A } from './state/nav'
 import { selectPopulatedPlanets } from './state/planets'
-import SolarSystem from './screens/solarsystem/'
-import Overview from './screens/overview/'
-import Shipyard from './screens/shipyard/'
-import Fleet from './screens/fleet/'
+import SolarSystem from './screens/solarsystem'
+import Overview from './screens/overview'
+import Shipyard from './screens/shipyard'
+import Fleet from './screens/fleet'
+import Training from './screens/training'
+import Dock from './screens/dock'
+import Surface from './screens/surface'
+import Combat from './screens/combat'
 import './App.css'
 
 const Tick = props => {
@@ -42,14 +46,14 @@ const Navigation = props => {
 	const planet = props.planet || 'h'
 	return (
 		<nav className="navigation">
-			<A screen='solarsystem'>Home</A>
+			<A href={'solarsystem/'} screen='solarsystem'>Home</A>
 			<A href={'overview/' + planet} screen="overview" planet={planet}>Overview</A>
 			<A href={'shipyard/' + planet} screen="shipyard" planet={planet}>Shipyard</A>
 			<A href={'fleet/' + planet} screen="fleet" planet={planet}>Fleet</A>
 			<A href={'training/' + planet} screen="training" planet={planet}>Training</A>
-			<A href={'cargo/' + planet} screen="cargo" planet={planet}>Cargo</A>
+			<A href={'dock/' + planet} screen="dock" planet={planet}>Dock</A>
 			<A href={'surface/' + planet} screen="surface" planet={planet}>Surface</A>
-			<A screen='dock' planet={planet}>Dock</A>
+			<A href={'combat/' + planet} screen="combat" planet={planet}>Combat</A>
 		</nav>
 	)
 }
@@ -62,13 +66,13 @@ const Game = (props) => {
 
 	const routes = {
 		'/': () => (<SolarSystem />),
-		'/combat/:planet': ({planet}) => (<div>combat {planet}</div>),
-		'/dock/:planet': ({planet}) => (<div>dock {planet}</div>),
-		'/fleet/:planet': ({planet}) => (<Fleet id={planet} />),
-		'/overview/:planet': ({planet}) => (<Overview id={planet} />),
-		'/shipyard/:planet': ({planet}) => (<div>shipyard {planet}</div>),
-		'/surface/:planet': ({planet}) => (<div>surface {planet}</div>),
-		'/training/:planet': ({planet}) => (<div>training {planet}</div>)
+		'/overview/:planet': ({planet}) => (<Overview planet={planet} />),
+		'/shipyard/:planet': ({planet}) => (<Shipyard planet={planet} />),
+		'/fleet/:planet': ({planet}) => (<Fleet planet={planet} />),
+		'/training/:planet': ({planet}) => (<Training planet={planet} />),
+		'/dock/:planet': ({planet}) => (<Dock planet={planet} />),
+		'/surface/:planet': ({planet}) => (<Surface planet={planet} />),
+		'/combat/:planet': ({planet}) => (<Combat planet={planet} />)
 	}
 
 	// const content = useRoutes(routes)
@@ -81,39 +85,39 @@ const Game = (props) => {
 			content = (<SolarSystem />)
 			break
 		}
-		case 'combat':
-		{
-			content = (<div>combat {view.planet}</div>)
-			break
-		}
-		case 'dock':
-		{
-			content = (<div>dock {view.planet}</div>)
-			break
-		}
-		case 'fleet':
-		{
-			content = (<Fleet planet={planet} />)
-			break
-		}
 		case 'overview':
 		{
-			content = (<Overview id={view.planet} />)
+			content = (<Overview planet={view.planet} />)
 			break
 		}
 		case 'shipyard':
 		{
-			content = (<Shipyard id={view.planet} />)
+			content = (<Shipyard planet={view.planet} />)
 			break
 		}
-		case 'surface':
+		case 'fleet':
 		{
-			content = (<div>surface {view.planet}</div>)
+			content = (<Fleet planet={view.planet} />)
 			break
 		}
 		case 'training':
 		{
-			content = (<div>training {view.planet}</div>)
+			content = (<Training planet={view.planet} />)
+			break
+		}
+		case 'dock':
+		{
+			content = (<Dock planet={view.planet} />)
+			break
+		}
+		case 'surface':
+		{
+			content = (<Surface planet={view.planet} />)
+			break
+		}
+		case 'combat':
+		{
+			content = (<Combat planet={view.planet} />)
 			break
 		}
 		default:
