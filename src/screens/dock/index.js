@@ -39,8 +39,6 @@ const ShipDetails = props => {
 }
 
 const CivFuelCargo = props => {
-	const value = ''
-
 	return (
 		<div>
 			<div>{props.value}</div>

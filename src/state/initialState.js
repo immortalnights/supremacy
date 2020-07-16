@@ -103,7 +103,7 @@ const initializeState = ({set}) => {
 	]
 
 	// AI claims the first planet
-	const computerCapital = claimPlanet(players[0], planets[0], "EnemyBase", 1000)
+	claimPlanet(players[0], planets[0], "EnemyBase", 1000)
 
 	// player claims the last planet
 	const playerCapital = claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)

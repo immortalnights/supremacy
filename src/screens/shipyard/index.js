@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
-import { useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
-import store from '../../state/atoms'
 import { selectHumanPlayer } from '../../state/game'
 import { blueprints, selectNextShipName, useBuyShip } from '../../state/shipyard'
 
@@ -65,6 +64,10 @@ const Shipyard = props => {
 			case 'Escape':
 			{
 				setBuying(false)
+				break
+			}
+			default:
+			{
 				break
 			}
 		}

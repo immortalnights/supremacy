@@ -1,16 +1,14 @@
-import React, { useState, useCallback } from 'react'
-import { useRecoilValue } from 'recoil'
+import React, { useState } from 'react'
+import { } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import StarDate from '../../components/date'
 import DockingBays from '../../components/dockingbays/'
 import ShipHeading from './shipheading'
-import atoms from '../../state/atoms'
-import { useChangeShipPosition, selectPlayerShips } from '../../state/ships'
+import { useChangeShipPosition } from '../../state/ships'
 import './styles.css'
 
 const Fleet = props => {
-	const ships = useRecoilValue(selectPlayerShips)
 	const [ selected, setSelected ] = useState(null)
 	const [ action, setAction ] = useState(null)
 	const changeShipPosition = useChangeShipPosition()

@@ -2,7 +2,7 @@ import React from 'react'
 import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import DockingBays from '../../components/dockingbays/'
-import { useChangeShipPosition, selectPlayerShips, selectShipsAtPlanetPosition } from '../../state/ships'
+import { useChangeShipPosition, selectShipsAtPlanetPosition } from '../../state/ships'
 
 const PlanetSlot = props => {
 

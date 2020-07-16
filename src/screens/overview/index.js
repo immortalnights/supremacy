@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRecoilValue, useSetRecoilState } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import StarDate from '../../components/date'
 import { PlanetGrid } from '../../components/grid'
