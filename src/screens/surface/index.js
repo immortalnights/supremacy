@@ -2,7 +2,7 @@ import React from 'react'
 import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import DockingBays from '../../components/dockingbays/'
-import { useChangeShipPosition, selectShipsAtPlanetPosition } from '../../state/ships'
+import { useChangeShipPosition, useToggleShipOnSurface, selectShipsAtPlanetPosition } from '../../state/ships'
 
 const PlanetSlot = props => {
 
@@ -10,19 +10,22 @@ const PlanetSlot = props => {
 
 	return (
 		<div>
-			<div className="columns">
-				<Button onClick={() => props.onToggleStatus(props.id, 'on')} disabled={taken === false}>On</Button>
-				<Button onClick={() => props.onToggleStatus(props.id, 'off')} disabled={taken === false}>Off</Button>
+			<div className="flex-columns">
+				<Button onClick={() => props.onToggleStatus(props.id, 'activate')} disabled={taken === false}>On</Button>
+				<Button onClick={() => props.onToggleStatus(props.id, 'deactivate')} disabled={taken === false}>Off</Button>
 			</div>
-			<img onClick={() => props.onClick(props.id)} src="" alt="Empty" />
-			<div>{props.name}</div>
-			<div>{props.status}</div>
+			<div onClick={() => props.onClick(props.id)} style={{cursor:'pointer'}}>
+				<img src="" alt="Empty" />
+				<div>{props.name}</div>
+				<div>{props.status}</div>
+			</div>
 		</div>
 	)
 }
 
 const Surface = props => {
 	const changeShipPosition = useChangeShipPosition()
+	const toggleShipOnSurface = useToggleShipOnSurface()
 	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'surface' }))
 
 	const onClickDockingBay = ship => {
@@ -31,12 +34,13 @@ const Surface = props => {
 
 	const onToggleStatus = (ship, status) => {
 		console.log("toggle status", ship, status)
+		toggleShipOnSurface({ id: ship }, status)
 	}
 
 	const onClickSurfaceSlot = ship => {
 		if (ship !== undefined)
 		{
-			changeShipPosition({ id: ship }, 'dock')
+			changeShipPosition({ id: ship }, 'docked')
 		}
 	}
 
@@ -47,17 +51,17 @@ const Surface = props => {
 
 		const id = ship ? ship.id : undefined
 		const name = ship ? ship.name : undefined
-		const status = ship ? ship.status : undefined
+		const status = ship && ship.location.state === 'active' ? "Running" : ""
 		slots.push(<PlanetSlot key={slot} id={id} name={name} status={status} onToggleStatus={onToggleStatus} onClick={onClickSurfaceSlot} />)
 	}
 
 	return (
 		<div>
-			<div className="columns">
-				<div className="columns">
+			<div className="flex-columns">
+				<div className="flex-columns">
 					<DockingBays planet={props.planet} onSelect={onClickDockingBay} />
 				</div>
-				<div>
+				<div className="flex-columns">
 					{slots}
 				</div>
 			</div>

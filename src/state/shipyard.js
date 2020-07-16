@@ -35,6 +35,7 @@ export const useBuyShip = (player) => {
 	const [ game, setGame ] = useRecoilState(atoms.game)
 	const [ capital, setCapital ] = useRecoilState(selectCapitalPlanet(player))
 	const createShip = useRecoilCallback(({ set }) => ship => {
+		// Should all the sets be done in the callback?
 		set(atoms.ships(ship.id), ship)
 	})
 
@@ -63,11 +64,24 @@ export const useBuyShip = (player) => {
 			// Plant only has three docking bays
 			const location = {
 				planet: capital.id,
-				position: 'dock'
+				position: 'docked'
 			}
 
 			// console.log(id, game.nextShipId)
-			createShip({ id, owner: player.id, name: name, location, ...cloneDeep(bp) })
+			createShip({
+				id,
+				owner: player.id,
+				name: name,
+				location,
+				crew: 0,
+				cargo: {
+					"civilians": 0,
+					"cargo": 0,
+					"fuel": 0,
+					"platoons": []
+				},
+				...cloneDeep(bp)
+			})
 		}
 		else
 		{

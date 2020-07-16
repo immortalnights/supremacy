@@ -4,7 +4,7 @@ import atoms from '../../state/atoms'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
 
 const DockingBays = props => {
-	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'dock' }))
+	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'docked' }))
 	const planet = useRecoilValue(atoms.planets(props.planet))
 
 	const onClickBay = ship => {

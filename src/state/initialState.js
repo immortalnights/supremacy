@@ -112,7 +112,7 @@ const initializeState = ({set}) => {
 		ship.owner = players[1].id
 		ship.location = {
 			planet: playerCapital.id,
-			position: 'dock'
+			position: 'docked'
 		}
 		game.ships.push(ship.id)
 	})

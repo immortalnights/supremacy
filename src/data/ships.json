@@ -2,31 +2,35 @@
 	"battlecruiser":
 	{
 		"type": "B-29 Battle Cruiser",
+		"description": "",
 		"shortName": "Battle",
-		"crew": 21,
-		"seats": 4500,
-		"capacity": 600,
-		"fuel_capacity": 1000,
+		"requiredCrew": 21,
+		"cargo": null,
+		"capacity": {
+			"civilians": 4500,
+			"cargo": 600,
+			"fuel": 1000,
+			"platoons": 4
+		},
 		"cost": 5250,
-		"platoon_space": false,
-
-		"harvester": null
+		"harvester": false
 	},
 	"generator":
 	{
 		"type": "Solar-Satellite Generator",
+		"description": "",
 		"shortName": "Solar",
-		"crew": 0,
-		"seats": 0,
-		"capacity": 0,
-		"fuel_capacity": -1,
+		"requiredCrew": 0,
+		"cargo": null,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 0,
+			"fuel": -1,
+			"platoons": 0
+		},
 		"cost": 975,
-		"platoon_space": false,
-
 		"harvester": {
 			"location": "orbit",
-			"cost": 0,
-
 			"food": 0,
 			"minerals": 0,
 			"fuel": 0,
@@ -36,69 +40,77 @@
 	"atmos":
 	{
 		"type": "Atmosphere Processor",
+		"description": "",
 		"shortName": "Atmos",
-		"crew": 0,
-		"seats": 0,
-		"capacity": 0,
-		"fuel_capacity": 1500,
+		"requiredCrew": 0,
+		"cargo": null,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 0,
+			"fuel": 1500,
+			"platoons": 0
+		},
 		"cost": 26753,
-		"platoon_space": false,
-
-		"harvester": null
+		"harvester": false
 	},
 	"carrier":
 	{
 		"type": "Cargo Store / Carrier",
+		"description": "",
 		"shortName": "Cargo",
-		"crew": 11,
-		"seats": 1850,
-		"capacity": 2250,
-		"fuel_capacity": 1250,
+		"requiredCrew": 11,
+		"cargo": null,
+		"capacity": {
+			"civilians": 1850,
+			"cargo": 2250,
+			"fuel": 1250,
+			"platoons": 0
+		},
 		"cost": 15400,
-		"platoon_space": false,
-
-		"harvester": null
+		"harvester": false
 	},
 	"miningstation":
 	{
 		"type": "Core Mining Station",
+		"description": "",
 		"shortName": "Mining",
-		"crew": 294,
-		"seats": 0,
-		"capacity": 950,
-		"fuel_capacity": 1400,
+		"requiredCrew": 294,
+		"cargo": null,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 950,
+			"fuel": 1400,
+			"platoons": 0
+		},
 		"cost": 17999,
-		"platoon_space": false,
-
 		"harvester": {
 			"location": "surface",
-			"cost": 200,
-
 			"food": 0,
 			"minerals": 2000,
 			"fuel": 1000,
-			"energy": 0
+			"energy": -200
 		}
 	},
 	"horticultural":
 	{
 		"type": "Horticultural Station",
+		"description": "",
 		"shortName": "Farming",
-		"crew": 175,
-		"seats": 0,
-		"capacity": 950,
-		"fuel_capacity": 750,
+		"requiredCrew": 175,
+		"cargo": null,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 950,
+			"fuel": 750,
+			"platoons": 0
+		},
 		"cost": 16995,
-		"platoon_space": false,
-
 		"harvester": {
 			"location": "surface",
-			"cost": 200,
-
 			"food": 2000,
 			"minerals": 0,
 			"fuel": 0,
-			"energy": 0
+			"energy": -200
 		}
 	}
 }
