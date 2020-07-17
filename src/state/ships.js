@@ -1,6 +1,8 @@
 import { selector, selectorFamily, useRecoilCallback } from 'recoil'
 import { selectHumanPlayer } from './game'
 import atoms from './atoms'
+import { addDates } from '../logic/date'
+import { calculateTravel } from '../logic/travel'
 
 export const selectPlayerShips = selector({
 	key: 'playerShips',
@@ -89,6 +91,34 @@ const shipReducer = (ship, action) => {
 			}
 			break
 		}
+		case 'travel':
+		{
+			// Sent ship to planet
+			// TODO validation
+			if (ship.location.planet !== action.destination.id)
+			{
+				const origin = action.origin
+				const destination = action.destination
+
+				const travel = calculateTravel(origin, destination, ship)
+
+				ship = { ...ship }
+				ship.heading = {
+					from: { id: origin.id, name: origin.name },
+					to: { id: destination.id, name: destination.name },
+					departure: action.date,
+					distance: travel.distance,
+					arrival: addDates(action.date, travel.duration),
+					fuel: travel.fuel
+				}
+				console.log("Heading", ship.heading)
+				ship.location = {
+					planet: null,
+					position: 'space'
+				}
+			}
+			break
+		}
 	}
 
 	return ship
@@ -99,6 +129,23 @@ export const useChangeShipPosition = () => {
 		// get the ship from the snapshot to ensure it's the latest version
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
 		const reducedShip = shipReducer(refreshedShip, { type: 'reposition', position })
+		if (reducedShip !== refreshedShip)
+		{
+			set(atoms.ships(reducedShip.id), reducedShip)
+		}
+	})
+
+	return callback
+}
+
+export const useSendShipToDestination = () => {
+	const callback = useRecoilCallback(({ snapshot, set }) => (ship, planet) => {
+		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
+		const date = snapshot.getLoadable(atoms.date).contents
+		const origin = snapshot.getLoadable(atoms.planets(refreshedShip.location.planet)).contents
+		const destination = snapshot.getLoadable(atoms.planets(planet.id)).contents
+
+		const reducedShip = shipReducer(refreshedShip, { type: 'travel', origin, destination, date })
 		if (reducedShip !== refreshedShip)
 		{
 			set(atoms.ships(reducedShip.id), reducedShip)

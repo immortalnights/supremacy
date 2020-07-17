@@ -19,33 +19,32 @@ const PlanetOverview = props => {
 	return (
 		<div className="flex-columns">
 			<dl>
-				<dd>{planet.name}</dd>
 				<dt>Planet</dt>
-				<dd><StarDate /></dd>
+				<dd>{planet.name}</dd>
 				<dt>Date</dt>
-				<dd>{planet.status}</dd>
+				<dd><StarDate /></dd>
 				<dt>Status</dt>
-				<dd>{planet.resources.credits}</dd>
+				<dd>{planet.status}</dd>
 				<dt>Credits</dt>
+				<dd>{planet.resources.credits}</dd>
 
-				<dd>{planet.resources.foodChange} {planet.resources.food} T.</dd>
 				<dt>Food</dt>
-				<dd>{planet.resources.minerals} T.</dd>
+				<dd>{planet.resources.foodChange} {planet.resources.food} T.</dd>
 				<dt>Minerals</dt>
-				<dd>{planet.resources.fuel} T.</dd>
+				<dd>{planet.resources.minerals} T.</dd>
 				<dt>Fuels</dt>
-				<dd>{planet.resources.energy} T.</dd>
+				<dd>{planet.resources.fuel} T.</dd>
 				<dt>Energy</dt>
+				<dd>{planet.resources.energy} T.</dd>
 			</dl>
 			<dl>
-				<dd>{planet.population}</dd>
 				<dt>Population</dt>
-				<dd>{planet.growthChange} {planet.growth} %</dd>
+				<dd>{planet.population}</dd>
 				<dt>Growth</dt>
-				<dd>{planet.morale} %</dd>
+				<dd>{planet.growthChange} {planet.growth} %</dd>
 				<dt>Morale</dt>
+				<dd>{planet.morale} %</dd>
 
-				<dd>{planet.tax} %</dd>
 				<dt className="flex-columns">
 					<div style={{display: 'flex', flexDirection: 'column'}}>
 						<Button>Inc</Button>
@@ -53,9 +52,10 @@ const PlanetOverview = props => {
 					</div>
 					<span style={{flex: '1', margin: 'auto'}}>Tax Rate</span>
 				</dt>
+				<dd>{planet.tax} %</dd>
 
-				<dd>{0}</dd>
 				<dt>Military Strength</dt>
+				<dd>{0}</dd>
 			</dl>
 		</div>
 	)
@@ -86,7 +86,13 @@ const IconGrid = props => {
 		rows.push(<tr key={rowIndex}>{row}</tr>)
 	}
 
-	return (<div className="icon-grid"><table>{rows}</table></div>)
+	return (
+		<div className="icon-grid">
+			<table>
+				<tbody>{rows}</tbody>
+			</table>
+		</div>
+	)
 }
 
 const OverviewSlots = props => {

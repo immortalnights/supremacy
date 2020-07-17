@@ -5,13 +5,14 @@ import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import StarDate from '../../components/date'
 import DockingBays from '../../components/dockingbays/'
 import ShipHeading from './shipheading'
-import { useChangeShipPosition } from '../../state/ships'
+import { useChangeShipPosition, useSendShipToDestination } from '../../state/ships'
 import './styles.css'
 
 const Fleet = props => {
 	const [ selected, setSelected ] = useState(null)
 	const [ action, setAction ] = useState(null)
 	const changeShipPosition = useChangeShipPosition()
+	const sendToDestination = useSendShipToDestination()
 
 	const onSelectShip = ship => {
 		console.log(ship)
@@ -19,7 +20,9 @@ const Fleet = props => {
 	}
 
 	const onSelectPlanet = planet => {
-		console.log(planet)
+		console.log(`Travel ${selected.name} (${selected.id}) => ${planet.name} (${planet.id})`)
+		sendToDestination(selected, planet)
+		setAction(null)
 	}
 
 	const onSelectBay = ship => {
@@ -40,7 +43,7 @@ const Fleet = props => {
 	}
 
 	const onClickLand = () => {
-		changeShipPosition(selected, 'dock')
+		changeShipPosition(selected, 'docked')
 	}
 
 	let grid;
@@ -64,18 +67,18 @@ const Fleet = props => {
 							<Button onClick={onClickTransfer} disabled={!selected}>Transfer</Button>
 							<Button onClick={onClickLand} disabled={!selected}>Land</Button>
 						</div>
-						<div>
-							<label>Ship</label>
-							<span>{selected ? selected.name : ''}</span>
-							<label>Date</label>
-							<StarDate />
-							<label>Class</label>
-							<span>{selected ? selected.type : ''}</span>
-							<label>Crew</label>
-							<span>{selected ? selected.crew : ''}</span>
-							<label>Fuel</label>
-							<span>{selected ? selected.fuel : ''}</span>
-						</div>
+						<dl>
+							<dt>Ship</dt>
+							<dd>{selected ? selected.name : ''}</dd>
+							<dt>Date</dt>
+							<dd><StarDate /></dd>
+							<dt>Class</dt>
+							<dd>{selected ? selected.type : ''}</dd>
+							<dt>Crew</dt>
+							<dd>{selected ? selected.crew : ''}</dd>
+							<dt>Fuel</dt>
+							<dd>{selected ? selected.fuel : ''}</dd>
+						</dl>
 					</div>
 					<div>
 						<Button disabled={!selected}>Decommission</Button>
@@ -86,7 +89,7 @@ const Fleet = props => {
 			<div>
 				{/* Messages */}
 			</div>
-			<div>
+			<div className="flex-columns">
 				{grid}
 				<ShipHeading ship={selected} />
 			</div>

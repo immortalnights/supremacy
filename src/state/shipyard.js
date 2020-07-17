@@ -2,8 +2,8 @@ import { atom, selectorFamily, useRecoilValue, useRecoilState, useRecoilCallback
 import atoms from './atoms'
 import { selectHumanPlayer } from './game'
 import { selectCapitalPlanet } from './planets'
+import { createShip } from '../logic/ships'
 import shipData from '../data/ships.json'
-import cloneDeep from 'lodash/cloneDeep';
 
 export const blueprints = atom({
 	key: 'blueprints',
@@ -34,7 +34,7 @@ export const useBuyShip = (player) => {
 	const bps = useRecoilValue(blueprints)
 	const [ game, setGame ] = useRecoilState(atoms.game)
 	const [ capital, setCapital ] = useRecoilState(selectCapitalPlanet(player))
-	const createShip = useRecoilCallback(({ set }) => ship => {
+	const setShip = useRecoilCallback(({ set }) => ship => {
 		// Should all the sets be done in the callback?
 		set(atoms.ships(ship.id), ship)
 	})
@@ -62,26 +62,9 @@ export const useBuyShip = (player) => {
 
 			// set the location of the new ship
 			// Plant only has three docking bays
-			const location = {
-				planet: capital.id,
-				position: 'docked'
-			}
 
 			// console.log(id, game.nextShipId)
-			createShip({
-				id,
-				owner: player.id,
-				name: name,
-				location,
-				crew: 0,
-				cargo: {
-					"civilians": 0,
-					"cargo": 0,
-					"fuel": 0,
-					"platoons": []
-				},
-				...cloneDeep(bp)
-			})
+			setShip(createShip(bp, id, name, player, capital))
 		}
 		else
 		{

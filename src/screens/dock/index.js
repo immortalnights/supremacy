@@ -18,22 +18,22 @@ const ShipDetails = props => {
 
 	return (
 		<dl>
-			<dd>{details.name}</dd>
 			<dt>Ship</dt>
-			<dd>{details.civilians}</dd>
+			<dd>{details.name}</dd>
 			<dt>Civilians</dt>
-			<dd>{details.seats}</dd>
+			<dd>{details.civilians}</dd>
 			<dt>Seats</dt>
-			<dd>{details.requiredCrew}</dd>
+			<dd>{details.seats}</dd>
 			<dt>To Crew</dt>
-			<dd>{details.capacity}</dd>
+			<dd>{details.requiredCrew}</dd>
 			<dt>Capacity</dt>
-			<dd>{details.maxFuel}</dd>
+			<dd>{details.capacity}</dd>
 			<dt>Max Fuel</dt>
-			<dd>{details.payload}</dd>
+			<dd>{details.maxFuel}</dd>
 			<dt>Payload</dt>
-			<dd>{details.value}</dd>
+			<dd>{details.payload}</dd>
 			<dt>Value</dt>
+			<dd>{details.value}</dd>
 		</dl>
 	)
 }

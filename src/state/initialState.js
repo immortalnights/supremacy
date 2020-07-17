@@ -1,5 +1,7 @@
 import store from './atoms'
 import { viewAtom } from './nav'
+import { createShip } from '../logic/ships'
+import shipData from '../data/ships.json'
 
 const claimPlanet = (player, planet, name, pop) => {
 	if (!player.capitalPlanet)
@@ -64,6 +66,10 @@ const initializeState = ({set}) => {
 			morale: 0,
 			tax: 0,
 			status: '',
+			location: {
+				x: 0,
+				y: index
+			},
 			resources: {
 				credits: 0,
 				food: 0,
@@ -76,30 +82,7 @@ const initializeState = ({set}) => {
 	}
 
 	const playerFleet = [
-		{
-			"id": 0,
-			"owner": undefined,
-			"name": "Solar 1",
-			"type": "Solar-Satellite Generator",
-			"shortName": "Solar",
-			"crew": 0,
-			"seats": 0,
-			"capacity": 0,
-			"fuel_capacity": -1,
-			"cost": 975,
-			"platoon_space": false,
-			"location": {
-				planet: undefined
-			},
-			"harvester": {
-				"location": "surface",
-				"cost": 0,
-				"food": 0,
-				"minerals": 0,
-				"fuel": 0,
-				"energy": 800
-			}
-		}
+		{ blueprint: shipData['generator'], name: "Solar 1" }
 	]
 
 	// AI claims the first planet
@@ -108,15 +91,14 @@ const initializeState = ({set}) => {
 	// player claims the last planet
 	const playerCapital = claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
 
-	playerFleet.forEach(ship => {
-		ship.owner = players[1].id
-		ship.location = {
-			planet: playerCapital.id,
-			position: 'docked'
-		}
+	const defaultShips = []
+
+	let shipId = 0
+	playerFleet.forEach(item => {
+		const ship = createShip(item.blueprint, shipId++, item.name, players[1], playerCapital)
+		defaultShips.push(ship)
 		game.ships.push(ship.id)
 	})
-
 
 	let pathName = window.location.pathname
 	pathName = pathName.replace(/\/game\/([\d]+)?/, '')
@@ -145,7 +127,7 @@ const initializeState = ({set}) => {
 		set(store.planets(p.id), p)
 	})
 
-	playerFleet.forEach(ship => {
+	defaultShips.forEach(ship => {
 		set(store.ships(ship.id), ship)
 	})
 }

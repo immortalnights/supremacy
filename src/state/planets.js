@@ -22,7 +22,7 @@ export const selectPlanets = selector({
 			planets.push(planet)
 		})
 
-		console.log(planets)
+		// console.log(planets)
 		return planets
 	}
 })

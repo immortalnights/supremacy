@@ -1,0 +1,11 @@
+notes.txt
+
+Ship "location"
+planet: planet id
+position: relative to planet, "docked", "orbit", "surface", "space"
+x: 
+y: 
+
+Planet "location"
+x: 
+y: 

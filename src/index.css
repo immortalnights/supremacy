@@ -13,17 +13,17 @@ code {
 }
 
 .flex-columns {
-	display: flex;
+  display: flex;
 }
 
 dl {
-
+  display: flex;
+  flex-wrap: wrap;
 }
-
-dd {
-	display: inline-block;
-}
-
 dt {
-	display: block;
+  width: 33%;
+}
+dd {
+  margin-left: auto;
+  width: 66%;
 }
