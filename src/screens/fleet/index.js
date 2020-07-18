@@ -2,9 +2,9 @@ import React, { useState } from 'react'
 import { } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
-import StarDate from '../../components/date'
 import DockingBays from '../../components/dockingbays/'
 import ShipHeading from './shipheading'
+import ShipDetails from './shipdetails'
 import { useChangeShipPosition, useSendShipToDestination } from '../../state/ships'
 import './styles.css'
 
@@ -33,7 +33,7 @@ const Fleet = props => {
 	const onClickLaunch = () => {
 		if (selected)
 		{
-			changeShipPosition(selected, 'space')
+			changeShipPosition(selected, 'orbit')
 		}
 		// setAction('launch')
 	}
@@ -67,18 +67,7 @@ const Fleet = props => {
 							<Button onClick={onClickTransfer} disabled={!selected}>Transfer</Button>
 							<Button onClick={onClickLand} disabled={!selected}>Land</Button>
 						</div>
-						<dl>
-							<dt>Ship</dt>
-							<dd>{selected ? selected.name : ''}</dd>
-							<dt>Date</dt>
-							<dd><StarDate /></dd>
-							<dt>Class</dt>
-							<dd>{selected ? selected.type : ''}</dd>
-							<dt>Crew</dt>
-							<dd>{selected ? selected.crew : ''}</dd>
-							<dt>Fuel</dt>
-							<dd>{selected ? selected.fuel : ''}</dd>
-						</dl>
+						<ShipDetails ship={selected} />
 					</div>
 					<div>
 						<Button disabled={!selected}>Decommission</Button>

@@ -1,11 +1,14 @@
 import React from 'react'
+import { useRecoilValue } from 'recoil'
+import atoms from '../../state/atoms'
 
 const ShipHeading = props => {
+	const ship = useRecoilValue(atoms.ships(props.ship ? props.ship.id : null))
 	let content
 
-	if (props.ship && props.ship.heading)
+	if (ship && ship.heading)
 	{
-		const heading = props.ship.heading
+		const heading = ship.heading
 		content = (
 			<dl>
 				<dt>Ship</dt>

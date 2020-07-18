@@ -98,7 +98,7 @@ const Shipyard = props => {
 					</div>
 					<div>
 						<label>Cost</label>
-						<div>{ship.cost} :Credits</div>
+						<div>{ship.cost[0].credits} :Credits</div>
 					</div>
 					<div>
 						<label>Capacity</label>

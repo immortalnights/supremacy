@@ -2,41 +2,8 @@ import React, { useState } from 'react'
 import {} from 'recoil'
 import { Button } from 'seventh-component-library'
 import DockingBays from '../../components/dockingbays/'
-
-const ShipDetails = props => {
-
-	const details = {
-		name: '',
-		civilians: '', // on the planet
-		seats: '',
-		requiredCrew: '',
-		capacity: '',
-		maxFuel: '',
-		payload: '',
-		value: '',
-	}
-
-	return (
-		<dl>
-			<dt>Ship</dt>
-			<dd>{details.name}</dd>
-			<dt>Civilians</dt>
-			<dd>{details.civilians}</dd>
-			<dt>Seats</dt>
-			<dd>{details.seats}</dd>
-			<dt>To Crew</dt>
-			<dd>{details.requiredCrew}</dd>
-			<dt>Capacity</dt>
-			<dd>{details.capacity}</dd>
-			<dt>Max Fuel</dt>
-			<dd>{details.maxFuel}</dd>
-			<dt>Payload</dt>
-			<dd>{details.payload}</dd>
-			<dt>Value</dt>
-			<dd>{details.value}</dd>
-		</dl>
-	)
-}
+import ShipDetails from './shipdetails'
+import { useAssignCrew } from '../../state/ships'
 
 const CivFuelCargo = props => {
 	return (
@@ -74,7 +41,7 @@ const CargoItem = props => {
 
 const Cargo = props => {
 	return (
-		<div>
+		<div className="flex-columns">
 			<CargoItem type="food" available={0} value={0} />
 			<CargoItem type="minerals" available={0} value={0} />
 			<CargoItem type="fuels" available={0} value={0} />
@@ -85,16 +52,36 @@ const Cargo = props => {
 
 const Dock = props => {
 	const [ selected, setSelected ] = useState(null)
+	const assignCrew = useAssignCrew()
+
+	const onSelectBay = ship => {
+		setSelected(ship)
+	}
+
+	const onAssignCrew = () => {
+		if (selected)
+		{
+			assignCrew(selected, { id: props.planet })
+		}
+	}
+
+	const onUnloadCargo = () => {
+
+	}
+
+	const onDecommission = () => {
+
+	}
 
 	return (
-		<div>
+		<div className="flex-columns">
 			<div>
-				<div className="columns">
-					<DockingBays planet={props.planet} />
-					<ShipDetails ship={selected} />
+				<div className="flex-columns">
+					<DockingBays planet={props.planet} onSelect={onSelectBay} />
+					<ShipDetails ship={selected} planet={props.planet} />
 				</div>
 				<div>{/*messages*/}</div>
-				<div className="columns">
+				<div className="flex-columns">
 					<div>
 						<div>
 							<div>{/*image*/}</div>
@@ -102,19 +89,17 @@ const Dock = props => {
 							<CivFuelCargo value="" icon="" iconAlt="fuel" />
 						</div>
 						<div>
-							<label>Class</label> {''} 
+							<label>Class</label> {selected ? selected.type : ''}
 						</div>
 					</div>
 					<div>
-						<Button>Crew</Button>
-						<Button>Unload</Button>
-						<Button>Decomission</Button>
+						<Button onClick={onAssignCrew}>Crew</Button>
+						<Button onClick={onUnloadCargo}>Unload</Button>
+						<Button onClick={onDecommission}>Decomission</Button>
 					</div>
 				</div>
 			</div>
-			<div>
-				<Cargo ship={selected} planet={props.planet} />
-			</div>
+			<Cargo ship={selected} planet={props.planet} />
 		</div>
 	)
 }

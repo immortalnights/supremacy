@@ -82,7 +82,8 @@ const initializeState = ({set}) => {
 	}
 
 	const playerFleet = [
-		{ blueprint: shipData['generator'], name: "Solar 1" }
+		{ blueprint: shipData['generator'], name: "Solar 1" },
+		{ blueprint: shipData['horticultural'], name: "Farm 1" },
 	]
 
 	// AI claims the first planet

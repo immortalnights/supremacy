@@ -5,6 +5,7 @@
 		"description": "",
 		"shortName": "Battle",
 		"requiredCrew": 21,
+		"maximumFuel": 100,
 		"cargo": null,
 		"capacity": {
 			"civilians": 4500,
@@ -13,7 +14,20 @@
 			"platoons": 4
 		},
 		"speed": 1,
-		"cost": 5250,
+		"cost": [
+			{
+				"credits": 5250
+			},
+			{
+				"credits": 5250
+			},
+			{
+				"credits": 5250
+			},
+			{
+				"credits": 5250
+			}
+		],
 		"harvester": false
 	},
 	"generator":
@@ -22,6 +36,7 @@
 		"description": "",
 		"shortName": "Solar",
 		"requiredCrew": 0,
+		"maximumFuel": 0,
 		"cargo": null,
 		"capacity": {
 			"civilians": 0,
@@ -30,7 +45,20 @@
 			"platoons": 0
 		},
 		"speed": 1,
-		"cost": 975,
+		"cost": [
+			{
+				"credits": 975
+			},
+			{
+				"credits": 975
+			},
+			{
+				"credits": 975
+			},
+			{
+				"credits": 975
+			}
+		],
 		"harvester": {
 			"location": "orbit",
 			"food": 0,
@@ -45,6 +73,7 @@
 		"description": "",
 		"shortName": "Atmos",
 		"requiredCrew": 0,
+		"maximumFuel": 100,
 		"cargo": null,
 		"capacity": {
 			"civilians": 0,
@@ -53,7 +82,20 @@
 			"platoons": 0
 		},
 		"speed": 1,
-		"cost": 26753,
+		"cost": [
+			{
+				"credits": 26753
+			},
+			{
+				"credits": 26753
+			},
+			{
+				"credits": 26753
+			},
+			{
+				"credits": 26753
+			}
+		],
 		"harvester": false
 	},
 	"carrier":
@@ -62,6 +104,7 @@
 		"description": "",
 		"shortName": "Cargo",
 		"requiredCrew": 11,
+		"maximumFuel": 100,
 		"cargo": null,
 		"capacity": {
 			"civilians": 1850,
@@ -70,7 +113,20 @@
 			"platoons": 0
 		},
 		"speed": 1,
-		"cost": 15400,
+		"cost": [
+			{
+				"credits": 15400
+			},
+			{
+				"credits": 15400
+			},
+			{
+				"credits": 15400
+			},
+			{
+				"credits": 15400
+			}
+		],
 		"harvester": false
 	},
 	"miningstation":
@@ -79,6 +135,7 @@
 		"description": "",
 		"shortName": "Mining",
 		"requiredCrew": 294,
+		"maximumFuel": 100,
 		"cargo": null,
 		"capacity": {
 			"civilians": 0,
@@ -87,7 +144,20 @@
 			"platoons": 0
 		},
 		"speed": 1,
-		"cost": 17999,
+		"cost": [
+			{
+				"credits": 17999
+			},
+			{
+				"credits": 17999
+			},
+			{
+				"credits": 17999
+			},
+			{
+				"credits": 17999
+			}
+		],
 		"harvester": {
 			"location": "surface",
 			"food": 0,
@@ -102,6 +172,7 @@
 		"description": "",
 		"shortName": "Farming",
 		"requiredCrew": 175,
+		"maximumFuel": 100,
 		"cargo": null,
 		"capacity": {
 			"civilians": 0,
@@ -110,7 +181,20 @@
 			"platoons": 0
 		},
 		"speed": 1,
-		"cost": 16995,
+		"cost": [
+			{
+				"credits": 16995
+			},
+			{
+				"credits": 16995
+			},
+			{
+				"credits": 16995
+			},
+			{
+				"credits": 16995
+			}
+		],
 		"harvester": {
 			"location": "surface",
 			"food": 2000,
