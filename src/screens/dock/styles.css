@@ -1,0 +1,16 @@
+
+.cargo-item {
+	text-align: right;
+	border-width: 2px;
+	border-style: solid;
+	margin: 1px;
+	padding: 0px 2px;
+}
+
+.planet-cargo-item {
+	border-color: green;
+}
+
+.ship-cargo-item {
+	border-color: red;
+}

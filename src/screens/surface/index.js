@@ -5,7 +5,6 @@ import DockingBays from '../../components/dockingbays/'
 import { useChangeShipPosition, useToggleShipOnSurface, selectShipsAtPlanetPosition } from '../../state/ships'
 
 const PlanetSlot = props => {
-
 	const taken = props.id === undefined ? false : true
 
 	return (
@@ -15,7 +14,7 @@ const PlanetSlot = props => {
 				<Button onClick={() => props.onToggleStatus(props.id, 'deactivate')} disabled={taken === false}>Off</Button>
 			</div>
 			<div onClick={() => props.onClick(props.id)} style={{cursor:'pointer'}}>
-				<img src="" alt="Empty" />
+				<div style={{height: '64px'}}><img src="" alt="Empty"/></div>
 				<div>{props.name}</div>
 				<div>{props.status}</div>
 			</div>
@@ -57,11 +56,9 @@ const Surface = props => {
 
 	return (
 		<div>
-			<div className="flex-columns">
-				<div className="flex-columns">
-					<DockingBays planet={props.planet} onSelect={onClickDockingBay} />
-				</div>
-				<div className="flex-columns">
+			<div className="flex-columns" style={{justifyContent: 'space-between'}}>
+				<DockingBays planet={props.planet} onSelect={onClickDockingBay} />
+				<div className="flex-columns" style={{flex: 1, justifyContent: 'space-around'}}>
 					{slots}
 				</div>
 			</div>

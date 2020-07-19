@@ -45,6 +45,33 @@ export const selectShipsAtPlanetPosition = selectorFamily({
 	}
 })
 
+export const selectFirstInDock = selectorFamily({
+	key: 'firstShipInDock',
+	get: key => ({ get }) => {
+		const game = get(atoms.game)
+
+		const id = game.ships.find(id => {
+			let match = false
+			const ship = get(atoms.ships(id))
+
+			if (ship.location && ship.location.planet === key && ship.location.position === 'docked')
+			{
+				match = true
+			}
+
+			return match
+		})
+
+		let result = null
+		if (id !== undefined)
+		{
+			result = get(atoms.ships(id))
+		}
+
+		return result
+	}
+})
+
 // could be a hook?
 const shipReducer = (ship, action) => {
 	// console.log("Ship reducer", ship, action)
@@ -87,7 +114,7 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`Ship ${ship.name} cannot move to ${action.position}`)
 			}
-			else if (action.position !== 'docked' && ship.fuel < 100)
+			else if (!['docked', 'surface'].includes(action.position) && ship.fuel < 100)
 			{
 				console.warn(`Ship ${ship.name} does not have enough fuel`)
 			}

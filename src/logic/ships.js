@@ -43,8 +43,10 @@ export const createShip = (blueprint, id, name, player, planet) => {
 		fuel: 0,
 		cargo: {
 			'civilians': 0,
-			'cargo': 0,
-			'fuel': 0,
+			'food': 0,
+			'minerals': 0,
+			'fuels': 0,
+			'energy': 0,
 			'platoons': []
 		},
 		value: blueprint.cost[0].credits,

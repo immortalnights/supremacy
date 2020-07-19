@@ -13,6 +13,7 @@ const ShipDetails = props => {
 		seats: '',
 		crew: '',
 		requiredCrew: '',
+		crewText: '',
 		capacity: '',
 		maximumFuel: '',
 		payload: '',
@@ -29,6 +30,15 @@ const ShipDetails = props => {
 		details.maximumFuel = ship.maximumFuel
 		details.payload = 0
 		details.value = ship.value
+
+		if (ship.requiredCrew > 0)
+		{
+			details.crewText = details.crew + ' / ' + details.requiredCrew
+		}
+		else
+		{
+			details.crewText = 'remote'
+		}
 	}
 
 	return (
@@ -40,7 +50,7 @@ const ShipDetails = props => {
 			<dt>Seats</dt>
 			<dd>{details.seats}</dd>
 			<dt>Crew</dt>
-			<dd>{ship ? (details.crew + ' / ' + details.requiredCrew) : ''}</dd>
+			<dd>{details.crewText}</dd>
 			<dt>Capacity</dt>
 			<dd>{details.capacity}</dd>
 			<dt>Max Fuel</dt>

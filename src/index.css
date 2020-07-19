@@ -27,3 +27,12 @@ dd {
   margin-left: auto;
   width: 66%;
 }
+
+.stacked-buttons{
+  display: flex;
+  flex-direction: column;
+}
+
+.stacked-buttons > button {
+  flex: 1;
+}
