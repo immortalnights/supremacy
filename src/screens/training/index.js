@@ -12,23 +12,23 @@ const Training = props => {
 	return (
 		<div>
 			<div className="flex-columns">
-				<div>
+				<div className="flex-columns">
 					<div>Platoon</div>
 					<div>1st</div>
-					<div>
-						<div><Button>Up</Button></div>
-						<div><Button>Down</Button></div>
+					<div className="stacked-buttons">
+						<Button className="small">Up</Button>
+						<Button className="small">Down</Button>
 					</div>
 				</div>
-				<div>
+				<div className="flex-columns">
 					<div>Troops</div>
 					<div>0</div>
-					<div>
-						<div><Button>Up</Button></div>
-						<div><Button>Down</Button></div>
+					<div className="stacked-buttons">
+						<Button className="small">Up</Button>
+						<Button className="small">Down</Button>
 					</div>
 				</div>
-				<div>
+				<div className="flex-columns">
 					<div>Civilians</div>
 					<div>{civilians}</div>
 				</div>

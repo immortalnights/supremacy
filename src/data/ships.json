@@ -25,7 +25,9 @@
 				"credits": 5250
 			},
 			{
-				"credits": 5250
+				"credits": 5250,
+				"materials": 95,
+				"energy": 366
 			}
 		],
 		"harvester": false

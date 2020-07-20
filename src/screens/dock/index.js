@@ -19,7 +19,7 @@ const ShipCivFuelCargo = props => {
 
 		if (ship.maximumFuel > 0 && ship.cargo)
 		{
-			fuel = ship.cargo.fuel
+			fuel = ship.cargo.fuels
 		}
 		else
 		{
@@ -89,7 +89,7 @@ const Cargo = props => {
 		<div className="flex-columns">
 			<CargoItem type="food" available={planet.resources.food} loaded={cargo.food || 0} />
 			<CargoItem type="minerals" available={planet.resources.minerals} loaded={cargo.minerals || 0} />
-			<CargoItem type="fuels" available={planet.resources.fuel} loaded={cargo.fuels || 0} />
+			<CargoItem type="fuels" available={planet.resources.fuels} loaded={cargo.fuels || 0} />
 			<CargoItem type="energy" available={planet.resources.energy} loaded={cargo.energy || 0} />
 		</div>
 	)

@@ -28,11 +28,16 @@ dd {
   width: 66%;
 }
 
-.stacked-buttons{
+.stacked-buttons {
   display: flex;
   flex-direction: column;
 }
 
 .stacked-buttons > button {
   flex: 1;
+}
+
+button.small {
+  font-size: .75em;
+  line-height: 1em;
 }

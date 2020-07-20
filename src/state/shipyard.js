@@ -10,13 +10,13 @@ export const blueprints = atom({
 	default: shipData
 })
 
-export const selectNextShipName = selectorFamily({
-	key: 'nextShipName',
+export const selectCountOwnedShip = selectorFamily({
+	key: 'countOwnedShip',
 	get: ship => ({ get }) => {
 		const player = get(selectHumanPlayer)
 		const game = get(atoms.game)
 
-		let count = 1
+		let count = 0
 		let shortName = ship.shortName
 		game.ships.forEach(id => {
 			const gameShip = get(atoms.ships(id))
@@ -26,49 +26,89 @@ export const selectNextShipName = selectorFamily({
 			}
 		})
 
-		return shortName.substring(0, 10) + " " + count
+		return count
 	}
 })
 
-export const useBuyShip = (player) => {
-	const bps = useRecoilValue(blueprints)
-	const [ game, setGame ] = useRecoilState(atoms.game)
-	const [ capital, setCapital ] = useRecoilState(selectCapitalPlanet(player))
-	const setShip = useRecoilCallback(({ set }) => ship => {
-		// Should all the sets be done in the callback?
-		set(atoms.ships(ship.id), ship)
+export const selectNextShipName = selectorFamily({
+	key: 'nextShipName',
+	get: ship => ({ get }) => {
+		const count = get(selectCountOwnedShip(ship))
+		return ship.shortName.substring(0, 10) + " " + (count + 1)
+	}
+})
+
+const canAfford = (cost, resources) => {
+	// Expand to cover all potential resource costs
+	console.log("Can afford", cost, resources)
+	return resources.credits >= cost.credits
+}
+
+const takeCost = (resources, cost) => {
+	// Expand to cover all potential resource costs
+	resources.credits = resources.credits - cost.credits
+	return resources
+}
+
+const hasAtmos = (snapshot, player) => {
+	const game = snapshot.getLoadable(atoms.game).contents
+	let owned = false
+
+	game.ships.forEach(id => {
+		const ship = snapshot.getLoadable(atoms.ships(id)).contents
+		console.log(id, ship)
+		if (ship.owner === player.id && ship.type === 'Atmosphere Processor')
+		{
+			owned = true
+		}
 	})
 
-	return (key, name) => {
-		const bp = bps[key]
-		// console.log(capital, bp)
+	return owned
+}
 
-		if (capital.resources.credits > bp.cost)
+export const useBuyShip = (player) => {
+	return useRecoilCallback(({ snapshot, set }) => (key, name) => {
+		const bps = snapshot.getLoadable(blueprints).contents
+		const game = snapshot.getLoadable(atoms.game).contents
+		const capital = snapshot.getLoadable(selectCapitalPlanet(player)).contents
+
+		const blueprint = bps[key]
+		console.log(key, blueprint, bps)
+		if (canAfford(blueprint.cost[0], capital.resources))
 		{
-			const resources = { ...capital.resources }
-			resources.credits = resources.credits - bp.cost
+			if (key === 'atmos' && hasAtmos(snapshot, player))
+			{
+				console.log("Player already owns an Atmos")
+			}
+			else
+			{
+				const resources = takeCost({ ...capital.resources }, blueprint.cost[0])
+				set(atoms.planets(capital.id), { ...capital, resources: resources })
 
-			setCapital({ ...capital, resources: resources })
+				// console.log(game.nextShipId)
+				const id = game.nextShipId
+				const ship = createShip(blueprint, id, name, player, capital)
 
-			const player = game.players.find(p => p.type === 'human')
+				console.log("New ship", ship.id, ship)
+				set(atoms.ships(ship.id), ship)
+				if (key === 'atmos')
+				{
+					// const index = game.players.findIndex(p => p.id === player.id)
+					// game.players = [ ...game.players ]
+					// game.players[index] = { ...game.players[index] }
+					// game.players[index].atmos = ship.id
+				}
 
-			// console.log(game.nextShipId)
-			const id = game.nextShipId
-			setGame({
-				...game,
-				nextShipId: game.nextShipId + 1,
-				ships: [ ...game.ships, id ]
-			})
-
-			// set the location of the new ship
-			// Plant only has three docking bays
-
-			// console.log(id, game.nextShipId)
-			setShip(createShip(bp, id, name, player, capital))
+				set(atoms.game, {
+					...game,
+					nextShipId: game.nextShipId + 1,
+					ships: [ ...game.ships, id ]
+				})
+			}
 		}
 		else
 		{
-			console.log("not enough credits on home planet")
+			console.log("Not enough credits on home planet")
 		}
-	}
+	})
 }

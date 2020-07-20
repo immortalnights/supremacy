@@ -1,4 +1,4 @@
-import { selector, selectorFamily } from 'recoil'
+import { selector, selectorFamily, useRecoilCallback } from 'recoil'
 import atoms from './atoms'
 
 export const selectCapitalPlanet = selectorFamily({
@@ -50,3 +50,40 @@ export const selectPopulatedPlanets = selector({
 		set(atoms.planets(newValue.id), newValue)
 	}
 })
+
+const planetReducer = (planet, action) => {
+	console.log("Planet reducer", planet, action)
+
+	switch (action.type)
+	{
+		case 'tax':
+		{
+			if (action.value < 0 && planet.tax > 0)
+			{
+				planet = { ...planet }
+				planet.tax = planet.tax + action.value
+			}
+			else if (action.value > 0 && planet.tax < 100)
+			{
+				planet = { ...planet }
+				planet.tax = planet.tax + action.value
+			}
+			break
+		}
+	}
+
+	return planet
+}
+
+export const useChangeTax = () => {
+	const callback = useRecoilCallback(({ snapshot, set }) => (planet, value) => {
+		const refreshed = snapshot.getLoadable(atoms.planets(planet.id)).contents
+		const reduced = planetReducer(refreshed, { type: 'tax', value })
+		if (reduced !== refreshed)
+		{
+			set(atoms.planets(reduced.id), reduced)
+		}
+	})
+
+	return callback
+}

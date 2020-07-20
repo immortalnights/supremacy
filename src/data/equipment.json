@@ -1,0 +1,37 @@
+{
+	"armour_1": {
+		"name": "",
+		"armour": 0,
+		"cost": 50
+	},
+	"armour_1": {
+		"name": "",
+		"armour": 0,
+		"cost": 100
+	},
+	"armour_1": {
+		"name": "",
+		"armour": 0,
+		"cost": 200
+	},
+	"armour_1": {
+		"name": "",
+		"armour": 0,
+		"cost": 295
+	},
+	"weapon_1": {
+		"name": "",
+		"damage": 0,
+		"cost": 50
+	},
+	"weapon_2": {
+		"name": "",
+		"damage": 0,
+		"cost": 120
+	},
+	"weapon_3": {
+		"name": "",
+		"damage": 0,
+		"cost": 250
+	}
+}

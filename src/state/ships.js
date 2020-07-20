@@ -114,7 +114,7 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`Ship ${ship.name} cannot move to ${action.position}`)
 			}
-			else if (!['docked', 'surface'].includes(action.position) && ship.fuel < 100)
+			else if (!['docked', 'surface'].includes(action.position) && ship.maximumFuel < 0 && ship.fuel < 100)
 			{
 				console.warn(`Ship ${ship.name} does not have enough fuel`)
 			}
@@ -205,7 +205,7 @@ const shipReducer = (ship, action) => {
 }
 
 export const useChangeShipPosition = () => {
-	const callback = useRecoilCallback(({ snapshot, set }) => (ship, position) => {
+	return useRecoilCallback(({ snapshot, set }) => (ship, position) => {
 		// get the ship from the snapshot to ensure it's the latest version
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
 		const reducedShip = shipReducer(refreshedShip, { type: 'reposition', position })
@@ -214,12 +214,10 @@ export const useChangeShipPosition = () => {
 			set(atoms.ships(reducedShip.id), reducedShip)
 		}
 	})
-
-	return callback
 }
 
 export const useSendShipToDestination = () => {
-	const callback = useRecoilCallback(({ snapshot, set }) => (ship, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => (ship, planet) => {
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
 		const date = snapshot.getLoadable(atoms.date).contents
 		const origin = snapshot.getLoadable(atoms.planets(refreshedShip.location.planet)).contents
@@ -231,12 +229,10 @@ export const useSendShipToDestination = () => {
 			set(atoms.ships(reducedShip.id), reducedShip)
 		}
 	})
-
-	return callback
 }
 
 export const useToggleShipOnSurface = () => {
-	const callback = useRecoilCallback(({ snapshot, set }) => (ship, state) => {
+	return useRecoilCallback(({ snapshot, set }) => (ship, state) => {
 		// get the ship from the snapshot to ensure it's the latest version
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
 		const reducedShip = shipReducer(refreshedShip, { type: state })
@@ -245,12 +241,10 @@ export const useToggleShipOnSurface = () => {
 			set(atoms.ships(reducedShip.id), reducedShip)
 		}
 	})
-
-	return callback
 }
 
 export const useAssignCrew = () => {
-	const callback = useRecoilCallback(({ snapshot, set }) => (ship, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => (ship, planet) => {
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
 		const refreshedPlanet = snapshot.getLoadable(atoms.planets(planet.id)).contents
 		const reducedShip = shipReducer(refreshedShip, { type: 'crew', planet: refreshedPlanet })
@@ -262,6 +256,4 @@ export const useAssignCrew = () => {
 			set(atoms.ships(reducedShip.id), reducedShip)
 		}
 	})
-
-	return callback
 }

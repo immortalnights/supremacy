@@ -2,7 +2,42 @@ import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { selectHumanPlayer } from '../../state/game'
-import { blueprints, selectNextShipName, useBuyShip } from '../../state/shipyard'
+import { selectCapitalPlanet } from '../../state/planets'
+import { blueprints, selectCountOwnedShip, selectNextShipName, useBuyShip } from '../../state/shipyard'
+
+const Details = props => {
+	const player = useRecoilValue(selectHumanPlayer)
+	const capital = useRecoilValue(selectCapitalPlanet(player))
+	const owned = useRecoilValue(selectCountOwnedShip(props))
+
+	return (
+		<div className="flex-columns" style={{justifyContent: 'space-around'}}>
+			<div>
+				<label>Starbase</label>
+				<div>{capital.resources.credits} :Credits</div>
+			</div>
+			<div>
+				<label>Cost</label>
+				<div>{props.cost[0].credits} :Credits</div>
+			</div>
+			<div>
+				<label>Capacity</label>
+				<dl>
+					<dd>{props.requiredCrew} T.</dd>
+					<dt>:Crew</dt>
+					<dd>{props.capacity.cargo} T.</dd>
+					<dt>:Payload</dt>
+					<dd>{props.maximumFuel} T.</dd>
+					<dt>:Fuel</dt>
+				</dl>
+			</div>
+			<div>
+				<label>Data</label>
+				<div>{owned} :Owned</div>
+			</div>
+		</div>
+	)
+}
 
 const Shipyard = props => {
 	const bps = useRecoilValue(blueprints)
@@ -10,7 +45,8 @@ const Shipyard = props => {
 	const [ index, setIndex ] = useState(indexes[0])
 	const ship = bps[index]
 	const [ buying, setBuying ] = useState(false)
-	const buyShip = useBuyShip(useRecoilValue(selectHumanPlayer))
+	const player = useRecoilValue(selectHumanPlayer)
+	const buyShip = useBuyShip(player)
 	const nextShipName = useRecoilValue(selectNextShipName(ship))
 
 	const onClickNext = () => {
@@ -91,24 +127,7 @@ const Shipyard = props => {
 					</div>
 					<Button onClick={onClickNext}>=&gt;</Button>
 				</div>
-				<div className="flex-columns" style={{justifyContent: 'space-around'}}>
-					<div>
-						<label>Starbase</label>
-						<div>? :Credits</div>
-					</div>
-					<div>
-						<label>Cost</label>
-						<div>{ship.cost[0].credits} :Credits</div>
-					</div>
-					<div>
-						<label>Capacity</label>
-						<div>{ship.capacity.cargo} T. :Payload</div>
-					</div>
-					<div>
-						<label>Data</label>
-						<div>? :Owned</div>
-					</div>
-				</div>
+				<Details { ...ship } />
 			</div>
 		</div>
 	)

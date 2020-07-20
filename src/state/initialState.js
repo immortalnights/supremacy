@@ -3,7 +3,17 @@ import { viewAtom } from './nav'
 import { createShip } from '../logic/ships'
 import shipData from '../data/ships.json'
 
-const claimPlanet = (player, planet, name, pop) => {
+const random = (min, max) => {
+	return Math.floor(Math.random() * (max - min) ) + min
+}
+
+const deviation = (value, minDeviation, maxDeviation) => {
+	const min = value + (value * -minDeviation)
+	const max = value + (value * maxDeviation)
+	return random(min, max)
+}
+
+const claimPlanet = (player, planet, name, deviate) => {
 	if (!player.capitalPlanet)
 	{
 		player.capitalPlanet = planet.id
@@ -14,12 +24,18 @@ const claimPlanet = (player, planet, name, pop) => {
 	planet.owner = player.id
 	planet.name = name
 	planet.habitable = true
-	planet.population = pop
-	planet.growth = .1
-	planet.moral = .75
-	planet.tax = .5
+	planet.population = deviation(1500, deviate.min, deviate.max)
+	planet.growth = 1
+	planet.moral = 75
+	planet.tax = 25
 	planet.status = ''
-	planet.resources.credits = 10000
+	planet.resources = {
+		credits: deviation(60000, deviate.min, deviate.max),
+		food: deviation(2500, deviate.min, deviate.max),
+		minerals: deviation(3000, deviate.min, deviate.max),
+		fuels: deviation(3500, deviate.min, deviate.max),
+		energy: deviation(4000, deviate.min, deviate.max)
+	}
 
 	return planet
 }
@@ -87,19 +103,21 @@ const initializeState = ({set}) => {
 	]
 
 	// AI claims the first planet
-	claimPlanet(players[0], planets[0], "EnemyBase", 1000)
+	claimPlanet(players[0], planets[0], "EnemyBase", { min: -.20, max: 0 })
 
 	// player claims the last planet
-	const playerCapital = claimPlanet(players[1], planets[planets.length - 1], "Starbase", 1000)
+	const playerCapital = claimPlanet(players[1], planets[planets.length - 1], "Starbase", { min: -.1, max: .1})
 
 	const defaultShips = []
 
-	let shipId = 0
 	playerFleet.forEach(item => {
-		const ship = createShip(item.blueprint, shipId++, item.name, players[1], playerCapital)
+		const ship = createShip(item.blueprint, game.nextShipId, item.name, players[1], playerCapital)
 		defaultShips.push(ship)
 		game.ships.push(ship.id)
+
+		game.nextShipId++
 	})
+	// console.log("Next ship ID", game.nextShipId)
 
 	let pathName = window.location.pathname
 	pathName = pathName.replace(/\/game\/([\d]+)?/, '')

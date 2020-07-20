@@ -4,16 +4,22 @@ import { Button } from 'seventh-component-library'
 import StarDate from '../../components/date'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
+import { useChangeTax } from '../../state/planets'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
 import './styles.css'
 
 const PlanetOverview = props => {
 	// const platoons = useRecoilValue(store.platoons)
 	const planet = useRecoilValue(store.planets(props.id))
+	const changeTax = useChangeTax()
 
 	if (!planet)
 	{
 		return (<div>Planet {props.id} does not exist</div>)
+	}
+
+	const onChangeTax = value => {
+		changeTax({ id: props.id }, value)
 	}
 
 	return (
@@ -33,7 +39,7 @@ const PlanetOverview = props => {
 				<dt>Minerals</dt>
 				<dd>{planet.resources.minerals} T.</dd>
 				<dt>Fuels</dt>
-				<dd>{planet.resources.fuel} T.</dd>
+				<dd>{planet.resources.fuels} T.</dd>
 				<dt>Energy</dt>
 				<dd>{planet.resources.energy} T.</dd>
 			</dl>
@@ -41,18 +47,18 @@ const PlanetOverview = props => {
 				<dt>Population</dt>
 				<dd>{planet.population}</dd>
 				<dt>Growth</dt>
-				<dd>{planet.growthChange} {planet.growth} %</dd>
+				<dd>{planet.growthChange} {(planet.growth / 100).toFixed(2)} %</dd>
 				<dt>Morale</dt>
-				<dd>{planet.morale} %</dd>
+				<dd>{(planet.morale / 100).toFixed(2)} %</dd>
 
 				<dt className="flex-columns">
 					<div style={{display: 'flex', flexDirection: 'column'}}>
-						<Button>Inc</Button>
-						<Button>Dec</Button>
+						<Button onClick={() => onChangeTax(1)}>Inc</Button>
+						<Button onClick={() => onChangeTax(-1)}>Dec</Button>
 					</div>
 					<span style={{flex: '1', margin: 'auto'}}>Tax Rate</span>
 				</dt>
-				<dd>{planet.tax} %</dd>
+				<dd>{(planet.tax / 100).toFixed(2)} %</dd>
 
 				<dt>Military Strength</dt>
 				<dd>{0}</dd>
@@ -68,7 +74,7 @@ const IconGrid = props => {
 		const row = []
 		for (let colIndex = 0; colIndex < 3; colIndex++)
 		{
-			const index = (colIndex * 8) + rowIndex
+			const index = colIndex + (rowIndex * 3)
 			let cell
 			if (props.items[index])
 			{
