@@ -6,7 +6,6 @@
 		"shortName": "Battle",
 		"requiredCrew": 21,
 		"maximumFuel": 100,
-		"cargo": null,
 		"capacity": {
 			"civilians": 4500,
 			"cargo": 600,
@@ -39,7 +38,6 @@
 		"shortName": "Solar",
 		"requiredCrew": 0,
 		"maximumFuel": 0,
-		"cargo": null,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 0,
@@ -76,7 +74,6 @@
 		"shortName": "Atmos",
 		"requiredCrew": 0,
 		"maximumFuel": 100,
-		"cargo": null,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 0,
@@ -107,7 +104,6 @@
 		"shortName": "Cargo",
 		"requiredCrew": 11,
 		"maximumFuel": 100,
-		"cargo": null,
 		"capacity": {
 			"civilians": 1850,
 			"cargo": 2250,
@@ -138,7 +134,6 @@
 		"shortName": "Mining",
 		"requiredCrew": 294,
 		"maximumFuel": 100,
-		"cargo": null,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 950,
@@ -175,7 +170,6 @@
 		"shortName": "Farming",
 		"requiredCrew": 175,
 		"maximumFuel": 100,
-		"cargo": null,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 950,

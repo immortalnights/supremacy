@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { } from 'recoil'
-import { Button } from 'seventh-component-library'
+import Button from '../../components/button'
 import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import DockingBays from '../../components/dockingbays/'
 import ShipHeading from './shipheading'

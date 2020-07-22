@@ -70,6 +70,11 @@ const planetReducer = (planet, action) => {
 			}
 			break
 		}
+		default:
+		{
+			console.warn(`Unhandled action ${action.type}`)
+			break
+		}
 	}
 
 	return planet

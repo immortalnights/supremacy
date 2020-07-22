@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
+import Button from '../../components/button'
 import atoms from '../../state/atoms'
 import DockingBays from '../../components/dockingbays/'
 import ShipDetails from './shipdetails'
-import { selectFirstInDock, useAssignCrew } from '../../state/ships'
+import { selectFirstInDock, useAssignCrew, useLoadUnloadCargo } from '../../state/ships'
 import './styles.css'
 
 const ShipCivFuelCargo = props => {
 	const ship = useRecoilValue(atoms.ships(props.ship ? props.ship.id : null))
+	const loadUnload = useLoadUnloadCargo(ship, { id: props.planet })
 	const image = ''
 	let civilians = ''
 	let fuel
@@ -19,7 +20,7 @@ const ShipCivFuelCargo = props => {
 
 		if (ship.maximumFuel > 0 && ship.cargo)
 		{
-			fuel = ship.cargo.fuels
+			fuel = ship.fuel
 		}
 		else
 		{
@@ -27,11 +28,19 @@ const ShipCivFuelCargo = props => {
 		}
 	}
 
+	const onChangeCivilians = change => {
+		loadUnload('civilians', change)
+	}
+
+	const onChangeFuel = change => {
+		loadUnload('fuel', change)
+	}
+
 	return (
 		<div className="flex-columns" style={{justifyContent: 'space-between'}}>
 			<div>{/*image*/}</div>
-			<CivFuelCargo value={civilians} icon="" iconAlt="civilians" />
-			<CivFuelCargo value={fuel} icon="" iconAlt="fuel" />
+			<CivFuelCargo onChange={onChangeCivilians} value={civilians} icon={image} iconAlt="civilians" />
+			<CivFuelCargo onChange={onChangeFuel} value={fuel} icon={image} iconAlt="fuel" />
 		</div>
 	)
 }
@@ -42,8 +51,8 @@ const CivFuelCargo = props => {
 			<div style={{height:'1.5em', textAlign: 'right'}}>{props.value}</div>
 			<div className="flex-columns">
 				<div>
-					<div><Button>More</Button></div>
-					<div><Button>Less</Button></div>
+					<div><Button onHold={() => props.onChange(1)} frequency="scale">More</Button></div>
+					<div><Button onHold={() => props.onChange(-1)} frequency="scale">Less</Button></div>
 				</div>
 				<img src={props.icon} alt={props.iconAlt} />
 			</div>
@@ -129,7 +138,7 @@ const Dock = props => {
 				<div>{/*messages*/}</div>
 				<div className="flex-columns" style={{justifyContent: 'space-around'}}>
 					<div>
-						<ShipCivFuelCargo ship={selected} />
+						<ShipCivFuelCargo ship={selected} planet={props.planet} />
 						<div>
 							<label>Class</label> {selected ? selected.type : ''}
 						</div>

@@ -116,24 +116,28 @@ const OverviewSlots = props => {
 		case 'orbit':
 		{
 			message = `Ships in orbit of ${planet.name}`
-			break;
+			break
 		}
 		case 'surface':
 		{
 			message = `Ships on surface of ${planet.name}`
-			break;
+			break
 		}
 		case 'docked':
 		{
 			message = `Ships docked at ${planet.name}`
-			break;
+			break
+		}
+		default:
+		{
+			break
 		}
 	}
 
 	return (
 		<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
 			<div style={{textAlign: 'center'}}>{message}</div>
-			<IconGrid items={ships} onSelectItem={() => {}} />
+			<IconGrid items={ships} onSelectItem={onSelectItem} />
 		</div>
 	)
 }

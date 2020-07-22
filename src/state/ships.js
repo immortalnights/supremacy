@@ -97,6 +97,7 @@ const shipReducer = (ship, action) => {
 				ship = { ...ship }
 				ship.crew = ship.requiredCrew
 			}
+			break
 		}
 		case 'reposition':
 		{
@@ -199,6 +200,113 @@ const shipReducer = (ship, action) => {
 			}
 			break
 		}
+		case 'load:cargo':
+		{
+			const planet = action.planet
+
+			const check = (source, target, maximum) => {
+				let ok = false
+				// console.log("check", source, target, maximum)
+				if (!maximum)
+				{
+					console.warn(`Ship does not have any available space for ${action.cargo}`)
+				}
+				else if (target === maximum)
+				{
+					console.warn(`Ship has maximum capacity of ${action.cargo} on board`)
+				}
+				else if (source === 0)
+				{
+					console.warn(`Planet does not have any available ${action.cargo}`)
+				}
+				else
+				{
+					ok = true
+				}
+
+				return ok
+			}
+
+			const calculateTransfer = (source, target, maximum, requested) => {
+				let transfer
+				if (requested > 0)
+				{
+					transfer = Math.min(maximum - target, source, requested)
+				}
+				else
+				{
+					transfer = -Math.min(target, Math.abs(requested))
+				}
+
+				return transfer
+			}
+
+			console.assert(ship.cargo, `Ship does not have a cargo bay`)
+			switch (action.cargo)
+			{
+				case 'civilians':
+				{
+					const source = planet.population
+					const destination = ship.cargo.civilians
+					const capacity = ship.capacity.civilians
+
+					if (check(source, destination, capacity))
+					{
+						const transfer = calculateTransfer(source, destination, capacity, action.change)
+
+						// console.log(`Transfer ${transfer}, ${source}, ${destination}, ${capacity}, ${action.change}`)
+						ship = { ...ship }
+						ship.cargo = { ...ship.cargo }
+						ship.cargo.civilians = ship.cargo.civilians + transfer
+						planet.population = planet.population - transfer
+					}
+					break
+				}
+				case 'fuel':
+				{
+					const source = planet.resources.fuels
+					const destination = ship.fuel
+					const capacity = ship.maximumFuel
+
+					if (check(source, destination, capacity))
+					{
+						const transfer = calculateTransfer(source, destination, capacity, action.change)
+
+						ship = { ...ship }
+						ship.fuel = ship.fuel + transfer
+						planet.resources = { ...planet.resources }
+						planet.resources.fuels = planet.resources.fuels - transfer
+					}
+					break
+				}
+				case 'food':
+				case 'minerals':
+				case 'fuels':
+				case 'energy':
+				{
+					const source = planet.resources[action.cargo]
+					const destination = ship.cargo[action.cargo]
+					const capacity = ship.capacity[action.cargo]
+
+					if (check(source, destination, capacity))
+					{
+						const transfer = calculateTransfer(source, destination, capacity, action.change)
+
+						ship = { ...ship }
+						ship.fuel = ship.fuel + transfer
+						planet.resources = { ...planet.resources }
+						planet.resources.fuels = planet.resources.fuels - transfer
+					}
+					break
+				}
+			}
+			break
+		}
+		default:
+		{
+			console.warn(`Unhandled action ${action.type}`)
+			break
+		}
 	}
 
 	return ship
@@ -253,6 +361,21 @@ export const useAssignCrew = () => {
 			let updatedPlanet = { ...refreshedPlanet }
 			updatedPlanet.population = updatedPlanet.population - ship.requiredCrew
 			set(atoms.planets(updatedPlanet.id), updatedPlanet)
+			set(atoms.ships(reducedShip.id), reducedShip)
+		}
+	})
+}
+
+export const useLoadUnloadCargo = (ship, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => (cargo, change) => {
+		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
+		const refreshedPlanet = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
+		// note, shipReducer will modify the planet because in this function excatly
+		// how much of the cargo has been loaded is not known (may be less than `change`).
+		const reducedShip = shipReducer(refreshedShip, { type: 'load:cargo', planet: refreshedPlanet, cargo, change })
+		if (reducedShip !== refreshedShip)
+		{
+			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)
 			set(atoms.ships(reducedShip.id), reducedShip)
 		}
 	})

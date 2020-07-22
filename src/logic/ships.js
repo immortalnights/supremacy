@@ -25,6 +25,10 @@ export const canChangePosition = (fromPos, to) => {
 			r = ['orbit'].includes(to)
 			break
 		}
+		default:
+		{
+			break
+		}
 	}
 
 	return r

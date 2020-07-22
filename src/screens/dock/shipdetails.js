@@ -1,6 +1,5 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
-import StarDate from '../../components/date'
 import atoms from '../../state/atoms'
 
 const ShipDetails = props => {

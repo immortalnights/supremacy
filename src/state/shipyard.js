@@ -1,4 +1,4 @@
-import { atom, selectorFamily, useRecoilValue, useRecoilState, useRecoilCallback } from 'recoil'
+import { atom, selectorFamily, useRecoilCallback } from 'recoil'
 import atoms from './atoms'
 import { selectHumanPlayer } from './game'
 import { selectCapitalPlanet } from './planets'
@@ -17,7 +17,6 @@ export const selectCountOwnedShip = selectorFamily({
 		const game = get(atoms.game)
 
 		let count = 0
-		let shortName = ship.shortName
 		game.ships.forEach(id => {
 			const gameShip = get(atoms.ships(id))
 			if (gameShip.owner === player.id && gameShip.type === ship.type)
