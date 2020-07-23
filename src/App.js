@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
 // import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
@@ -59,9 +59,8 @@ const Navigation = props => {
 }
 
 const Game = (props) => {
-	const view = useRecoilValue(viewAtom);
-	// may not want the entire planet, as tick updates will cause screen re-render
-	// console.log("planet", planet)
+	const view = useRecoilValue(viewAtom)
+	const [ selected, setSelected ] = useState(view.planet || 'h')
 
 	const routes = {
 		'/': () => (<SolarSystem />),
@@ -76,47 +75,51 @@ const Game = (props) => {
 
 	// const content = useRoutes(routes)
 
+	const onSelectPlanet = planet => {
+		setSelected(planet)
+	}
+
 	let content;
 	switch (view.screen)
 	{
 		case 'solarsystem':
 		{
-			content = (<SolarSystem />)
+			content = (<SolarSystem onSelectPlanet={onSelectPlanet} planet={selected} />)
 			break
 		}
 		case 'overview':
 		{
-			content = (<Overview planet={view.planet} />)
+			content = (<Overview planet={selected} />)
 			break
 		}
 		case 'shipyard':
 		{
-			content = (<Shipyard planet={view.planet} />)
+			content = (<Shipyard planet={selected} />)
 			break
 		}
 		case 'fleet':
 		{
-			content = (<Fleet planet={view.planet} />)
+			content = (<Fleet planet={selected} />)
 			break
 		}
 		case 'training':
 		{
-			content = (<Training planet={view.planet} />)
+			content = (<Training planet={selected} />)
 			break
 		}
 		case 'dock':
 		{
-			content = (<Dock planet={view.planet} />)
+			content = (<Dock planet={selected} />)
 			break
 		}
 		case 'surface':
 		{
-			content = (<Surface planet={view.planet} />)
+			content = (<Surface planet={selected} />)
 			break
 		}
 		case 'combat':
 		{
-			content = (<Combat planet={view.planet} />)
+			content = (<Combat planet={selected} />)
 			break
 		}
 		default:
@@ -126,7 +129,13 @@ const Game = (props) => {
 		}
 	}
 
-	return (<React.Fragment><Tick />{content}<Navigation planet={view.planet} /></React.Fragment>)
+	return (
+		<React.Fragment>
+			<Tick />
+			{content}
+			<Navigation planet={selected} />
+		</React.Fragment>
+	)
 }
 
 const MockBrowser = props => {
@@ -134,12 +143,11 @@ const MockBrowser = props => {
 }
 
 function App() {
-	console.log("App.render")
 	const content = useMatchmakingRouter(MockBrowser, undefined, Game)
 
 	return (
 		<RecoilRoot initializeState={initializeState}>
-			<React.Fragment>{content}</React.Fragment>
+			{content}
 		</RecoilRoot>
 	)
 }

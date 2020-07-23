@@ -72,6 +72,28 @@ export const selectFirstInDock = selectorFamily({
 	}
 })
 
+const beginTravel = (ship, origin, destination, date) => {
+	const travel = calculateTravel(origin, destination, ship)
+
+	ship = { ...ship }
+	ship.heading = {
+		from: { id: origin.id, name: origin.name },
+		to: { id: destination.id, name: destination.name },
+		departure: date,
+		distance: travel.distance,
+		arrival: addDates(date, travel.duration),
+		fuel: travel.fuel
+	}
+	// console.log("Heading", ship.heading)
+
+	ship.location = {
+		planet: null,
+		position: 'space'
+	}
+
+	return ship
+}
+
 // could be a hook?
 const shipReducer = (ship, action) => {
 	// console.log("Ship reducer", ship, action)
@@ -103,7 +125,11 @@ const shipReducer = (ship, action) => {
 		{
 			// Reposition a ship within a planet
 			// TODO validation
-			if (ship.location.position === action.position)
+			if (ship.type === 'Atmosphere Processor')
+			{
+				console.warn(`Cannot directly control Atmon`)
+			}
+			else if (ship.location.position === action.position)
 			{
 				console.warn(`Ship is already in position ${action.position}`)
 			}
@@ -167,7 +193,11 @@ const shipReducer = (ship, action) => {
 		{
 			// Sent ship to planet
 			// TODO validation
-			if (ship.location.position !== 'orbit')
+			if (ship.type === 'Atmosphere Processor')
+			{
+				console.warn(`Cannot directly control Atmon`)
+			}
+			else if (ship.location.position !== 'orbit')
 			{
 				console.log(`Ship is not in orbit of a planet (${ship.location.position})`)
 			}
@@ -180,23 +210,7 @@ const shipReducer = (ship, action) => {
 				const origin = action.origin
 				const destination = action.destination
 
-				const travel = calculateTravel(origin, destination, ship)
-
-				ship = { ...ship }
-				ship.heading = {
-					from: { id: origin.id, name: origin.name },
-					to: { id: destination.id, name: destination.name },
-					departure: action.date,
-					distance: travel.distance,
-					arrival: addDates(action.date, travel.duration),
-					fuel: travel.fuel
-				}
-				// console.log("Heading", ship.heading)
-
-				ship.location = {
-					planet: null,
-					position: 'space'
-				}
+				ship = beginTravel(ship, origin, destination, action.date)
 			}
 			break
 		}
