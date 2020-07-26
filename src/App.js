@@ -1,12 +1,14 @@
-import React, { useState } from 'react'
-import { RecoilRoot, useRecoilState, useRecoilValue } from 'recoil'
+import React, { useState, useEffect } from 'react'
+import { RecoilRoot, useRecoilState, useRecoilValue, useRecoilCallback } from 'recoil'
 // import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import initializeState from './state/initialState'
 import atoms from './state/atoms'
-import store from './state/atoms'
+import { useSendAtmos } from './state/ships'
+import Button from './components/button'
 import { viewAtom, A } from './state/nav'
 import { selectPopulatedPlanets } from './state/planets'
+import Tick from './logic/tick'
 import SolarSystem from './screens/solarsystem'
 import Overview from './screens/overview'
 import Shipyard from './screens/shipyard'
@@ -17,43 +19,23 @@ import Surface from './screens/surface'
 import Combat from './screens/combat'
 import './App.css'
 
-const Tick = props => {
-	// const [date, setDate] = useRecoilState(store.date);
-	const [planet, setPlanet] = useRecoilState(store.planets('a'));
-
-	// useEffect(() => {
-	// 	setTimeout(() => {
-	// 		console.log(date)
-	// 		const newDate = { ...date }
-	// 		newDate.m = newDate.m + 1
-	// 		setDate(newDate)
-	// 	}, 1000)
-	// }, [date, setDate])
-
-	// modify planet 0 should not cause the players planet (0) to re-render
-	// useEffect(() => {
-	// 	setTimeout(() => {
-	// 		const clone = { ...planet };
-	// 		clone.population = clone.population + 1
-	// 		setPlanet(clone)
-	// 	}, 1000)
-	// }, [planet, setPlanet])
-
-	return false
-}
 
 const Navigation = props => {
 	const planet = props.planet || 'h'
+	const onSolarsystem = props.screen === 'solarsystem'
+
 	return (
 		<nav className="navigation">
 			<A href={'solarsystem/'} screen='solarsystem'>Home</A>
 			<A href={'overview/' + planet} screen="overview" planet={planet}>Overview</A>
 			<A href={'shipyard/' + planet} screen="shipyard" planet={planet}>Shipyard</A>
 			<A href={'fleet/' + planet} screen="fleet" planet={planet}>Fleet</A>
+			<Button onClick={props.onClickTerraform} disabled={!onSolarsystem}>Terraform</Button>
 			<A href={'training/' + planet} screen="training" planet={planet}>Training</A>
 			<A href={'dock/' + planet} screen="dock" planet={planet}>Dock</A>
 			<A href={'surface/' + planet} screen="surface" planet={planet}>Surface</A>
 			<A href={'combat/' + planet} screen="combat" planet={planet}>Combat</A>
+			<Button onClick={props.onClickEspionage} disabled={!onSolarsystem}>Espionage</Button>
 		</nav>
 	)
 }
@@ -61,6 +43,7 @@ const Navigation = props => {
 const Game = (props) => {
 	const view = useRecoilValue(viewAtom)
 	const [ selected, setSelected ] = useState(view.planet || 'h')
+	const sendAtmos = useSendAtmos()
 
 	const routes = {
 		'/': () => (<SolarSystem />),
@@ -77,6 +60,14 @@ const Game = (props) => {
 
 	const onSelectPlanet = planet => {
 		setSelected(planet)
+	}
+
+	const onClickTerraform = () => {
+		sendAtmos({ id: selected })
+	}
+
+	const onClickEspionage = () => {
+
 	}
 
 	let content;
@@ -133,7 +124,7 @@ const Game = (props) => {
 		<React.Fragment>
 			<Tick />
 			{content}
-			<Navigation planet={selected} />
+			<Navigation planet={selected} screen={view.screen} onClickTerraform={onClickTerraform} onClickEspionage={onClickEspionage} />
 		</React.Fragment>
 	)
 }

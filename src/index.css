@@ -16,6 +16,10 @@ code {
   display: flex;
 }
 
+.flex-columns > * {
+  flex: 1 1 0px;
+}
+
 dl {
   display: flex;
   flex-wrap: wrap;

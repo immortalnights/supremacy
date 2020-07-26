@@ -73,6 +73,7 @@ export const selectFirstInDock = selectorFamily({
 })
 
 const beginTravel = (ship, origin, destination, date) => {
+	console.log("Init travel", origin, destination)
 	const travel = calculateTravel(origin, destination, ship)
 
 	ship = { ...ship }
@@ -88,10 +89,27 @@ const beginTravel = (ship, origin, destination, date) => {
 
 	ship.location = {
 		planet: null,
-		position: 'space'
+		position: 'space',
+		state: 'inactive'
 	}
 
 	return ship
+}
+
+const findAtmos = (snapshot, player) => {
+	const game = snapshot.getLoadable(atoms.game).contents
+	let atmos
+
+	game.ships.forEach(id => {
+		const ship = snapshot.getLoadable(atoms.ships(id)).contents
+		console.log(id, ship)
+		if (ship.owner === player.id && ship.type === 'Atmosphere Processor')
+		{
+			atmos = ship
+		}
+	})
+
+	return atmos
 }
 
 // could be a hook?
@@ -127,7 +145,7 @@ const shipReducer = (ship, action) => {
 			// TODO validation
 			if (ship.type === 'Atmosphere Processor')
 			{
-				console.warn(`Cannot directly control Atmon`)
+				console.warn(`Cannot directly control Atmos`)
 			}
 			else if (ship.location.position === action.position)
 			{
@@ -197,13 +215,44 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`Cannot directly control Atmon`)
 			}
-			else if (ship.location.position !== 'orbit')
+			else if (ship.heading)
 			{
-				console.log(`Ship is not in orbit of a planet (${ship.location.position})`)
+				console.warn(`Ship is already travelling to Planet ${ship.heading.to.id}`)
 			}
 			else if (ship.location.planet === action.destination.id)
 			{
 				console.log("Ship is is already at", action.destination.name)
+			}
+			else if (ship.location.position !== 'orbit')
+			{
+				console.log(`Ship is not in orbit of a planet (${ship.location.position})`)
+			}
+			else
+			{
+				const origin = action.origin
+				const destination = action.destination
+
+				ship = beginTravel(ship, origin, destination, action.date)
+			}
+			break
+		}
+		case 'terraform':
+		{
+			if (ship.type !== 'Atmosphere Processor')
+			{
+				console.warn(`${ship.type} cannot terraform planets`)
+			}
+			else if (ship.heading)
+			{
+				console.warn(`Ship is already travelling to Planet ${ship.heading.to.id}`)
+			}
+			else if (ship.location.state === 'active')
+			{
+				console.warn(`Atmosphere Processor is busy`)
+			}
+			else if (action.destination.owner)
+			{
+				console.warn(`Cannot terraform an occupied planet`)
 			}
 			else
 			{
@@ -313,6 +362,11 @@ const shipReducer = (ship, action) => {
 					}
 					break
 				}
+				default:
+				{
+					console.warn(`Invalid cargo ${action.cargo}`)
+					break;
+				}
 			}
 			break
 		}
@@ -391,6 +445,32 @@ export const useLoadUnloadCargo = (ship, planet) => {
 		{
 			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)
 			set(atoms.ships(reducedShip.id), reducedShip)
+		}
+	})
+}
+
+export const useSendAtmos = () => {
+	return useRecoilCallback(({ snapshot, set }) => planet => {
+		console.assert(planet && planet.id, "Invalid destination planet")
+
+		const player = snapshot.getLoadable(selectHumanPlayer).contents
+		const atmos = findAtmos(snapshot, player)
+
+		if (atmos)
+		{
+			const date = snapshot.getLoadable(atoms.date).contents
+			const origin = snapshot.getLoadable(atoms.planets(atmos.location.planet)).contents
+			const destination = snapshot.getLoadable(atoms.planets(planet.id)).contents
+
+			const reducedShip = shipReducer(atmos, { type: 'terraform', origin, destination, date })
+			if (reducedShip !== atmos)
+			{
+				set(atoms.ships(reducedShip.id), reducedShip)
+			}
+		}
+		else
+		{
+			console.warn("Player does not own a Atmosphere Processor")
 		}
 	})
 }

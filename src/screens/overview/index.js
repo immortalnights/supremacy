@@ -26,7 +26,7 @@ const PlanetOverview = props => {
 		<div className="flex-columns">
 			<dl>
 				<dt>Planet</dt>
-				<dd>{planet.name}</dd>
+				<dd>{planet.name || planet.id}</dd>
 				<dt>Date</dt>
 				<dd><StarDate /></dd>
 				<dt>Status</dt>

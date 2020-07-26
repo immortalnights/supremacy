@@ -41,7 +41,8 @@ export const createShip = (blueprint, id, name, player, planet) => {
 		name: name,
 		location: {
 			planet: planet.id,
-			position: 'docked'
+			position: 'docked',
+			state: 'inactive'
 		},
 		crew: 0,
 		fuel: 0,
