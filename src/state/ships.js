@@ -1,7 +1,7 @@
 import { selector, selectorFamily, useRecoilCallback } from 'recoil'
 import { selectHumanPlayer } from './game'
 import atoms from './atoms'
-import { addDates } from '../logic/date'
+import dates from '../logic/date'
 import { canChangePosition } from '../logic/ships'
 import { calculateTravel } from '../logic/travel'
 
@@ -82,7 +82,7 @@ const beginTravel = (ship, origin, destination, date) => {
 		to: { id: destination.id, name: destination.name },
 		departure: date,
 		distance: travel.distance,
-		arrival: addDates(date, travel.duration),
+		arrival: dates.add(date, travel.duration),
 		fuel: travel.fuel
 	}
 	// console.log("Heading", ship.heading)
@@ -102,7 +102,7 @@ const findAtmos = (snapshot, player) => {
 
 	game.ships.forEach(id => {
 		const ship = snapshot.getLoadable(atoms.ships(id)).contents
-		console.log(id, ship)
+		// console.log(id, ship)
 		if (ship.owner === player.id && ship.type === 'Atmosphere Processor')
 		{
 			atmos = ship
@@ -242,13 +242,18 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`${ship.type} cannot terraform planets`)
 			}
+			else if (ship.location.planet === action.destination.id)
+			{
+				console.log("Atmos is is already at", action.destination.name)
+			}
 			else if (ship.heading)
 			{
-				console.warn(`Ship is already travelling to Planet ${ship.heading.to.id}`)
+				console.warn(`Atmos is already travelling to Planet ${ship.heading.to.id}`)
 			}
 			else if (ship.location.state === 'active')
 			{
-				console.warn(`Atmosphere Processor is busy`)
+				const diff = dates.diff(ship.terraforming.completion, action.date)
+				console.warn(`Atmosphere Processor is busy, will complete in ${diff} days`)
 			}
 			else if (action.destination.owner)
 			{

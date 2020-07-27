@@ -7,7 +7,7 @@ const game = atom({
 
 const date = atom({
 	key: 'date',
-	default: { m: 1, y: 2050 }
+	default: { d: 1, y: 2050 }
 })
 
 const planets = atomFamily({

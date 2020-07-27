@@ -1,29 +1,22 @@
 import React, { useEffect } from 'react'
 import { useRecoilValue, useRecoilCallback } from 'recoil'
-import atoms from '../state/atoms'
+import date from './date'
+import { terraformPlanet } from './planets'
+import store from '../state/atoms'
+import { selectPlayer } from '../state/game'
 
-const updateDate = (date, set) => {
-	if (date.m === 60)
-	{
-		date.y = date.y + 1
-		date.m = 1
-	}
-	else
-	{
-		date.m = date.m + 1
-	}
-
-	set(atoms.date, date)
-
-	return date
+const updateDate = (currentDate, set) => {
+	const next = date.next(currentDate)
+	set(store.date, next)
+	return next
 }
 
-const updateShip = (id, snapshot, date, set) => {
-	let ship = snapshot.getLoadable(atoms.ships(id)).contents
+const updateShip = (id, snapshot, currentDate, set) => {
+	let ship = snapshot.getLoadable(store.ships(id)).contents
 
 	if (ship.heading)
 	{
-		if (ship.heading.arrival.m === date.m && ship.heading.arrival.y === date.y)
+		if (date.equal(ship.heading.arrival, currentDate))
 		{
 			console.log(`Ship ${ship.name} has arrived at ${ship.heading.to.name || ship.heading.to.id}`)
 			ship = { ...ship }
@@ -36,26 +29,52 @@ const updateShip = (id, snapshot, date, set) => {
 
 			if (ship.type === 'Atmosphere Processor')
 			{
-				const planet = snapshot.getLoadable(atoms.planets(ship.location.planet)).contents
+				const planet = snapshot.getLoadable(store.planets(ship.location.planet)).contents
 				if (!planet.habitable)
 				{
+					const duration = planet.terraformDuration
+					const completion = date.add(date.fromDays(duration), currentDate)
 					// Start terraforming
 					ship.location.state = 'active'
-					ship.terraform = {
-						//
+					ship.terraforming = {
+						duration,
+						completion
 					}
 
-					console.log(`${ship.name} has started terraforming planet. Will complete by ...`)
+					console.log(`${ship.name} has started terraforming planet. Will complete by ${date.format(completion)}`)
 				}
 			}
 		}
 	}
-	else
+	else //ship.location.state === 'active'
 	{
 		switch (ship.type)
 		{
 			case 'Atmosphere Processor':
 			{
+				if (ship.location.state === 'active' && ship.terraforming)
+				{
+					if (date.equal(ship.terraforming.completion, currentDate))
+					{
+						console.log(`Terraforming of planet ${ship.location.planet} completed.`)
+
+						const player = snapshot.getLoadable(selectPlayer(ship.owner)).contents
+						const planet = { ...snapshot.getLoadable(store.planets(ship.location.planet)).contents }
+
+						terraformPlanet(player, planet, 'Planet X')
+						console.log("Terraformed planet", planet)
+
+						set(store.planets(ship.location.planet), planet)
+
+						ship = { ... ship }
+						ship.location = {
+							id: planet.id,
+							position: 'docked',
+							state: 'inactive'
+						}
+						ship.terraforming = false
+					}
+				}
 				break
 			}
 			case 'Solar-Satellite Generator':
@@ -82,32 +101,32 @@ const updateShip = (id, snapshot, date, set) => {
 		}
 	}
 
-	set(atoms.ships(ship.id), ship)
+	set(store.ships(ship.id), ship)
 }
 
-const updatePlanet = (id, snapshot, date, set) => {
+const updatePlanet = (id, snapshot, currentDate, set) => {
 }
 
 const tick = (snapshot, set) => {
 	// console.log("callback")
-	const date = updateDate({ ...snapshot.getLoadable(atoms.date).contents }, set)
+	const nextDate = updateDate({ ...snapshot.getLoadable(store.date).contents }, set)
 
-	const game = snapshot.getLoadable(atoms.game).contents
+	const game = snapshot.getLoadable(store.game).contents
 
-	game.ships.map(ship => updateShip(ship, snapshot, date, set))
-	game.planets.map(planet => updatePlanet(planet, snapshot, date, set))
+	game.ships.map(ship => updateShip(ship, snapshot, nextDate, set))
+	game.planets.map(planet => updatePlanet(planet, snapshot, nextDate, set))
 
 }
 
 
 const Tick = props => {
-	const date = useRecoilValue(atoms.date)
+	const currentDate = useRecoilValue(store.date)
 	const callback = useRecoilCallback(({ snapshot, set }) => () => tick(snapshot, set))
 
 	useEffect(() => {
 		// console.log("useEffect")
 		setTimeout(callback, 1000)
-	}, [date])
+	}, [currentDate])
 
 	return false
 }

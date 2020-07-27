@@ -1,9 +1,10 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
-import atoms from '../../state/atoms'
+import store from '../../state/atoms'
+import { DateDisplay } from '../../components/date'
 
 const ShipHeading = props => {
-	const ship = useRecoilValue(atoms.ships(props.ship ? props.ship.id : null))
+	const ship = useRecoilValue(store.ships(props.ship ? props.ship.id : null))
 	let content
 
 	if (ship && ship.heading)
@@ -18,7 +19,7 @@ const ShipHeading = props => {
 				<dt>To</dt>
 				<dd>{heading.to.name}</dd>
 				<dt>EDA</dt>
-				<dd>{heading.arrival.m} / {heading.arrival.y}</dd>
+				<dd><DateDisplay date={heading.arrival} /></dd>
 				<dt>Fuel</dt>
 				<dd>{heading.fuel}</dd>
 			</dl>

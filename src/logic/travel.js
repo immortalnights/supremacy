@@ -1,11 +1,13 @@
+import date from './date'
+
 export const calculateDistance = (origin, destination) => {
 	return Math.abs(origin.location.y - destination.location.y)
 }
 
 export const calculateDuration = (distance, ship) => {
 	const speed = ship.speed
-	const months = distance / speed
-	return { m: (months % 12), y: Math.floor(months / 12) }
+	const days = distance / speed
+	return date.fromDays(days)
 }
 
 export const calculateFuel = (distance, ship) => {
