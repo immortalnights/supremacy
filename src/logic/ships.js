@@ -34,7 +34,7 @@ export const canChangePosition = (fromPos, to) => {
 	return r
 }
 
-export const createShip = (blueprint, id, name, player, planet) => {
+export const createShip = (blueprint, id, name, player, planet, date) => {
 	const ship = {
 		id,
 		owner: player.id,
@@ -55,7 +55,7 @@ export const createShip = (blueprint, id, name, player, planet) => {
 			'platoons': []
 		},
 		value: blueprint.cost[0].credits,
-		purchased: '',
+		purchased: date,
 		...cloneDeep(blueprint)
 	}
 

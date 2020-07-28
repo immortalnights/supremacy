@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { useRecoilValue } from 'recoil'
+import { useRecoilValue, useRecoilState } from 'recoil'
 import { Button } from 'seventh-component-library'
+import { viewAtom, useNavigate } from '../../state/nav'
 import StarDate from '../../components/date'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
@@ -102,16 +103,20 @@ const IconGrid = props => {
 }
 
 const OverviewSlots = props => {
-	const key = { planet: props.planet, position: props.position }
+	const [ slotType, setSlotType ] = useState('surface')
+	const key = { planet: props.planet, position: slotType }
 	const planet = useRecoilValue(store.planets(props.planet))
 	const ships = useRecoilValue(selectShipsAtPlanetPosition(key))
+
+	// for some reason this is being re-rendered on tick
+	// console.log("OverviewSlots.render", key)
 
 	const onSelectItem = item => {
 		// Noop
 	}
 
 	let message
-	switch (props.position)
+	switch (slotType)
 	{
 		case 'orbit':
 		{
@@ -136,6 +141,11 @@ const OverviewSlots = props => {
 
 	return (
 		<div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+			<div>
+				<Button onClick={() => setSlotType('orbit')}>Ships in Orbit</Button>
+				<Button onClick={() => setSlotType('surface')}>Ships on the Surface</Button>
+				<Button onClick={() => setSlotType('docked')}>Ships Docked</Button>
+			</div>
 			<div style={{textAlign: 'center'}}>{message}</div>
 			<IconGrid items={ships} onSelectItem={onSelectItem} />
 		</div>
@@ -143,12 +153,19 @@ const OverviewSlots = props => {
 }
 
 const Overview = props => {
-	const [ selected, setSelected ] = useState(props.planet)
-	const [ slotType, setSlotType ] = useState('surface')
+	const [ view, setView ] = useRecoilState(viewAtom)
+	const navigate = useNavigate()
+	// const [ selected, setSelected ] = useState(props.planet)
+	const selected = props.planet
 
 	const onSelectItem = item => {
-		setSelected(item.id)
+		// setSelected(item.id)
+		console.log("Select planet", item.id)
+		// setView({ screen: 'overview', planet: item.id })
+		navigate('overview', item.id)
 	}
+
+	console.log("render overview")
 
 	return (
 		<div>
@@ -164,14 +181,7 @@ const Overview = props => {
 					<div>Messages</div>
 					<PlanetGrid onSelectItem={onSelectItem} />
 				</div>
-				<div>
-					<div>
-						<Button onClick={() => setSlotType('orbit')}>Ships in Orbit</Button>
-						<Button onClick={() => setSlotType('surface')}>Ships on the Surface</Button>
-						<Button onClick={() => setSlotType('docked')}>Ships Docked</Button>
-					</div>
-					<OverviewSlots planet={selected} position={slotType} />
-				</div>
+				<OverviewSlots planet={selected} />
 			</div>
 		</div>
 	)

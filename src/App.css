@@ -1,3 +1,7 @@
+#root > div {
+	min-height: 600px;
+}
+
 nav {
 	text-align: center;
 	border-top: 1px solid darkgray;

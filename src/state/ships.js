@@ -32,7 +32,7 @@ export const selectShipsAtPlanetPosition = selectorFamily({
 
 		game.ships.forEach(id => {
 			const ship = get(atoms.ships(id))
-			if (ship.location)
+			if (key && ship.location)
 			{
 				if (ship.location.planet === key.planet && ship.location.position === key.position)
 				{
@@ -41,6 +41,7 @@ export const selectShipsAtPlanetPosition = selectorFamily({
 			}
 		})
 
+		console.log("shipsAtPlanetPosition", key, "=>", ships)
 		return ships
 	}
 })
@@ -49,7 +50,6 @@ export const selectFirstInDock = selectorFamily({
 	key: 'firstShipInDock',
 	get: key => ({ get }) => {
 		const game = get(atoms.game)
-
 		const id = game.ships.find(id => {
 			let match = false
 			const ship = get(atoms.ships(id))
@@ -217,15 +217,15 @@ const shipReducer = (ship, action) => {
 			}
 			else if (ship.heading)
 			{
-				console.warn(`Ship is already travelling to Planet ${ship.heading.to.id}`)
+				console.warn(`${ship.name} is already travelling to Planet ${ship.heading.to.id}`)
 			}
 			else if (ship.location.planet === action.destination.id)
 			{
-				console.log("Ship is is already at", action.destination.name)
+				console.log(`${ship.name} is is already at ${action.destination.name}`)
 			}
 			else if (ship.location.position !== 'orbit')
 			{
-				console.log(`Ship is not in orbit of a planet (${ship.location.position})`)
+				console.log(`${ship.name} is not in orbit of a planet (${ship.location.position})`)
 			}
 			else
 			{

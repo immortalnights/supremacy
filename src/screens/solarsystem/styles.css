@@ -1,3 +1,15 @@
 .planet-list {
 	list-style: none;
 }
+
+.planet-list > li {
+	border-width: 2px;
+	border-color: transparent;
+	border-style: solid;
+	padding: 2px;
+	cursor: pointer;
+}
+
+.planet-list > li.selected {
+	border-color: blue;
+}

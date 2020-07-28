@@ -35,6 +35,7 @@ const updateShip = (id, snapshot, currentDate, set) => {
 					const duration = planet.terraformDuration
 					const completion = date.add(date.fromDays(duration), currentDate)
 					// Start terraforming
+					ship.location.position = 'surface'
 					ship.location.state = 'active'
 					ship.terraforming = {
 						duration,
@@ -68,8 +69,8 @@ const updateShip = (id, snapshot, currentDate, set) => {
 
 						ship = { ... ship }
 						ship.location = {
-							id: planet.id,
-							position: 'docked',
+							planet: planet.id,
+							position: 'surface',
 							state: 'inactive'
 						}
 						ship.terraforming = false
@@ -115,7 +116,6 @@ const tick = (snapshot, set) => {
 
 	game.ships.map(ship => updateShip(ship, snapshot, nextDate, set))
 	game.planets.map(planet => updatePlanet(planet, snapshot, nextDate, set))
-
 }
 
 

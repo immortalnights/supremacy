@@ -113,13 +113,13 @@ const Shipyard = props => {
 	return (
 		<div>
 			<div>Shipyard</div>
-			<div style={{margin: '0 auto', width: '80%'}}>
+			<div style={{ margin: '0 auto', width: '80%' }}>
 				<img src="" alt={index} />
-				<div className="flex-columns" style={{justifyContent: 'space-around'}}>
+				<div className="flex-columns" style={{ justifyContent: 'space-around' }}>
 					<Button onClick={onClickPrevious}>&lt;=</Button>
 					<Button onClick={onClickBuy}>Buy</Button>
-					<div style={{flex: '1', lineHeight: '1.5em'}}>
-						<div style={{display: 'inline-block', margin: '0 10px'}}>
+					<div style={{ flexBasis: '75%', lineHeight: '1.5em' }}>
+						<div style={{ display: 'inline-block', margin: '0 10px' }}>
 							<div>{ship.description}</div>
 							<div>Type {ship.type}</div>
 						</div>

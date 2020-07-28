@@ -5,6 +5,7 @@ import { PlayerFleetGrid, PlanetGrid } from '../../components/grid'
 import DockingBays from '../../components/dockingbays/'
 import ShipHeading from './shipheading'
 import ShipDetails from './shipdetails'
+import { useNavigate } from '../../state/nav'
 import { useChangeShipPosition, useSendShipToDestination } from '../../state/ships'
 import './styles.css'
 
@@ -13,10 +14,19 @@ const Fleet = props => {
 	const [ action, setAction ] = useState(null)
 	const changeShipPosition = useChangeShipPosition()
 	const sendToDestination = useSendShipToDestination()
+	const navigate = useNavigate()
+
+	console.log("Fleet.render")
 
 	const onSelectShip = ship => {
-		console.log(ship)
-		setSelected(ship)
+		if (ship.location.planet === props.planet)
+		{
+			setSelected(ship)
+		}
+		else
+		{
+			navigate('fleet', ship.location.planet)
+		}
 	}
 
 	const onSelectPlanet = planet => {

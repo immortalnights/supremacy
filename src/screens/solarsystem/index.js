@@ -21,8 +21,8 @@ const SolarSystem = props => {
 		<div>
 			<ul className="planet-list">
 				{game.planets.map(id => (
-					<li key={id}>
-						<div onDoubleClick={() => navigate('overview', id)} onClick={() => props.onSelectPlanet(id)} style={{borderWidth: '2px', borderColor: id === props.planet ? 'blue' : 'transparent', borderStyle: 'solid'}}><Planet id={id} /></div>
+					<li key={id} className={props.planet === id ? 'selected' : ''} onDoubleClick={() => navigate('overview', id)} onClick={() => navigate('solarsystem', id)}>
+						<Planet id={id} />
 					</li>
 				))}
 			</ul>
