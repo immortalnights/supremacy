@@ -16,7 +16,7 @@ const ShipCivFuelCargo = props => {
 
 	if (ship)
 	{
-		civilians = ship.cargo ? ship.cargo.civilians : 0
+		civilians = ship.civilians
 
 		if (ship.maximumFuel > 0 && ship.cargo)
 		{
@@ -46,13 +46,23 @@ const ShipCivFuelCargo = props => {
 }
 
 const CivFuelCargo = props => {
+	const onHoldMore = modifiers => {
+		const val = modifiers.ctrl ? 5 : 1
+		props.onChange(val)
+	}
+
+	const onHoldLess = modifiers => {
+		const val = modifiers.ctrl ? -5 : -1
+		props.onChange(val)
+	}
+
 	return (
 		<div>
 			<div style={{height:'1.5em', textAlign: 'right'}}>{props.value}</div>
 			<div className="flex-columns">
-				<div>
-					<div><Button onHold={() => props.onChange(1)} frequency="scale">More</Button></div>
-					<div><Button onHold={() => props.onChange(-1)} frequency="scale">Less</Button></div>
+				<div className="flex-columns">
+					<Button onHold={onHoldMore} frequency="scale">More</Button>
+					<Button onHold={onHoldLess} frequency="scale">Less</Button>
 				</div>
 				<img src={props.icon} alt={props.iconAlt} />
 			</div>
@@ -61,6 +71,16 @@ const CivFuelCargo = props => {
 }
 
 const CargoItem = props => {
+	const onHoldMore = modifiers => {
+		const val = modifiers.ctrl ? 5 : 1
+		props.onChange(val)
+	}
+
+	const onHoldLess = modifiers => {
+		const val = modifiers.ctrl ? -5 : -1
+		props.onChange(val)
+	}
+
 	return (
 		<div style={{display: 'flex', flexDirection: 'column'}}>
 			<div style={{flex: 1}}>
@@ -68,9 +88,9 @@ const CargoItem = props => {
 			</div>
 			<div>
 				<div>
-					<div>
-						<Button>More</Button>
-						<Button>Less</Button>
+					<div className="flex-columns">
+						<Button onHold={onHoldMore} frequency="scale">More</Button>
+						<Button onHold={onHoldLess} frequency="scale">Less</Button>
 					</div>
 					<div style={{textAlign: 'center'}}>{props.type}</div>
 				</div>
@@ -84,6 +104,7 @@ const CargoItem = props => {
 const Cargo = props => {
 	const ship = useRecoilValue(atoms.ships(props.ship ? props.ship.id : null))
 	const planet = useRecoilValue(atoms.planets(props.planet))
+	const loadUnload = useLoadUnloadCargo(ship, { id: props.planet })
 
 	let cargo = {}
 	if (ship && ship.cargo)
@@ -94,17 +115,35 @@ const Cargo = props => {
 		cargo.energy = ship.cargo.energy
 	}
 
+	const loadUnloadFood = change => {
+		loadUnload('food', change)
+	}
+
+	const loadUnloadMinerals = change => {
+		loadUnload('minerals', change)
+	}
+
+	const loadUnloadFuels = change => {
+		loadUnload('fuels', change)
+	}
+
+	const loadUnloadEnergy = change => {
+		loadUnload('energy', change)
+	}
+
 	return (
 		<div className="flex-columns">
-			<CargoItem type="food" available={planet.resources.food} loaded={cargo.food || 0} />
-			<CargoItem type="minerals" available={planet.resources.minerals} loaded={cargo.minerals || 0} />
-			<CargoItem type="fuels" available={planet.resources.fuels} loaded={cargo.fuels || 0} />
-			<CargoItem type="energy" available={planet.resources.energy} loaded={cargo.energy || 0} />
+			<CargoItem type="food" available={planet.resources.food} loaded={cargo.food || 0} onChange={loadUnloadFood} />
+			<CargoItem type="minerals" available={planet.resources.minerals} loaded={cargo.minerals || 0} onChange={loadUnloadMinerals} />
+			<CargoItem type="fuels" available={planet.resources.fuels} loaded={cargo.fuels || 0} onChange={loadUnloadFuels} />
+			<CargoItem type="energy" available={planet.resources.energy} loaded={cargo.energy || 0} onChange={loadUnloadEnergy} />
 		</div>
 	)
 }
 
 const Dock = props => {
+	console.log("Dock.render")
+
 	const defaultSelected = useRecoilValue(selectFirstInDock(props.planet))
 	const [ selected, setSelected ] = useState(defaultSelected)
 	const assignCrew = useAssignCrew()

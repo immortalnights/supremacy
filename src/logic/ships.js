@@ -46,14 +46,14 @@ export const createShip = (blueprint, id, name, player, planet, date) => {
 		},
 		crew: 0,
 		fuel: 0,
+		civilians: 0,
 		cargo: {
-			'civilians': 0,
-			'food': 0,
-			'minerals': 0,
-			'fuels': 0,
-			'energy': 0,
-			'platoons': []
+			food: 0,
+			minerals: 0,
+			fuels: 0,
+			energy: 0
 		},
+		platoons: [],
 		value: blueprint.cost[0].credits,
 		purchased: date,
 		...cloneDeep(blueprint)

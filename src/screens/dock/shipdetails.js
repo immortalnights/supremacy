@@ -27,7 +27,7 @@ const ShipDetails = props => {
 		details.requiredCrew = ship.requiredCrew
 		details.capacity = ship.capacity.cargo
 		details.maximumFuel = ship.maximumFuel
-		details.payload = 0
+		details.payload = Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
 		details.value = ship.value
 
 		if (ship.requiredCrew > 0)

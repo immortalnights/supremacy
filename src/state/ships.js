@@ -315,7 +315,7 @@ const shipReducer = (ship, action) => {
 				case 'civilians':
 				{
 					const source = planet.population
-					const destination = ship.cargo.civilians
+					const destination = ship.civilians
 					const capacity = ship.capacity.civilians
 
 					if (check(source, destination, capacity))
@@ -324,8 +324,7 @@ const shipReducer = (ship, action) => {
 
 						// console.log(`Transfer ${transfer}, ${source}, ${destination}, ${capacity}, ${action.change}`)
 						ship = { ...ship }
-						ship.cargo = { ...ship.cargo }
-						ship.cargo.civilians = ship.cargo.civilians + transfer
+						ship.civilians = ship.civilians + transfer
 						planet.population = planet.population - transfer
 					}
 					break
@@ -353,17 +352,18 @@ const shipReducer = (ship, action) => {
 				case 'energy':
 				{
 					const source = planet.resources[action.cargo]
-					const destination = ship.cargo[action.cargo]
-					const capacity = ship.capacity[action.cargo]
+					const destination = Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
+					const capacity = ship.capacity.cargo
 
 					if (check(source, destination, capacity))
 					{
 						const transfer = calculateTransfer(source, destination, capacity, action.change)
 
 						ship = { ...ship }
-						ship.fuel = ship.fuel + transfer
+						ship.cargo = { ...ship.cargo }
+						ship.cargo[action.cargo] = ship.cargo[action.cargo] + transfer
 						planet.resources = { ...planet.resources }
-						planet.resources.fuels = planet.resources.fuels - transfer
+						planet.resources[action.cargo] = planet.resources[action.cargo] - transfer
 					}
 					break
 				}
