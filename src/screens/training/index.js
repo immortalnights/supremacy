@@ -1,10 +1,14 @@
 import React from 'react'
-import {} from 'recoil'
+import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
+import state from '../../state/atoms'
+import { selectHumanPlayer } from '../../state/game'
+import { selectCapitalPlanet } from '../../state/planets'
+import { selectPlayerPlatoon } from '../../state/platoons'
 
 const Training = props => {
-	const civilians = 0
-	const credits = 0
+	const player = useRecoilValue(selectHumanPlayer)
+	const capital = useRecoilValue(selectCapitalPlanet(player))
 	const rank = ''
 	const message = ''
 	const calibre = 0
@@ -30,7 +34,7 @@ const Training = props => {
 				</div>
 				<div className="flex-columns">
 					<div>Civilians</div>
-					<div>{civilians}</div>
+					<div>{capital.population}</div>
 				</div>
 			</div>
 			<div className="flex-columns">
@@ -45,7 +49,7 @@ const Training = props => {
 					</div>
 					<div>
 						<div>Cost: {0}</div>
-						<div><img src="" alt="Suit" /></div>
+						<div><img src="" alt="Weapon" /></div>
 						<div>
 							<Button>Previous</Button>
 							<Button>Next</Button>
@@ -57,7 +61,7 @@ const Training = props => {
 						<label>Location</label> {''}
 					</div>
 					<div>
-						<label>Credits</label> {credits}
+						<label>Credits</label> {capital.resources.credits}
 					</div>
 					<div>
 						<label>Rank</label> {rank}

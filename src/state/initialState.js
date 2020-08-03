@@ -2,7 +2,9 @@ import store from './atoms'
 import { viewAtom } from './nav'
 import { createShip } from '../logic/ships'
 import { createPlanet, claimCapital } from '../logic/planets'
+import { createPlatoon } from '../logic/platoons'
 import shipData from '../data/ships.json'
+import equipmentData from '../data/equipment.json'
 
 const initializeState = ({set}) => {
 	const players = [
@@ -25,7 +27,6 @@ const initializeState = ({set}) => {
 		planets: [],
 		nextShipId: 0,
 		ships: [],
-		nextPlatoonId: 0,
 		platoons: []
 	}
 
@@ -76,6 +77,24 @@ const initializeState = ({set}) => {
 		{
 			location.screen = match[1]
 			location.planet = match[2]
+		}
+	}
+
+	const equipmentKeys = Object.keys(equipmentData);
+	// console.log(equipmentKeys)
+	const firstSuit = equipmentKeys.find(key => equipmentData[key].type === 'suit')
+	const firstWeapon = equipmentKeys.find(key => equipmentData[key].type === 'weapon')
+
+	let platoonId = 0
+	for (let playerIndex = 0; playerIndex < players.length; playerIndex++)
+	{
+		const owner = players[playerIndex]
+		for (let p = 1; p < 25; p++)
+		{
+			const platoon = createPlatoon(platoonId++, owner, p, firstSuit, firstWeapon)
+			game.platoons.push(platoon.id)
+
+			set(store.platoons(platoon.id), platoon)
 		}
 	}
 

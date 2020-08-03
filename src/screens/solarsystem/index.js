@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useRecoilValue } from 'recoil'
 import store from '../../state/atoms'
-import { A, useNavigate } from '../../state/nav'
+import { useNavigate } from '../../state/nav'
 import StarDate from '../../components/date'
 import './styles.css'
 

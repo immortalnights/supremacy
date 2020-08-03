@@ -1,5 +1,5 @@
 import React from 'react'
-import { atom, useSetRecoilState, useRecoilCallback } from 'recoil'
+import { atom, useRecoilCallback } from 'recoil'
 
 export const viewAtom = atom({
 	key: 'view',
@@ -19,10 +19,7 @@ export const useNavigate = () => {
 }
 
 export const A = props => {
-	// const setView = useSetRecoilState(viewAtom)
 	const navigate = useNavigate()
-
-	// console.log(props)
 
 	const onAClick = e => {
 		e.preventDefault()

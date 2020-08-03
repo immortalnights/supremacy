@@ -67,7 +67,7 @@ const updateShip = (id, snapshot, currentDate, set) => {
 
 						set(store.planets(ship.location.planet), planet)
 
-						ship = { ... ship }
+						ship = { ...ship }
 						ship.location = {
 							planet: planet.id,
 							position: 'surface',
@@ -126,7 +126,7 @@ const Tick = props => {
 	useEffect(() => {
 		// console.log("useEffect")
 		setTimeout(callback, 1000)
-	}, [currentDate])
+	}, [currentDate, callback])
 
 	return false
 }

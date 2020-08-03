@@ -1,35 +1,42 @@
 {
-	"armour_1": {
+	"suit_1": {
+		"type": "suit",
 		"name": "",
 		"armour": 0,
 		"cost": 50
 	},
-	"armour_1": {
+	"suit_2": {
+		"type": "suit",
 		"name": "",
 		"armour": 0,
 		"cost": 100
 	},
-	"armour_1": {
+	"suit_3": {
+		"type": "suit",
 		"name": "",
 		"armour": 0,
 		"cost": 200
 	},
-	"armour_1": {
+	"suit_4": {
+		"type": "suit",
 		"name": "",
 		"armour": 0,
 		"cost": 295
 	},
 	"weapon_1": {
+		"type": "weapon",
 		"name": "",
 		"damage": 0,
 		"cost": 50
 	},
 	"weapon_2": {
+		"type": "weapon",
 		"name": "",
 		"damage": 0,
 		"cost": 120
 	},
 	"weapon_3": {
+		"type": "weapon",
 		"name": "",
 		"damage": 0,
 		"cost": 250

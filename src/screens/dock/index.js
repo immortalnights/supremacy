@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react'
+import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil'
 import Button from '../../components/button'
 import atoms from '../../state/atoms'

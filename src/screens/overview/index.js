@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { useRecoilValue, useRecoilState } from 'recoil'
+import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
-import { viewAtom, useNavigate } from '../../state/nav'
+import { useNavigate } from '../../state/nav'
 import StarDate from '../../components/date'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
@@ -153,7 +153,6 @@ const OverviewSlots = props => {
 }
 
 const Overview = props => {
-	const [ view, setView ] = useRecoilState(viewAtom)
 	const navigate = useNavigate()
 	// const [ selected, setSelected ] = useState(props.planet)
 	const selected = props.planet
