@@ -1,47 +1,27 @@
 import { atom, selector, selectorFamily, useRecoilCallback } from 'recoil'
 import state from './atoms'
-import equipmentData from '../data/equipment.json'
+import { MAXIMUM_PLATOON_SIZE } from '../logic/platoons'
 import { calculateTransfer } from '../logic/general'
 
-const MAXIMUM_PLATOON_SIZE = 200
 
-const filterEquipment = type => {
-	const equipment = []
-	Object.keys(equipmentData).forEach(key => {
-		const e = equipmentData[key]
-		if (e.type === type)
-		{
-			e.id = key
-			equipment.push(e)
-		}
-	})
-
-	return equipment
-}
-
-export const suits = atom({
-	key: 'suits',
-	default: filterEquipment('suit')
-})
-
-export const weapons = atom({
-	key: 'weapons',
-	default: filterEquipment('weapon')
-})
-
-export const selectSuit = selectorFamily({
-	key: 'selectSuit',
+export const selectPlatoon = selectorFamily({
+	key: 'selectPlatoon',
 	get: key => ({ get }) => {
-		const available = get(suits)
-		return available.find(s => s.id === key)
+		return get(state.platoons(key))
 	}
 })
 
-export const selectWeapon = selectorFamily({
-	key: 'selectWeapon',
+export const selectPlayerPlatoonIndexes = selectorFamily({
+	key: 'selectPlayerPlatoonIndexes',
 	get: key => ({ get }) => {
-		const available = get(weapons)
-		return available.find(w => w.id === key)
+		const game = get(state.game)
+
+		const platoons = game.platoons.filter(id => {
+			const p = get(state.platoons(id))
+			return p.owner === key.id
+		})
+
+		return platoons
 	}
 })
 
@@ -50,6 +30,7 @@ export const selectPlayerPlatoon = selectorFamily({
 	get: key => ({ get }) => {
 		const game = get(state.game)
 		let platoon
+		console.log('selectPlayerPlatoons', key)
 
 		game.platoons.find(id => {
 			const p = get(state.platoons(id))
@@ -110,6 +91,11 @@ const platoonReducer = (platoon, action) => {
 				platoon = { ...platoon }
 				platoon.troops = platoon.troops + transfer
 				planet.population = planet.population - transfer
+
+				if (transfer > 0)
+				{
+					platoon.additionalTroops = platoon.additionalTroops + transfer
+				}
 			}
 			break
 		}
@@ -127,6 +113,9 @@ const platoonReducer = (platoon, action) => {
 			{
 				platoon = { ...platoon }
 				platoon.commissioned = true
+				platoon.location = {
+					planet: action.planet.id
+				}
 			}
 			break
 		}
@@ -163,10 +152,10 @@ export const useChangeTroops = (platoon, planet) => {
 	})
 }
 
-export const useCommissionPlatoon  = platoon => {
+export const useCommissionPlatoon  = (platoon, planet) => {
 	return useRecoilCallback(({ snapshot, set }) => () => {
 		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
-		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission' })
+		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet })
 		if (reducedPlatoon !== refreshedPlatoon)
 		{
 			set(state.platoons(reducedPlatoon.id), reducedPlatoon)

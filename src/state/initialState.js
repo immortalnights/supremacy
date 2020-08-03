@@ -2,7 +2,7 @@ import store from './atoms'
 import { viewAtom } from './nav'
 import { createShip } from '../logic/ships'
 import { createPlanet, claimCapital } from '../logic/planets'
-import { createPlatoon } from '../logic/platoons'
+import { MAXIMUM_PLATOONS, createPlatoon } from '../logic/platoons'
 import shipData from '../data/ships.json'
 import equipmentData from '../data/equipment.json'
 
@@ -89,7 +89,7 @@ const initializeState = ({set}) => {
 	for (let playerIndex = 0; playerIndex < players.length; playerIndex++)
 	{
 		const owner = players[playerIndex]
-		for (let p = 1; p < 25; p++)
+		for (let p = 1; p <= MAXIMUM_PLATOONS; p++)
 		{
 			const platoon = createPlatoon(platoonId++, owner, p, firstSuit, firstWeapon)
 			game.platoons.push(platoon.id)
