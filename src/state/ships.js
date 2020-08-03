@@ -4,6 +4,7 @@ import atoms from './atoms'
 import dates from '../logic/date'
 import { canChangePosition } from '../logic/ships'
 import { calculateTravel } from '../logic/travel'
+import { calculateTransfer } from '../logic/general'
 
 export const selectPlayerShips = selector({
 	key: 'playerShips',
@@ -293,20 +294,6 @@ const shipReducer = (ship, action) => {
 				}
 
 				return ok
-			}
-
-			const calculateTransfer = (source, target, maximum, requested) => {
-				let transfer
-				if (requested > 0)
-				{
-					transfer = Math.min(maximum - target, source, requested)
-				}
-				else
-				{
-					transfer = -Math.min(target, Math.abs(requested))
-				}
-
-				return transfer
 			}
 
 			console.assert(ship.cargo, `Ship does not have a cargo bay`)

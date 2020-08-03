@@ -1,35 +1,49 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
-import state from '../../state/atoms'
+import Button from '../../components/button'
 import { selectHumanPlayer } from '../../state/game'
 import { selectCapitalPlanet } from '../../state/planets'
-import { selectPlayerPlatoon } from '../../state/platoons'
+import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon } from '../../state/platoons'
+import PlatoonEquipment from './platoonequipment'
 
 const Training = props => {
 	const player = useRecoilValue(selectHumanPlayer)
 	const capital = useRecoilValue(selectCapitalPlanet(player))
-	const rank = ''
+	const [ name ] = useState('1st')
+	const platoon = useRecoilValue(selectPlayerPlatoon({ player: player.id, name }))
+	const changeTroops = useChangeTroops(platoon, capital)
+	const commission = useCommissionPlatoon(platoon)
 	const message = ''
-	const calibre = 0
+
+	console.log("Training", platoon)
+
+	const onHoldMore = modifiers => {
+		const val = modifiers.ctrl ? 5 : 1
+		changeTroops(val)
+	}
+
+	const onHoldLess = modifiers => {
+		const val = modifiers.ctrl ? -5 : -1
+		changeTroops(val)
+	}
 
 	return (
 		<div>
 			<div className="flex-columns">
 				<div className="flex-columns">
 					<div>Platoon</div>
-					<div>1st</div>
+					<div>{platoon.name}</div>
 					<div className="stacked-buttons">
-						<Button className="small">Up</Button>
-						<Button className="small">Down</Button>
+						<Button className="small" onClick={null}>Up</Button>
+						<Button className="small" onClick={null}>Down</Button>
 					</div>
 				</div>
 				<div className="flex-columns">
 					<div>Troops</div>
-					<div>0</div>
+					<div>{platoon.troops}</div>
 					<div className="stacked-buttons">
-						<Button className="small">Up</Button>
-						<Button className="small">Down</Button>
+						<Button className="small" onHold={onHoldMore} frequency="scale">Up</Button>
+						<Button className="small" onHold={onHoldLess} frequency="scale">Down</Button>
 					</div>
 				</div>
 				<div className="flex-columns">
@@ -38,44 +52,27 @@ const Training = props => {
 				</div>
 			</div>
 			<div className="flex-columns">
-				<div className="flex-columns">
-					<div>
-						<div>Suit Cost: {0}</div>
-						<div><img src="" alt="Suit" /></div>
-						<div>
-							<Button>Previous</Button>
-							<Button>Next</Button>
-						</div>
-					</div>
-					<div>
-						<div>Cost: {0}</div>
-						<div><img src="" alt="Weapon" /></div>
-						<div>
-							<Button>Previous</Button>
-							<Button>Next</Button>
-						</div>
-					</div>
-				</div>
+				<PlatoonEquipment platoon={platoon} />
 				<div>
 					<div>
-						<label>Location</label> {''}
+						<label>Location</label> {capital.name}
 					</div>
 					<div>
 						<label>Credits</label> {capital.resources.credits}
 					</div>
 					<div>
-						<label>Rank</label> {rank}
+						<label>Rank</label> {platoon.rank}
 					</div>
 					<div>
 						{message}
 					</div>
 					<div>{/*messages*/}</div>
-					<div>
-						<Button>Equip</Button>
+					<div className="flex-columns">
+						<Button onClick={commission}>Equip</Button>
 						<Button>Disband</Button>
 					</div>
 					<div>
-						<label>Calibre</label> {calibre}%
+						<label>Calibre</label> {platoon.calibre}%
 					</div>
 				</div>
 			</div>
