@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
+import Button from '../../components/button'
 import { suits, weapons } from '../../state/equipment'
 import { useChangeEquipment } from '../../state/platoons'
 import { prevIndex, nextIndex } from '../../logic/general'

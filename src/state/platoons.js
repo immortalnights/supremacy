@@ -3,7 +3,6 @@ import state from './atoms'
 import { MAXIMUM_PLATOON_SIZE } from '../logic/platoons'
 import { calculateTransfer } from '../logic/general'
 
-
 export const selectPlatoon = selectorFamily({
 	key: 'selectPlatoon',
 	get: key => ({ get }) => {

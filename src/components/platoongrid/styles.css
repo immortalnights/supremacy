@@ -1,0 +1,9 @@
+
+.platoon.grid td {
+	border-style: solid;
+}
+
+.platoon.grid td.spacer {
+	width: 2em;
+	border-style: none;
+}
