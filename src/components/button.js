@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react'
 
-const Button = props => {
-	const DEFAULT_FREQUENCY = 500
-	const MAX_FREQUENCY = 50
-	const DEFAULT_MULTIPLIER = 1
-	const MAX_MULTIPLIER = 100
+const DEFAULT_FREQUENCY = 500
+const MAX_FREQUENCY = 50
+const DEFAULT_MULTIPLIER = 1
+const MAX_MULTIPLIER = 100
 
+const Button = props => {
 	const timer = useRef()
 	const duration = useRef(0)
 	const frequency = useRef(DEFAULT_FREQUENCY)
@@ -61,7 +61,15 @@ const Button = props => {
 		}
 	}, [])
 
-	return (<button className={props.className} type={props.type || "button"} disabled={props.disabled} onClick={props.onClick} onMouseDown={start} onMouseUp={clear} style={{userSelect: 'none'}}>{props.children}</button>)
+	return (<button className={props.className} type={props.type} disabled={props.disabled} onClick={props.onClick} onMouseDown={start} onMouseUp={clear} style={{userSelect: 'none'}}>{props.children}</button>)
+}
+
+Button.defaultProps = {
+	type: 'button',
+	disabled: false,
+	onClick: () => {},
+	onHold: undefined,
+	frequency: undefined
 }
 
 export default Button

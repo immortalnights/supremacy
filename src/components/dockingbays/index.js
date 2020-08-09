@@ -7,18 +7,11 @@ const DockingBays = props => {
 	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'docked' }))
 	const planet = useRecoilValue(atoms.planets(props.planet))
 
-	const onClickBay = ship => {
-		if (ship)
-		{
-			props.onSelect(ship)
-		}
-	}
-
 	const bays = []
 	for (let bay = 0; bay < 3; bay++)
 	{
 		const ship = ships[bay]
-		bays.push(<li key={bay} className="bay" title={ship ? ship.name : ''} onClick={() => onClickBay(ship)}>{ship ? ship.name : ''}</li>)
+		bays.push(<li key={bay} className="bay" title={ship ? ship.name : ''} onClick={() => props.onSelect(ship)}>{ship ? ship.name : ''}</li>)
 	}
 
 	return (
@@ -35,6 +28,11 @@ const DockingBays = props => {
 			</div>
 		</div>
 	)
+}
+
+DockingBays.defaultProps = {
+	onSelect: () => {},
+	planet: undefined
 }
 
 export default DockingBays

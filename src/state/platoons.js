@@ -10,6 +10,36 @@ export const selectPlatoon = selectorFamily({
 	}
 })
 
+export const selectPlatoons = selectorFamily({
+	key: 'selectPlatoons',
+	get: key => ({ get }) => {
+		const game = get(state.game)
+		const platoons = []
+
+		// console.log("*** selectPlatoons", key)
+
+		game.platoons.forEach(id => {
+			const p = get(state.platoons(id))
+
+			// console.log(p.name, p.location)
+			// console.log("(key.name == null || key.name === p.name)", (key.name == null || key.name === p.name))
+			// console.log("(key.player == null || key.player === p.owner)", (key.player == null || key.player === p.owner))
+			// console.log("(key.planet == null || key.planet === p.location.planet)", (key.planet == null || (p.location && key.planet === p.location.planet)))
+			// console.log("(key.ship == null || key.ship === p.location.ship)", (key.ship == null || (p.location && key.ship === p.location.ship)))
+
+			if ((key.name == null || key.name === p.name) &&
+				(key.player == null || key.player === p.owner) &&
+				(key.planet == null || (p.location && key.planet === p.location.planet)) &&
+				(key.ship == null || (p.location && key.ship === p.location.ship)))
+			{
+				platoons.push(p)
+			}
+		})
+
+		return platoons
+	}
+})
+
 export const selectPlayerPlatoonIndexes = selectorFamily({
 	key: 'selectPlayerPlatoonIndexes',
 	get: key => ({ get }) => {
@@ -118,8 +148,71 @@ const platoonReducer = (platoon, action) => {
 			}
 			break
 		}
+		case 'transfer':
+		{
+			if (!platoon.commissioned || platoon.troops === 0)
+			{
+				console.warn(`Invalid platoon`)
+			}
+			else if (action.ship.capacity.platoons === 0)
+			{
+				console.warn(`Ship '${action.ship.name}' has no platoon capacity`)
+			}
+			else if (action.direction === 'load')
+			{
+				if (platoon.location.planet == null)
+				{
+					console.warn(`Platoon ${platoon.name} is not on a planet`)
+				}
+				else if (platoon.location.planet !== action.planet.id)
+				{
+					console.warn(`Platoon ${platoon.name} is not on planet ${action.planet.id}`)
+				}
+				else if (action.platoonsInShip.length >= action.ship.capacity.platoons)
+				{
+					console.warn(`Ship '${action.ship.name}' is full`)
+				}
+				else
+				{
+					platoon = { ...platoon }
+					platoon.location = { ...platoon.location }
+
+					delete platoon.location.planet
+					platoon.location.ship = action.ship.id
+				}
+			}
+			else if (action.direction === 'unload')
+			{
+				if (platoon.location.ship == null)
+				{
+					console.warn(`Platoon ${platoon.name} is not on a planet`)
+				}
+				else if (platoon.location.ship !== action.ship.id)
+				{
+					console.warn(`Platoon ${platoon.name} is not in ship ${action.ship.name}`)
+				}
+				else if (action.platoonsOnPlanet.length >= 24)
+				{
+					console.log(`Planet ${action.planet.id} is full`)
+				}
+				else
+				{
+					platoon = { ...platoon }
+					platoon.location = { ...platoon.location }
+
+					platoon.location.planet = action.planet.id
+					delete platoon.location.ship
+				}
+			}
+			else
+			{
+				console.warn("Invalid direction", action.direction)
+			}
+			break;
+		}
 		default:
 		{
+			console.warn(`Unhandled action ${action.type}`)
 			break
 		}
 	}
@@ -155,6 +248,19 @@ export const useCommissionPlatoon  = (platoon, planet) => {
 	return useRecoilCallback(({ snapshot, set }) => () => {
 		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
 		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet })
+		if (reducedPlatoon !== refreshedPlatoon)
+		{
+			set(state.platoons(reducedPlatoon.id), reducedPlatoon)
+		}
+	})
+}
+
+export const useTransferPlatoon  = (planet, ship) => {
+	return useRecoilCallback(({ snapshot, set }) => (direction, platoon) => {
+		const platoonsOnPlanet = snapshot.getLoadable(selectPlatoons({ planet: planet.id })).contents
+		const platoonsInShip = snapshot.getLoadable(selectPlatoons({ ship: ship.id })).contents
+		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
+		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'transfer', direction, planet, ship, platoonsOnPlanet, platoonsInShip })
 		if (reducedPlatoon !== refreshedPlatoon)
 		{
 			set(state.platoons(reducedPlatoon.id), reducedPlatoon)

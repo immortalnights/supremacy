@@ -1,21 +1,28 @@
 import React from 'react'
-import {} from 'recoil'
+import { useRecoilValue } from 'recoil'
+import { selectPlatoons } from '../../state/platoons'
 import './styles.css'
 
 const Platoon = props => {
+
+	const onClick = () => {
+		if (props.name)
+		{
+			props.onClick(props)
+		}
+	}
+
 	return (
 		<React.Fragment>
-			<td>{props.name}</td>
-			<td>{props.troops}</td>
+			<td className="platoon-name" onClick={onClick}>{props.name}</td>
+			<td className="platoon-troops" onClick={onClick}>{props.troops}</td>
 		</React.Fragment>
 	)
 }
 
 const PlatoonGrid = props => {
-	const maxRows = props.rows || 4
-	const maxCols = props.cols || 1
-
-	console.log(maxRows, maxCols)
+	const maxRows = props.rows
+	const maxCols = props.cols
 
 	const rows = []
 	for (let row = 0; row < maxRows; row++)
@@ -23,11 +30,12 @@ const PlatoonGrid = props => {
 		const columns = []
 		for (let col = 0; col < maxCols; col++)
 		{
-			columns.push(<Platoon />)
+			const index = (col * 8) + row
+			columns.push(<Platoon key={index} {...props.platoons[index]} onClick={props.onSelect} />)
 
 			if (maxCols > 1 && col < maxCols - 1)
 			{
-				columns.push(<td className="spacer"></td>)
+				columns.push(<td key={index + 1} className="spacer"></td>)
 			}
 		}
 
@@ -45,12 +53,21 @@ const PlatoonGrid = props => {
 	)
 }
 
+PlatoonGrid.defaultProps = {
+	rows: 4,
+	cols: 1,
+	onSelect: () => {},
+	items: [],
+}
+
 export const ShipPlatoons = props => {
-	return (<PlatoonGrid rows={4} cols={1} />)
+	const platoons = useRecoilValue(selectPlatoons({ ship: props.ship || -1 }))
+	return (<PlatoonGrid rows={4} cols={1} platoons={platoons} onSelect={props.onSelect} />)
 }
 
 export const PlanetPlatoons = props => {
-	return (<PlatoonGrid rows={8} cols={3} />)
+	const platoons = useRecoilValue(selectPlatoons({ planet: props.planet }))
+	return (<PlatoonGrid rows={8} cols={3} platoons={platoons} onSelect={props.onSelect} />)
 }
 
 export default PlatoonGrid

@@ -5,14 +5,6 @@ import { selectPlayerShips } from '../../state/ships'
 import './styles.css'
 
 const Grid = props => {
-
-	const onSelectItem = item => {
-		if (props.onSelectItem)
-		{
-			props.onSelectItem(item)
-		}
-	}
-
 	const rows = []
 	for (let rowIndex = 0; rowIndex < 8; rowIndex++)
 	{
@@ -24,7 +16,7 @@ const Grid = props => {
 			if (props.items[index])
 			{
 				const item = props.items[index]
-				cell = (<td key={index} title={item.name + " (" + item.type + ")"} onClick={e => onSelectItem(item)}>{item.name}</td>)
+				cell = (<td key={index} title={item.name + " (" + item.type + ")"} onClick={e => props.onSelectItem(item)}>{item.name}</td>)
 			}
 			else
 			{
@@ -42,6 +34,11 @@ const Grid = props => {
 			<tbody>{rows}</tbody>
 		</table>
 	)
+}
+
+Grid.defaultProps = {
+	onSelectItem: () => {},
+	items: []
 }
 
 export const PlanetGrid = props => {

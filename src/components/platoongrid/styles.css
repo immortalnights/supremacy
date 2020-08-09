@@ -7,3 +7,15 @@
 	width: 2em;
 	border-style: none;
 }
+
+.platoon.grid td {
+	user-select: none;
+}
+
+.platoon.grid .platoon-name {
+	width: 4em;
+}
+
+.platoon.grid .platoon-troops {
+	width: 3em;
+}
