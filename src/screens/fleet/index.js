@@ -80,7 +80,7 @@ const Fleet = props => {
 						<ShipDetails ship={selected} />
 					</div>
 					<div>
-						<Button disabled={!selected}>Decommission</Button>
+						<Button disabled={!selected}>Abort</Button>
 						<Button disabled={!selected}>Rename</Button>
 					</div>
 				</div>

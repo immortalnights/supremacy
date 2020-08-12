@@ -33,24 +33,24 @@ const PlanetOverview = props => {
 				<dt>Status</dt>
 				<dd>{planet.status}</dd>
 				<dt>Credits</dt>
-				<dd>{planet.resources.credits}</dd>
+				<dd>{planet.resources.credits.toFixed(0)}</dd>
 
 				<dt>Food</dt>
-				<dd>{planet.resources.foodChange} {planet.resources.food} T.</dd>
+				<dd>{planet.resources.foodChange} {planet.resources.food.toFixed(0)} T.</dd>
 				<dt>Minerals</dt>
-				<dd>{planet.resources.minerals} T.</dd>
+				<dd>{planet.resources.minerals.toFixed(0)} T.</dd>
 				<dt>Fuels</dt>
-				<dd>{planet.resources.fuels} T.</dd>
+				<dd>{planet.resources.fuels.toFixed(0)} T.</dd>
 				<dt>Energy</dt>
-				<dd>{planet.resources.energy} T.</dd>
+				<dd>{planet.resources.energy.toFixed(0)} T.</dd>
 			</dl>
 			<dl>
 				<dt>Population</dt>
 				<dd>{planet.population}</dd>
 				<dt>Growth</dt>
-				<dd>{planet.growthChange} {(planet.growth / 100).toFixed(2)} %</dd>
+				<dd>{planet.growthChange} {Math.floor(planet.growth)} %</dd>
 				<dt>Morale</dt>
-				<dd>{(planet.morale / 100).toFixed(2)} %</dd>
+				<dd>{planet.morale.toFixed(0)} %</dd>
 
 				<dt className="flex-columns">
 					<div style={{display: 'flex', flexDirection: 'column'}}>
@@ -59,7 +59,7 @@ const PlanetOverview = props => {
 					</div>
 					<span style={{flex: '1', margin: 'auto'}}>Tax Rate</span>
 				</dt>
-				<dd>{(planet.tax / 100).toFixed(2)} %</dd>
+				<dd>{planet.tax} %</dd>
 
 				<dt>Military Strength</dt>
 				<dd>{0}</dd>

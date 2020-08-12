@@ -61,10 +61,12 @@
 		],
 		"harvester": {
 			"location": "orbit",
-			"food": 0,
-			"minerals": 0,
-			"fuel": 0,
-			"energy": 800
+			"resources": {
+				"food": 0,
+				"minerals": 0,
+				"fuel": 0,
+				"energy": 6
+			}
 		}
 	},
 	"atmos":
@@ -157,10 +159,12 @@
 		],
 		"harvester": {
 			"location": "surface",
-			"food": 0,
-			"minerals": 2000,
-			"fuel": 1000,
-			"energy": -200
+			"resources": {
+				"food": 0,
+				"minerals": 2000,
+				"fuel": 1000,
+				"energy": -200
+			}
 		}
 	},
 	"horticultural":
@@ -193,10 +197,12 @@
 		],
 		"harvester": {
 			"location": "surface",
-			"food": 2000,
-			"minerals": 0,
-			"fuel": 0,
-			"energy": -200
+			"resources": {
+				"food": 12,
+				"minerals": 0,
+				"fuel": 0,
+				"energy": 0
+			}
 		}
 	}
 }

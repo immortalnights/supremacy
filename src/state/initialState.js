@@ -41,7 +41,6 @@ const initializeState = ({set}) => {
 
 	const playerFleet = [
 		{ blueprint: shipData['generator'], name: "Solar 1" },
-		{ blueprint: shipData['carrier'], name: "Carrier 1" },
 		{ blueprint: shipData['atmos'], name: "Atmos 1" },
 	]
 
@@ -67,7 +66,7 @@ const initializeState = ({set}) => {
 
 	const location = {
 		screen: 'solarsystem',
-		planet: null
+		planet: playerCapital.id
 	}
 
 	if (pathName)
