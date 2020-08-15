@@ -1,15 +1,33 @@
-import React from 'react'
-import { RecoilRoot, useRecoilValue } from 'recoil'
+import React, { useState, useEffect } from 'react'
+import { RecoilRoot, useRecoilValue, useTransactionObservation_UNSTABLE } from 'recoil'
 // import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
-import initializeState from './state/initialState'
+import { random } from './logic/general'
+import newGameState from './state/newgamestate'
+import initializeState from './state/initializestate'
+import { usePersistentState, getLocalStorageValue } from './state/persistentstate'
 import { useSendAtmos } from './state/ships'
 import Content from './content'
+import Button from './components/button'
 import Navigation from './components/navigation'
 import { viewAtom } from './state/nav'
 import Tick from './logic/tick'
 import './App.css'
 
+
+const PersistenceObserver = props => {
+	console.log("PersistenceObserver", props)
+	useTransactionObservation_UNSTABLE(({ atomValues, atomInfo, modifiedAtoms }) => {
+		const data = {}
+		atomValues.forEach((item, key) => {
+			data[key] = item
+		})
+
+		window.localStorage.setItem('savegame_' + props.slot, JSON.stringify(data));
+	});
+
+	return null;
+}
 
 const Game = (props) => {
 	const view = useRecoilValue(viewAtom)
@@ -38,6 +56,7 @@ const Game = (props) => {
 		// 
 	}
 
+	console.log("Game selected,", selected)
 	return (
 		<React.Fragment>
 			<Tick />
@@ -47,18 +66,87 @@ const Game = (props) => {
 	)
 }
 
-const MockBrowser = props => {
-	return (<div><a href="/game/0">Game</a></div>)
+const initialGameState = gameOptions => {
+	let newGameData
+	let saveGameData
+	switch (gameOptions.action)
+	{
+		case 'new':
+		{
+			newGameData = newGameState(gameOptions)
+			break
+		}
+		case 'load':
+		{
+			saveGameData = getLocalStorageValue('savegame_' + gameOptions.slot)
+			break
+		}
+		default:
+		{
+			throw ("Invalid action")
+			break
+		}
+	}
+
+	return ({ set }) => initializeState(set, newGameData, saveGameData)
+}
+
+const GameRoot = props => {
+	console.log("GameRoot", props)
+	const initialState = initialGameState(props)
+
+	return (
+		<RecoilRoot initializeState={initialState}>
+			<PersistenceObserver slot={props.slot} />
+			<Game />
+		</RecoilRoot>
+	)
+}
+
+const MainMenu = props => {
+	return (
+		<div>
+			<h2>Supremacy</h2>
+			<div><Button disabled={!props.canContinue} onClick={props.onContinueGame}>Continue</Button></div>
+			<div><Button onClick={props.onNewGame}>New Game</Button></div>
+			<div><Button disabled={true}>Multiplayer</Button></div>
+			<div><Button disabled={true}>Load Game</Button></div>
+		</div>
+	)
 }
 
 function App() {
-	const content = useMatchmakingRouter(MockBrowser, undefined, Game)
+	let pathName = window.location.pathname
+	const url = pathName.match(/\/game\/([\w_]+)?/, '')
 
-	return (
-		<RecoilRoot initializeState={initializeState}>
-			{content}
-		</RecoilRoot>
-	)
+	const [ playOptions, setPlayOptions ] = useState(null)
+	const [ slot, setSlot ] = usePersistentState('slot', null)
+
+	const onNewGame = () => {
+		const newGameSlot = 'slot_1'
+		setSlot(newGameSlot)
+		setPlayOptions({ action: 'new', slot })
+	}
+
+	const onContinueGame = () => {
+		setPlayOptions({ action: 'load', slot })
+	}
+
+	let content;
+	if (url && url[1] === '0')
+	{
+		content = <GameRoot {...{ action: 'load', slot: 'slot_1' }} />
+	}
+	else if (playOptions)
+	{
+		content = <GameRoot {...playOptions} />
+	}
+	else
+	{
+		content = (<MainMenu onNewGame={onNewGame} canContinue={slot} onContinueGame={onContinueGame} />)
+	}
+
+	return (<div>{content}</div>)
 }
 
 export default App

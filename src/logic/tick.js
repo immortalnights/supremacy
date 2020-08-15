@@ -30,13 +30,13 @@ const harvestResources = (ship, planet) => {
 	})
 }
 
-const changeSymbol = (current, previous) => {
+const changeSymbol = (current, previous, sym) => {
 	const change = current - previous
 	let symbol
 
 	if (change === 0)
 	{
-		symbol = ' '
+		symbol = sym
 	}
 	else if (change < 0)
 	{
@@ -152,18 +152,20 @@ const updatePlanet = (planet, planetOwner, date) => {
 		planet.resources = { ...planet.resources }
 
 		let starvation = false
+		const oddDate = (date.day % 2) !== 0
 
 		// Credits are only paid every other tick
-		planet.creditTick = 1 - planet.creditTick
-		if (planet.creditTick === 1)
+		if (oddDate)
 		{
-			const creditsIncome = planet.population * (planet.creditsPerPop * planet.multipliers.resources.credits)
+			const taxPerPop = ((planet.creditsPerPop * planet.multipliers.resources.credits) * (planet.tax / 100))
+			const creditsIncome = planet.population * taxPerPop
 			planet.resources.credits = planet.resources.credits + creditsIncome
+			// console.log("Tax", taxPerPop, creditsIncome, planet.resources.credits)
 		}
 
 		// handle food
 		const foodConsumed = planet.population * (planet.foodPerPop * planet.multipliers.resources.food)
-		planet.resources.food = planet.resources.food - foodConsumed
+		// planet.resources.food = planet.resources.food - foodConsumed
 
 		if (planet.resources.food < 0)
 		{
@@ -171,9 +173,9 @@ const updatePlanet = (planet, planetOwner, date) => {
 			planet.resources.food = 0
 		}
 
-		console.log("food", planet.population, foodConsumed, planet.resources.food)
+		// console.log("Food", planet.population, foodConsumed, planet.resources.food)
 
-		planet.resources.foodChange = changeSymbol(planet.resources.food, planet.resources.previousFood)
+		planet.resources.foodChange = changeSymbol(planet.resources.food, planet.resources.previousFood, planet.resources.foodChange)
 		planet.resources.previousFood = planet.resources.food
 
 		// TEST don't log plant A morale/growth
@@ -182,7 +184,7 @@ const updatePlanet = (planet, planetOwner, date) => {
 
 		// handle morale
 		const targetMorale = 100 - planet.tax
-		console.log("morale target", targetMorale)
+		// console.log("Morale target", targetMorale)
 
 		// calculate growth based on morale, but if the planet is out of food the morale defaults to 1
 		if (starvation)
@@ -201,23 +203,24 @@ const updatePlanet = (planet, planetOwner, date) => {
 			}
 		}
 
-		let targetGrowth = 33
-		if (starvation)
+		const baseGrowth = -50 * (planet.tax / 100)
+		const targetGrowth = 33 * (planet.morale / 100)
+		// console.log("Base", baseGrowth, "Target", targetGrowth, '=', baseGrowth + targetGrowth)
+
+		const diff = targetGrowth - planet.growthAdjustment
+		// console.log(diff, planet.growthAdjustment)
+		if (targetGrowth < planet.growthAdjustment)
 		{
-			targetGrowth = targetGrowth - 7
+			planet.growthAdjustment = planet.growthAdjustment - Math.min(Math.abs(diff), 1)
+		}
+		else if (targetGrowth > planet.growthAdjustment)
+		{
+			planet.growthAdjustment = planet.growthAdjustment + Math.min(Math.abs(diff), 1)
 		}
 
-		targetGrowth = targetGrowth - ((100 - planet.morale) * 0.5) - ((planet.tax / 10) * 3)
+		planet.growth = Math.ceil(baseGrowth + planet.growthAdjustment)
 
-		const growthChange = Math.min(Math.abs(planet.growth - targetGrowth), 1)
-		console.log("change", planet.growth, targetGrowth, planet.growth - targetGrowth, Math.abs(planet.growth - targetGrowth))
-		console.log("growth target", targetGrowth, growthChange, planet.previousGrowth)
-
-		if (starvation)
-		{
-			planet.growth = targetGrowth
-		}
-		else if (targetGrowth < planet.growth)
+		if (targetGrowth < planet.growth)
 		{
 			planet.growth = planet.growth - .5
 		}
@@ -226,8 +229,26 @@ const updatePlanet = (planet, planetOwner, date) => {
 			planet.growth = planet.growth + .5
 		}
 
-		planet.growthChange = changeSymbol(planet.growth, planet.previousGrowth)
+		planet.growthChange = changeSymbol(planet.growth, planet.previousGrowth, planet.growthChange)
 		planet.previousGrowth = planet.growth
+
+		// update population
+		if (oddDate)
+		{
+			const populationGrowth = (planet.population * (planet.growth / 100))
+			planet.population = planet.population + populationGrowth
+
+			if (planet.population < 1)
+			{
+				planet.population = 0
+			}
+			else if (planet.population > 30000)
+			{
+				planet.population = 30000
+			}
+
+			// console.log("Growth", planet.growth, populationGrowth, planet.population)
+		}
 	}
 
 	return planet
@@ -297,15 +318,17 @@ const tick = (snapshot, set) => {
 	platoons.forEach(platoon => set(store.platoons(platoon.id), platoon))
 }
 
-
 const Tick = props => {
 	const currentDate = useRecoilValue(store.date)
-	const callback = useRecoilCallback(({ snapshot, set }) => () => tick(snapshot, set))
+	const settings = useRecoilValue(store.settings)
+	const callback = useRecoilCallback(({ snapshot, set }) => () => {
+		tick(snapshot, set)
+	})
 
 	useEffect(() => {
 		// console.log("useEffect")
-		setTimeout(callback, 1000)
-	}, [currentDate]) // don't pass callback as dependancy...
+		setTimeout(callback, settings.speed)
+	}, [currentDate]) // don't pass callback as dependency...
 
 	return false
 }

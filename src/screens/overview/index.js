@@ -46,7 +46,7 @@ const PlanetOverview = props => {
 			</dl>
 			<dl>
 				<dt>Population</dt>
-				<dd>{planet.population}</dd>
+				<dd>{planet.population.toFixed(0)}</dd>
 				<dt>Growth</dt>
 				<dd>{planet.growthChange} {Math.floor(planet.growth)} %</dd>
 				<dt>Morale</dt>

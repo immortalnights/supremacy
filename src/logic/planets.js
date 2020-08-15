@@ -1,7 +1,4 @@
-
-const random = (min, max) => {
-	return Math.floor(Math.random() * (max - min) ) + min
-}
+import { random } from './general'
 
 const deviation = (base, minDeviation, maxDeviation) => {
 	const min = base + (base * -minDeviation)
@@ -125,9 +122,10 @@ export const terraformPlanet = (player, planet, name) => {
 	planet.type = type.name
 	planet.population = random(1500, 3000)
 	planet.growth = 0
+	planet.growthAdjustment = 0
 	planet.previousGrowth = 0
-	planet.morale = 100
-	planet.tax = 0
+	planet.morale = 75
+	planet.tax = 25
 	planet.status = ''
 	planet.resources = {
 		credits: 0,
@@ -140,7 +138,6 @@ export const terraformPlanet = (player, planet, name) => {
 	planet.resources.foodChange = ''
 	planet.foodPerPop = 0.004
 	planet.creditsPerPop = 0.32
-	planet.creditTick = 0
 	planet.multipliers = {
 		resources: { ...type.multipliers.resources },
 		harvesting: { ...type.multipliers.harvesting }
@@ -161,7 +158,7 @@ export const claimCapital = (player, planet, name, deviate) => {
 	planet.population = deviation(1500, deviate.min, deviate.max)
 	planet.resources = {
 		credits: deviation(60000, deviate.min, deviate.max),
-		food: 50, //deviation(2500, deviate.min, deviate.max),
+		food: deviation(2500, deviate.min, deviate.max),
 		minerals: deviation(3000, deviate.min, deviate.max),
 		fuels: deviation(3500, deviate.min, deviate.max),
 		energy: deviation(4000, deviate.min, deviate.max)

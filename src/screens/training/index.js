@@ -67,7 +67,7 @@ const Training = props => {
 				</div>
 				<div className="flex-columns">
 					<div>Civilians</div>
-					<div>{capital.population}</div>
+					<div>{capital.population.toFixed(0)}</div>
 				</div>
 			</div>
 			<div className="flex-columns">
@@ -77,7 +77,7 @@ const Training = props => {
 						<label>Location</label> {capital.name}
 					</div>
 					<div>
-						<label>Credits</label> {capital.resources.credits}
+						<label>Credits</label> {capital.resources.credits.toFixed(0)}
 					</div>
 					<div>
 						<label>Rank</label> {platoon.rank}
@@ -91,7 +91,7 @@ const Training = props => {
 						<Button>Disband</Button>
 					</div>
 					<div>
-						<label>Calibre</label> {platoon.calibre}%
+						<label>Calibre</label> {platoon.calibre.toFixed(0)}%
 					</div>
 				</div>
 			</div>

@@ -1,4 +1,8 @@
 
+export const random = (min, max) => {
+	return Math.floor(Math.random() * (max - min) ) + min
+}
+
 export const nextIndex = (index, length) => {
 	let next = index + 1
 	if (next > length - 1)

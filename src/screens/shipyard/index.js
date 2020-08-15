@@ -14,7 +14,7 @@ const Details = props => {
 		<div className="flex-columns" style={{justifyContent: 'space-around'}}>
 			<div>
 				<label>Starbase</label>
-				<div>{capital.resources.credits} :Credits</div>
+				<div>{capital.resources.credits.toFixed(0)} :Credits</div>
 			</div>
 			<div>
 				<label>Cost</label>
