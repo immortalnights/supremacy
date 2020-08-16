@@ -39,7 +39,7 @@ const initializeState = (set, newGameData, saveGameData) => {
 			const name = parts[0]
 			const realKey = parseKey(parts[parts.length - 1])
 			const atom = store[name]
-			console.log(name, typeof(atom), realKey)
+			// console.log(name, typeof(atom), realKey)
 			set(typeof(atom) === 'function' ? atom(realKey) : atom, saveGameData[key])
 		})
 	}

@@ -53,7 +53,7 @@ const changeSymbol = (current, previous, sym) => {
 const updateShip = (ship, shipOwner, planet, currentDate) => {
 	if (ship.heading)
 	{
-		if (date.equal(ship.heading.arrival, currentDate))
+		if (date.lessThen(ship.heading.arrival, currentDate))
 		{
 			console.log(`Ship ${ship.name} has arrived at ${ship.heading.to.name || ship.heading.to.id}`)
 			ship = { ...ship }
@@ -91,7 +91,7 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 			{
 				if (ship.location.state === 'active' && ship.terraforming)
 				{
-					if (date.equal(ship.terraforming.completion, currentDate))
+					if (date.lessThen(ship.terraforming.completion, currentDate))
 					{
 						console.log(`Terraforming of planet ${ship.location.planet} completed.`)
 
@@ -165,7 +165,7 @@ const updatePlanet = (planet, planetOwner, date) => {
 
 		// handle food
 		const foodConsumed = planet.population * (planet.foodPerPop * planet.multipliers.resources.food)
-		// planet.resources.food = planet.resources.food - foodConsumed
+		planet.resources.food = planet.resources.food - foodConsumed
 
 		if (planet.resources.food < 0)
 		{
@@ -278,7 +278,11 @@ const tick = (snapshot, set) => {
 		const player = snapshot.getLoadable(selectPlayer(ship.owner)).contents
 
 		let planetIndex = -1
-		if (ship.location && ship.location.planet)
+		if (ship.heading && ship.heading.to)
+		{
+			planetIndex = planets.findIndex(p => p.id === ship.heading.to.id)
+		}
+		else if (ship.location && ship.location.planet)
 		{
 			planetIndex = planets.findIndex(p => p.id === ship.location.planet)
 		}

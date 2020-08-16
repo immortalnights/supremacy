@@ -3,9 +3,11 @@ import { useRecoilValue } from 'recoil'
 import { Button } from 'seventh-component-library'
 import { useNavigate } from '../../state/nav'
 import StarDate from '../../components/date'
+import Message from '../../components/message'
+import InlineName from '../../components/inlinename'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
-import { useChangeTax } from '../../state/planets'
+import { useChangeTax, useRename } from '../../state/planets'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
 import './styles.css'
 
@@ -104,8 +106,7 @@ const IconGrid = props => {
 
 const OverviewSlots = props => {
 	const [ slotType, setSlotType ] = useState('surface')
-	const key = { planet: props.planet, position: slotType }
-	const planet = useRecoilValue(store.planets(props.planet))
+	const key = { planet: props.planet.id, position: slotType }
 	const ships = useRecoilValue(selectShipsAtPlanetPosition(key))
 
 	// for some reason this is being re-rendered on tick
@@ -120,17 +121,17 @@ const OverviewSlots = props => {
 	{
 		case 'orbit':
 		{
-			message = `Ships in orbit of ${planet.name}`
+			message = `Ships in orbit of ${props.planet.name}`
 			break
 		}
 		case 'surface':
 		{
-			message = `Ships on surface of ${planet.name}`
+			message = `Ships on surface of ${props.planet.name}`
 			break
 		}
 		case 'docked':
 		{
-			message = `Ships docked at ${planet.name}`
+			message = `Ships docked at ${props.planet.name}`
 			break
 		}
 		default:
@@ -153,8 +154,11 @@ const OverviewSlots = props => {
 }
 
 const Overview = props => {
+	console.log("Overview.render")
+	const planet = useRecoilValue(store.planets(props.planet))
+	const renamePlanet = useRename()
 	const navigate = useNavigate()
-	// const [ selected, setSelected ] = useState(props.planet)
+	const [ rename, setRename ] = useState(false)
 	const selected = props.planet
 
 	const onSelectItem = item => {
@@ -164,23 +168,38 @@ const Overview = props => {
 		navigate('overview', item.id)
 	}
 
-	console.log("render overview")
+	const onStartRename = () => {
+		setRename(true)
+	}
+
+	const onCancelRename = () => {
+		setRename(false)
+	}
+
+	const onSetName = name => {
+		renamePlanet(planet, name)
+		setRename(false)
+	}
+
+	const onTransferCredits = () => {
+		// Transfer credits from all other planets to Capital
+	}
 
 	return (
 		<div>
 			<div className="flex-columns">
 				<div style={{display: 'flex', flexDirection: 'column'}}>
-					<Button>Rename</Button>
-					<Button>Transfer Credits</Button>
+					<Button onClick={onStartRename}>Rename</Button>
+					<Button onClick={onTransferCredits}>Transfer Credits</Button>
 				</div>
 				<PlanetOverview id={selected} />
 			</div>
 			<div className="flex-columns">
 				<div>
-					<div>Messages</div>
+					{rename ? (<InlineName message="Rename planet" value={planet.name} onCancel={onCancelRename} onSetName={onSetName} />) : <Message />}
 					<PlanetGrid onSelectItem={onSelectItem} />
 				</div>
-				<OverviewSlots planet={selected} />
+				<OverviewSlots planet={planet} />
 			</div>
 		</div>
 	)

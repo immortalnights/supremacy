@@ -8,7 +8,6 @@ export const viewAtom = atom({
 
 export const useNavigate = () => {
 	return useRecoilCallback(({ snapshot, set }) => (screen, planet) => {
-		console.log('nav', screen, planet)
 		window.history.pushState(null, null, `/game/0/${screen}/${planet || ''}`)
 
 		set(viewAtom, {

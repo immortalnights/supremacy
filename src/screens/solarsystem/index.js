@@ -9,7 +9,7 @@ const Planet = props => {
 	const planet = useRecoilValue(store.planets(props.id))
 
 	return (
-		<div>{planet.name || "Lifeless Planet"}</div>
+		<div className={!planet.name ? "lifeless" : ""} >{planet.name || "Lifeless Planet"}</div>
 	)
 }
 

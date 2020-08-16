@@ -70,6 +70,15 @@ const planetReducer = (planet, action) => {
 			}
 			break
 		}
+		case 'rename':
+		{
+			if (action.name)
+			{
+				planet = { ...planet }
+				planet.name = action.name
+			}
+			break
+		}
 		default:
 		{
 			console.warn(`Unhandled action ${action.type}`)
@@ -84,6 +93,19 @@ export const useChangeTax = () => {
 	const callback = useRecoilCallback(({ snapshot, set }) => (planet, value) => {
 		const refreshed = snapshot.getLoadable(atoms.planets(planet.id)).contents
 		const reduced = planetReducer(refreshed, { type: 'tax', value })
+		if (reduced !== refreshed)
+		{
+			set(atoms.planets(reduced.id), reduced)
+		}
+	})
+
+	return callback
+}
+
+export const useRename = () => {
+	const callback = useRecoilCallback(({ snapshot, set }) => (planet, name) => {
+		const refreshed = snapshot.getLoadable(atoms.planets(planet.id)).contents
+		const reduced = planetReducer(refreshed, { type: 'rename', name })
 		if (reduced !== refreshed)
 		{
 			set(atoms.planets(reduced.id), reduced)

@@ -32,6 +32,10 @@ export const equal = (a, b) => {
 	return a.d === b.d && a.y === b.y
 }
 
+export const lessThen = (a, b) => {
+	return a.y < b.y || a.y === b.y && a.d < b.d
+}
+
 export const add = (a, b) => {
 	const days = a.d + b.d
 	return {
@@ -50,6 +54,7 @@ export default {
 	next,
 	fromDays,
 	equal,
+	lessThen,
 	add,
 	diff
 }
