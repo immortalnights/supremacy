@@ -137,7 +137,7 @@ export const terraformPlanet = (player, planet, name) => {
 	planet.resources.previousFood = planet.resources.food
 	planet.resources.foodChange = ''
 	planet.foodPerPop = 0.004
-	planet.creditsPerPop = 0.32
+	planet.creditsPerPop = 0.008
 	planet.multipliers = {
 		resources: { ...type.multipliers.resources },
 		harvesting: { ...type.multipliers.harvesting }
