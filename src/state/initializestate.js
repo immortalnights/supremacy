@@ -48,7 +48,8 @@ const initializeState = (set, newGameData, saveGameData) => {
 		throw ("Invalid game data")
 	}
 
-	const playerCapital = 'h'
+	// FIXME this needs to be better!
+	const playerCapital = { id: 'h' }
 
 	let pathName = window.location.pathname
 	pathName = pathName.replace(/\/game\/([\d]+)?/, '')

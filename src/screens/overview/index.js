@@ -7,7 +7,7 @@ import Message from '../../components/message'
 import InlineName from '../../components/inlinename'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
-import { useChangeTax, useRename } from '../../state/planets'
+import { useChangeTax, useRename, useTransferCredits } from '../../state/planets'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
 import './styles.css'
 
@@ -156,6 +156,7 @@ const OverviewSlots = props => {
 const Overview = props => {
 	console.log("Overview.render")
 	const planet = useRecoilValue(store.planets(props.planet))
+	const transferCredits = useTransferCredits({ id: planet.owner })
 	const renamePlanet = useRename()
 	const navigate = useNavigate()
 	const [ rename, setRename ] = useState(false)
@@ -183,6 +184,7 @@ const Overview = props => {
 
 	const onTransferCredits = () => {
 		// Transfer credits from all other planets to Capital
+		transferCredits()
 	}
 
 	return (

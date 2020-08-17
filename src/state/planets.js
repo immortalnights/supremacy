@@ -79,6 +79,18 @@ const planetReducer = (planet, action) => {
 			}
 			break
 		}
+		case 'transfer':
+		{
+			if (planet.resources.credits > 0)
+			{
+				planet = { ...planet }
+				planet.resources = { ...planet.resources }
+				action.capital.resources = { ...action.capital.resources }
+				action.capital.resources.credits = action.capital.resources.credits + planet.resources.credits
+				planet.resources.credits = 0
+			}
+			break
+		}
 		default:
 		{
 			console.warn(`Unhandled action ${action.type}`)
@@ -109,6 +121,36 @@ export const useRename = () => {
 		if (reduced !== refreshed)
 		{
 			set(atoms.planets(reduced.id), reduced)
+		}
+	})
+
+	return callback
+}
+
+export const useTransferCredits = player => {
+	const callback = useRecoilCallback(({ snapshot, set }) => () => {
+		const game = snapshot.getLoadable(atoms.game).contents
+		player = game.players.find(p => p.id === player.id)
+		const capital = { ...snapshot.getLoadable(atoms.planets(player.capitalPlanet)).contents }
+
+		let tansferedCredits = false
+		game.planets.forEach(id => {
+			const planet = snapshot.getLoadable(atoms.planets(id)).contents
+
+			if (capital !== planet && planet.owner === player.id)
+			{
+				const reduced = planetReducer(planet, { type: 'transfer', capital })
+				if (reduced !== planet)
+				{
+					set(atoms.planets(reduced.id), reduced)
+					tansferedCredits = true
+				}
+			}
+		})
+
+		if (tansferedCredits)
+		{
+			set(atoms.planets(capital.id), capital)
 		}
 	})
 
