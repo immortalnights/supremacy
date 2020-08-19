@@ -163,6 +163,7 @@ const Overview = props => {
 	const selected = props.planet
 
 	const onSelectItem = item => {
+		setRename(false)
 		// setSelected(item.id)
 		console.log("Select planet", item.id)
 		// setView({ screen: 'overview', planet: item.id })

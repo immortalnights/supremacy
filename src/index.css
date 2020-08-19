@@ -20,6 +20,10 @@ code {
   flex: 1 1 0px;
 }
 
+.space-around {
+  justify-content: space-around;
+}
+
 dl {
   display: flex;
   flex-wrap: wrap;
@@ -39,6 +43,7 @@ dd {
 
 .stacked-buttons > button {
   flex: 1;
+  margin: 10px;
 }
 
 button.small {

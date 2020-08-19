@@ -24,7 +24,7 @@ const harvestResources = (ship, planet) => {
 		if (harvest)
 		{
 			const change = harvest * multiplier
-			console.log(planet.type, resource, harvest, `*${multiplier}`, change, planet.resources[resource])
+			// console.log(planet.type, resource, harvest, `*${multiplier}`, change, planet.resources[resource])
 			planet.resources[resource] = planet.resources[resource] + change
 		}
 	})
@@ -113,7 +113,7 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 			}
 			case 'Solar-Satellite Generator':
 			{
-				if (ship.location.position === 'orbit')
+				if (ship.location.position === 'orbit' && ship.owner === planet.owner)
 				{
 					planet = { ...planet }
 					harvestResources(ship, planet);
@@ -123,7 +123,7 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 			case 'Core Mining Station':
 			case 'Horticultural Station':
 			{
-				if (ship.location.position === 'surface' && ship.location.state === 'active')
+				if (ship.location.position === 'surface' && ship.location.state === 'active' && ship.owner === planet.owner)
 				{
 					planet = { ...planet }
 					harvestResources(ship, planet)

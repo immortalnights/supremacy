@@ -37,6 +37,11 @@ const Content = props => {
 				content = (<Combat planet={props.planet} />)
 				break
 			}
+			case 'fleet':
+			{
+				content = (<Fleet planet={props.planet} />)
+				break
+			}
 			default:
 			{
 				// TODO add error message

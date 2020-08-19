@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import './styles.css'
 
 const InlineName = props => {
 	const [ name, setName ] = useState()
@@ -36,12 +37,13 @@ const InlineName = props => {
 	}
 
 	return (
-		<div>
-			<form onSubmit={onSubmit}>
-				<label htmlFor="inlinenameinput">{props.message}</label>
-				<input type="text" id="inlinenameinput" name="name" defaultValue={props.value} autoFocus onKeyDown={onKeyDown} />
-			</form>
-		</div>
+		<form onSubmit={onSubmit}>
+			<div className="inlinename-container">
+				<div class="flex-columns"><div></div><label htmlFor="inlinenameinput">{props.message}</label></div>
+				<div><input type="text" id="inlinenameinput" name="name" defaultValue={props.value} autoFocus onKeyDown={onKeyDown} /></div>
+				<div><button type="submit">OK</button></div>
+			</div>
+		</form>
 	)
 }
 

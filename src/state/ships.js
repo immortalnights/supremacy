@@ -362,6 +362,15 @@ const shipReducer = (ship, action) => {
 			}
 			break
 		}
+		case 'rename':
+		{
+			if (action.name)
+			{
+				ship = { ...ship }
+				ship.name = action.name
+			}
+			break
+		}
 		default:
 		{
 			console.warn(`Unhandled action ${action.type}`)
@@ -465,4 +474,17 @@ export const useSendAtmos = () => {
 			console.warn("Player does not own a Atmosphere Processor")
 		}
 	})
+}
+
+export const useRename = () => {
+	const callback = useRecoilCallback(({ snapshot, set }) => (ship, name) => {
+		const refreshed = snapshot.getLoadable(atoms.ships(ship.id)).contents
+		const reduced = shipReducer(refreshed, { type: 'rename', name })
+		if (reduced !== refreshed)
+		{
+			set(atoms.ships(reduced.id), reduced)
+		}
+	})
+
+	return callback
 }
