@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useRecoilValue } from 'recoil'
+import { } from 'recoil'
 import Button from '../../components/button'
 import DockingBays from '../../components/dockingbays/'
 import { ShipPlatoons, PlanetPlatoons } from '../../components/platoongrid/'
@@ -20,9 +20,8 @@ const ShipDetails = props => {
 const Combat = props => {
 	const [ ship, setShip ] = useState(null)
 	const transferPlatoon = useTransferPlatoon({ id: props.planet }, ship)
-	// const useRecoilValue()
 	const playerStrength = 0
-	const enermyStrength = 0
+	const enemyStrength = 0
 	const messages = ''
 	const aggression = 0
 
@@ -63,7 +62,7 @@ const Combat = props => {
 					<dt>Your Total Stength</dt>
 					<dd>{playerStrength}</dd>
 					<dt>Enemy Total Stength</dt>
-					<dd>{playerStrength}</dd>
+					<dd>{enemyStrength}</dd>
 					<dt>Total Troops Remaining</dt>
 					<dd>{playerStrength}</dd>
 				</dl>

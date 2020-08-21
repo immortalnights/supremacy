@@ -1,4 +1,4 @@
-import { atom, selector, selectorFamily, useRecoilCallback } from 'recoil'
+import { selectorFamily, useRecoilCallback } from 'recoil'
 import state from './atoms'
 import { MAXIMUM_PLATOON_SIZE } from '../logic/platoons'
 import { calculateTransfer } from '../logic/general'

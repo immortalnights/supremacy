@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export const getLocalStorageValue = (key, defaultValue) => {
 	const persistentValue = window.localStorage.getItem(key);
@@ -6,7 +6,7 @@ export const getLocalStorageValue = (key, defaultValue) => {
 }
 
 export const usePersistentState = (key, defaultValue) => {
-	const [value, setValue] = useState(() => {
+	const [ value, setValue ] = useState(() => {
 		return getLocalStorageValue(key, defaultValue)
 	});
 
@@ -21,7 +21,7 @@ export const usePersistentState = (key, defaultValue) => {
 }
 
 export const usePersistentValue = key => {
-	const [value, setValue] = useState(() => {
+	const [ value ] = useState(() => {
 		return getLocalStorageValue(key, null)
 	});
 

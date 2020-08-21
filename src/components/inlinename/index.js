@@ -2,8 +2,6 @@ import React, { useState } from 'react'
 import './styles.css'
 
 const InlineName = props => {
-	const [ name, setName ] = useState()
-
 	const onSubmit = event => {
 		event.preventDefault()
 

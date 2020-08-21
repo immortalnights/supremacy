@@ -45,7 +45,7 @@ const ShipDetails = props => {
 			<dt>Ship</dt>
 			<dd>{details.name}</dd>
 			<dt>Civilians</dt>
-			<dd>{details.civilians}</dd>
+			<dd>{details.civilians.toFixed(0)}</dd>
 			<dt>Seats</dt>
 			<dd>{details.seats}</dd>
 			<dt>Crew</dt>

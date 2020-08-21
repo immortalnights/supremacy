@@ -7,7 +7,7 @@ const initializeState = (set, newGameData, saveGameData) => {
 
 	if (newGameData)
 	{
-		const { game, players, planets, ships, platoons } = newGameData
+		const { game, planets, ships, platoons } = newGameData
 
 		// set
 		set(store.game, game)
@@ -26,8 +26,6 @@ const initializeState = (set, newGameData, saveGameData) => {
 	}
 	else if (saveGameData)
 	{
-		const { game } = saveGameData
-
 		const parseKey = key => {
 			key = key.replace(/"/g, '')
 			return isNaN(key) ? key : Number(key)
@@ -45,7 +43,7 @@ const initializeState = (set, newGameData, saveGameData) => {
 	}
 	else
 	{
-		throw ("Invalid game data")
+		throw Error("Invalid game data")
 	}
 
 	// FIXME this needs to be better!

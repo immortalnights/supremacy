@@ -94,8 +94,8 @@ const CargoItem = props => {
 					</div>
 					<div style={{textAlign: 'center'}}>{props.type}</div>
 				</div>
-				<div className="cargo-item planet-cargo-item">{props.available}</div>
-				<div className="cargo-item ship-cargo-item">{props.loaded}</div>
+				<div className="cargo-item planet-cargo-item">{props.available.toFixed(0)}</div>
+				<div className="cargo-item ship-cargo-item">{props.loaded.toFixed(0)}</div>
 			</div>
 		</div>
 	)

@@ -33,7 +33,7 @@ export const equal = (a, b) => {
 }
 
 export const lessThen = (a, b) => {
-	return a.y < b.y || a.y === b.y && a.d < b.d
+	return a.y < b.y || (a.y === b.y && a.d < b.d)
 }
 
 export const add = (a, b) => {

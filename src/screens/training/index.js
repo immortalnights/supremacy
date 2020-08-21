@@ -4,7 +4,7 @@ import Button from '../../components/button'
 import { selectHumanPlayer } from '../../state/game'
 import { selectCapitalPlanet } from '../../state/planets'
 import { MAXIMUM_PLATOONS, ordinal, usePlatoonCostCalc } from '../../logic/platoons'
-import { selectPlayerPlatoonIndexes, selectPlatoon, selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon } from '../../state/platoons'
+import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon } from '../../state/platoons'
 import PlatoonEquipment from './platoonequipment'
 
 const Training = props => {

@@ -145,14 +145,14 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 	return planet
 }
 
-const updatePlanet = (planet, planetOwner, date) => {
+const updatePlanet = (planet, planetOwner, platoons, date) => {
 	if (planet.type !== "Lifeless")
 	{
 		planet = { ...planet }
 		planet.resources = { ...planet.resources }
 
 		let starvation = false
-		const oddDate = (date.day % 2) !== 0
+		const oddDate = (date.d % 2) !== 0
 
 		// Credits are only paid every other tick
 		if (oddDate)
@@ -177,10 +177,6 @@ const updatePlanet = (planet, planetOwner, date) => {
 
 		planet.resources.foodChange = changeSymbol(planet.resources.food, planet.resources.previousFood, planet.resources.foodChange)
 		planet.resources.previousFood = planet.resources.food
-
-		// TEST don't log plant A morale/growth
-		if (planet.id === 'a')
-			return planet
 
 		// handle morale
 		const targetMorale = 100 - planet.tax
@@ -235,7 +231,7 @@ const updatePlanet = (planet, planetOwner, date) => {
 		// update population
 		if (oddDate)
 		{
-			const populationGrowth = (planet.population * (planet.growth / 100))
+			const populationGrowth = ((planet.population / 4) * (planet.growth / 100))
 			planet.population = planet.population + populationGrowth
 
 			if (planet.population < 1)
