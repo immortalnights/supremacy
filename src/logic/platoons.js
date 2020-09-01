@@ -47,11 +47,19 @@ export const ordinal = i => {
 	return i + suffix
 }
 
+export const calculatePlatoonCost = (platoon, suit, weapon) => {
+	return (suit.cost + weapon.cost) * platoon.troops
+}
+
+export const calculatePlatoonStrength = platoon => {
+	// TODO move from state/platoons
+}
+
 export const usePlatoonCostCalc = platoon => {
 	const suit = useRecoilValue(selectSuit(platoon.suit))
 	const weapon = useRecoilValue(selectWeapon(platoon.weapon))
 
-	return (suit.cost + weapon.cost) * platoon.troops
+	return calculatePlatoonCost(platoon, suit, weapon)
 }
 
 export const createPlatoon = (id, player, index, suit, weapon) => {

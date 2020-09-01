@@ -4,7 +4,7 @@ import Button from '../../components/button'
 import { selectHumanPlayer } from '../../state/game'
 import { selectCapitalPlanet } from '../../state/planets'
 import { MAXIMUM_PLATOONS, ordinal, usePlatoonCostCalc } from '../../logic/platoons'
-import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon } from '../../state/platoons'
+import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon, useDisbandPlatoon } from '../../state/platoons'
 import PlatoonEquipment from './platoonequipment'
 
 const Training = props => {
@@ -14,8 +14,11 @@ const Training = props => {
 	const platoon = useRecoilValue(selectPlayerPlatoon({ player: player.id, name: ordinal(index) }))
 	const changeTroops = useChangeTroops(platoon, capital)
 	const commission = useCommissionPlatoon(platoon, capital)
+	const disband = useDisbandPlatoon(platoon)
 	const cost = usePlatoonCostCalc(platoon)
 	let message = ''
+
+	const canDisband = platoon.commissioned && platoon.location.planet === capital.id
 
 	const onHoldMore = modifiers => {
 		const val = modifiers.ctrl ? 5 : 1
@@ -61,8 +64,8 @@ const Training = props => {
 					<div>Troops</div>
 					<div>{platoon.troops}</div>
 					<div className="stacked-buttons">
-						<Button className="small" onHold={onHoldMore} frequency="scale">Up</Button>
-						<Button className="small" onHold={onHoldLess} frequency="scale">Down</Button>
+						<Button className="small" onHold={onHoldMore} frequency="scale" disabled={platoon.commissioned}>Up</Button>
+						<Button className="small" onHold={onHoldLess} frequency="scale" disabled={platoon.commissioned}>Down</Button>
 					</div>
 				</div>
 				<div className="flex-columns">
@@ -88,7 +91,7 @@ const Training = props => {
 					<div>{/*messages*/}</div>
 					<div className="flex-columns">
 						<Button onClick={commission}>Equip</Button>
-						<Button>Disband</Button>
+						<Button onClick={disband} disabled={!canDisband}>Disband</Button>
 					</div>
 					<div>
 						<label>Calibre</label> {platoon.calibre.toFixed(0)}%

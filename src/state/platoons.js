@@ -1,7 +1,10 @@
 import { selectorFamily, useRecoilCallback } from 'recoil'
 import state from './atoms'
+import { selectSuit, selectWeapon } from '../state/equipment'
+import { selectPlayerCapitalPlanet } from '../state/planets'
 import { MAXIMUM_PLATOON_SIZE } from '../logic/platoons'
 import { calculateTransfer } from '../logic/general'
+import { calculatePlatoonCost } from '../logic/platoons'
 
 export const selectPlatoon = selectorFamily({
 	key: 'selectPlatoon',
@@ -27,7 +30,8 @@ export const selectPlatoons = selectorFamily({
 			// console.log("(key.planet == null || key.planet === p.location.planet)", (key.planet == null || (p.location && key.planet === p.location.planet)))
 			// console.log("(key.ship == null || key.ship === p.location.ship)", (key.ship == null || (p.location && key.ship === p.location.ship)))
 
-			if ((key.name == null || key.name === p.name) &&
+			if ((key.commissioned == null || key.commissioned === p.commissioned) &&
+				(key.name == null || key.name === p.name) &&
 				(key.player == null || key.player === p.owner) &&
 				(key.planet == null || (p.location && key.planet === p.location.planet)) &&
 				(key.ship == null || (p.location && key.ship === p.location.ship)))
@@ -140,11 +144,43 @@ const platoonReducer = (platoon, action) => {
 			}
 			else
 			{
-				platoon = { ...platoon }
-				platoon.commissioned = true
-				platoon.location = {
-					planet: action.planet.id
+				const planet = action.planet
+				const cost = calculatePlatoonCost(platoon, action.suit, action.weapon)
+
+				if (cost > planet.resources.credits)
+				{
+					console.warn("Cannot commission platoon, plant does not have enough credits")
 				}
+				else
+				{
+					planet.resources = { ...planet.resources }
+					planet.resources.credits = planet.resources.credits - cost
+
+					platoon = { ...platoon }
+					platoon.commissioned = true
+					platoon.location = {
+						planet: action.planet.id
+					}
+				}
+
+			}
+			break
+		}
+		case 'disband':
+		{
+			if (!platoon.commissioned)
+			{
+				console.warn(`Cannot disband invalid platoon`)
+			}
+			else if (platoon.location.planet !== action.capital.id)
+			{
+				console.warn(`Cannot disband platoon which is not located at the player's capital`)
+			}
+			else
+			{
+				// Troops are not removed from the platoon, but the platoon can be edited
+				platoon = { ...platoon }
+				platoon.commissioned = false
 			}
 			break
 		}
@@ -244,10 +280,27 @@ export const useChangeTroops = (platoon, planet) => {
 	})
 }
 
-export const useCommissionPlatoon  = (platoon, planet) => {
+export const useCommissionPlatoon = (platoon, planet) => {
 	return useRecoilCallback(({ snapshot, set }) => () => {
 		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
-		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet })
+		const refreshedPlanet = { ...snapshot.getLoadable(state.planets(planet.id)).contents }
+		const suit = snapshot.getLoadable(selectSuit(platoon.suit)).contents
+		const weapon = snapshot.getLoadable(selectWeapon(platoon.weapon)).contents
+		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet: refreshedPlanet, suit, weapon })
+		if (reducedPlatoon !== refreshedPlatoon)
+		{
+			set(state.planets(refreshedPlanet.id), refreshedPlanet)
+			set(state.platoons(reducedPlatoon.id), reducedPlatoon)
+		}
+	})
+}
+
+export const useDisbandPlatoon = platoon => {
+	return useRecoilCallback(({ snapshot, set }) => () => {
+		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
+		const capitalPlanet = snapshot.getLoadable(selectPlayerCapitalPlanet({ id: platoon.owner })).contents
+		const platoonPlanet = snapshot.getLoadable(state.planets(platoon.planet)).contents
+		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'disband', planet: platoonPlanet, capital: capitalPlanet })
 		if (reducedPlatoon !== refreshedPlatoon)
 		{
 			set(state.platoons(reducedPlatoon.id), reducedPlatoon)
@@ -255,7 +308,7 @@ export const useCommissionPlatoon  = (platoon, planet) => {
 	})
 }
 
-export const useTransferPlatoon  = (planet, ship) => {
+export const useTransferPlatoon = (planet, ship) => {
 	return useRecoilCallback(({ snapshot, set }) => (direction, platoon) => {
 		const platoonsOnPlanet = snapshot.getLoadable(selectPlatoons({ planet: planet.id })).contents
 		const platoonsInShip = snapshot.getLoadable(selectPlatoons({ ship: ship.id })).contents

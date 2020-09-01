@@ -256,6 +256,9 @@ const tick = (snapshot, set) => {
 
 	const game = snapshot.getLoadable(store.game).contents
 
+	// players is read-only
+	const players = game.players
+
 	// Cannot update an item more the once within the loop as state changes are not applied immediately.
 	// Therefore collect all items and update them.
 	let planets = game.planets.map(id => {
@@ -271,7 +274,7 @@ const tick = (snapshot, set) => {
 	// handle ships first as they may arrive at a planet
 	// replace the ship array with the potentially modified ships
 	ships = ships.map(ship => {
-		const player = snapshot.getLoadable(selectPlayer(ship.owner)).contents
+		const player = players.find(player => player.id === ship.owner)
 
 		let planetIndex = -1
 		if (ship.heading && ship.heading.to)
@@ -295,7 +298,7 @@ const tick = (snapshot, set) => {
 	})
 
 	planets = planets.map(planet => {
-		const player = snapshot.getLoadable(selectPlayer(planet.owner)).contents
+		const player = players.find(player => player.id === planet.owner)
 
 		const platoonsOnPlanet = platoons.filter(p => {
 			return (p.location && p.location.planet === planet.id)
@@ -311,6 +314,39 @@ const tick = (snapshot, set) => {
 		})
 
 		return planet
+	})
+
+	platoons = platoons.map(platoon => {
+		if (platoon)
+		{
+			if (platoon.commissioned === false)
+			{
+				if (platoon.troops > 0 && platoon.calibre < 100)
+				{
+					platoon = { ...platoon }
+
+					if (platoon.troopChange > 0)
+					{
+						// Loose 1% per new troop added
+						platoon.calibre = platoon.calibre - platoon.troopChange
+					}
+
+					// train 3% per tick
+					platoon.calibre = platoon.calibre + 3
+
+					platoon.calibre = Math.max(platoon.calibre, 0)
+					platoon.calibre = Math.min(platoon.calibre, 100)
+				}
+				else if (platoon.troops === 0 && platoon.calibre > 0)
+				{
+					// Reset the clibre if the platoon is emptied
+					platoon = { ...platoon }
+					platoon.calibre = 0
+				}
+			}
+		}
+
+		return platoon
 	})
 
 	ships.forEach(ship => set(store.ships(ship.id), ship))
