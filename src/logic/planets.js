@@ -96,6 +96,7 @@ export const createPlanet = (id, location) => {
 		name: '',
 		habitable: false,
 		type: "Lifeless",
+		radius: random(4000, 25000),
 		population: 0,
 		terraformDuration: random(5, 10), // 99
 
@@ -123,6 +124,7 @@ export const terraformPlanet = (player, planet, name) => {
 	planet.owner = player.id
 	planet.name = name
 	planet.habitable = true
+	delete planet.terraforming
 	planet.type = type.name
 	planet.population = random(1500, 3000)
 	planet.defenderAggression = 25

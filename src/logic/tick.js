@@ -68,8 +68,12 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 			{
 				if (!planet.habitable)
 				{
-					const duration = planet.terraformDuration
+					const duration = planet.terraformDuration * 10
 					const completion = date.add(date.fromDays(duration), currentDate)
+
+					planet = { ...planet }
+					planet.terraforming = true
+
 					// Start terraforming
 					ship.location.position = 'surface'
 					ship.location.state = 'active'

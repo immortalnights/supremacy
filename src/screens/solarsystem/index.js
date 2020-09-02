@@ -5,32 +5,40 @@ import { useNavigate } from '../../state/nav'
 import StarDate from '../../components/date'
 import './styles.css'
 
-const Planet = props => {
-	const planet = useRecoilValue(store.planets(props.id))
+const PlanetList = props => {
+	const game = useRecoilValue(store.game)
+	const navigate = useNavigate()
 
 	return (
-		<div className={!planet.name ? "lifeless" : ""} >{planet.name || "Lifeless Planet"}</div>
+		<ul className="planet-list">
+			{game.planets.map(id => (
+				<li key={id} className={props.selected === id ? 'selected' : ''} onDoubleClick={() => navigate('overview', id)} onClick={() => navigate('solarsystem', id)}>
+					<Planet planet={id} />
+				</li>
+			))}
+		</ul>
+	)
+}
+
+const Planet = props => {
+	const planet = useRecoilValue(store.planets(props.planet))
+
+	return (
+		<div className={planet.habitable ? "" : "lifeless"} >{planet.name || "Lifeless Planet"}</div>
 	)
 }
 
 const SolarSystem = props => {
-	const game = useRecoilValue(store.game)
-	const navigate = useNavigate()
-
-	return (<div className="flex-columns">
-		<div>
-			<ul className="planet-list">
-				{game.planets.map(id => (
-					<li key={id} className={props.planet === id ? 'selected' : ''} onDoubleClick={() => navigate('overview', id)} onClick={() => navigate('solarsystem', id)}>
-						<Planet id={id} />
-					</li>
-				))}
-			</ul>
+	return (
+		<div className="flex-columns">
+			<PlanetList selected={props.planet.id} />
+			<div>
+				<StarDate />
+				<div><img src="" alt={props.planet.type} /></div>
+				<div>{props.planet.terraforming ? "Formatting" : (props.planet.name || "Lifeless")}</div>
+			</div>
 		</div>
-		<div>
-			<StarDate />
-		</div>
-	</div>)
+	)
 }
 
 export default SolarSystem

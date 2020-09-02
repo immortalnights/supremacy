@@ -24,7 +24,7 @@ const Content = props => {
 		{
 			case 'solarsystem':
 			{
-				content = (<SolarSystem planet={props.planet} />)
+				content = (<SolarSystem planet={planet} />)
 				break
 			}
 			case 'shipyard':
@@ -58,7 +58,7 @@ const Content = props => {
 		{
 			case 'solarsystem':
 			{
-				content = (<SolarSystem planet={props.planet} />)
+				content = (<SolarSystem planet={planet} />)
 				break
 			}
 			case 'overview':

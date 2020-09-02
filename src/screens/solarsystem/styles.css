@@ -13,3 +13,7 @@
 .planet-list > li.selected {
 	border-color: blue;
 }
+
+.planet-list > li .lifeless {
+	color: #4e4e4e;
+}

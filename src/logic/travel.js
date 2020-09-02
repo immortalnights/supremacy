@@ -1,7 +1,7 @@
 import date from './date'
 
 export const calculateDistance = (origin, destination) => {
-	return Math.abs(origin.location.y - destination.location.y)
+	return 2 * Math.abs(origin.location.y - destination.location.y)
 }
 
 export const calculateDuration = (distance, ship) => {
