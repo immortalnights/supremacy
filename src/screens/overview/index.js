@@ -1,28 +1,44 @@
 import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
 import { useNavigate } from '../../state/nav'
+import Button from '../../components/button'
 import StarDate from '../../components/date'
 import Message from '../../components/message'
 import InlineName from '../../components/inlinename'
 import { PlanetGrid } from '../../components/grid'
 import store from '../../state/atoms'
-import { useChangeTax, useRename, useTransferCredits } from '../../state/planets'
+import { useSetTax, useSetName, useTransferCredits } from '../../state/planets'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
 import './styles.css'
+
+const TaxControls = props => {
+	const setPlanetTax = useSetTax()
+
+	const onHoldIncTax = modifiers => {
+		const mod = modifiers.ctrl ? 5 : 1
+		setPlanetTax({ id: props.planet.id }, props.planet.tax + mod)
+	}
+
+	const onHoldDecTax = modifiers => {
+		const mod = modifiers.ctrl ? -5 : -1
+		setPlanetTax({ id: props.planet.id }, props.planet.tax + mod)
+	}
+
+	return (
+		<div style={{display: 'flex', flexDirection: 'column', margin: '0 5px'}}>
+			<Button onHold={onHoldIncTax} frequency="scale">Inc</Button>
+			<Button onHold={onHoldDecTax} frequency="scale">Dec</Button>
+		</div>
+	)
+}
 
 const PlanetOverview = props => {
 	// const platoons = useRecoilValue(store.platoons)
 	const planet = useRecoilValue(store.planets(props.id))
-	const changeTax = useChangeTax()
 
 	if (!planet)
 	{
 		return (<div>Planet {props.id} does not exist</div>)
-	}
-
-	const onChangeTax = value => {
-		changeTax({ id: props.id }, value)
 	}
 
 	return (
@@ -55,13 +71,12 @@ const PlanetOverview = props => {
 				<dd>{planet.morale.toFixed(0)} %</dd>
 
 				<dt className="flex-columns">
-					<div style={{display: 'flex', flexDirection: 'column'}}>
-						<Button onClick={() => onChangeTax(1)}>Inc</Button>
-						<Button onClick={() => onChangeTax(-1)}>Dec</Button>
-					</div>
-					<span style={{flex: '1', margin: 'auto'}}>Tax Rate</span>
+					<TaxControls planet={planet}  />
+					<span style={{flex: '1 0 30%', margin: 'auto'}}>Tax Rate</span>
 				</dt>
-				<dd>{planet.tax} %</dd>
+				<dd style={{display: 'flex'}}>
+					<span style={{flex: '1', margin: 'auto'}}>{planet.tax} %</span>
+				</dd>
 
 				<dt>Military Strength</dt>
 				<dd>{0}</dd>
@@ -157,7 +172,7 @@ const Overview = props => {
 	console.log("Overview.render")
 	const planet = useRecoilValue(store.planets(props.planet))
 	const transferCredits = useTransferCredits({ id: planet.owner })
-	const renamePlanet = useRename()
+	const setPlanetName = useSetName()
 	const navigate = useNavigate()
 	const [ rename, setRename ] = useState(false)
 	const selected = props.planet
@@ -179,7 +194,7 @@ const Overview = props => {
 	}
 
 	const onSetName = name => {
-		renamePlanet(planet, name)
+		setPlanetName(planet, name)
 		setRename(false)
 	}
 

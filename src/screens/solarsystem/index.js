@@ -29,13 +29,29 @@ const Planet = props => {
 }
 
 const SolarSystem = props => {
+
+	let displayName = props.planet.terraforming ? "Formatting" : (props.planet.name || "Lifeless")
+	let displayType
+	if (!props.planet.habitable)
+	{
+		displayType = "lifeless"
+	}
+	else if (props.planet.owner === props.player.id)
+	{
+		displayType = props.planet.type
+	}
+	else
+	{
+		displayType = "classified"
+	}
+
 	return (
 		<div className="flex-columns">
 			<PlanetList selected={props.planet.id} />
 			<div>
 				<StarDate />
-				<div><img src="" alt={props.planet.type} /></div>
-				<div>{props.planet.terraforming ? "Formatting" : (props.planet.name || "Lifeless")}</div>
+				<div><img src="" alt={displayType} /></div>
+				<div>{displayName}</div>
 			</div>
 		</div>
 	)

@@ -24,7 +24,7 @@ const Content = props => {
 		{
 			case 'solarsystem':
 			{
-				content = (<SolarSystem planet={planet} />)
+				content = (<SolarSystem planet={planet} player={localPlayer} />)
 				break
 			}
 			case 'shipyard':
@@ -47,7 +47,7 @@ const Content = props => {
 				// TODO add error message
 				navigate('solarsystem', props.planet)
 				// naviage doesn't (currently) prevent the component from rendering
-				content = (<SolarSystem planet={props.planet} />)
+				content = (<SolarSystem planet={planet} player={localPlayer} />)
 				break
 			}
 		}
@@ -58,7 +58,7 @@ const Content = props => {
 		{
 			case 'solarsystem':
 			{
-				content = (<SolarSystem planet={planet} />)
+				content = (<SolarSystem planet={planet} player={localPlayer} />)
 				break
 			}
 			case 'overview':

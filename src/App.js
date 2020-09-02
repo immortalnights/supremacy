@@ -12,6 +12,7 @@ import Button from './components/button'
 import Navigation from './components/navigation'
 import { viewAtom } from './state/nav'
 import Tick from './logic/tick'
+import AI from './logic/ai'
 import './App.css'
 
 
@@ -60,6 +61,7 @@ const Game = (props) => {
 	return (
 		<React.Fragment>
 			<Tick />
+			<AI />
 			<Content {...view} />
 			<Navigation planet={selected} screen={view.screen} onClickTerraform={onClickTerraform} onClickEspionage={onClickEspionage} />
 		</React.Fragment>

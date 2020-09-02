@@ -1,4 +1,5 @@
 import { selector, selectorFamily, useRecoilCallback } from 'recoil'
+import { clamp } from '../logic/general'
 import state from './atoms'
 import { selectLocalPlayer } from './game'
 
@@ -62,21 +63,16 @@ export const selectPopulatedPlanets = selector({
 })
 
 const planetReducer = (planet, action) => {
-	console.log("Planet reducer", planet, action)
+	// console.log("Planet reducer", planet, action)
 
 	switch (action.type)
 	{
 		case 'tax':
 		{
-			if (action.value < 0 && planet.tax > 0)
+			if (planet.tax !== action.value)
 			{
 				planet = { ...planet }
-				planet.tax = planet.tax + action.value
-			}
-			else if (action.value > 0 && planet.tax < 100)
-			{
-				planet = { ...planet }
-				planet.tax = planet.tax + action.value
+				planet.tax = clamp(action.value, 0, 100)
 			}
 			break
 		}
@@ -130,7 +126,7 @@ const planetReducer = (planet, action) => {
 	return planet
 }
 
-export const useChangeTax = () => {
+export const useSetTax = () => {
 	const callback = useRecoilCallback(({ snapshot, set }) => (planet, value) => {
 		const refreshed = snapshot.getLoadable(state.planets(planet.id)).contents
 		const reduced = planetReducer(refreshed, { type: 'tax', value })
@@ -143,7 +139,7 @@ export const useChangeTax = () => {
 	return callback
 }
 
-export const useRename = () => {
+export const useSetName = () => {
 	const callback = useRecoilCallback(({ snapshot, set }) => (planet, name) => {
 		const refreshed = snapshot.getLoadable(state.planets(planet.id)).contents
 		const reduced = planetReducer(refreshed, { type: 'rename', name })

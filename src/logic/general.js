@@ -3,6 +3,10 @@ export const random = (min, max) => {
 	return Math.floor(Math.random() * (max - min) ) + min
 }
 
+export const clamp = (val, min, max) => {
+	return Math.min(Math.max(val, min), max)
+}
+
 export const nextIndex = (index, length) => {
 	let next = index + 1
 	if (next > length - 1)

@@ -353,6 +353,10 @@ const tick = (snapshot, set) => {
 		return platoon
 	})
 
+	// Display changes to AI capital planet for AI debugging
+	// const track = planets.find(p => p.id === 'a')
+	// console.log(track.tax)
+
 	ships.forEach(ship => set(store.ships(ship.id), ship))
 	planets.forEach(planet => set(store.planets(planet.id), planet))
 	platoons.forEach(platoon => set(store.platoons(platoon.id), platoon))
@@ -367,7 +371,11 @@ const Tick = props => {
 
 	useEffect(() => {
 		// console.log("useEffect")
-		setTimeout(callback, settings.speed)
+		const timer = setTimeout(callback, settings.speed)
+
+		return () => {
+			clearTimeout(timer)
+		}
 	}, [currentDate]) // don't pass callback as dependency...
 
 	return false
