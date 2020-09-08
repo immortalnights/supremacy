@@ -9,6 +9,14 @@ export const selectLocalPlayer = selector({
 	}
 })
 
+export const selectAIPlayer = selector({
+	key: 'aiPlayer',
+	get: ({ get }) => {
+		const game = get(atoms.game)
+		return game.players.find(p => p.type === 'ai')
+	}
+})
+
 export const selectHumanPlayer = selectLocalPlayer
 
 export const selectPlayer = selectorFamily({
