@@ -21,9 +21,11 @@ export const A = props => {
 	const navigate = useNavigate()
 
 	const onAClick = e => {
-		e.preventDefault()
-
-		navigate(props.screen, props.planet)
+		if (props.screen)
+		{
+			e.preventDefault()
+			navigate(props.screen, props.planet)
+		}
 	}
 
 	return (<a href={props.href} onClick={onAClick}>{props.children}</a>)

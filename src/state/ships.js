@@ -239,13 +239,16 @@ const shipReducer = (ship, action) => {
 		}
 		case 'terraform':
 		{
+			const origin = action.origin
+			const destination = action.destination
+
 			if (ship.type !== 'Atmosphere Processor')
 			{
 				console.warn(`${ship.type} cannot terraform planets`)
 			}
-			else if (ship.location.planet === action.destination.id)
+			else if (ship.location.planet === destination.id)
 			{
-				console.log("Atmos is is already at", action.destination.name)
+				console.log("Atmos is is already at", destination.name)
 			}
 			else if (ship.heading)
 			{
@@ -256,16 +259,18 @@ const shipReducer = (ship, action) => {
 				const diff = dates.diff(ship.terraforming.completion, action.date)
 				console.warn(`Atmosphere Processor is busy, will complete in ${diff} days`)
 			}
-			else if (action.destination.owner)
+			else if (destination.owner !== null)
 			{
 				console.warn(`Cannot terraform an occupied planet`)
 			}
 			else
 			{
-				const origin = action.origin
-				const destination = action.destination
 
 				ship = beginTravel(ship, origin, destination, action.date)
+
+				// Mark the planet are owned and terraformed
+				destination.terraforming = true
+				destination.owner = ship.owner
 			}
 			break
 		}
@@ -450,22 +455,22 @@ export const useLoadUnloadCargo = (ship, planet) => {
 	})
 }
 
-export const useSendAtmos = () => {
+export const useSendAtmos = player => {
 	return useRecoilCallback(({ snapshot, set }) => planet => {
 		console.assert(planet && planet.id, "Invalid destination planet")
 
-		const player = snapshot.getLoadable(selectHumanPlayer).contents
 		const atmos = findAtmos(snapshot, player)
 
 		if (atmos)
 		{
 			const date = snapshot.getLoadable(atoms.date).contents
 			const origin = snapshot.getLoadable(atoms.planets(atmos.location.planet)).contents
-			const destination = snapshot.getLoadable(atoms.planets(planet.id)).contents
+			const destination = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
 
 			const reducedShip = shipReducer(atmos, { type: 'terraform', origin, destination, date })
 			if (reducedShip !== atmos)
 			{
+				set(atoms.planets(destination.id), destination)
 				set(atoms.ships(reducedShip.id), reducedShip)
 			}
 		}

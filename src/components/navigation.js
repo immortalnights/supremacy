@@ -18,6 +18,7 @@ const Navigation = props => {
 			<A href={'surface/' + planet} screen="surface" planet={planet}>Surface</A>
 			<A href={'combat/' + planet} screen="combat" planet={planet}>Combat</A>
 			<Button onClick={props.onClickEspionage} disabled={!onSolarSystem}>Espionage</Button>
+			<A href='/'>Menu</A>
 		</nav>
 	)
 }

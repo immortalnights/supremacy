@@ -23,6 +23,8 @@ const initializeState = (set, newGameData, saveGameData) => {
 		platoons.forEach(platoon => {
 			set(store.platoons(platoon.id), platoon)
 		})
+
+		set(store.memory, {})
 	}
 	else if (saveGameData)
 	{

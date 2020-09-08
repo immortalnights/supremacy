@@ -1,8 +1,18 @@
 import { atom, atomFamily } from 'recoil'
 
+export const GAME_START_YEAR = 2050
+
 const game = atom({
 	key: 'game',
 	default: null,
+	persistence_UNSTABLE : {
+		type: 'object'
+	}
+})
+
+const memory = atom({
+	key: 'memory',
+	default: {},
 	persistence_UNSTABLE : {
 		type: 'object'
 	}
@@ -20,7 +30,7 @@ const settings = atom({
 
 const date = atom({
 	key: 'date',
-	default: { d: 1, y: 2050 },
+	default: { d: 1, y: GAME_START_YEAR },
 	persistence_UNSTABLE : {
 		type: 'object'
 	}
@@ -50,4 +60,4 @@ const platoons = atomFamily({
 	}
 })
 
-export default { game, settings, date, planets, ships, platoons }
+export default { game, memory, settings, date, GAME_START_YEAR, planets, ships, platoons }
