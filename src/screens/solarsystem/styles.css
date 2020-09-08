@@ -17,3 +17,39 @@
 .planet-list > li .lifeless {
 	color: #4e4e4e;
 }
+
+.planet.enemy label {
+	color: red;
+}
+
+.planet.friendly label {
+	color: green;
+}
+
+@keyframes flickerAnimation {
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@-o-keyframes flickerAnimation{
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@-moz-keyframes flickerAnimation{
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+@-webkit-keyframes flickerAnimation{
+	0%   { opacity: 1; }
+	50%  { opacity: 0; }
+	100% { opacity: 1; }
+}
+/*https://stackoverflow.com/questions/23985018/simple-css-animation-loop-fading-in-out-loading-text*/
+.animate-flicker {
+	-webkit-animation: flickerAnimation 2s infinite;
+	-moz-animation: flickerAnimation 2s infinite;
+	-o-animation: flickerAnimation 2s infinite;
+	animation: flickerAnimation 2s infinite;
+}

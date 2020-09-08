@@ -256,7 +256,7 @@ const shipReducer = (ship, action) => {
 			}
 			else if (ship.location.state === 'active')
 			{
-				const diff = dates.diff(ship.terraforming.completion, action.date)
+				const diff = dates.diff(action.date, ship.terraforming.completion)
 				console.warn(`Atmosphere Processor is busy, will complete in ${diff} days`)
 			}
 			else if (destination.owner !== null)

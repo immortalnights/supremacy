@@ -51,6 +51,13 @@ import { useSendShipToDestination, useSendAtmos } from '../state/ships'
 // 	}
 // }
 
+const nextActionDate = (date, difficulty) => {
+	const wait = dates.fromDays(random(dates.YEAR_LENGTH * 1.5, dates.YEAR_LENGTH * 2.5) * difficulty)
+	const next = dates.add(date, wait)
+	console.log("AI", `Next action ${next.d} / ${next.y}`)
+	return next
+}
+
 
 const compute = ({ date, memory, game, planets, ships, platoons }) => {
 	let tasks = []
@@ -66,10 +73,20 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 		}
 	})
 
-	// AI doesn't do anything for two game years
-	if (date.y < (GAME_START_YEAR + 2))
+
+	if (!memory.initialized)
 	{
-		console.log("AI", `Waiting until later...`, date.y, GAME_START_YEAR)
+		// AI does not perform any action for a random amount of time from the start of the game
+		// TODO time to very based on AI difficultly
+		memory = { ...memory }
+		memory.initialized = true
+		memory.nextAction = nextActionDate(date, 1)
+	}
+
+	// AI doesn't do anything for two game years
+	if (dates.diff(date, memory.nextAction) > 0)
+	{
+		// console.log("AI", `Waiting until later...`, memory.nextAction)
 	}
 	else
 	{
@@ -84,36 +101,42 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 				ref: 'Atmosphere Processor'
 			})
 		}
-		else if (terraformer.terraforming)
+		else if (terraformer.heading || terraformer.terraforming)
 		{
 			// console.log("AI", `Atmosphere Processor is currently busy`)
-		}
-		else if (!memory.lastExpanded || dates.diff(date, memory.lastExpanded) > dates.YEAR_LENGTH)
-		{
-			// find the next available planet
-			const available = planets.find(p => p.owner === null)
-
-			if (available)
-			{
-				memory = { ...memory }
-				memory.lastExpanded = { ...date }
-
-				console.log("AI", `Identified available planet ${available.id}`, available)
-
-				tasks.push({
-					type: 'ship:terraform',
-					ref: available.id
-				})
-			}
-			else
-			{
-				// No available planets!
-
-			}
+			memory = { ...memory }
+			memory.nextAction = nextActionDate(date, 1)
 		}
 		else
 		{
-			// Waiting...
+			// find the next planet to expand to
+			const next = planets.find(p => p.owner !== me.id)
+
+			if (next)
+			{
+				if (next.owner === null)
+				{
+					console.log("AI", `Next planet (${next.id}) is lifeless, sending terraformer`)
+
+					tasks.push({
+						type: 'ship:terraform',
+						ref: next.id
+					})
+				}
+				else
+				{
+					console.log("AI", `Next planet (${next.id}) is owned, send attack wave`)
+
+					tasks.push({
+						type: 'invade',
+						ref: next.id
+					})
+				}
+
+				memory = { ...memory }
+				memory.lastAction = { ...date }
+				memory.nextAction = nextActionDate(date, 1)
+			}
 		}
 	}
 
@@ -166,40 +189,44 @@ const AI = props => {
 
 		set(store.memory, mem)
 
-		if (tasks.length > 0)
+		while (tasks.length > 0)
 		{
-			tasks.forEach(task => {
-				switch (task.type)
+			const task = tasks.pop()
+
+			switch (task.type)
+			{
+				case 'ship:purchase':
 				{
-					case 'ship:purchase':
+					switch (task.ref)
 					{
-						switch (task.ref)
+						case 'Atmosphere Processor':
 						{
-							case 'Atmosphere Processor':
-							{
-								buyShip('atmos', "AI Atmos")
-								break
-							}
-							default:
-							{
-								console.warn("AI", `Attempting to buy ship '${task.ref}'`)
-								break
-							}
+							buyShip('atmos', "AI Atmos")
+							break
 						}
-						break;
+						default:
+						{
+							console.warn("AI", `Attempting to buy ship '${task.ref}'`)
+							break
+						}
 					}
-					case 'ship:terraform':
-					{
-						sendAtmos({ id: task.ref })
-						break;
-					}
-					default:
-					{
-						console.warn("AI", `Unknown task ${task.type}`)
-						break
-					}
+					break;
 				}
-			})
+				case 'ship:terraform':
+				{
+					sendAtmos({ id: task.ref })
+					break;
+				}
+				case 'invade':
+				{
+					break
+				}
+				default:
+				{
+					console.warn("AI", `Unknown task ${task.type}`)
+					break
+				}
+			}
 		}
 	})
 

@@ -45,8 +45,8 @@ export const add = (a, b) => {
 }
 
 // Return number of days between two dates
-export const diff = (a, b) => {
-	return ((a.y - b.y) * YEAR_LENGTH) + (a.d - b.d)
+export const diff = (f, t) => {
+	return ((t.y - f.y) * YEAR_LENGTH) + (t.d - f.d)
 }
 
 export default {

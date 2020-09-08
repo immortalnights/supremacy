@@ -7,29 +7,57 @@ import './styles.css'
 
 const PlanetList = props => {
 	const game = useRecoilValue(store.game)
-	const navigate = useNavigate()
 
 	return (
 		<ul className="planet-list">
-			{game.planets.map(id => (
-				<li key={id} className={props.selected === id ? 'selected' : ''} onDoubleClick={() => navigate('overview', id)} onClick={() => navigate('solarsystem', id)}>
-					<Planet planet={id} />
-				</li>
-			))}
+			{game.planets.map(id => {
+				return (<Planet key={id} planet={id} selected={props.selected === id} />)
+			})}
 		</ul>
 	)
 }
 
 const Planet = props => {
 	const planet = useRecoilValue(store.planets(props.planet))
+	const navigate = useNavigate()
+
+	let terraforming;
+	if (planet.terraforming)
+	{
+		terraforming = (<div className="animate-flicker">Terraforming</div>)
+	}
+
+	const className = ['flex-columns planet']
+
+	if (props.selected)
+	{
+		className.push('selected')
+	}
+
+	if (!planet.habitable)
+	{
+		className.push('lifeless')
+	}
+
+	// FIXME use proper player IDs
+	if (planet.owner !== null)
+	{
+		if (planet.owner === 0)
+		{
+			className.push('enemy')
+		}
+		else
+		{
+			className.push('friendly')
+		}
+	}
 
 	return (
-		<div className={planet.habitable ? "" : "lifeless"} >{planet.name || "Lifeless Planet"}</div>
+		<li className={className.join(' ')} onDoubleClick={() => navigate('overview', planet.id)} onClick={() => navigate('solarsystem', planet.id)}><label>{planet.name || "Lifeless Planet"}</label> {terraforming}</li>
 	)
 }
 
 const SolarSystem = props => {
-
 	let displayName = props.planet.terraforming ? "Formatting" : (props.planet.name || "Lifeless")
 	let displayType
 	if (!props.planet.habitable)
