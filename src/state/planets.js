@@ -115,6 +115,7 @@ const planetReducer = (planet, action) => {
 				planet = { ...planet }
 				planet[role + 'Aggression'] = aggression + (25 * action.direction)
 			}
+			break;
 		}
 		default:
 		{

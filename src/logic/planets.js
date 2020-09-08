@@ -2,7 +2,7 @@ import { selectorFamily } from 'recoil'
 import state from '../state/atoms'
 import { selectLocalPlayer } from '../state/game'
 import { random } from './general'
-import { selectSuit, selectWeapon } from '../state/equipment'
+import { calculatePlatoonStrength } from '../logic/platoons'
 
 const deviation = (base, minDeviation, maxDeviation) => {
 	const min = base + (base * -minDeviation)
@@ -184,36 +184,18 @@ export const selectPlanetStrength = selectorFamily({
 		const realPlanet = get(state.planets(planet))
 		let strength = 0
 
-		const aggresionMultiplier = {
-			25: 1,
-			50: 1.5,
-			75: 2,
-			100: 2.5
-		}
-
-		const aggressionBonus = 308 // ?
+		// FIXME would be better to use the player ID
 
 		game.platoons.forEach(id => {
 			const platoon = get(state.platoons(id))
-			const suit = get(selectSuit(platoon.suit))
-			const weapon = get(selectWeapon(platoon.weapon))
 
 			if (platoon.commissioned && platoon.location && platoon.location.planet === realPlanet.id)
 			{
-				if (role === 'defender' && platoon.owner === realPlanet.owner ||
-					  role === 'attacker' && platoon.owner !== realPlanet.owner)
+				if ((role === 'defender' && platoon.owner === realPlanet.owner) ||
+					  (role === 'attacker' && platoon.owner !== realPlanet.owner))
 				{
 					const aggression = realPlanet[role + 'Aggression']
-					const calibre = platoon.calibre / 100
-
-					const base = ((platoon.troops * suit.armour) + (platoon.troops * weapon.damage)) * calibre
-					const troopAggressionBonus = (0.5 + ((aggression / 25)) * 0.5)
-					const troopTotal = base * troopAggressionBonus
-					const bonus = (aggressionBonus * (aggression / 100)) * calibre
-					const final = troopTotal + bonus
-					console.log(platoon, final)
-
-					strength = strength + final
+					strength = strength + calculatePlatoonStrength(platoon, aggression)
 				}
 			}
 		})

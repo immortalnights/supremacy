@@ -158,6 +158,7 @@ const platoonReducer = (platoon, action) => {
 
 					platoon = { ...platoon }
 					platoon.commissioned = true
+					platoon.unitStrength = action.suit.armour + action.weapon.damage
 					platoon.location = {
 						planet: action.planet.id
 					}

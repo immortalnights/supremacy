@@ -146,7 +146,43 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 
 const handleCombat = (planet, planetOwner, platoons, date) => {
 
-	return planet
+	// Split the platoons by player
+	const attackers = []
+	const defenders = []
+	// Clone the platoon array for modification
+	platoons = [ ...platoons ]
+
+	platoons.forEach(platoon => {
+		if (platoon.owner === planet.owner)
+		{
+			defenders.push(platoon)
+		}
+		else
+		{
+			attackers.push(platoon)
+		}
+	})
+
+	// Handle planet combat if the planet has attackers, defenders are optional
+	if (attackers.length > 0)
+	{
+		const attackersStrength = attackers.reduce((p, t) => t + p.strength, 0)
+		const defendersStrength = defenders.reduce((p, t) => t + p.strength, 0)
+
+		// handle combat
+		if (defenders.length > 0)
+		{
+			
+
+		}
+
+		if (defenders.length === 0)
+		{
+			console.log(`Planet {planet.id} has been conquered`)
+		}
+	}
+
+	return [ planet, platoons ]
 }
 
 const updatePlanet = (planet, planetOwner, platoons, date) => {
@@ -301,6 +337,7 @@ const tick = (snapshot, set) => {
 		return updatedShip
 	})
 
+	// handle planets, combat is resolved before planet updates
 	planets = planets.map(planet => {
 		const player = players.find(player => player.id === planet.owner)
 
@@ -308,7 +345,11 @@ const tick = (snapshot, set) => {
 			return (p.location && p.location.planet === planet.id)
 		})
 
-		planet = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+		// FIXME
+
+		let r = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+		// FIXME again
+		planet = r[0]
 		planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
 
 		// update platoons
@@ -348,10 +389,19 @@ const tick = (snapshot, set) => {
 					platoon.calibre = 0
 				}
 			}
+			else if (platoon.troops === 0)
+			{
+				// Disband
+				platoon.commissioned = false
+				platoon.troopChange = 0
+				platoon.calibre = 0
+			}
 		}
 
 		return platoon
 	})
+
+
 
 	// Display changes to AI capital planet for AI debugging
 	// const track = planets.find(p => p.id === 'a')

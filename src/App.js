@@ -6,6 +6,7 @@ import { random } from './logic/general'
 import newGameState from './state/newgamestate'
 import initializeState from './state/initializestate'
 import { usePersistentState, getLocalStorageValue } from './state/persistentstate'
+import { selectLocalPlayer } from './state/game'
 import { useSendAtmos } from './state/ships'
 import Content from './content'
 import Button from './components/button'
@@ -30,9 +31,10 @@ const PersistenceObserver = props => {
 	return null;
 }
 
-const Game = (props) => {
+const Game = props => {
 	const view = useRecoilValue(viewAtom)
-	const sendAtmos = useSendAtmos()
+	const player = useRecoilValue(selectLocalPlayer)
+	const sendAtmos = useSendAtmos(player)
 
 	const selected = view.planet
 

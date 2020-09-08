@@ -51,8 +51,25 @@ export const calculatePlatoonCost = (platoon, suit, weapon) => {
 	return (suit.cost + weapon.cost) * platoon.troops
 }
 
-export const calculatePlatoonStrength = platoon => {
-	// TODO move from state/platoons
+export const calculatePlatoonStrength = (platoon, aggression) => {
+	const calibrepc = platoon.calibre / 100
+	const aggressionpc = aggression / 100
+	// console.log(calibrepc, aggressionpc)
+
+	// magic number
+	const BASE_STRENGTH = 277
+
+	// core strength, platoon size percentage (100% = 200) multiplied by calibre percentage of base strength
+	const core = (platoon.troops / 200) * (BASE_STRENGTH * calibrepc)
+	// equipment, core multiplied by equipment value
+	const equipment = core * platoon.unitStrength
+	// aggression, core multiplied by aggression "step"
+	const aggr = core * ((aggressionpc / .25) - 1)
+
+	// truncate to drop any awkward decimals
+	const total = Math.trunc(platoon.troops + core + equipment + aggr)
+	console.log(platoon.troops, core, equipment, aggr, total)
+	return total
 }
 
 export const usePlatoonCostCalc = platoon => {

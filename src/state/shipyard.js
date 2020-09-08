@@ -65,7 +65,7 @@ const hasAtmos = (snapshot, player) => {
 	return owned
 }
 
-export const useBuyShip = (player) => {
+export const useBuyShip = player => {
 	return useRecoilCallback(({ snapshot, set }) => (key, name) => {
 		const bps = snapshot.getLoadable(blueprints).contents
 		const game = snapshot.getLoadable(atoms.game).contents
