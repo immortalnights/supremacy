@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
+import Button from '../../components/button'
+import InlineName from '../../components/inlinename/'
 import { selectHumanPlayer } from '../../state/game'
 import { selectCapitalPlanet } from '../../state/planets'
 import { blueprints, selectCountOwnedShip, selectNextShipName, useBuyShip } from '../../state/shipyard'
@@ -81,49 +82,38 @@ const Shipyard = props => {
 	}
 
 	const onClickBuy = () => {
-		console.log(`buy ${index}`)
 		setBuying(true)
 	}
 
-	const onKeyDown = e => {
-		switch (e.key)
-		{
-			case 'Enter':
-			{
-				if (e.target.value)
-				{
-					buyShip(index, e.target.value)
-					setBuying(false)
-				}
-				break
-			}
-			case 'Escape':
-			{
-				setBuying(false)
-				break
-			}
-			default:
-			{
-				break
-			}
-		}
+	const onConfirmBuy = name => {
+		buyShip(index, name)
+		setBuying(false)
 	}
 
-	// console.log(bps, index, bps[index])
+	const onCancelBuy = () => {
+		setBuying(false)
+	}
+
+	let BuyComponent
+	if (buying)
+	{
+		BuyComponent = () => (
+			<InlineName message="Enter name. 'Enter' to confirm, 'Esc' to cancel." name="name" value={nextShipName} onComplete={onConfirmBuy} onCancel={onCancelBuy} autoFocus />
+		)
+	}
+
 	return (
 		<div>
-			<div>Shipyard</div>
 			<div style={{ margin: '0 auto', width: '80%' }}>
 				<img src="" alt={index} />
 				<div className="flex-columns" style={{ justifyContent: 'space-around' }}>
 					<Button onClick={onClickPrevious}>&lt;=</Button>
 					<Button onClick={onClickBuy}>Buy</Button>
-					<div style={{ flexBasis: '75%', lineHeight: '1.5em' }}>
-						<div style={{ display: 'inline-block', margin: '0 10px' }}>
-							<div>{ship.description}</div>
-							<div>Type {ship.type}</div>
+					<div style={{flexBasis: '70%', margin: '0 10px'}}>
+						<div>
+							{buying ? (<BuyComponent /> ) : (<div style={{height: '2em'}}>{ship.description}</div>)}
 						</div>
-						{buying ? <input name="name" onKeyDown={onKeyDown} defaultValue={nextShipName} autoFocus /> : ""}
+						<div>Type {ship.type}</div>
 					</div>
 					<Button onClick={onClickNext}>=&gt;</Button>
 				</div>

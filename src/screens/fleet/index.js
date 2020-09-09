@@ -144,7 +144,7 @@ const Fleet = props => {
 				</div>
 			</div>
 			<div>
-				{rename ? (<InlineName message="Rename ship" value={selected.name} onCancel={onCancelRename} onSetName={onSetName} />) : <Message text={message} />}
+				{rename ? (<InlineName message="Rename ship" value={selected.name} onCancel={onCancelRename} onComplete={onSetName} />) : <Message text={message} />}
 			</div>
 			<div className="flex-columns">
 				{grid}

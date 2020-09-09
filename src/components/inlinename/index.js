@@ -1,4 +1,5 @@
 import React from 'react'
+import PropTypes from 'prop-types'
 import './styles.css'
 
 const InlineName = props => {
@@ -6,25 +7,23 @@ const InlineName = props => {
 		event.preventDefault()
 
 		const form = event.target
+		const val = form.name.value
 
-		props.onSetName(form.name.value)
+		if (val && props.onComplete)
+		{
+			props.onComplete(val)
+		}
 	}
 
 	const onKeyDown = event => {
 		switch (event.key)
 		{
-			// case 'Enter':
-			// {
-			// 	if (e.target.value)
-			// 	{
-			// 		buyShip(index, e.target.value)
-			// 		setBuying(false)
-			// 	}
-			// 	break
-			// }
 			case 'Escape':
 			{
-				props.onCancel()
+				if (props.onCancel)
+				{
+					props.onCancel()
+				}
 				break
 			}
 			default:
@@ -35,14 +34,24 @@ const InlineName = props => {
 	}
 
 	return (
-		<form onSubmit={onSubmit}>
-			<div className="inlinename-container">
-				<div class="flex-columns"><div></div><label htmlFor="inlinenameinput">{props.message}</label></div>
-				<div><input type="text" id="inlinenameinput" name="name" defaultValue={props.value} autoFocus onKeyDown={onKeyDown} /></div>
-				<div><button type="submit">OK</button></div>
-			</div>
-		</form>
+		<div style={{display: 'inline: block'}}>
+			<form onSubmit={onSubmit}>
+				<div className="inlinename-container">
+					<div className="flex-columns"><div></div><label htmlFor="inlinenameinput">{props.message}</label></div>
+					<div><input type="text" id="inlinenameinput" name="name" defaultValue={props.value} placeholder={props.placeholder} autoFocus onKeyDown={onKeyDown} onFocus={e => e.target.select()} /></div>
+					<div><button type="submit">OK</button></div>
+				</div>
+			</form>
+		</div>
 	)
+}
+
+InlineName.propTypes = {
+	onComplete: PropTypes.func.isRequired,
+	onCancel: PropTypes.func.isRequired,
+	value: PropTypes.string,
+	message: PropTypes.string,
+	placeholder: PropTypes.string
 }
 
 export default InlineName

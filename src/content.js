@@ -18,7 +18,27 @@ const Content = props => {
 	const navigate = useNavigate()
 	let content;
 
-	if (planet.owner !== localPlayer.id)
+	if (!planet.habitable)
+	{
+		switch (props.screen)
+		{
+			// FIX navigation recursion to remove switch
+			case 'solarsystem':
+			{
+				content = (<SolarSystem planet={planet} player={localPlayer} />)
+				break
+			}
+			default:
+			{
+				// TODO add error message
+				navigate('solarsystem', props.planet)
+				// naviage doesn't (currently) prevent the component from rendering
+				content = (<SolarSystem planet={planet} player={localPlayer} />)
+				break
+			}
+		}
+	}
+	else if (planet.owner !== localPlayer.id)
 	{
 		switch (props.screen)
 		{

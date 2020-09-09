@@ -101,7 +101,7 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 
 						planet = { ...planet }
 
-						terraformPlanet(shipOwner, planet, 'Planet X')
+						terraformPlanet(shipOwner, planet, planet.name)
 						console.log("Terraformed planet", planet)
 
 						ship = { ...ship }

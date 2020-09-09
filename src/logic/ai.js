@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect } from 'react'
 import { atom, useRecoilValue, useRecoilCallback } from 'recoil'
 import { random } from './general'
+import planetNames from '../data/planetnames'
 import dates from './date'
 import store, { GAME_START_YEAR } from '../state/atoms'
 import { selectAIPlayer } from '../state/game'
@@ -114,14 +115,21 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 
 			if (next)
 			{
+				memory = { ...memory }
+
 				if (next.owner === null)
 				{
 					console.log("AI", `Next planet (${next.id}) is lifeless, sending terraformer`)
 
+					const nameIndex = memory.nameIndex === undefined ? 1 : memory.nameIndex
+
 					tasks.push({
 						type: 'ship:terraform',
-						ref: next.id
+						ref: next.id,
+						name: planetNames[nameIndex]
 					})
+
+					memory.nameIndex = nameIndex + 1
 				}
 				else
 				{
@@ -133,7 +141,6 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 					})
 				}
 
-				memory = { ...memory }
 				memory.lastAction = { ...date }
 				memory.nextAction = nextActionDate(date, 1)
 			}
@@ -214,7 +221,7 @@ const AI = props => {
 				}
 				case 'ship:terraform':
 				{
-					sendAtmos({ id: task.ref })
+					sendAtmos({ id: task.ref }, task.name)
 					break;
 				}
 				case 'invade':

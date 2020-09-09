@@ -73,6 +73,24 @@ export const selectFirstInDock = selectorFamily({
 	}
 })
 
+export const selectPlayerAtmos = selectorFamily({
+	key: 'selectAtmos',
+	get: player => ({ get }) => {
+		let atmos
+		const game = get(atoms.game)
+		game.ships.find(id => {
+			const ship = get(atoms.ships(id))
+			if (ship.type === 'Atmosphere Processor' && ship.owner === player.id)
+			{
+				atmos = ship
+			}
+			return !!atmos
+		})
+
+		return atmos
+	}
+})
+
 const beginTravel = (ship, origin, destination, date) => {
 	console.log("Init travel", origin, destination)
 	const travel = calculateTravel(origin, destination, ship)
@@ -265,12 +283,12 @@ const shipReducer = (ship, action) => {
 			}
 			else
 			{
-
 				ship = beginTravel(ship, origin, destination, action.date)
 
 				// Mark the planet are owned and terraformed
 				destination.terraforming = true
 				destination.owner = ship.owner
+				destination.name = action.name
 			}
 			break
 		}
@@ -456,7 +474,7 @@ export const useLoadUnloadCargo = (ship, planet) => {
 }
 
 export const useSendAtmos = player => {
-	return useRecoilCallback(({ snapshot, set }) => planet => {
+	return useRecoilCallback(({ snapshot, set }) => (planet, name) => {
 		console.assert(planet && planet.id, "Invalid destination planet")
 
 		const atmos = findAtmos(snapshot, player)
@@ -467,7 +485,7 @@ export const useSendAtmos = player => {
 			const origin = snapshot.getLoadable(atoms.planets(atmos.location.planet)).contents
 			const destination = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
 
-			const reducedShip = shipReducer(atmos, { type: 'terraform', origin, destination, date })
+			const reducedShip = shipReducer(atmos, { type: 'terraform', origin, destination, date, name })
 			if (reducedShip !== atmos)
 			{
 				set(atoms.planets(destination.id), destination)

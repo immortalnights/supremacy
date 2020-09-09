@@ -6,8 +6,6 @@ import { random } from './logic/general'
 import newGameState from './state/newgamestate'
 import initializeState from './state/initializestate'
 import { usePersistentState, getLocalStorageValue } from './state/persistentstate'
-import { selectLocalPlayer } from './state/game'
-import { useSendAtmos } from './state/ships'
 import Content from './content'
 import Button from './components/button'
 import Navigation from './components/navigation'
@@ -33,8 +31,6 @@ const PersistenceObserver = props => {
 
 const Game = props => {
 	const view = useRecoilValue(viewAtom)
-	const player = useRecoilValue(selectLocalPlayer)
-	const sendAtmos = useSendAtmos(player)
 
 	const selected = view.planet
 
@@ -51,21 +47,13 @@ const Game = props => {
 
 	// const content = useRoutes(routes)
 
-	const onClickTerraform = () => {
-		sendAtmos({ id: selected })
-	}
-
-	const onClickEspionage = () => {
-		// 
-	}
-
 	console.log("Game selected,", selected)
 	return (
 		<React.Fragment>
 			<Tick />
 			<AI />
 			<Content {...view} />
-			<Navigation planet={selected} screen={view.screen} onClickTerraform={onClickTerraform} onClickEspionage={onClickEspionage} />
+			<Navigation planet={selected} screen={view.screen} />
 		</React.Fragment>
 	)
 }

@@ -2,7 +2,7 @@
 	"battlecruiser":
 	{
 		"type": "B-29 Battle Cruiser",
-		"description": "",
+		"description": "Carries four fully equipped platoons into battle.",
 		"shortName": "Battle",
 		"requiredCrew": 21,
 		"maximumFuel": 100,

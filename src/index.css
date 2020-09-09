@@ -20,6 +20,27 @@ code {
   flex: 1 1 0px;
 }
 
+.flex
+{
+  display: flex;
+}
+
+.flex > * {
+  flex: 1 1 0px;
+}
+
+.flex-columns {
+
+}
+
+.flex-rows {
+  flex-direction: column;
+}
+
+.flex .flex-spacer {
+  flex-basis: 100%;
+}
+
 .space-around {
   justify-content: space-around;
 }
