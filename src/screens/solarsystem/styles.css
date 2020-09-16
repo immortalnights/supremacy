@@ -57,3 +57,24 @@
 	-o-animation: flickerAnimation 2s infinite;
 	animation: flickerAnimation 2s infinite;
 }
+
+.espionage-container {
+	margin: 10px;
+}
+
+.espionage-list {
+	padding: 0 10px;
+	margin: 0;
+}
+
+.espionage-list li {
+	list-style: none;
+	display: flex;
+	justify-content: space-between;
+}
+
+.espionage-list li > * {
+	flex: 0;
+	white-space: nowrap;
+	margin: auto;
+}

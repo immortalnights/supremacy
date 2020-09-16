@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import Button from '../button'
 import './styles.css'
 
 const InlineName = props => {
@@ -40,6 +41,7 @@ const InlineName = props => {
 					<div className="flex-columns"><div></div><label htmlFor="inlinenameinput">{props.message}</label></div>
 					<div><input type="text" id="inlinenameinput" name="name" defaultValue={props.value} placeholder={props.placeholder} autoFocus onKeyDown={onKeyDown} onFocus={e => e.target.select()} /></div>
 					<div><button type="submit">OK</button></div>
+					<div><Button onClick={props.onCancel}>Cancel</Button></div>
 				</div>
 			</form>
 		</div>

@@ -18,6 +18,9 @@ const newGameState = options => {
 		}
 	]
 
+	const human = players[1]
+	const ai = players[0]
+
 	const planetCount = 8
 	const game = {
 		id: 0,
@@ -41,15 +44,15 @@ const newGameState = options => {
 	const playerFleet = []
 
 	// AI claims the first planet
-	claimCapital(players[0], planets[0], "EnemyBase", { min: -.20, max: 0 })
+	const aiCapital = claimCapital(ai, planets[0], "EnemyBase", { min: -.20, max: 0 })
 
 	// player claims the last planet
-	const playerCapital = claimCapital(players[1], planets[planets.length - 1], "Starbase", { min: -.1, max: .1})
+	const playerCapital = claimCapital(human, planets[planets.length - 1], "Starbase", { min: -.1, max: .1})
 
 	const ships = []
 
 	playerFleet.forEach(item => {
-		const ship = createShip(item.blueprint, game.nextShipId, item.name, players[1], playerCapital)
+		const ship = createShip(item.blueprint, game.nextShipId, item.name, human, playerCapital)
 		ships.push(ship)
 		game.ships.push(ship.id)
 
@@ -74,6 +77,16 @@ const newGameState = options => {
 
 			platoons.push(platoon)
 		}
+	}
+
+	// Create initial AI planet defense
+	const platoon = platoons.find(platoon => platoon.owner === ai.id)
+	platoon.commissioned = true
+	platoon.calibre = 100
+	platoon.troops = 1560
+	platoon.unitStrength = 2 // level 1 armor and weapon
+	platoon.location = {
+		planet: aiCapital.id
 	}
 
 	return {

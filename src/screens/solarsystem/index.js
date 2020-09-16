@@ -7,19 +7,8 @@ import store from '../../state/atoms'
 import { selectLocalPlayer } from '../../state/game'
 import { selectPlayerAtmos, useSendAtmos } from '../../state/ships'
 import { useNavigate } from '../../state/nav'
+import Espionage from './espionage'
 import './styles.css'
-
-const PlanetList = props => {
-	const game = useRecoilValue(store.game)
-
-	return (
-		<ul className="planet-list">
-			{game.planets.map(id => {
-				return (<Planet key={id} planet={id} selected={props.selected === id} />)
-			})}
-		</ul>
-	)
-}
 
 const Planet = props => {
 	const planet = useRecoilValue(store.planets(props.planet))
@@ -62,8 +51,34 @@ const Planet = props => {
 		}
 	}
 
+	const onSelectPlanet = () => {
+		if (!props.locked)
+		{
+			navigate('solarsystem', planet.id)
+		}
+	}
+
+	const onGoToPlanet = () => {
+		if (!props.locked)
+		{
+			navigate('overview', planet.id)
+		}
+	}
+
 	return (
-		<li className={className.join(' ')} onDoubleClick={() => navigate('overview', planet.id)} onClick={() => navigate('solarsystem', planet.id)}><label>{name}</label> {terraforming}</li>
+		<li className={className.join(' ')} onDoubleClick={onGoToPlanet} onClick={onSelectPlanet}><label>{name}</label> {terraforming}</li>
+	)
+}
+
+const PlanetList = props => {
+	const game = useRecoilValue(store.game)
+
+	return (
+		<ul className="planet-list">
+			{game.planets.map(id => {
+				return (<Planet key={id} planet={id} selected={props.selected === id} locked={props.locked} />)
+			})}
+		</ul>
 	)
 }
 
@@ -71,7 +86,7 @@ const SolarSystem = props => {
 	const player = useRecoilValue(selectLocalPlayer)
 	const sendAtmos = useSendAtmos(player)
 	const atmos = useRecoilValue(selectPlayerAtmos(player))
-	const [ terraforming, setTerraforming ] = useState(false)
+	const [ action, setAction ] = useState(null)
 
 	let displayName = props.planet.terraforming ? "Formatting" : (props.planet.name || "Lifeless")
 	let displayType
@@ -89,25 +104,28 @@ const SolarSystem = props => {
 	}
 
 	const onClickTerraform = () => {
-		setTerraforming(true)
-	}
-
-	const onClickEspionage = () => {
-		// 
+		setAction('terraform')
 	}
 
 	const onConfirmTerraform = name => {
-		debugger
 		sendAtmos({ id: props.planet.id }, name )
-		setTerraforming(false)
+		setAction(null)
 	}
 
 	const onCancelTerraform = () => {
-		setTerraforming(false)
+		setAction(null)
+	}
+
+	const onClickEspionage = () => {
+		setAction('espionage')
+	}
+
+	const onCancelEspionage = () => {
+		setAction(null)
 	}
 
 	const canTerraform = atmos && props.planet.owner === null
-	const canSpy = props.planet.owner !== null && props.planet.owner !== player.id
+	const canSpy = action !== 'espionage' && props.planet.owner !== null && props.planet.owner !== player.id
 
 	let TerraformComponent = null
 	if (canTerraform)
@@ -123,7 +141,7 @@ const SolarSystem = props => {
 
 	return (
 		<div className="flex-columns">
-			<PlanetList selected={props.planet.id} />
+			<PlanetList selected={props.planet.id} locked={!!action}/>
 			<div className="flex flex-rows">
 				<div style={{textAlign: 'center'}}>
 					<StarDate />
@@ -132,7 +150,8 @@ const SolarSystem = props => {
 				</div>
 				<div className="flex-spacer"></div>
 				<div>
-					{terraforming ? <TerraformComponent /> : ""}
+					{action === 'espionage' ? <Espionage onCancel={onCancelEspionage} /> : ""}
+					{action === 'terraform' ? <TerraformComponent /> : ""}
 					<div className="flex space-around" style={{textAlign: 'center', margin: '0 10px 20px'}}>
 						<Button onClick={onClickTerraform} disabled={!canTerraform}>Terraform</Button>
 						<div style={{flexBasis: '10%', flexGrow: 0}}></div>

@@ -5,6 +5,8 @@ import { terraformPlanet } from './planets'
 import store from '../state/atoms'
 import { selectPlayer } from '../state/game'
 
+import { calculatePlatoonStrength } from './platoons'
+
 const updateDate = (currentDate, set) => {
 	const next = date.next(currentDate)
 	set(store.date, next)
@@ -172,7 +174,6 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 		// handle combat
 		if (defenders.length > 0)
 		{
-			
 
 		}
 
@@ -401,7 +402,21 @@ const tick = (snapshot, set) => {
 		return platoon
 	})
 
+	planets.forEach(planet => {
+		const player = players.find(player => player.id === planet.owner)
 
+		if (player && player.type === 'ai')
+		{
+			// Increase planet defense platoon by 2 (1 x 1 troop)
+			const index = platoons.findIndex(platoon => platoon.location && platoon.location.planet === planet.id)
+			const defender = { ...platoons[index] }
+			defender.troops = defender.troops + 2
+
+			platoons[index] = defender
+
+			console.log("AI capital defense", calculatePlatoonStrength(defender, 25))
+		}
+	})
 
 	// Display changes to AI capital planet for AI debugging
 	// const track = planets.find(p => p.id === 'a')
