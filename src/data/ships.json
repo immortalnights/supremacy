@@ -5,7 +5,6 @@
 		"description": "Carries four fully equipped platoons into battle.",
 		"shortName": "Battle",
 		"requiredCrew": 21,
-		"maximumFuel": 100,
 		"capacity": {
 			"civilians": 4500,
 			"cargo": 600,
@@ -37,11 +36,10 @@
 		"description": "",
 		"shortName": "Solar",
 		"requiredCrew": 0,
-		"maximumFuel": 0,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 0,
-			"fuel": -1,
+			"fuel": null,
 			"platoons": 0
 		},
 		"speed": 1,
@@ -75,11 +73,10 @@
 		"description": "",
 		"shortName": "Atmos",
 		"requiredCrew": 0,
-		"maximumFuel": 100,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 0,
-			"fuel": 1500,
+			"fuel": null,
 			"platoons": 0
 		},
 		"speed": 1,
@@ -105,7 +102,6 @@
 		"description": "",
 		"shortName": "Cargo",
 		"requiredCrew": 11,
-		"maximumFuel": 100,
 		"capacity": {
 			"civilians": 1850,
 			"cargo": 2250,
@@ -135,7 +131,6 @@
 		"description": "",
 		"shortName": "Mining",
 		"requiredCrew": 294,
-		"maximumFuel": 100,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 950,
@@ -173,7 +168,6 @@
 		"description": "",
 		"shortName": "Farming",
 		"requiredCrew": 175,
-		"maximumFuel": 100,
 		"capacity": {
 			"civilians": 0,
 			"cargo": 950,

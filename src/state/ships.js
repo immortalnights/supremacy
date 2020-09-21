@@ -91,11 +91,11 @@ export const selectPlayerAtmos = selectorFamily({
 	}
 })
 
-const beginTravel = (ship, origin, destination, date) => {
+const beginTravel = (travel, ship, origin, destination, date) => {
 	console.log("Init travel", origin, destination)
-	const travel = calculateTravel(origin, destination, ship)
 
 	ship = { ...ship }
+	ship.fuel = ship.fuel - travel.fuel
 	ship.heading = {
 		from: { id: origin.id, name: origin.name },
 		to: { id: destination.id, name: destination.name },
@@ -161,6 +161,12 @@ const shipReducer = (ship, action) => {
 		case 'reposition':
 		{
 			// Reposition a ship within a planet
+			console.log(action.position, ship.capacity && ship.capacity.fuel, ship.fuel)
+
+			const nuclearFuelled = ship.capacity.fuel === null
+			// repositionning cost 100 fuel, unless landing to transferring to the surface
+			const fuelCost = ['docked', 'surface'].includes(action.position) ? 0 : 100
+
 			// TODO validation
 			if (ship.type === 'Atmosphere Processor')
 			{
@@ -178,13 +184,17 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`Ship ${ship.name} cannot move to ${action.position}`)
 			}
-			else if (!['docked', 'surface'].includes(action.position) && ship.maximumFuel < 0 && ship.fuel < 100)
+			else if (!nuclearFuelled && ship.fuel < fuelCost)
 			{
-				console.warn(`Ship ${ship.name} does not have enough fuel`)
+				console.warn(`Ship ${ship.name} does not have enough fuel, requires ${fuelCost} fuel`)
 			}
 			else
 			{
 				ship = { ...ship }
+				if (!nuclearFuelled && fuelCost)
+				{
+					ship.fuel = ship.fuel - fuelCost
+				}
 				ship.location = { ...ship.location }
 				ship.location.position = action.position
 
@@ -229,29 +239,37 @@ const shipReducer = (ship, action) => {
 		case 'travel':
 		{
 			// Sent ship to planet
-			// TODO validation
+			const origin = action.origin
+			const destination = action.destination
+
 			if (ship.type === 'Atmosphere Processor')
 			{
-				console.warn(`Cannot directly control Atmon`)
+				console.warn(`Cannot directly control Atmosphere Processor`)
 			}
 			else if (ship.heading)
 			{
-				console.warn(`${ship.name} is already travelling to Planet ${ship.heading.to.id}`)
+				console.warn(`${ship.name} is already travelling to planet ${ship.heading.to.id}`)
 			}
-			else if (ship.location.planet === action.destination.id)
+			else if (ship.location.planet === destination.id)
 			{
-				console.log(`${ship.name} is is already at ${action.destination.name}`)
+				console.warn(`${ship.name} is is already at ${destination.name}`)
 			}
 			else if (ship.location.position !== 'orbit')
 			{
-				console.log(`${ship.name} is not in orbit of a planet (${ship.location.position})`)
+				console.warn(`${ship.name} is not in orbit of a planet (Location ${ship.location.position})`)
 			}
 			else
 			{
-				const origin = action.origin
-				const destination = action.destination
+				const travel = calculateTravel(origin, destination, ship)
 
-				ship = beginTravel(ship, origin, destination, action.date)
+				if (ship.capacity.fuel && ship.fuel < travel.fuel)
+				{
+					console.warn(`Ship ${ship.name} does not have enough fuel, requires ${travel.fuel} fuel`)
+				}
+				else
+				{
+					ship = beginTravel(travel, ship, origin, destination, action.date)
+				}
 			}
 			break
 		}
@@ -266,7 +284,7 @@ const shipReducer = (ship, action) => {
 			}
 			else if (ship.location.planet === destination.id)
 			{
-				console.log("Atmos is is already at", destination.name)
+				console.warn("Atmos is is already at", destination.name)
 			}
 			else if (ship.heading)
 			{
@@ -283,7 +301,12 @@ const shipReducer = (ship, action) => {
 			}
 			else
 			{
-				ship = beginTravel(ship, origin, destination, action.date)
+				const travel = calculateTravel(origin, destination, ship)
+
+				// Atmos does not use fuel
+				travel.fuel = 0
+
+				ship = beginTravel(travel, ship, origin, destination, action.date)
 
 				// Mark the planet are owned and terraformed
 				destination.terraforming = true
@@ -296,18 +319,18 @@ const shipReducer = (ship, action) => {
 		{
 			const planet = action.planet
 
-			const check = (source, target, maximum) => {
+			const check = (change, source, target, maximum) => {
 				let ok = false
 				// console.log("check", source, target, maximum)
-				if (!maximum)
+				if (!maximum || (change > 0 && target >= maximum))
 				{
 					console.warn(`Ship does not have any available space for ${action.cargo}`)
 				}
-				else if (target === maximum)
+				else if (change > 0 && target >= maximum)
 				{
 					console.warn(`Ship has maximum capacity of ${action.cargo} on board`)
 				}
-				else if (source === 0)
+				else if (change > 0 && source === 0)
 				{
 					console.warn(`Planet does not have any available ${action.cargo}`)
 				}
@@ -328,7 +351,7 @@ const shipReducer = (ship, action) => {
 					const destination = ship.civilians
 					const capacity = ship.capacity.civilians
 
-					if (check(source, destination, capacity))
+					if (check(action.change, source, destination, capacity))
 					{
 						const transfer = calculateTransfer(source, destination, capacity, action.change)
 
@@ -343,9 +366,9 @@ const shipReducer = (ship, action) => {
 				{
 					const source = planet.resources.fuels
 					const destination = ship.fuel
-					const capacity = ship.maximumFuel
+					const capacity = ship.capacity.fuel
 
-					if (check(source, destination, capacity))
+					if (check(action.change, source, destination, capacity))
 					{
 						const transfer = calculateTransfer(source, destination, capacity, action.change)
 
@@ -365,7 +388,7 @@ const shipReducer = (ship, action) => {
 					const destination = Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
 					const capacity = ship.capacity.cargo
 
-					if (check(source, destination, capacity))
+					if (check(action.change, source, destination, capacity))
 					{
 						const transfer = calculateTransfer(source, destination, capacity, action.change)
 

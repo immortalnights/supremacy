@@ -18,7 +18,7 @@ const ShipCivFuelCargo = props => {
 	{
 		civilians = ship.civilians
 
-		if (ship.maximumFuel > 0 && ship.cargo)
+		if (ship.capacity && ship.capacity.fuel)
 		{
 			fuel = ship.fuel
 		}

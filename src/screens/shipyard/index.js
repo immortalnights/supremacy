@@ -28,7 +28,7 @@ const Details = props => {
 					<dt>:Crew</dt>
 					<dd>{props.capacity.cargo} T.</dd>
 					<dt>:Payload</dt>
-					<dd>{props.maximumFuel} T.</dd>
+					<dd>{props.capacity.fuel} T.</dd>
 					<dt>:Fuel</dt>
 				</dl>
 			</div>
