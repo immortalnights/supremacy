@@ -1,4 +1,4 @@
-import cloneDeep from 'lodash/cloneDeep';
+import cloneDeep from 'lodash/cloneDeep'
 
 export const canChangePosition = (fromPos, to) => {
 	let r = false

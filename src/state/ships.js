@@ -161,11 +161,14 @@ const shipReducer = (ship, action) => {
 		case 'reposition':
 		{
 			// Reposition a ship within a planet
-			console.log(action.position, ship.capacity && ship.capacity.fuel, ship.fuel)
-
 			const nuclearFuelled = ship.capacity.fuel === null
 			// repositionning cost 100 fuel, unless landing to transferring to the surface
 			const fuelCost = ['docked', 'surface'].includes(action.position) ? 0 : 100
+
+			const limits = {
+				docked: 3,
+				surface: 6
+			}
 
 			// TODO validation
 			if (ship.type === 'Atmosphere Processor')
@@ -187,6 +190,10 @@ const shipReducer = (ship, action) => {
 			else if (!nuclearFuelled && ship.fuel < fuelCost)
 			{
 				console.warn(`Ship ${ship.name} does not have enough fuel, requires ${fuelCost} fuel`)
+			}
+			else if (limits[action.position] && action.shipsAtLocation.length >= limits[action.position])
+			{
+				console.warn(`Position ${action.position} is full`)
 			}
 			else
 			{
@@ -403,7 +410,7 @@ const shipReducer = (ship, action) => {
 				default:
 				{
 					console.warn(`Invalid cargo ${action.cargo}`)
-					break;
+					break
 				}
 			}
 			break
@@ -431,7 +438,23 @@ export const useChangeShipPosition = () => {
 	return useRecoilCallback(({ snapshot, set }) => (ship, position) => {
 		// get the ship from the snapshot to ensure it's the latest version
 		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
-		const reducedShip = shipReducer(refreshedShip, { type: 'reposition', position })
+
+		// Docks and Surface have limited space, so find all ships in the those target locations
+		const shipsAtLocation = []
+
+		if (['docked', 'surface'].includes(position))
+		{
+			const game = snapshot.getLoadable(atoms.game).contents
+			game.ships.forEach(id => {
+				const otherShip = snapshot.getLoadable(atoms.ships(id)).contents
+				if (otherShip.location.planet === refreshedShip.location.planet && otherShip.location.position === position)
+				{
+					shipsAtLocation.push(otherShip)
+				}
+			})
+		}
+
+		const reducedShip = shipReducer(refreshedShip, { type: 'reposition', position, shipsAtLocation })
 		if (reducedShip !== refreshedShip)
 		{
 			set(atoms.ships(reducedShip.id), reducedShip)
