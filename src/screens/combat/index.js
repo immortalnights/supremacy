@@ -16,12 +16,13 @@ const ShipDetails = props => {
 		<div>
 			<label>Ship</label>
 			<div>{ship.name}</div>
-			<ShipPlatoons ship={ship.id} onSelect={props.onSelect} />
+			<ShipPlatoons ship={ship.id} player={props.player} onSelect={props.onSelect} />
 		</div>
 	)
 }
 
 const Combat = props => {
+	console.log("Combat.render")
 	const [ ship, setShip ] = useState(null)
 	const planet = useRecoilValue(state.planets(props.planet))
 	const player = useRecoilValue(selectLocalPlayer)
@@ -55,12 +56,12 @@ const Combat = props => {
 		<div className="flex-columns">
 			<div>
 				<div className="flex-columns">
-					<DockingBays planet={props.planet} onSelect={onSelectShip} />
-					<ShipDetails ship={ship} onSelect={onUnloadPlatoon} />
+					<DockingBays planet={props.planet} player={player} onSelect={onSelectShip} />
+					<ShipDetails ship={ship} player={player} onSelect={onUnloadPlatoon} />
 				</div>
 				<div>{messages}</div>
 				<div>
-					<PlanetPlatoons planet={props.planet} onSelect={onLoadPlatoon} />
+					<PlanetPlatoons planet={props.planet} player={player} onSelect={onLoadPlatoon} />
 				</div>
 			</div>
 			<div>{/*power comparison*/}</div>

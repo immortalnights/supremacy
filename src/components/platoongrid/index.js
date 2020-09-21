@@ -61,12 +61,12 @@ PlatoonGrid.defaultProps = {
 }
 
 export const ShipPlatoons = props => {
-	const platoons = useRecoilValue(selectPlatoons({ ship: props.ship, commissioned: true }))
+	const platoons = useRecoilValue(selectPlatoons({ ship: props.ship, commissioned: true, player: props.player.id }))
 	return (<PlatoonGrid rows={4} cols={1} platoons={platoons} onSelect={props.onSelect} />)
 }
 
 export const PlanetPlatoons = props => {
-	const platoons = useRecoilValue(selectPlatoons({ planet: props.planet, commissioned: true }))
+	const platoons = useRecoilValue(selectPlatoons({ planet: props.planet, commissioned: true, player: props.player.id }))
 	return (<PlatoonGrid rows={8} cols={3} platoons={platoons} onSelect={props.onSelect} />)
 }
 

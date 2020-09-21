@@ -297,10 +297,13 @@ const updatePlanet = (planet, planetOwner, platoons, date) => {
 const updateAIPlanet = (planet, planetOwner, platoons, date) => {
 	// Increase planet defense platoon by 2 (1 x 1 troop)
 	platoons.forEach((platoon, index) => {
-		platoon = { ...platoon }
-		platoon.troops = platoon.troops + 2
+		if (platoon.owner === planetOwner.id)
+		{
+			platoon = { ...platoon }
+			platoon.troops = platoon.troops + 2
 
-		platoons[index] = platoon
+			platoons[index] = platoon
+		}
 
 		// console.log("AI planet defense", planet.id, calculatePlatoonStrength(platoon, 25))
 	})

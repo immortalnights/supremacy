@@ -12,6 +12,7 @@ import { useChangeShipPosition, useSendShipToDestination, useRename } from '../.
 import './styles.css'
 
 const Fleet = props => {
+	console.log("Fleet.render")
 	const [ selected, setSelected ] = useState(null)
 	const [ rename, setRename ] = useState(false)
 	const [ action, setAction ] = useState(null)
@@ -19,8 +20,6 @@ const Fleet = props => {
 	const sendToDestination = useSendShipToDestination()
 	const renameShip = useRename()
 	const navigate = useNavigate()
-
-	console.log("Fleet.render")
 
 	const onSelectShip = ship => {
 		setRename(false)

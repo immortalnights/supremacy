@@ -41,6 +41,7 @@ const Details = props => {
 }
 
 const Shipyard = props => {
+	console.log("Shipyard.render")
 	const bps = useRecoilValue(blueprints)
 	const indexes = Object.keys(bps)
 	const [ index, setIndex ] = useState(indexes[0])

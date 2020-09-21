@@ -109,5 +109,5 @@ export const useBuyShip = player => {
 		{
 			console.log("Not enough credits on home planet")
 		}
-	})
+	}, [])
 }

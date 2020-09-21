@@ -8,6 +8,7 @@ import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon, useDisbandP
 import PlatoonEquipment from './platoonequipment'
 
 const Training = props => {
+	console.log("Training.render")
 	const player = useRecoilValue(selectHumanPlayer)
 	const capital = useRecoilValue(selectCapitalPlanet(player))
 	const [ index, setIndex ] = useState(1)

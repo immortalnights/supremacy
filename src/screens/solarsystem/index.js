@@ -83,6 +83,7 @@ const PlanetList = props => {
 }
 
 const SolarSystem = props => {
+	console.log("SolarSystem.render")
 	const player = useRecoilValue(selectLocalPlayer)
 	const sendAtmos = useSendAtmos(player)
 	const atmos = useRecoilValue(selectPlayerAtmos(player))
