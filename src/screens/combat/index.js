@@ -10,7 +10,7 @@ import { useTransferPlatoon } from '../../state/platoons'
 import { useChangeAggression } from '../../state/planets'
 
 const ShipDetails = props => {
-	const ship = props.ship || {}
+	const ship = props.ship || { id: null }
 
 	return (
 		<div>

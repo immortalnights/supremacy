@@ -147,12 +147,12 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 }
 
 const handleCombat = (planet, planetOwner, platoons, date) => {
-
 	// Split the platoons by player
 	const attackers = []
 	const defenders = []
-	// Clone the platoon array for modification
-	platoons = [ ...platoons ]
+
+	// Clone the all platoons for modification
+	platoons = platoons.map(platoon => { return { ...platoon } })
 
 	platoons.forEach(platoon => {
 		if (platoon.owner === planet.owner)
@@ -165,23 +165,26 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 		}
 	})
 
-	// Handle planet combat if the planet has attackers, defenders are optional
-	if (attackers.length > 0)
-	{
-		const attackersStrength = attackers.reduce((p, t) => t + p.strength, 0)
-		const defendersStrength = defenders.reduce((p, t) => t + p.strength, 0)
+	let perPlatoon = 0
 
-		// handle combat
-		if (defenders.length > 0)
+	// Basic, take forty troops from each side
+	perPlatoon = Math.floor(40 / attackers.length)
+	attackers.forEach(platoon => {
+		if (platoon.troops > 0)
 		{
-
+			const lost = Math.min(platoon.troops, perPlatoon)
+			platoon.troops = platoon.troops - lost
 		}
+	})
 
-		if (defenders.length === 0)
+	perPlatoon = Math.floor(40 / defenders.length)
+	defenders.forEach(platoon => {
+		if (platoon.troops > 0)
 		{
-			console.log(`Planet {planet.id} has been conquered`)
+			const lost = Math.min(platoon.troops, perPlatoon)
+			platoon.troops = platoon.troops - lost
 		}
-	}
+	})
 
 	return [ planet, platoons ]
 }
@@ -198,7 +201,7 @@ const updatePlanet = (planet, planetOwner, platoons, date) => {
 		// Credits are only paid every other tick
 		if (oddDate)
 		{
-			const taxPerPop = ((planet.creditsPerPop * planet.multipliers.resources.credits) * (planet.tax / 100))
+			const taxPerPop = ((planet.creditsPerPop * planet.multipliers.resources.credits) * (planet.tax))
 			const creditsIncome = planet.population * taxPerPop
 			planet.resources.credits = planet.resources.credits + creditsIncome
 			// console.log("Tax", taxPerPop, creditsIncome, planet.resources.credits)
@@ -291,6 +294,20 @@ const updatePlanet = (planet, planetOwner, platoons, date) => {
 	return planet
 }
 
+const updateAIPlanet = (planet, planetOwner, platoons, date) => {
+	// Increase planet defense platoon by 2 (1 x 1 troop)
+	platoons.forEach((platoon, index) => {
+		platoon = { ...platoon }
+		platoon.troops = platoon.troops + 2
+
+		platoons[index] = platoon
+
+		// console.log("AI planet defense", planet.id, calculatePlatoonStrength(platoon, 25))
+	})
+
+	return planet
+}
+
 const tick = (snapshot, set) => {
 	// console.log("callback")
 	const nextDate = updateDate({ ...snapshot.getLoadable(store.date).contents }, set)
@@ -342,22 +359,34 @@ const tick = (snapshot, set) => {
 	planets = planets.map(planet => {
 		const player = players.find(player => player.id === planet.owner)
 
-		const platoonsOnPlanet = platoons.filter(p => {
-			return (p.location && p.location.planet === planet.id)
-		})
+		if (planet.habitable && planet.owner !== undefined)
+		{
+			const platoonsOnPlanet = platoons.filter(p => {
+				return (p.location && p.location.planet === planet.id)
+			})
 
-		// FIXME
+			// FIXME
 
-		let r = handleCombat(planet, player, platoonsOnPlanet, nextDate)
-		// FIXME again
-		planet = r[0]
-		planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
+			let r = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+			// FIXME again
+			planet = r[0]
 
-		// update platoons
-		platoonsOnPlanet.forEach(platoon => {
-			const index = platoons.findIndex(p => p.id === platoon.id)
-			platoons[index] = platoon
-		})
+			if (player.type === 'ai')
+			{
+				// AI planet is updated differently, least until the AI plays proper
+				planet = updateAIPlanet(planet, player, platoonsOnPlanet, nextDate)
+			}
+			else
+			{
+				planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
+			}
+
+			// update platoons
+			platoonsOnPlanet.forEach(platoon => {
+				const index = platoons.findIndex(p => p.id === platoon.id)
+				platoons[index] = platoon
+			})
+		}
 
 		return planet
 	})
@@ -397,25 +426,13 @@ const tick = (snapshot, set) => {
 				platoon.troopChange = 0
 				platoon.calibre = 0
 			}
+			else
+			{
+				// console.log(platoon)
+			}
 		}
 
 		return platoon
-	})
-
-	planets.forEach(planet => {
-		const player = players.find(player => player.id === planet.owner)
-
-		if (player && player.type === 'ai')
-		{
-			// Increase planet defense platoon by 2 (1 x 1 troop)
-			const index = platoons.findIndex(platoon => platoon.location && platoon.location.planet === planet.id)
-			const defender = { ...platoons[index] }
-			defender.troops = defender.troops + 2
-
-			platoons[index] = defender
-
-			console.log("AI capital defense", calculatePlatoonStrength(defender, 25))
-		}
 	})
 
 	// Display changes to AI capital planet for AI debugging

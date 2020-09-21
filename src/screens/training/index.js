@@ -20,13 +20,27 @@ const Training = props => {
 
 	const canDisband = platoon.commissioned && platoon.location.planet === capital.id
 
+	const getModifierValue = modifiers => {
+		let val = 1
+		if (modifiers.alt)
+		{
+			val = 200
+		}
+		else if (modifiers.ctrl)
+		{
+			val = 10
+		}
+
+		return val
+	}
+
 	const onHoldMore = modifiers => {
-		const val = modifiers.ctrl ? 5 : 1
+		const val = getModifierValue(modifiers)
 		changeTroops(val)
 	}
 
 	const onHoldLess = modifiers => {
-		const val = modifiers.ctrl ? -5 : -1
+		const val = getModifierValue(modifiers)
 		changeTroops(val)
 	}
 

@@ -19,8 +19,6 @@ export const selectPlatoons = selectorFamily({
 		const game = get(state.game)
 		const platoons = []
 
-		// console.log("*** selectPlatoons", key)
-
 		game.platoons.forEach(id => {
 			const p = get(state.platoons(id))
 
@@ -30,11 +28,11 @@ export const selectPlatoons = selectorFamily({
 			// console.log("(key.planet == null || key.planet === p.location.planet)", (key.planet == null || (p.location && key.planet === p.location.planet)))
 			// console.log("(key.ship == null || key.ship === p.location.ship)", (key.ship == null || (p.location && key.ship === p.location.ship)))
 
-			if ((key.commissioned == null || key.commissioned === p.commissioned) &&
-				(key.name == null || key.name === p.name) &&
-				(key.player == null || key.player === p.owner) &&
-				(key.planet == null || (p.location && key.planet === p.location.planet)) &&
-				(key.ship == null || (p.location && key.ship === p.location.ship)))
+			if ((key.commissioned ===undefined || key.commissioned === p.commissioned) &&
+				(key.name === undefined || key.name === p.name) &&
+				(key.player === undefined || key.player === p.owner) &&
+				(key.planet === undefined || (p.location && key.planet === p.location.planet)) &&
+				(key.ship === undefined || (p.location && key.ship === p.location.ship)))
 			{
 				platoons.push(p)
 			}
@@ -63,7 +61,6 @@ export const selectPlayerPlatoon = selectorFamily({
 	get: key => ({ get }) => {
 		const game = get(state.game)
 		let platoon
-		console.log('selectPlayerPlatoons', key)
 
 		game.platoons.find(id => {
 			const p = get(state.platoons(id))
@@ -75,7 +72,6 @@ export const selectPlayerPlatoon = selectorFamily({
 			return !!platoon
 		})
 
-		console.log("playerPlatoon", key, "=>", platoon)
 		return platoon
 	}
 })
