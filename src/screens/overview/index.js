@@ -215,7 +215,7 @@ const Overview = props => {
 			<div className="flex-columns">
 				<div>
 					{rename ? (<InlineName message="Rename planet" value={planet.name} onCancel={onCancelRename} onComplete={onSetName} />) : <Message />}
-					<PlanetGrid onSelectItem={onSelectItem} />
+					<PlanetGrid selected={planet} player={{id: planet.owner}} onSelectItem={onSelectItem} />
 				</div>
 				<OverviewSlots planet={planet} />
 			</div>

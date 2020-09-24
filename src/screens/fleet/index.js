@@ -116,11 +116,12 @@ const Fleet = props => {
 	let grid;
 	if (action === 'transfer')
 	{
-		grid = (<PlanetGrid onSelectItem={onSelectPlanet} />)
+		// FIXME
+		grid = (<PlanetGrid selected={{ id: props.planet }} player={{ id: 1 }} onSelectItem={onSelectPlanet} />)
 	}
 	else
 	{
-		grid = (<PlayerFleetGrid onSelectItem={onSelectShip} />)
+		grid = (<PlayerFleetGrid selected={selected} onSelectItem={onSelectShip} />)
 	}
 
 	return (

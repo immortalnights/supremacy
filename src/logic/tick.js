@@ -151,9 +151,6 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 	const attackers = []
 	const defenders = []
 
-	// Clone the all platoons for modification
-	platoons = platoons.map(platoon => { return { ...platoon } })
-
 	platoons.forEach(platoon => {
 		if (platoon.owner === planet.owner)
 		{
@@ -165,32 +162,60 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 		}
 	})
 
-	let perPlatoon = 0
+	const modifiedPlatoons = []
 
-	// Basic, take forty troops from each side
-	perPlatoon = Math.floor(40 / attackers.length)
-	attackers.forEach(platoon => {
-		if (platoon.troops > 0)
-		{
-			const lost = Math.min(platoon.troops, perPlatoon)
-			platoon.troops = platoon.troops - lost
-		}
-	})
+	if (attackers.length > 0 && defenders.length > 0)
+	{
+		const baseTroopReduction = 1 // 40
+		let perPlatoon = 0
 
-	perPlatoon = Math.floor(40 / defenders.length)
-	defenders.forEach(platoon => {
-		if (platoon.troops > 0)
-		{
-			const lost = Math.min(platoon.troops, perPlatoon)
-			platoon.troops = platoon.troops - lost
-		}
-	})
 
-	return [ planet, platoons ]
+		// Basic, take forty troops from each side
+		perPlatoon = Math.floor(baseTroopReduction / attackers.length)
+		console.log("Attackers lost", perPlatoon, "per platoon", attackers[0]);
+		attackers.forEach(platoon => {
+			if (platoon.troops > 0)
+			{
+				platoon = { ...platoon }
+
+				const lost = Math.min(platoon.troops, perPlatoon)
+				platoon.troops = platoon.troops - lost
+
+				modifiedPlatoons.push(platoon)
+			}
+		})
+
+		perPlatoon = Math.floor(baseTroopReduction / defenders.length)
+		console.log("Defenders lost", perPlatoon, "per platoon");
+		defenders.forEach(platoon => {
+			if (platoon.troops > 0)
+			{
+				platoon = { ...platoon }
+
+				const lost = Math.min(platoon.troops, perPlatoon)
+				platoon.troops = platoon.troops - lost
+
+				modifiedPlatoons.push(platoon)
+			}
+		})
+	}
+	else
+	{
+		// If there is no comabt, ensure all platoons are returned
+		platoons.map(p => modifiedPlatoons.push(p))
+	}
+
+	return [ planet, modifiedPlatoons ]
+}
+
+const plantCaptured = (planet, platoonsOnPlanet) => {
+	const hasDefenders = !!platoonsOnPlanet.find(p => p.owner === planet.owner)
+	const hasAttackers = !!platoonsOnPlanet.find(p => p.owner !== planet.owner)
+	return hasDefenders === false && hasAttackers === true
 }
 
 const updatePlanet = (planet, planetOwner, platoons, date) => {
-	if (planet.type !== "Lifeless")
+	if (planet.type !== 'Lifeless')
 	{
 		planet = { ...planet }
 		planet.resources = { ...planet.resources }
@@ -364,15 +389,9 @@ const tick = (snapshot, set) => {
 
 		if (planet.habitable && planet.owner !== undefined)
 		{
-			const platoonsOnPlanet = platoons.filter(p => {
-				return (p.location && p.location.planet === planet.id)
+			let platoonsOnPlanet = platoons.filter(p => {
+				return p.location && p.location.planet === planet.id
 			})
-
-			// FIXME
-
-			let r = handleCombat(planet, player, platoonsOnPlanet, nextDate)
-			// FIXME again
-			planet = r[0]
 
 			if (player.type === 'ai')
 			{
@@ -384,8 +403,48 @@ const tick = (snapshot, set) => {
 				planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
 			}
 
+			let modifiedPlatoons = []; // semi-colon required
+			[ planet, modifiedPlatoons ] = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+
+			if (plantCaptured(planet, modifiedPlatoons))
+			{
+				const conqueror = modifiedPlatoons.find(p => p.owner !== planet.owner).owner
+				console.log(`Planet ${planet.name} (${planet.id}) has been conquered by ${conqueror}`)
+
+				planet = { ...planet }
+				planet.owner = conqueror
+				// loose 25% of the population
+				planet.population = planet.population * .75
+
+				ships = ships.map(ship => {
+					if (ship.location && ship.location.planet === planet.id)
+					{
+						// Cannot capture a players Atmosphere Processor
+						if (ship.type === "Atmosphere Processor")
+						{
+							// Push the atmos to orbit
+							ship.location = { ...ship.location, position: 'orbit' }
+						}
+						// All dockets or surface ships are claimed by the conqueror
+						else if (ship.location.position === 'docked' || ship.location.position === 'surface')
+						{
+							ship = { ... ship }
+							ship.owner = conqueror
+						}
+						// All orbetting solar's are claimed by the conqueror
+						else if (ship.type === "Solar-Satellite Generator" && ship.location.position === 'orbit')
+						{
+							ship = { ... ship }
+							ship.owner = conqueror
+						}
+					}
+
+					return ship
+				})
+			}
+
 			// update platoons
-			platoonsOnPlanet.forEach(platoon => {
+			modifiedPlatoons.forEach(platoon => {
 				const index = platoons.findIndex(p => p.id === platoon.id)
 				platoons[index] = platoon
 			})
@@ -425,9 +484,12 @@ const tick = (snapshot, set) => {
 			else if (platoon.troops === 0)
 			{
 				// Disband
+				console.warn(`Platoon ${platoon.id} has been defeated on planet ${platoon.location.planet}`)
 				platoon.commissioned = false
 				platoon.troopChange = 0
 				platoon.calibre = 0
+				platoon.rank = ""
+				platoon.location = {}
 			}
 			else
 			{

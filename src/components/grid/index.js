@@ -16,7 +16,20 @@ const Grid = props => {
 			if (props.items[index])
 			{
 				const item = props.items[index]
-				cell = (<td key={index} title={item.name + " (" + item.type + ")"} onClick={e => props.onSelectItem(item)}>{item.name}</td>)
+
+				const classes = []
+
+				if (props.selected && item.id === props.selected.id)
+				{
+					classes.push('selected')
+				}
+
+				if (props.classNamesForItem)
+				{
+					classes.push(props.classNamesForItem(item))
+				}
+
+				cell = (<td key={index} title={item.name + " (" + item.type + ")"} className={classes.join(' ')} onClick={e => props.onSelectItem(item)}>{item.name}</td>)
 			}
 			else
 			{
@@ -43,7 +56,12 @@ Grid.defaultProps = {
 
 export const PlanetGrid = props => {
 	const planets = useRecoilValue(selectPlanets)
-	return (<Grid items={planets} {...props} />)
+
+	const classNamesForItem = item => {
+		return item.owner === props.player.id ? 'planet friendly' : 'planet enemy'
+	}
+
+	return (<Grid items={planets} {...props} classNamesForItem={props.player && classNamesForItem} />)
 }
 
 export const PlayerFleetGrid = props => {

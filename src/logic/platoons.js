@@ -68,7 +68,7 @@ export const calculatePlatoonStrength = (platoon, aggression) => {
 
 	// truncate to drop any awkward decimals
 	const total = Math.trunc(platoon.troops + core + equipment + aggr)
-	console.log(platoon.troops, core, equipment, aggr, total)
+	// console.log(platoon.troops, core, equipment, aggr, total)
 	return total
 }
 

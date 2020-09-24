@@ -10,3 +10,15 @@ table.grid td {
 	border-color: purple;
 	cursor: pointer;
 }
+
+table.grid td.selected {
+	font-weight: 600;
+}
+
+table.grid td.planet.friendly {
+	color: green;
+}
+
+table.grid td.planet.enemy {
+	color: red;
+}
