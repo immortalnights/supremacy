@@ -88,7 +88,7 @@ export const createPlatoon = (id, player, index, suit, weapon) => {
 		weapon,
 		troops: 0,
 		troopChange: 0,
-		rank: PLATOON_RANKS[0],
+		rank: 0,
 		calibre: 0,
 		commissioned: false
 	}

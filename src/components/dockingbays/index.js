@@ -2,6 +2,7 @@ import React from 'react'
 import { useRecoilValue } from 'recoil'
 import atoms from '../../state/atoms'
 import { selectShipsAtPlanetPosition } from '../../state/ships'
+import './styles.css'
 
 const DockingBays = props => {
 	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'docked' }))
@@ -11,7 +12,15 @@ const DockingBays = props => {
 	for (let bay = 0; bay < 3; bay++)
 	{
 		const ship = ships[bay]
-		bays.push(<li key={bay} className="bay" title={ship ? ship.name : ''} onClick={() => props.onSelect(ship)}>{ship ? ship.name : ''}</li>)
+
+		const classes = ['bay']
+
+		if (ship != null && props.selected != null && props.selected.id === ship.id)
+		{
+			classes.push('selected')
+		}
+
+		bays.push(<li key={bay} className={classes.join(' ')} title={ship ? ship.name : ''} onClick={() => props.onSelect(ship)}>{ship ? ship.name : ''}</li>)
 	}
 
 	return (

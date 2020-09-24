@@ -2,3 +2,7 @@
 .bay {
 	cursor: pointer;
 }
+
+.bay.selected {
+	font-weight: 600;
+}

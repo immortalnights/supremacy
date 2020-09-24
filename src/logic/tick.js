@@ -166,13 +166,12 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 
 	if (attackers.length > 0 && defenders.length > 0)
 	{
-		const baseTroopReduction = 1 // 40
+		const baseTroopReduction = 40
 		let perPlatoon = 0
 
-
 		// Basic, take forty troops from each side
-		perPlatoon = Math.floor(baseTroopReduction / attackers.length)
-		console.log("Attackers lost", perPlatoon, "per platoon", attackers[0]);
+		perPlatoon = Math.max(Math.floor(baseTroopReduction / attackers.length), 1)
+		console.log("Attackers lost", perPlatoon, "per platoon");
 		attackers.forEach(platoon => {
 			if (platoon.troops > 0)
 			{
@@ -185,7 +184,7 @@ const handleCombat = (planet, planetOwner, platoons, date) => {
 			}
 		})
 
-		perPlatoon = Math.floor(baseTroopReduction / defenders.length)
+		perPlatoon = Math.max(Math.floor(baseTroopReduction / defenders.length), 1)
 		console.log("Defenders lost", perPlatoon, "per platoon");
 		defenders.forEach(platoon => {
 			if (platoon.troops > 0)
@@ -488,7 +487,7 @@ const tick = (snapshot, set) => {
 				platoon.commissioned = false
 				platoon.troopChange = 0
 				platoon.calibre = 0
-				platoon.rank = ""
+				platoon.rank = 0
 				platoon.location = {}
 			}
 			else

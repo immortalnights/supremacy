@@ -171,7 +171,7 @@ const Dock = props => {
 		<div className="flex-columns">
 			<div>
 				<div className="flex-columns" style={{justifyContent: 'space-around'}}>
-					<DockingBays planet={props.planet} onSelect={onSelectBay} />
+					<DockingBays planet={props.planet} selected={selected} onSelect={onSelectBay} />
 					<ShipDetails ship={selected} planet={props.planet} />
 				</div>
 				<div>{/*messages*/}</div>

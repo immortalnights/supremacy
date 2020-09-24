@@ -3,7 +3,7 @@ import { useRecoilValue } from 'recoil'
 import Button from '../../components/button'
 import { selectHumanPlayer } from '../../state/game'
 import { selectCapitalPlanet } from '../../state/planets'
-import { MAXIMUM_PLATOONS, ordinal, usePlatoonCostCalc } from '../../logic/platoons'
+import { MAXIMUM_PLATOONS, PLATOON_RANKS, ordinal, usePlatoonCostCalc } from '../../logic/platoons'
 import { selectPlayerPlatoon, useChangeTroops, useCommissionPlatoon, useDisbandPlatoon } from '../../state/platoons'
 import PlatoonEquipment from './platoonequipment'
 
@@ -98,7 +98,7 @@ const Training = props => {
 						<label>Credits</label> {capital.resources.credits.toFixed(0)}
 					</div>
 					<div>
-						<label>Rank</label> {platoon.rank}
+						<label>Rank</label> {PLATOON_RANKS[platoon.rank]}
 					</div>
 					<div>
 						{message}

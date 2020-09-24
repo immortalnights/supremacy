@@ -56,7 +56,7 @@ const Combat = props => {
 		<div className="flex-columns">
 			<div>
 				<div className="flex-columns">
-					<DockingBays planet={props.planet} player={player} onSelect={onSelectShip} />
+					<DockingBays planet={props.planet} player={player} selected={ship} onSelect={onSelectShip} />
 					<ShipDetails ship={ship} player={player} onSelect={onUnloadPlatoon} />
 				</div>
 				<div>{messages}</div>
