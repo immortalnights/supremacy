@@ -5,6 +5,7 @@ import dates from '../logic/date'
 import { canChangePosition } from '../logic/ships'
 import { calculateTravel } from '../logic/travel'
 import { calculateTransfer } from '../logic/general'
+import { PLANT_POSITION_LIMITS } from '../logic/planets'
 
 export const selectPlayerShips = selector({
 	key: 'playerShips',
@@ -165,10 +166,7 @@ const shipReducer = (ship, action) => {
 			// repositionning cost 100 fuel, unless landing to transferring to the surface
 			const fuelCost = ['docked', 'surface'].includes(action.position) ? 0 : 100
 
-			const limits = {
-				docked: 3,
-				surface: 6
-			}
+			const limit = PLANT_POSITION_LIMITS[action.position]
 
 			// TODO validation
 			if (ship.type === 'Atmosphere Processor')
@@ -191,7 +189,7 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`Ship ${ship.name} does not have enough fuel, requires ${fuelCost} fuel`)
 			}
-			else if (limits[action.position] && action.shipsAtLocation.length >= limits[action.position])
+			else if (limit != null && action.shipsAtLocation.length >= limit)
 			{
 				console.warn(`Position ${action.position} is full`)
 			}
@@ -322,7 +320,7 @@ const shipReducer = (ship, action) => {
 			}
 			break
 		}
-		case 'load:cargo':
+		case 'transfer:cargo':
 		{
 			const planet = action.planet
 
@@ -415,6 +413,37 @@ const shipReducer = (ship, action) => {
 			}
 			break
 		}
+		case 'unload:cargo':
+		{
+			let totalCargo = 0
+			const cargoTypes = Object.keys(ship.cargo)
+			cargoTypes.forEach(type => totalCargo = totalCargo + ship.cargo[type])
+
+			if (!ship.location || ship.location.position !== 'docked')
+			{
+				console.warn(`Cannot unload ship ${ship.name} not in docking bay`)
+			}
+			else if (totalCargo === 0)
+			{
+				console.warn(`Ship ${ship.name} does not have any cargo to unload`)
+			}
+			else
+			{
+				const planet = action.planet
+
+				ship = { ...ship }
+				ship.cargo = { ...ship.cargo }
+				// planet = { ...planet } Copy already provided
+
+				planet.resources = { ... planet.resources }
+
+				cargoTypes.forEach(type => {
+					planet.resources[type] = planet.resources[type] + ship.cargo[type]
+					ship.cargo[type] = 0
+				})
+			}
+			break
+		}
 		case 'rename':
 		{
 			if (action.name)
@@ -422,6 +451,10 @@ const shipReducer = (ship, action) => {
 				ship = { ...ship }
 				ship.name = action.name
 			}
+			break
+		}
+		case 'decommission':
+		{
 			break
 		}
 		default:
@@ -510,7 +543,35 @@ export const useLoadUnloadCargo = (ship, planet) => {
 		const refreshedPlanet = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
 		// note, shipReducer will modify the planet because in this function excatly
 		// how much of the cargo has been loaded is not known (may be less than `change`).
-		const reducedShip = shipReducer(refreshedShip, { type: 'load:cargo', planet: refreshedPlanet, cargo, change })
+		const reducedShip = shipReducer(refreshedShip, { type: 'transfer:cargo', planet: refreshedPlanet, cargo, change })
+		if (reducedShip !== refreshedShip)
+		{
+			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)
+			set(atoms.ships(reducedShip.id), reducedShip)
+		}
+	})
+}
+
+export const useUnloadAllCargo = (ship, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => () => {
+		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
+		const refreshedPlanet = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
+		// note, shipReducer will modify the planet
+		const reducedShip = shipReducer(refreshedShip, { type: 'unload:cargo', planet: refreshedPlanet })
+		if (reducedShip !== refreshedShip)
+		{
+			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)
+			set(atoms.ships(reducedShip.id), reducedShip)
+		}
+	})
+}
+
+export const useDecommissionShip = (ship, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => (cargo, change) => {
+		const refreshedShip = snapshot.getLoadable(atoms.ships(ship.id)).contents
+		const refreshedPlanet = { ...snapshot.getLoadable(atoms.planets(planet.id)).contents }
+		// note, shipReducer will modify the planet
+		const reducedShip = shipReducer(refreshedShip, { type: 'decommission', planet: refreshedPlanet })
 		if (reducedShip !== refreshedShip)
 		{
 			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)

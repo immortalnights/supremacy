@@ -143,6 +143,10 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 		}
 	}
 
+	// Value deprecation
+	ship = { ...ship }
+	ship.value = ship.value - 1
+
 	return [ ship, planet ]
 }
 

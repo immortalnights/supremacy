@@ -28,6 +28,7 @@
 				"energy": 366
 			}
 		],
+		"value": 3850,
 		"harvester": false
 	},
 	"generator":
@@ -57,6 +58,7 @@
 				"credits": 975
 			}
 		],
+		"value": 13550,
 		"harvester": {
 			"location": "orbit",
 			"resources": {
@@ -94,6 +96,7 @@
 				"credits": 26753
 			}
 		],
+		"value": 7500,
 		"harvester": false
 	},
 	"carrier":
@@ -123,6 +126,7 @@
 				"credits": 15400
 			}
 		],
+		"value": 1000,
 		"harvester": false
 	},
 	"miningstation":
@@ -152,6 +156,7 @@
 				"credits": 17999
 			}
 		],
+		"value": 14750,
 		"harvester": {
 			"location": "surface",
 			"resources": {
@@ -189,6 +194,7 @@
 				"credits": 16995
 			}
 		],
+		"value": 13550,
 		"harvester": {
 			"location": "surface",
 			"resources": {

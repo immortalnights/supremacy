@@ -3,6 +3,8 @@ import atoms from './atoms'
 import { selectHumanPlayer } from './game'
 import { selectCapitalPlanet } from './planets'
 import { createShip } from '../logic/ships'
+import { PLANT_POSITION_LIMITS } from '../logic/planets'
+import { selectShipsAtPlanetPosition } from '../state/ships'
 import shipData from '../data/ships.json'
 
 export const blueprints = atom({
@@ -68,46 +70,49 @@ const hasAtmos = (snapshot, player) => {
 export const useBuyShip = player => {
 	return useRecoilCallback(({ snapshot, set }) => (key, name) => {
 		const bps = snapshot.getLoadable(blueprints).contents
+		const date = snapshot.getLoadable(atoms.date).contents
 		const game = snapshot.getLoadable(atoms.game).contents
 		const capital = snapshot.getLoadable(selectCapitalPlanet(player)).contents
-
+		const shipsInBay = snapshot.getLoadable(selectShipsAtPlanetPosition({ planet: capital.id, position: 'docked' })).contents
 		const blueprint = bps[key]
+
 		console.log(key, blueprint, bps)
-		if (canAfford(blueprint.cost[0], capital.resources))
+		if (canAfford(blueprint.cost[0], capital.resources) === false)
 		{
-			if (key === 'atmos' && hasAtmos(snapshot, player))
-			{
-				console.log("Player already owns an Atmos")
-			}
-			else
-			{
-				const resources = takeCost({ ...capital.resources }, blueprint.cost[0])
-				set(atoms.planets(capital.id), { ...capital, resources: resources })
-
-				// console.log(game.nextShipId)
-				const id = game.nextShipId
-				const ship = createShip(blueprint, id, name, player, capital)
-
-				console.log("New ship", ship.id, ship)
-				set(atoms.ships(ship.id), ship)
-				if (key === 'atmos')
-				{
-					// const index = game.players.findIndex(p => p.id === player.id)
-					// game.players = [ ...game.players ]
-					// game.players[index] = { ...game.players[index] }
-					// game.players[index].atmos = ship.id
-				}
-
-				set(atoms.game, {
-					...game,
-					nextShipId: game.nextShipId + 1,
-					ships: [ ...game.ships, id ]
-				})
-			}
+			console.warn("Not enough credits on home planet")
+		}
+		else if (shipsInBay.length >= PLANT_POSITION_LIMITS['docked'])
+		{
+			console.warn("Cannot buy ship, docking bay is full")
+		}
+		else if (key === 'atmos' && hasAtmos(snapshot, player))
+		{
+			console.log("Player already owns an Atmos")
 		}
 		else
 		{
-			console.log("Not enough credits on home planet")
+			const resources = takeCost({ ...capital.resources }, blueprint.cost[0])
+			set(atoms.planets(capital.id), { ...capital, resources: resources })
+
+			// console.log(game.nextShipId)
+			const id = game.nextShipId
+			const ship = createShip(blueprint, id, name, player, capital, date)
+
+			console.log("New ship", ship.id, ship)
+			set(atoms.ships(ship.id), ship)
+			if (key === 'atmos')
+			{
+				// const index = game.players.findIndex(p => p.id === player.id)
+				// game.players = [ ...game.players ]
+				// game.players[index] = { ...game.players[index] }
+				// game.players[index].atmos = ship.id
+			}
+
+			set(atoms.game, {
+				...game,
+				nextShipId: game.nextShipId + 1,
+				ships: [ ...game.ships, id ]
+			})
 		}
 	}, [])
 }

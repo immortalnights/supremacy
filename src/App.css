@@ -10,3 +10,24 @@ nav a {
 	margin: .125em;
 	padding: .25em .5em;
 }
+
+.content {
+	display: flex;
+	flex-direction: column;
+}
+
+.main-menu {
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.main-menu > div {
+	margin: 10px 5px;
+	display: flex;
+	flex-direction: column;
+}
+
+.main-menu button {
+	flex: 1;
+}

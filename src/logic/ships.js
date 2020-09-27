@@ -54,7 +54,6 @@ export const createShip = (blueprint, id, name, player, planet, date) => {
 			energy: 0
 		},
 		platoons: [],
-		value: blueprint.cost[0].credits,
 		purchased: date,
 		...cloneDeep(blueprint)
 	}

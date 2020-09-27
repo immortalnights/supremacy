@@ -4,7 +4,7 @@ import Button from '../../components/button'
 import atoms from '../../state/atoms'
 import DockingBays from '../../components/dockingbays/'
 import ShipDetails from './shipdetails'
-import { selectFirstInDock, useAssignCrew, useLoadUnloadCargo } from '../../state/ships'
+import { selectFirstInDock, useAssignCrew, useLoadUnloadCargo, useUnloadAllCargo, useDecommissionShip } from '../../state/ships'
 import './styles.css'
 
 const ShipCivFuelCargo = props => {
@@ -147,6 +147,8 @@ const Dock = props => {
 	const defaultSelected = useRecoilValue(selectFirstInDock(props.planet))
 	const [ selected, setSelected ] = useState(defaultSelected)
 	const assignCrew = useAssignCrew()
+	const unloadAll = useUnloadAllCargo(selected, { id: props.planet })
+	const decommission = useDecommissionShip(selected, { id: props.planet })
 
 	const onSelectBay = ship => {
 		setSelected(ship)
@@ -160,11 +162,12 @@ const Dock = props => {
 	}
 
 	const onUnloadCargo = () => {
-
+		unloadAll()
 	}
 
 	const onDecommission = () => {
-
+		// Return value, all minerals or fuel. All crew and cargo
+		decommission()
 	}
 
 	return (
@@ -185,7 +188,7 @@ const Dock = props => {
 					<div className="stacked-buttons">
 						<Button onClick={onAssignCrew}>Crew</Button>
 						<Button onClick={onUnloadCargo}>Unload</Button>
-						<Button onClick={onDecommission}>Decomission</Button>
+						<Button onClick={onDecommission}>Decommission</Button>
 					</div>
 				</div>
 			</div>

@@ -97,7 +97,7 @@ const GameRoot = props => {
 
 const MainMenu = props => {
 	return (
-		<div>
+		<div className="main-menu">
 			<h2>Supremacy</h2>
 			<div><Button disabled={!props.canContinue} onClick={props.onContinueGame}>Continue</Button></div>
 			<div><Button onClick={props.onNewGame}>New Game</Button></div>
@@ -138,7 +138,7 @@ function App() {
 		content = (<MainMenu onNewGame={onNewGame} canContinue={slot} onContinueGame={onContinueGame} />)
 	}
 
-	return (<div>{content}</div>)
+	return (<div className="content">{content}</div>)
 }
 
 export default App

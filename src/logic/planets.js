@@ -89,6 +89,11 @@ export const PLANET_TYPES = [
 	}
 ]
 
+export const PLANT_POSITION_LIMITS = {
+	docked: 3,
+	surface: 6
+}
+
 export const createPlanet = (id, location) => {
 	return {
 		id,
