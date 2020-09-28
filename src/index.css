@@ -50,21 +50,21 @@ dl {
   flex-wrap: wrap;
 }
 dt {
-  width: 33%;
+  width: 40%;
 }
 dd {
   margin-left: auto;
-  width: 66%;
+  width: 60%;
 }
 
 .stacked-buttons {
   display: flex;
   flex-direction: column;
+  margin: auto 1em;
 }
 
-.stacked-buttons > button {
-  flex: 1;
-  margin: 10px;
+button {
+  user-select: none;
 }
 
 button.small {

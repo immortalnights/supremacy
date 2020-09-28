@@ -7,15 +7,19 @@ const ShipDetails = props => {
 	const planet = useRecoilValue(atoms.planets(props.planet))
 
 	const details = {
-		name: '',
+		name: "-",
 		civilians: planet.population, // on the planet
-		seats: 0,
-		crew: 0,
-		requiredCrew: 0,
-		crewText: '',
-		capacity: null,
-		payload: null,
-		value: 0
+		seats: "-",
+		crew: "-",
+		requiredCrew: null,
+		crewText: "-",
+		capacity: {
+			seats: "-",
+			cargo: "-"
+		},
+		maxFuel: "-",
+		payload: "-",
+		value: "-"
 	}
 
 	if (ship)
@@ -35,6 +39,8 @@ const ShipDetails = props => {
 		{
 			details.crewText = 'remote'
 		}
+
+		details.maxFuel = details.capacity ? details.capacity.fuel : "Nuclear"
 	}
 
 	return (
@@ -44,13 +50,13 @@ const ShipDetails = props => {
 			<dt>Civilians</dt>
 			<dd>{details.civilians.toFixed(0)}</dd>
 			<dt>Seats</dt>
-			<dd>{details.capacity ? details.capacity.seats : 0}</dd>
+			<dd>{details.capacity.seats}</dd>
 			<dt>Crew</dt>
 			<dd>{details.crewText}</dd>
 			<dt>Capacity</dt>
-			<dd>{details.capacity ? details.capacity.cargo : 0}</dd>
+			<dd>{details.capacity.cargo}</dd>
 			<dt>Max Fuel</dt>
-			<dd>{details.capacity ? details.capacity.fuel : "Nuclear"}</dd>
+			<dd>{details.maxFuel}</dd>
 			<dt>Payload</dt>
 			<dd>{details.payload}</dd>
 			<dt>Value</dt>

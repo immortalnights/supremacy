@@ -41,7 +41,7 @@ const Training = props => {
 	}
 
 	const onHoldLess = modifiers => {
-		const val = getModifierValue(modifiers)
+		const val = -getModifierValue(modifiers)
 		changeTroops(val)
 	}
 
@@ -92,20 +92,20 @@ const Training = props => {
 				<PlatoonEquipment platoon={platoon} />
 				<div>
 					<div>
-						<label>Location</label> {capital.name}
+						<label>Location</label> {platoon.commissioned ? platoon.location.name : "-"}
 					</div>
 					<div>
 						<label>Credits</label> {capital.resources.credits.toFixed(0)}
 					</div>
 					<div>
-						<label>Rank</label> {PLATOON_RANKS[platoon.rank]}
+						<label>Rank</label> {platoon.commissioned ? PLATOON_RANKS[platoon.rank] : "-"}
 					</div>
 					<div>
 						{message}
 					</div>
 					<div>{/*messages*/}</div>
 					<div className="flex-columns">
-						<Button onClick={commission}>Equip</Button>
+						<Button onClick={commission} disabled={platoon.commissioned || platoon.troops === 0}>Equip</Button>
 						<Button onClick={disband} disabled={!canDisband}>Disband</Button>
 					</div>
 					<div>

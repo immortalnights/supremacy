@@ -8,30 +8,32 @@ const MAX_MULTIPLIER = 100
 const Button = props => {
 	const timer = useRef()
 	const duration = useRef(0)
-	const frequency = useRef(DEFAULT_FREQUENCY)
+	const freq = useRef(DEFAULT_FREQUENCY)
 	const multiplier = useRef(DEFAULT_MULTIPLIER)
 
-	const onHold = modifiers => {
+	const { onHold, frequency, ...attr } = props
+
+	const onButtonHold = modifiers => {
 		props.onHold(modifiers)
 
 		duration.current++
-		if (props.frequency === 'scale')
+		if (frequency === 'scale')
 		{
 			if (duration.current > 1)
 			{
-				frequency.current = Math.max(frequency.current * .90, 50)
+				freq.current = Math.max(freq.current * .90, 50)
 			}
 		}
 		else
 		{
-			frequency.current = props.frequency || frequency.current
+			freq.current = frequency || freq.current
 		}
 
-		timer.current = setTimeout(onHold.bind(null, modifiers), frequency.current)
+		timer.current = setTimeout(onHold.bind(null, modifiers), freq.current)
 	}
 
 	const start = event => {
-		frequency.current = DEFAULT_FREQUENCY
+		freq.current = DEFAULT_FREQUENCY
 		multiplier.current = DEFAULT_MULTIPLIER
 
 		if (props.onHold)
@@ -41,7 +43,7 @@ const Button = props => {
 				alt: event.altKey
 			}
 
-			onHold(modifiers)
+			onButtonHold(modifiers)
 		}
 	}
 
@@ -61,7 +63,13 @@ const Button = props => {
 		}
 	}, [])
 
-	return (<button className={props.className} type={props.type} disabled={props.disabled} onClick={props.onClick} onMouseDown={start} onMouseUp={clear} style={{userSelect: 'none'}}>{props.children}</button>)
+	if (attr.style)
+	{
+
+		console.log("***", attr.style)
+	}
+
+	return (<button { ...attr } onMouseDown={start} onMouseUp={clear}>{props.children}</button>)
 }
 
 Button.defaultProps = {

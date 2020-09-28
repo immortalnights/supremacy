@@ -11,8 +11,8 @@ const ShipCivFuelCargo = props => {
 	const ship = useRecoilValue(atoms.ships(props.ship ? props.ship.id : null))
 	const loadUnload = useLoadUnloadCargo(ship, { id: props.planet })
 	const image = ''
-	let civilians = ''
-	let fuel
+	let civilians = "-"
+	let fuel = "-"
 
 	if (ship)
 	{
@@ -39,8 +39,8 @@ const ShipCivFuelCargo = props => {
 	return (
 		<div className="flex-columns" style={{justifyContent: 'space-between'}}>
 			<div>{/*image*/}</div>
-			<CivFuelCargo onChange={onChangeCivilians} value={civilians} icon={image} iconAlt="civilians" />
-			<CivFuelCargo onChange={onChangeFuel} value={fuel} icon={image} iconAlt="fuel" />
+			<CivFuelCargo onChange={onChangeCivilians} value={civilians} icon={image} iconAlt="civilians" disabled={!ship} />
+			<CivFuelCargo onChange={onChangeFuel} value={fuel} icon={image} iconAlt="fuel" disabled={!ship} />
 		</div>
 	)
 }
@@ -61,8 +61,8 @@ const CivFuelCargo = props => {
 			<div style={{height:'1.5em', textAlign: 'right'}}>{props.value}</div>
 			<div className="flex-columns">
 				<div className="flex-columns">
-					<Button onHold={onHoldMore} frequency="scale">More</Button>
-					<Button onHold={onHoldLess} frequency="scale">Less</Button>
+					<Button onHold={onHoldMore} frequency="scale" disabled={props.disabled}>More</Button>
+					<Button onHold={onHoldLess} frequency="scale" disabled={props.disabled}>Less</Button>
 				</div>
 				<img src={props.icon} alt={props.iconAlt} />
 			</div>
@@ -89,8 +89,8 @@ const CargoItem = props => {
 			<div>
 				<div>
 					<div className="flex-columns">
-						<Button onHold={onHoldMore} frequency="scale">More</Button>
-						<Button onHold={onHoldLess} frequency="scale">Less</Button>
+						<Button onHold={onHoldMore} frequency="scale" disabled={props.disabled}>More</Button>
+						<Button onHold={onHoldLess} frequency="scale" disabled={props.disabled}>Less</Button>
 					</div>
 					<div style={{textAlign: 'center'}}>{props.type}</div>
 				</div>
@@ -133,10 +133,10 @@ const Cargo = props => {
 
 	return (
 		<div className="flex-columns">
-			<CargoItem type="food" available={planet.resources.food} loaded={cargo.food || 0} onChange={loadUnloadFood} />
-			<CargoItem type="minerals" available={planet.resources.minerals} loaded={cargo.minerals || 0} onChange={loadUnloadMinerals} />
-			<CargoItem type="fuels" available={planet.resources.fuels} loaded={cargo.fuels || 0} onChange={loadUnloadFuels} />
-			<CargoItem type="energy" available={planet.resources.energy} loaded={cargo.energy || 0} onChange={loadUnloadEnergy} />
+			<CargoItem type="food" available={planet.resources.food} loaded={cargo.food || 0} onChange={loadUnloadFood} disabled={!ship} />
+			<CargoItem type="minerals" available={planet.resources.minerals} loaded={cargo.minerals || 0} onChange={loadUnloadMinerals} disabled={!ship} />
+			<CargoItem type="fuels" available={planet.resources.fuels} loaded={cargo.fuels || 0} onChange={loadUnloadFuels} disabled={!ship} />
+			<CargoItem type="energy" available={planet.resources.energy} loaded={cargo.energy || 0} onChange={loadUnloadEnergy} disabled={!ship} />
 		</div>
 	)
 }
@@ -168,6 +168,7 @@ const Dock = props => {
 	const onDecommission = () => {
 		// Return value, all minerals or fuel. All crew and cargo
 		decommission()
+		setSelected(null)
 	}
 
 	return (
@@ -186,9 +187,9 @@ const Dock = props => {
 						</div>
 					</div>
 					<div className="stacked-buttons">
-						<Button onClick={onAssignCrew}>Crew</Button>
-						<Button onClick={onUnloadCargo}>Unload</Button>
-						<Button onClick={onDecommission}>Decommission</Button>
+						<Button onClick={onAssignCrew} disabled={!selected}>Crew</Button>
+						<Button onClick={onUnloadCargo} disabled={!selected}>Unload</Button>
+						<Button onClick={onDecommission} disabled={!selected}>Decommission</Button>
 					</div>
 				</div>
 			</div>

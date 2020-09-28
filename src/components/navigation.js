@@ -1,10 +1,8 @@
 import React from 'react'
 import { A } from '../state/nav'
-import Button from './button'
 
 const Navigation = props => {
 	const planet = props.planet || 'h'
-	const onSolarSystem = props.screen === 'solarsystem'
 
 	return (
 		<nav className="navigation">

@@ -156,10 +156,10 @@ const platoonReducer = (platoon, action) => {
 					platoon.commissioned = true
 					platoon.unitStrength = action.suit.armour + action.weapon.damage
 					platoon.location = {
-						planet: action.planet.id
+						planet: action.planet.id,
+						name: action.planet.name
 					}
 				}
-
 			}
 			break
 		}
@@ -212,6 +212,7 @@ const platoonReducer = (platoon, action) => {
 
 					delete platoon.location.planet
 					platoon.location.ship = action.ship.id
+					platoon.location.name = action.ship.name
 				}
 			}
 			else if (action.direction === 'unload')
@@ -233,8 +234,9 @@ const platoonReducer = (platoon, action) => {
 					platoon = { ...platoon }
 					platoon.location = { ...platoon.location }
 
-					platoon.location.planet = action.planet.id
 					delete platoon.location.ship
+					platoon.location.planet = action.planet.id
+					platoon.location.name = action.planet.name
 				}
 			}
 			else

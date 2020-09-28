@@ -25,7 +25,7 @@ const TaxControls = props => {
 	}
 
 	return (
-		<div style={{display: 'flex', flexDirection: 'column', margin: '0 5px'}}>
+		<div className="flex flex-rows" style={{ margin: '0 5px 0 0' }}>
 			<Button onHold={onHoldIncTax} frequency="scale">Inc</Button>
 			<Button onHold={onHoldDecTax} frequency="scale">Dec</Button>
 		</div>
@@ -42,7 +42,7 @@ const PlanetOverview = props => {
 	}
 
 	return (
-		<div className="flex-columns">
+		<div className="flex-columns" style={{alignItems: 'baseline'}}>
 			<dl>
 				<dt>Planet</dt>
 				<dd>{planet.name || planet.id}</dd>
@@ -72,13 +72,13 @@ const PlanetOverview = props => {
 
 				<dt className="flex-columns">
 					<TaxControls planet={planet}  />
-					<span style={{flex: '1 0 30%', margin: 'auto'}}>Tax Rate</span>
+					<span style={{margin: 'auto 5px auto 0', whiteSpace: 'nowrap' }}>Tax Rate</span>
 				</dt>
 				<dd style={{display: 'flex'}}>
-					<span style={{flex: '1', margin: 'auto'}}>{planet.tax} %</span>
+					<span style={{margin: 'auto 0'}}>{planet.tax} %</span>
 				</dd>
 
-				<dt>Military Strength</dt>
+				<dt style={{whiteSpace: 'wrap'}}>Military Strength</dt>
 				<dd>{0}</dd>
 			</dl>
 		</div>
@@ -206,9 +206,9 @@ const Overview = props => {
 	return (
 		<div>
 			<div className="flex-columns">
-				<div style={{display: 'flex', flexDirection: 'column'}}>
+				<div class="flex flex-rows" style={{margin: 'auto 10px', flex: '0 1 0'}}>
 					<Button onClick={onStartRename}>Rename</Button>
-					<Button onClick={onTransferCredits}>Transfer Credits</Button>
+					<Button onClick={onTransferCredits} style={{whiteSpace: 'nowrap'}}>Transfer Credits</Button>
 				</div>
 				<PlanetOverview id={selected} />
 			</div>

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useRecoilValue, useRecoilCallback } from 'recoil'
 import date from './date'
-import { terraformPlanet } from './planets'
+import { terraformPlanet, PLANET_POPULATION_LIMIT } from './planets'
 import store from '../state/atoms'
 import { selectPlayer } from '../state/game'
 
@@ -145,7 +145,10 @@ const updateShip = (ship, shipOwner, planet, currentDate) => {
 
 	// Value deprecation
 	ship = { ...ship }
-	ship.value = ship.value - 1
+	if (ship.value > 0)
+	{
+		ship.value = ship.value - 1
+	}
 
 	return [ ship, planet ]
 }
@@ -310,9 +313,9 @@ const updatePlanet = (planet, planetOwner, platoons, date) => {
 			{
 				planet.population = 0
 			}
-			else if (planet.population > 30000)
+			else if (planet.population > PLANET_POPULATION_LIMIT)
 			{
-				planet.population = 30000
+				planet.population = PLANET_POPULATION_LIMIT
 			}
 
 			// console.log("Growth", planet.growth, populationGrowth, planet.population)

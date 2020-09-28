@@ -78,9 +78,9 @@ const Combat = props => {
 				<div>
 					<label>Aggression</label>
 					<div className="flex-columns">
-						<div>
-							<div><Button onClick={() => changeAggression(1)}>Inc</Button></div>
-							<div><Button onClick={() => changeAggression(-1)}>Dec</Button></div>
+						<div className="flex flex-rows">
+							<Button onClick={() => changeAggression(1)}>Inc</Button>
+							<Button onClick={() => changeAggression(-1)}>Dec</Button>
 						</div>
 						<div><img src="" alt="aggression" /></div>
 						<div>{aggression}</div>

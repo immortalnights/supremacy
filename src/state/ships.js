@@ -5,7 +5,7 @@ import dates from '../logic/date'
 import { canChangePosition } from '../logic/ships'
 import { calculateTravel } from '../logic/travel'
 import { calculateTransfer } from '../logic/general'
-import { PLANT_POSITION_LIMITS } from '../logic/planets'
+import { PLANET_POPULATION_LIMIT, PLANET_POSITION_LIMITS } from '../logic/planets'
 
 export const selectPlayerShips = selector({
 	key: 'playerShips',
@@ -43,7 +43,7 @@ export const selectShipsAtPlanetPosition = selectorFamily({
 			}
 		})
 
-		console.log("shipsAtPlanetPosition", key, "=>", ships)
+		// console.log("shipsAtPlanetPosition", key, "=>", ships)
 		return ships
 	}
 })
@@ -135,18 +135,19 @@ const findAtmos = (snapshot, player) => {
 // could be a hook?
 const shipReducer = (ship, action) => {
 	// console.log("Ship reducer", ship, action)
+	const planet = action.planet
+
 	switch (action.type)
 	{
 		case 'crew':
 		{
-			const planet = action.planet
 			if (ship.requiredCrew === 0)
 			{
-				console.log(`Ship ${ship.name} does not require a crew`)
+				console.warn(`Ship ${ship.name} does not require a crew`)
 			}
 			else if (ship.crew === ship.requiredCrew)
 			{
-				console.log(`Ship ${ship.name} already has a crew`)
+				console.warn(`Ship ${ship.name} already has a crew`)
 			}
 			else if (planet.population < ship.requiredCrew)
 			{
@@ -166,7 +167,7 @@ const shipReducer = (ship, action) => {
 			// repositionning cost 100 fuel, unless landing to transferring to the surface
 			const fuelCost = ['docked', 'surface'].includes(action.position) ? 0 : 100
 
-			const limit = PLANT_POSITION_LIMITS[action.position]
+			const limit = PLANET_POSITION_LIMITS[action.position]
 
 			// TODO validation
 			if (ship.type === 'Atmosphere Processor')
@@ -179,7 +180,7 @@ const shipReducer = (ship, action) => {
 			}
 			else if (ship.crew !== ship.requiredCrew)
 			{
-				console.log(`Ship ${ship.name} does not have the required crew`)
+				console.warn(`Ship ${ship.name} does not have the required crew`)
 			}
 			else if (canChangePosition(ship.location.position, action.position) === false)
 			{
@@ -219,7 +220,7 @@ const shipReducer = (ship, action) => {
 			// TODO validation
 			if (ship.crew !== ship.requiredCrew)
 			{
-				console.log(`Ship does not have the required crew`)
+				console.warn(`Ship does not have the required crew`)
 			}
 			else if (ship.location.position === 'surface')
 			{
@@ -322,8 +323,6 @@ const shipReducer = (ship, action) => {
 		}
 		case 'transfer:cargo':
 		{
-			const planet = action.planet
-
 			const check = (change, source, target, maximum) => {
 				let ok = false
 				// console.log("check", source, target, maximum)
@@ -429,13 +428,11 @@ const shipReducer = (ship, action) => {
 			}
 			else
 			{
-				const planet = action.planet
-
 				ship = { ...ship }
 				ship.cargo = { ...ship.cargo }
 				// planet = { ...planet } Copy already provided
 
-				planet.resources = { ... planet.resources }
+				planet.resources = { ...planet.resources }
 
 				cargoTypes.forEach(type => {
 					planet.resources[type] = planet.resources[type] + ship.cargo[type]
@@ -455,6 +452,48 @@ const shipReducer = (ship, action) => {
 		}
 		case 'decommission':
 		{
+			if (!ship.location || ship.location.position !== 'docked')
+			{
+				console.warn(`Cannot decommission ship ${ship.name} as it is not docked`)
+			}
+			else
+			{
+				ship = { ...ship }
+				ship.cargo = { ...ship.cargo }
+				// planet = { ...planet } Copy already provided
+
+				// Unload all cargo
+				planet.resources = { ...planet.resources }
+
+				const cargoTypes = Object.keys(ship.cargo)
+				cargoTypes.forEach(type => {
+					planet.resources[type] = planet.resources[type] + ship.cargo[type]
+					ship.cargo[type] = 0
+				})
+
+				// Unload fuel
+				planet.resources.fuels = planet.resources.fuels + ship.fuel
+				ship.fuel = 0
+
+				// Unload passengers
+				planet.population = planet.population + ship.civilians
+				ship.civilians = 0
+
+				// Unload crew
+				planet.population = planet.population + ship.crew
+				ship.crew = 0
+
+				// Refund credits (value), minerals and energy
+				planet.credits = planet.credits + ship.value
+				planet.resources.minerals = planet.resources.minerals
+				planet.resources.energy = planet.resources.energy
+
+				// Ensure population has not exceeded maximum
+				planet.population = Math.min(planet.population, PLANET_POPULATION_LIMIT)
+
+				// Mark the ship for removeal
+				ship.decommissioned = true
+			}
 			break
 		}
 		default:
@@ -575,7 +614,14 @@ export const useDecommissionShip = (ship, planet) => {
 		if (reducedShip !== refreshedShip)
 		{
 			set(atoms.planets(refreshedPlanet.id), refreshedPlanet)
-			set(atoms.ships(reducedShip.id), reducedShip)
+
+			const game = { ...snapshot.getLoadable(atoms.game).contents }
+			const index = game.ships.findIndex(id => id === ship.id)
+			game.ships = [ ...game.ships ]
+			game.ships.splice(index, 1)
+			set(atoms.game, game)
+
+			set(atoms.ships(reducedShip.id), null)
 		}
 	})
 }

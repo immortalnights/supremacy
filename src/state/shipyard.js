@@ -3,7 +3,7 @@ import atoms from './atoms'
 import { selectHumanPlayer } from './game'
 import { selectCapitalPlanet } from './planets'
 import { createShip } from '../logic/ships'
-import { PLANT_POSITION_LIMITS } from '../logic/planets'
+import { PLANET_POSITION_LIMITS } from '../logic/planets'
 import { selectShipsAtPlanetPosition } from '../state/ships'
 import shipData from '../data/ships.json'
 
@@ -81,7 +81,7 @@ export const useBuyShip = player => {
 		{
 			console.warn("Not enough credits on home planet")
 		}
-		else if (shipsInBay.length >= PLANT_POSITION_LIMITS['docked'])
+		else if (shipsInBay.length >= PLANET_POSITION_LIMITS['docked'])
 		{
 			console.warn("Cannot buy ship, docking bay is full")
 		}
