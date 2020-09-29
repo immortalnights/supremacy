@@ -63,12 +63,6 @@ const Button = props => {
 		}
 	}, [])
 
-	if (attr.style)
-	{
-
-		console.log("***", attr.style)
-	}
-
 	return (<button { ...attr } onMouseDown={start} onMouseUp={clear}>{props.children}</button>)
 }
 

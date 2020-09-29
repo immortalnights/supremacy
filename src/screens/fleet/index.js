@@ -127,7 +127,7 @@ const Fleet = props => {
 	return (
 		<div>
 			<div className="flex-columns">
-				<DockingBays planet={props.planet} onSelect={onSelectBay} />
+				<DockingBays planet={props.planet} selected={selected} onSelect={onSelectBay} />
 				<div>
 					<div>
 						<div className="flex-columns">

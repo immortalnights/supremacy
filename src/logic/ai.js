@@ -7,7 +7,7 @@ import store, { GAME_START_YEAR } from '../state/atoms'
 import { selectAIPlayer } from '../state/game'
 import { useSetTax, useTransferCredits, useChangeAggression } from '../state/planets'
 import { useBuyShip } from '../state/shipyard'
-import { useSendShipToDestination, useSendAtmos } from '../state/ships'
+import { useChangeShipPosition, useSendShipToDestination, useSendAtmos } from '../state/ships'
 
 
 // const govern = ({ planet, ships, platoons }) => {
@@ -53,7 +53,8 @@ import { useSendShipToDestination, useSendAtmos } from '../state/ships'
 // }
 
 const nextActionDate = (date, difficulty) => {
-	const wait = dates.fromDays(random(dates.YEAR_LENGTH * 1.5, dates.YEAR_LENGTH * 2.5) * difficulty)
+	// random(dates.YEAR_LENGTH * .25, dates.YEAR_LENGTH * .75) * difficulty
+	const wait = dates.fromDays(4)
 	const next = dates.add(date, wait)
 	console.log("AI", `Next action ${next.d} / ${next.y}`)
 	return next
@@ -64,6 +65,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 	let tasks = []
 
 	const me = game.players.find(p => p.type === 'ai')
+	const capital = planets.find(p => p.id === me.capitalPlanet)
 
 	// AI does not look after it's planets
 	planets.forEach(p => {
@@ -73,7 +75,6 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			// console.log("AI", `govener for planet ${planet.id} made ${requests.length} requests`)
 		}
 	})
-
 
 	if (!memory.initialized)
 	{
@@ -87,7 +88,162 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 	// AI doesn't do anything for two game years
 	if (dates.diff(date, memory.nextAction) > 0)
 	{
-		// console.log("AI", `Waiting until later...`, memory.nextAction)
+		console.log("AI", `Waiting until later...`, memory.nextAction)
+	}
+	else if (memory.invasion)
+	{
+		let invasion = { ...memory.invasion }
+		const ship = invasion.ship ? invasion.ship : ships.find(s => s.type === 'B-29 Battle Cruiser')
+
+		if (ship.heading)
+		{
+			return
+		}
+
+		console.log("AI", "Invasion", invasion)
+		switch (invasion.phase)
+		{
+			case 'prepare':
+			{
+				if (ship)
+				{
+					invasion.ship = ship
+
+					if (ship.crew === 0)
+					{
+						tasks.push({
+							type: 'ship:crew',
+							ref: ship.id
+						})
+					}
+
+					if (ship.fuel < ship.capacity.fuel)
+					{
+						tasks.push({
+							type: 'ship:refuel',
+							ref: ship.id
+						})
+					}
+					if (ship.location.planet === capital.id)
+					{
+						if (ship.location.position === 'docked')
+						{
+							invasion.phase = 'invade:load'
+						}
+						else
+						{
+							invasion.phase = 'return:land'
+						}
+					}
+					else
+					{
+						if (ship.location.position === 'docked')
+						{
+							invasion.phase = 'return:launch'
+						}
+						else
+						{
+							invasion.phase = 'return:travel'
+						}
+					}
+				}
+				else
+				{
+					tasks.push({
+						type: 'ship:purchase',
+						ref: 'B-29 Battle Cruiser'
+					})
+
+					invasion.phase = 'invade:load'
+				}
+				break
+			}
+			case 'return:launch':
+			{
+				tasks.push({
+					type: 'ship:launch',
+					ref: invasion.ship.id
+				})
+				invasion.phase = 'return:travel'
+				break
+			}
+			case 'return:travel':
+			{
+				tasks.push({
+					type: 'ship:travel',
+					ref: invasion.ship.id,
+					destination: capital.id
+				})
+				invasion.phase = 'return:land'
+				break
+			}
+			case 'return:land':
+			{
+				tasks.push({
+					type: 'ship:land',
+					ref: invasion.ship.id
+				})
+				invasion.phase = 'invade:load'
+				break
+			}
+			case 'invade:load':
+			{
+				tasks.push({
+					type: 'platoon:load',
+					ref: undefined,
+					// troops: Math.min(platoon.troops * 0.1, 80, platoon.troops)
+				})
+				invasion.phase = 'invade:launch'
+				break
+			}
+			case 'invade:launch':
+			{
+				tasks.push({
+					type: 'ship:launch',
+					ref: invasion.ship.id
+				})
+				invasion.phase = 'invade:travel'
+				break
+			}
+			case 'invade:travel':
+			{
+				tasks.push({
+					type: 'ship:travel',
+					ref: invasion.ship.id,
+					destination: invasion.target
+				})
+				invasion.phase = 'invade:land'
+				break
+			}
+			case 'invade:land':
+			{
+				tasks.push({
+					type: 'ship:land',
+					ref: invasion.ship.id
+				})
+				invasion.phase = 'invade:unload'
+				break
+			}
+			case 'invade:unload':
+			{
+				tasks.push({
+					type: 'platoon:unload',
+					ref: undefined
+				})
+				invasion.phase = 'invade:combat'
+				break
+			}
+			case 'invade:combat':
+			{
+				invasion = null
+				break
+			}
+		}
+
+		memory = { ...memory }
+		memory.invasion = invasion
+		memory.lastAction = { ...date }
+		memory.nextAction = nextActionDate(date, 1)
 	}
 	else
 	{
@@ -133,12 +289,11 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 				}
 				else
 				{
-					console.log("AI", `Next planet (${next.id}) is owned, send attack wave`)
-
-					tasks.push({
-						type: 'invade',
-						ref: next.id
-					})
+					console.log("AI", `Next planet (${next.id}) is owned, planning attack wave`)
+					memory.invasion = {
+						target: next.id,
+						phase: 'prepare'
+					}
 				}
 
 				memory.lastAction = { ...date }
@@ -155,6 +310,8 @@ const AI = props => {
 	const setTax = useSetTax()
 	const buyShip = useBuyShip(me)
 	const sendAtmos = useSendAtmos(me)
+	const repositionShip = useChangeShipPosition(me)
+	const sendShip = useSendShipToDestination(me)
 
 	const callback = useRecoilCallback(({ snapshot, set }) => () => {
 		const memory = snapshot.getLoadable(store.memory).contents
@@ -200,6 +357,8 @@ const AI = props => {
 		{
 			const task = tasks.pop()
 
+			console.log("Task:", task)
+
 			switch (task.type)
 			{
 				case 'ship:purchase':
@@ -211,6 +370,11 @@ const AI = props => {
 							buyShip('atmos', "AI Atmos")
 							break
 						}
+						case 'B-29 Battle Cruiser':
+						{
+							buyShip('battlecruiser', "AI Battle")
+							break
+						}
 						default:
 						{
 							console.warn("AI", `Attempting to buy ship '${task.ref}'`)
@@ -219,12 +383,42 @@ const AI = props => {
 					}
 					break;
 				}
+				case 'ship:crew':
+				{
+					const ship = { ...ships.find(s => s.id === task.ref) }
+					ship.crew = ship.requiredCrew
+					set(store.ships(ship.id), ship)
+					break
+				}
+				case 'ship:refuel':
+				{
+					const ship = { ...ships.find(s => s.id === task.ref) }
+					ship.fuel = ship.capacity.fuel
+					set(store.ships(ship.id), ship)
+					break
+				}
 				case 'ship:terraform':
 				{
 					sendAtmos({ id: task.ref }, task.name)
 					break;
 				}
-				case 'invade':
+				case 'ship:launch':
+				{
+					repositionShip({ id: task.ref }, 'orbit')
+					break
+				}
+				case 'ship:travel':
+				{
+					sendShip({ id: task.ref }, { id: task.destination })
+					break
+				}
+				case 'ship:land':
+				{
+					repositionShip({ id: task.ref }, 'docked')
+					break
+				}
+				case 'platoon:load':
+				case 'platoon:unload':
 				{
 					break
 				}

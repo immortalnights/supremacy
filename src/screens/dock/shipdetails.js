@@ -14,7 +14,7 @@ const ShipDetails = props => {
 		requiredCrew: null,
 		crewText: "-",
 		capacity: {
-			seats: "-",
+			civilians: "-",
 			cargo: "-"
 		},
 		maxFuel: "-",
@@ -50,7 +50,7 @@ const ShipDetails = props => {
 			<dt>Civilians</dt>
 			<dd>{details.civilians.toFixed(0)}</dd>
 			<dt>Seats</dt>
-			<dd>{details.capacity.seats}</dd>
+			<dd>{details.capacity.civilians}</dd>
 			<dt>Crew</dt>
 			<dd>{details.crewText}</dd>
 			<dt>Capacity</dt>

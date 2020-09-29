@@ -256,6 +256,10 @@ const shipReducer = (ship, action) => {
 			{
 				console.warn(`${ship.name} is already travelling to planet ${ship.heading.to.id}`)
 			}
+			else if (!destination || !destination.id)
+			{
+				console.warn(`${ship.name} has invalid destination`)
+			}
 			else if (ship.location.planet === destination.id)
 			{
 				console.warn(`${ship.name} is is already at ${destination.name}`)

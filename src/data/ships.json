@@ -12,20 +12,24 @@
 			"platoons": 4
 		},
 		"speed": 1,
+		"range": 2000,
 		"cost": [
 			{
 				"credits": 5250
 			},
 			{
-				"credits": 5250
-			},
-			{
-				"credits": 5250
+				"credits": 5250,
+				"energy": 366
 			},
 			{
 				"credits": 5250,
-				"materials": 95,
-				"energy": 366
+				"energy": 366,
+				"materials": 95
+			},
+			{
+				"credits": 5250,
+				"energy": 366,
+				"materials": 95
 			}
 		],
 		"value": 3850,
@@ -44,18 +48,24 @@
 			"platoons": 0
 		},
 		"speed": 1,
+		"range": null,
 		"cost": [
 			{
 				"credits": 975
 			},
 			{
-				"credits": 975
+				"credits": 975,
+				"energy": 92
 			},
 			{
-				"credits": 975
+				"credits": 975,
+				"energy": 92,
+				"minerals": 7
 			},
 			{
-				"credits": 975
+				"credits": 975,
+				"energy": 92,
+				"minerals": 7
 			}
 		],
 		"value": 13550,
@@ -82,18 +92,24 @@
 			"platoons": 0
 		},
 		"speed": 1,
+		"range": null,
 		"cost": [
 			{
 				"credits": 26753
 			},
 			{
-				"credits": 26753
+				"credits": 26753,
+				"energy": 999
 			},
 			{
-				"credits": 26753
+				"credits": 26753,
+				"energy": 999,
+				"minerals": 75
 			},
 			{
-				"credits": 26753
+				"credits": 26753,
+				"energy": 999,
+				"minerals": 75
 			}
 		],
 		"value": 7500,
@@ -112,18 +128,24 @@
 			"platoons": 0
 		},
 		"speed": 1,
+		"range": 3750,
 		"cost": [
 			{
 				"credits": 15400
 			},
 			{
-				"credits": 15400
+				"credits": 15400,
+				"energy": 465
 			},
 			{
-				"credits": 15400
+				"credits": 15400,
+				"energy": 465,
+				"minerals": 125
 			},
 			{
-				"credits": 15400
+				"credits": 15400,
+				"energy": 465,
+				"minerals": 125
 			}
 		],
 		"value": 1000,
@@ -142,18 +164,24 @@
 			"platoons": 0
 		},
 		"speed": 1,
+		"range": 4200,
 		"cost": [
 			{
 				"credits": 17999
 			},
 			{
-				"credits": 17999
+				"credits": 17999,
+				"energy": 875
 			},
 			{
-				"credits": 17999
+				"credits": 17999,
+				"energy": 875,
+				"minerals": 600
 			},
 			{
-				"credits": 17999
+				"credits": 17999,
+				"energy": 875,
+				"minerals": 600
 			}
 		],
 		"value": 14750,
@@ -180,18 +208,24 @@
 			"platoons": 0
 		},
 		"speed": 1,
+		"range": 3000,
 		"cost": [
 			{
 				"credits": 16995
 			},
 			{
-				"credits": 16995
+				"credits": 16995,
+				"energy": 970
 			},
 			{
-				"credits": 16995
+				"credits": 16995,
+				"energy": 970,
+				"minerals": 540
 			},
 			{
-				"credits": 16995
+				"credits": 16995,
+				"energy": 970,
+				"minerals": 540
 			}
 		],
 		"value": 13550,
