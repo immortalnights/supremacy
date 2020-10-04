@@ -93,7 +93,7 @@ export const selectPlayerAtmos = selectorFamily({
 })
 
 const beginTravel = (travel, ship, origin, destination, date) => {
-	console.log("Init travel", origin, destination)
+	console.log("Init travel", ship, origin.name, '=>', destination.name)
 
 	ship = { ...ship }
 	ship.fuel = ship.fuel - travel.fuel
@@ -105,7 +105,7 @@ const beginTravel = (travel, ship, origin, destination, date) => {
 		arrival: dates.add(date, travel.duration),
 		fuel: travel.fuel
 	}
-	// console.log("Heading", ship.heading)
+	console.log("Heading", ship.heading)
 
 	ship.location = {
 		planet: null,

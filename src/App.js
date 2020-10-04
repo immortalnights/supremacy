@@ -3,6 +3,7 @@ import { RecoilRoot, useRecoilValue, useTransactionObservation_UNSTABLE } from '
 // import { useRoutes } from 'hookrouter'
 import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import { random } from './logic/general'
+import store from './state/atoms'
 import newGameState from './state/newgamestate'
 import initializeState from './state/initializestate'
 import { usePersistentState, getLocalStorageValue } from './state/persistentstate'
@@ -29,7 +30,7 @@ const PersistenceObserver = props => {
 	return null;
 }
 
-const Game = props => {
+const GamePlay = props => {
 	const view = useRecoilValue(viewAtom)
 
 	const selected = view.planet
@@ -56,6 +57,39 @@ const Game = props => {
 			<Navigation planet={selected} screen={view.screen} />
 		</React.Fragment>
 	)
+}
+
+const GameOver = props => {
+	const [ slot, setSlot ] = usePersistentState('slot', null)
+
+	const onExit = () => {
+		setSlot(null)
+	}
+
+	return (
+		<div className="main-menu" style={{textAlign: 'center'}}>
+			<div>Game Over</div>
+			<div>
+				<a href="/" onClick={onExit}>Return to main menu</a>
+			</div>
+		</div>
+	)
+}
+
+const Game = props => {
+	const game = useRecoilValue(store.game)
+
+	let content
+	if (game.finished)
+	{
+		content = (<GameOver {...game} />)
+	}
+	else
+	{
+		content = (<GamePlay {...props} />)
+	}
+
+	return (content)
 }
 
 const initialGameState = gameOptions => {

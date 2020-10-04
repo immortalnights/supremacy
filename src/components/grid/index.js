@@ -55,10 +55,11 @@ Grid.defaultProps = {
 }
 
 export const PlanetGrid = props => {
-	const planets = useRecoilValue(selectPlanets)
+	let planets = useRecoilValue(selectPlanets)
+	planets = planets.map(p => (p.owner != null && p.habitable) ? p : null)
 
 	const classNamesForItem = item => {
-		return item.owner === props.player.id ? 'planet friendly' : 'planet enemy'
+		return (item && item.owner === props.player.id) ? 'planet friendly' : 'planet enemy'
 	}
 
 	return (<Grid items={planets} {...props} classNamesForItem={props.player && classNamesForItem} />)

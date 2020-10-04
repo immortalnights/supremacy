@@ -132,7 +132,7 @@ const platoonReducer = (platoon, action) => {
 		{
 			if (platoon.commissioned)
 			{
-				console.warn("Cannot comission an active platoon")
+				console.warn("Cannot commission an active platoon")
 			}
 			else if (platoon.troops === 0)
 			{
@@ -141,7 +141,9 @@ const platoonReducer = (platoon, action) => {
 			else
 			{
 				const planet = action.planet
-				const cost = calculatePlatoonCost(platoon, action.suit, action.weapon)
+
+				// AI does not pay for commissioning a platoon
+				const cost = action.free ? 0 : calculatePlatoonCost(platoon, action.suit, action.weapon)
 
 				if (cost > planet.resources.credits)
 				{
@@ -156,8 +158,8 @@ const platoonReducer = (platoon, action) => {
 					platoon.commissioned = true
 					platoon.unitStrength = action.suit.armour + action.weapon.damage
 					platoon.location = {
-						planet: action.planet.id,
-						name: action.planet.name
+						planet: planet.id,
+						name: planet.name
 					}
 				}
 			}
@@ -185,7 +187,7 @@ const platoonReducer = (platoon, action) => {
 		{
 			if (!platoon.commissioned || platoon.troops === 0)
 			{
-				console.warn(`Invalid platoon`)
+				console.warn(`Platoon ${platoon.name} is invalid ${platoon.commissioned} ${platoon.troops}`)
 			}
 			else if (action.ship.capacity.platoons === 0)
 			{
@@ -279,13 +281,15 @@ export const useChangeTroops = (platoon, planet) => {
 	})
 }
 
-export const useCommissionPlatoon = (platoon, planet) => {
-	return useRecoilCallback(({ snapshot, set }) => () => {
+export const useCommissionPlatoon = (player, planet) => {
+	return useRecoilCallback(({ snapshot, set }) => platoon => {
 		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents
 		const refreshedPlanet = { ...snapshot.getLoadable(state.planets(planet.id)).contents }
 		const suit = snapshot.getLoadable(selectSuit(platoon.suit)).contents
 		const weapon = snapshot.getLoadable(selectWeapon(platoon.weapon)).contents
-		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet: refreshedPlanet, suit, weapon })
+		const free = (player.type === 'ai')
+
+		const reducedPlatoon = platoonReducer(refreshedPlatoon, { type: 'commission', planet: refreshedPlanet, suit, weapon, free })
 		if (reducedPlatoon !== refreshedPlatoon)
 		{
 			set(state.planets(refreshedPlanet.id), refreshedPlanet)
@@ -307,8 +311,8 @@ export const useDisbandPlatoon = platoon => {
 	})
 }
 
-export const useTransferPlatoon = (planet, ship) => {
-	return useRecoilCallback(({ snapshot, set }) => (direction, platoon) => {
+export const useTransferPlatoon = () => {
+	return useRecoilCallback(({ snapshot, set }) => (direction, platoon, planet, ship) => {
 		const platoonsOnPlanet = snapshot.getLoadable(selectPlatoons({ planet: planet.id })).contents
 		const platoonsInShip = snapshot.getLoadable(selectPlatoons({ ship: ship.id })).contents
 		const refreshedPlatoon = snapshot.getLoadable(state.platoons(platoon.id)).contents

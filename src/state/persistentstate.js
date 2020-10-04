@@ -11,7 +11,11 @@ export const usePersistentState = (key, defaultValue) => {
 	});
 
 	useEffect(() => {
-		if (value !== null)
+		if (value == null)
+		{
+			window.localStorage.removeItem(key)
+		}
+		else
 		{
 			window.localStorage.setItem(key, JSON.stringify(value));
 		}

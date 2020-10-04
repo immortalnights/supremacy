@@ -14,7 +14,7 @@ const Training = props => {
 	const [ index, setIndex ] = useState(1)
 	const platoon = useRecoilValue(selectPlayerPlatoon({ player: player.id, name: ordinal(index) }))
 	const changeTroops = useChangeTroops(platoon, capital)
-	const commission = useCommissionPlatoon(platoon, capital)
+	const commission = useCommissionPlatoon(player, capital)
 	const disband = useDisbandPlatoon(platoon)
 	const cost = usePlatoonCostCalc(platoon)
 	let message = ''
@@ -105,7 +105,7 @@ const Training = props => {
 					</div>
 					<div>{/*messages*/}</div>
 					<div className="flex-columns">
-						<Button onClick={commission} disabled={platoon.commissioned || platoon.troops === 0}>Equip</Button>
+						<Button onClick={() => commission(platoon)} disabled={platoon.commissioned || platoon.troops === 0}>Equip</Button>
 						<Button onClick={disband} disabled={!canDisband}>Disband</Button>
 					</div>
 					<div>

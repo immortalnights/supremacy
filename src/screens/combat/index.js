@@ -26,7 +26,7 @@ const Combat = props => {
 	const [ ship, setShip ] = useState(null)
 	const planet = useRecoilValue(state.planets(props.planet))
 	const player = useRecoilValue(selectLocalPlayer)
-	const transferPlatoon = useTransferPlatoon(planet, ship)
+	const transferPlatoon = useTransferPlatoon()
 	const defenderStrength = useRecoilValue(selectPlanetStrength({ planet: props.planet, role: 'defender' }))
 	const playerTroops = useRecoilValue(selectPlanetTroops(props.planet, player))
 	const attackerStrength = useRecoilValue(selectPlanetStrength({ planet: props.planet, role: 'attacker' }))
@@ -41,14 +41,14 @@ const Combat = props => {
 	const onLoadPlatoon = platoon => {
 		if (ship)
 		{
-			transferPlatoon('load', platoon)
+			transferPlatoon('load', platoon, planet, ship)
 		}
 	}
 
 	const onUnloadPlatoon = platoon => {
 		if (ship)
 		{
-			transferPlatoon('unload', platoon)
+			transferPlatoon('unload', platoon, planet, ship)
 		}
 	}
 

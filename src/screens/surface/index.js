@@ -28,16 +28,23 @@ const Surface = props => {
 	const ships = useRecoilValue(selectShipsAtPlanetPosition({ planet: props.planet, position: 'surface' }))
 
 	const onClickDockingBay = ship => {
-		changeShipPosition(ship, 'surface')
+		if (ship != null)
+		{
+
+			changeShipPosition(ship, 'surface')
+		}
 	}
 
 	const onToggleStatus = (ship, status) => {
-		console.log("toggle status", ship, status)
-		toggleShipOnSurface({ id: ship }, status)
+		if (ship != null)
+		{
+			console.log("toggle status", ship, status)
+			toggleShipOnSurface({ id: ship }, status)
+		}
 	}
 
 	const onClickSurfaceSlot = ship => {
-		if (ship !== undefined)
+		if (ship != null)
 		{
 			changeShipPosition({ id: ship }, 'docked')
 		}

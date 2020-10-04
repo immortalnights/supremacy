@@ -29,7 +29,8 @@ const newGameState = options => {
 		nextShipId: 0,
 		ships: [],
 		platoons: [],
-		startDateTime: new Date().toString()
+		startDateTime: new Date().toString(),
+		finished: false
 	}
 
 	const planets = []

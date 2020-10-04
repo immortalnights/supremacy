@@ -5,9 +5,10 @@ import planetNames from '../data/planetnames'
 import dates from './date'
 import store, { GAME_START_YEAR } from '../state/atoms'
 import { selectAIPlayer } from '../state/game'
-import { useSetTax, useTransferCredits, useChangeAggression } from '../state/planets'
+import { selectPlayerCapitalPlanet, useSetTax, useTransferCredits, useChangeAggression } from '../state/planets'
 import { useBuyShip } from '../state/shipyard'
 import { useChangeShipPosition, useSendShipToDestination, useSendAtmos } from '../state/ships'
+import { useCommissionPlatoon, useTransferPlatoon } from '../state/platoons'
 
 
 // const govern = ({ planet, ships, platoons }) => {
@@ -88,16 +89,19 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 	// AI doesn't do anything for two game years
 	if (dates.diff(date, memory.nextAction) > 0)
 	{
-		console.log("AI", `Waiting until later...`, memory.nextAction)
+		// console.log("AI", `Waiting until later...`, memory.nextAction)
 	}
 	else if (memory.invasion)
 	{
 		let invasion = { ...memory.invasion }
-		const ship = invasion.ship ? invasion.ship : ships.find(s => s.type === 'B-29 Battle Cruiser')
+		const ship = ships.find(s => {
+			return (invasion.ship === s.id) || s.type === 'B-29 Battle Cruiser'
+		})
 
-		if (ship.heading)
+		if (ship && ship.heading)
 		{
-			return
+			console.log("AI", "Invasion ship is still travelling")
+			return [tasks, memory]
 		}
 
 		console.log("AI", "Invasion", invasion)
@@ -107,7 +111,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				if (ship)
 				{
-					invasion.ship = ship
+					invasion.ship = ship.id
 
 					if (ship.crew === 0)
 					{
@@ -128,7 +132,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 					{
 						if (ship.location.position === 'docked')
 						{
-							invasion.phase = 'invade:load'
+							invasion.phase = 'platoon:prepare'
 						}
 						else
 						{
@@ -154,7 +158,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 						ref: 'B-29 Battle Cruiser'
 					})
 
-					invasion.phase = 'invade:load'
+					invasion.phase = 'platoon:prepare'
 				}
 				break
 			}
@@ -162,7 +166,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:launch',
-					ref: invasion.ship.id
+					ref: invasion.ship
 				})
 				invasion.phase = 'return:travel'
 				break
@@ -171,7 +175,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:travel',
-					ref: invasion.ship.id,
+					ref: invasion.ship,
 					destination: capital.id
 				})
 				invasion.phase = 'return:land'
@@ -181,17 +185,40 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:land',
-					ref: invasion.ship.id
+					ref: invasion.ship
 				})
-				invasion.phase = 'invade:load'
+				invasion.phase = 'platoon:prepare'
 				break
 			}
-			case 'invade:load':
+			case 'platoon:prepare':
+			{
+				const first = platoons.find(p => p.name === '1st')
+				const other = platoons.find(p => p.id !== first.id && p.commissioned === false)
+
+				tasks.push({
+					type: 'platoon:prepare',
+					ref: other.id,
+					troops: Math.min(first.troops * 0.1, 80, first.troops)
+				})
+				invasion.phase = 'platoon:commission'
+				invasion.platoon = other.id
+				break
+			}
+			case 'platoon:commission':
+			{
+				tasks.push({
+					type: 'platoon:commission',
+					ref: invasion.platoon
+				})
+				invasion.phase = 'platoon:load'
+				break
+			}
+			case 'platoon:load':
 			{
 				tasks.push({
 					type: 'platoon:load',
-					ref: undefined,
-					// troops: Math.min(platoon.troops * 0.1, 80, platoon.troops)
+					platoon: invasion.platoon,
+					ship: invasion.ship
 				})
 				invasion.phase = 'invade:launch'
 				break
@@ -200,7 +227,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:launch',
-					ref: invasion.ship.id
+					ref: invasion.ship
 				})
 				invasion.phase = 'invade:travel'
 				break
@@ -209,7 +236,7 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:travel',
-					ref: invasion.ship.id,
+					ref: invasion.ship,
 					destination: invasion.target
 				})
 				invasion.phase = 'invade:land'
@@ -219,22 +246,33 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 			{
 				tasks.push({
 					type: 'ship:land',
-					ref: invasion.ship.id
+					ref: invasion.ship
 				})
-				invasion.phase = 'invade:unload'
+				invasion.phase = 'platoon:unload'
 				break
 			}
-			case 'invade:unload':
+			case 'platoon:unload':
 			{
 				tasks.push({
 					type: 'platoon:unload',
-					ref: undefined
+					platoon: invasion.platoon,
+					ship: invasion.ship,
+					planet: invasion.target
 				})
 				invasion.phase = 'invade:combat'
 				break
 			}
 			case 'invade:combat':
 			{
+				const platoon = platoons.find(p => p.id === invasion.platoon)
+				if (platoon.troops > 0)
+				{
+					// In progress
+				}
+				else
+				{
+				}
+
 				invasion = null
 				break
 			}
@@ -307,11 +345,14 @@ const compute = ({ date, memory, game, planets, ships, platoons }) => {
 
 const AI = props => {
 	const me = useRecoilValue(selectAIPlayer)
+	const capital = useRecoilValue(selectPlayerCapitalPlanet(me))
 	const setTax = useSetTax()
 	const buyShip = useBuyShip(me)
 	const sendAtmos = useSendAtmos(me)
 	const repositionShip = useChangeShipPosition(me)
 	const sendShip = useSendShipToDestination(me)
+	const commission = useCommissionPlatoon(me, capital)
+	const transferPlatoon = useTransferPlatoon(me)
 
 	const callback = useRecoilCallback(({ snapshot, set }) => () => {
 		const memory = snapshot.getLoadable(store.memory).contents
@@ -417,9 +458,43 @@ const AI = props => {
 					repositionShip({ id: task.ref }, 'docked')
 					break
 				}
+				case 'platoon:prepare':
+				{
+					const first = { ...platoons.find(p => p.name === '1st') }
+					const other = { ...platoons.find(p => p.id === task.ref) }
+
+					first.troops = first.troops - task.troops
+					other.suit = 'suit_2'
+					other.weapon = 'weapon_2'
+					other.troops = other.troops + task.troops
+
+					set(store.platoons(first.id), first)
+					set(store.platoons(other.id), other)
+
+					break
+				}
+				case 'platoon:commission':
+				{
+					const other = platoons.find(p => p.id === task.ref)
+
+					commission(other)
+					break
+				}
 				case 'platoon:load':
+				{
+					const ship = ships.find(s => s.id === task.ship)
+					const platoon = platoons.find(p => p.id === task.platoon)
+
+					transferPlatoon('load', platoon, capital, ship)
+					break
+				}
 				case 'platoon:unload':
 				{
+					const ship = ships.find(s => s.id === task.ship)
+					const platoon = platoons.find(p => p.id === task.platoon)
+					const planet = planets.find(p => p.id === task.planet)
+
+					transferPlatoon('unload', platoon, planet, ship)
 					break
 				}
 				default:

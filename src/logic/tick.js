@@ -346,10 +346,18 @@ const tick = (snapshot, set) => {
 	// console.log("callback")
 	const nextDate = updateDate({ ...snapshot.getLoadable(store.date).contents }, set)
 
-	const game = snapshot.getLoadable(store.game).contents
+	let game = snapshot.getLoadable(store.game).contents
+
+	if (game.finished)
+	{
+		console.log(`Game over.`)
+		return
+	}
 
 	// players is read-only
 	const players = game.players
+	const localPlayer = players.find(p => p.type === 'human')
+	const remotePlayer = players.find(p => p.type === 'ai')
 
 	// Cannot update an item more the once within the loop as state changes are not applied immediately.
 	// Therefore collect all items and update them.
@@ -363,156 +371,179 @@ const tick = (snapshot, set) => {
 		return snapshot.getLoadable(store.platoons(id)).contents
 	})
 
-	// handle ships first as they may arrive at a planet
-	// replace the ship array with the potentially modified ships
-	ships = ships.map(ship => {
-		const player = players.find(player => player.id === ship.owner)
+	// Determine if either plays has won / lost
+	const localPlayerLost = !planets.find(p => p.owner != null && p.owner === localPlayer.id)
+	const remotePlayerLost = !planets.find(p => p.owner != null && p.owner === remotePlayer.id)
 
-		let planetIndex = -1
-		if (ship.heading && ship.heading.to)
-		{
-			planetIndex = planets.findIndex(p => p.id === ship.heading.to.id)
-		}
-		else if (ship.location && ship.location.planet)
-		{
-			planetIndex = planets.findIndex(p => p.id === ship.location.planet)
-		}
+	if (localPlayerLost)
+	{
+		game = { ...game }
+		game.finished = true
+		game.winner = remotePlayer.id
+		console.warn(`Game over, ${remotePlayer.name} has won!`)
+		set(store.game, game)
+	}
+	else if (remotePlayerLost)
+	{
+		game = { ...game }
+		game.finished = true
+		game.winner = localPlayer.id
+		console.warn(`Game over, ${localPlayer.name} has won!`)
+		set(store.game, game)
+	}
+	else
+	{
+		// handle ships first as they may arrive at a planet
+		// replace the ship array with the potentially modified ships
+		ships = ships.map(ship => {
+			const player = players.find(player => player.id === ship.owner)
 
-		const [ updatedShip, updatedPlanet ] = updateShip(ship, player, planets[planetIndex], nextDate)
-
-		// replace the plant with the potentially modified planet
-		if (updatedPlanet)
-		{
-			planets[planetIndex] = updatedPlanet
-		}
-
-		return updatedShip
-	})
-
-	// handle planets, combat is resolved before planet updates
-	planets = planets.map(planet => {
-		const player = players.find(player => player.id === planet.owner)
-
-		if (planet.habitable && planet.owner !== undefined)
-		{
-			let platoonsOnPlanet = platoons.filter(p => {
-				return p.location && p.location.planet === planet.id
-			})
-
-			if (player.type === 'ai')
+			let planetIndex = -1
+			if (ship.heading && ship.heading.to)
 			{
-				// AI planet is updated differently, least until the AI plays proper
-				planet = updateAIPlanet(planet, player, platoonsOnPlanet, nextDate)
+				planetIndex = planets.findIndex(p => p.id === ship.heading.to.id)
 			}
-			else
+			else if (ship.location && ship.location.planet)
 			{
-				planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
+				planetIndex = planets.findIndex(p => p.id === ship.location.planet)
 			}
 
-			let modifiedPlatoons = []; // semi-colon required
-			[ planet, modifiedPlatoons ] = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+			const [ updatedShip, updatedPlanet ] = updateShip(ship, player, planets[planetIndex], nextDate)
 
-			if (plantCaptured(planet, modifiedPlatoons))
+			// replace the plant with the potentially modified planet
+			if (updatedPlanet)
 			{
-				const conqueror = modifiedPlatoons.find(p => p.owner !== planet.owner).owner
-				console.log(`Planet ${planet.name} (${planet.id}) has been conquered by ${conqueror}`)
+				planets[planetIndex] = updatedPlanet
+			}
 
-				planet = { ...planet }
-				planet.owner = conqueror
-				// loose 25% of the population
-				planet.population = planet.population * .75
+			return updatedShip
+		})
 
-				ships = ships.map(ship => {
-					if (ship.location && ship.location.planet === planet.id)
-					{
-						// Cannot capture a players Atmosphere Processor
-						if (ship.type === "Atmosphere Processor")
-						{
-							// Push the atmos to orbit
-							ship.location = { ...ship.location, position: 'orbit' }
-						}
-						// All dockets or surface ships are claimed by the conqueror
-						else if (ship.location.position === 'docked' || ship.location.position === 'surface')
-						{
-							ship = { ... ship }
-							ship.owner = conqueror
-						}
-						// All orbetting solar's are claimed by the conqueror
-						else if (ship.type === "Solar-Satellite Generator" && ship.location.position === 'orbit')
-						{
-							ship = { ... ship }
-							ship.owner = conqueror
-						}
-					}
+		// handle planets, combat is resolved before planet updates
+		planets = planets.map(planet => {
+			const player = players.find(player => player.id === planet.owner)
 
-					return ship
+			if (planet.habitable && planet.owner !== undefined)
+			{
+				let platoonsOnPlanet = platoons.filter(p => {
+					return p.location && p.location.planet === planet.id
+				})
+
+				if (player.type === 'ai')
+				{
+					// AI planet is updated differently, least until the AI plays proper
+					planet = updateAIPlanet(planet, player, platoonsOnPlanet, nextDate)
+				}
+				else
+				{
+					planet = updatePlanet(planet, player, platoonsOnPlanet, nextDate)
+				}
+
+				let modifiedPlatoons = []; // semi-colon required
+				[ planet, modifiedPlatoons ] = handleCombat(planet, player, platoonsOnPlanet, nextDate)
+
+				if (plantCaptured(planet, modifiedPlatoons))
+				{
+					const conqueror = modifiedPlatoons.find(p => p.owner !== planet.owner).owner
+					console.log(`Planet ${planet.name} (${planet.id}) has been conquered by ${conqueror}`)
+
+					planet = { ...planet }
+					planet.owner = conqueror
+					// loose 25% of the population
+					planet.population = planet.population * .75
+
+					ships = ships.map(ship => {
+						if (ship.location && ship.location.planet === planet.id)
+						{
+							// Cannot capture a players Atmosphere Processor
+							if (ship.type === "Atmosphere Processor")
+							{
+								// Push the atmos to orbit
+								ship.location = { ...ship.location, position: 'orbit' }
+							}
+							// All dockets or surface ships are claimed by the conqueror
+							else if (ship.location.position === 'docked' || ship.location.position === 'surface')
+							{
+								ship = { ... ship }
+								ship.owner = conqueror
+							}
+							// All orbetting solar's are claimed by the conqueror
+							else if (ship.type === "Solar-Satellite Generator" && ship.location.position === 'orbit')
+							{
+								ship = { ... ship }
+								ship.owner = conqueror
+							}
+						}
+
+						return ship
+					})
+				}
+
+				// update platoons
+				modifiedPlatoons.forEach(platoon => {
+					const index = platoons.findIndex(p => p.id === platoon.id)
+					platoons[index] = platoon
 				})
 			}
 
-			// update platoons
-			modifiedPlatoons.forEach(platoon => {
-				const index = platoons.findIndex(p => p.id === platoon.id)
-				platoons[index] = platoon
-			})
-		}
+			return planet
+		})
 
-		return planet
-	})
-
-	platoons = platoons.map(platoon => {
-		if (platoon)
-		{
-			if (platoon.commissioned === false)
+		platoons = platoons.map(platoon => {
+			if (platoon)
 			{
-				if (platoon.troops > 0 && platoon.calibre < 100)
+				if (platoon.commissioned === false)
 				{
-					platoon = { ...platoon }
-
-					if (platoon.troopChange > 0)
+					if (platoon.troops > 0 && platoon.calibre < 100)
 					{
-						// Loose 1% per new troop added
-						platoon.calibre = platoon.calibre - platoon.troopChange
+						platoon = { ...platoon }
+
+						if (platoon.troopChange > 0)
+						{
+							// Loose 1% per new troop added
+							platoon.calibre = platoon.calibre - platoon.troopChange
+						}
+
+						// train 3% per tick
+						platoon.calibre = platoon.calibre + 3
+
+						platoon.calibre = Math.max(platoon.calibre, 0)
+						platoon.calibre = Math.min(platoon.calibre, 100)
 					}
-
-					// train 3% per tick
-					platoon.calibre = platoon.calibre + 3
-
-					platoon.calibre = Math.max(platoon.calibre, 0)
-					platoon.calibre = Math.min(platoon.calibre, 100)
+					else if (platoon.troops === 0 && platoon.calibre > 0)
+					{
+						// Reset the clibre if the platoon is emptied
+						platoon = { ...platoon }
+						platoon.calibre = 0
+					}
 				}
-				else if (platoon.troops === 0 && platoon.calibre > 0)
+				else if (platoon.troops === 0)
 				{
-					// Reset the clibre if the platoon is emptied
-					platoon = { ...platoon }
+					// Disband
+					console.warn(`Platoon ${platoon.id} has been defeated on planet ${platoon.location.planet}`)
+					platoon.commissioned = false
+					platoon.troopChange = 0
 					platoon.calibre = 0
+					platoon.rank = 0
+					platoon.location = {}
+				}
+				else
+				{
+					// console.log(platoon)
 				}
 			}
-			else if (platoon.troops === 0)
-			{
-				// Disband
-				console.warn(`Platoon ${platoon.id} has been defeated on planet ${platoon.location.planet}`)
-				platoon.commissioned = false
-				platoon.troopChange = 0
-				platoon.calibre = 0
-				platoon.rank = 0
-				platoon.location = {}
-			}
-			else
-			{
-				// console.log(platoon)
-			}
-		}
 
-		return platoon
-	})
+			return platoon
+		})
 
-	// Display changes to AI capital planet for AI debugging
-	// const track = planets.find(p => p.id === 'a')
-	// console.log(track.tax)
+		// Display changes to AI capital planet for AI debugging
+		// const track = planets.find(p => p.id === 'a')
+		// console.log(track.tax)
 
-	ships.forEach(ship => set(store.ships(ship.id), ship))
-	planets.forEach(planet => set(store.planets(planet.id), planet))
-	platoons.forEach(platoon => set(store.platoons(platoon.id), platoon))
+		ships.forEach(ship => set(store.ships(ship.id), ship))
+		planets.forEach(planet => set(store.planets(planet.id), planet))
+		platoons.forEach(platoon => set(store.platoons(platoon.id), platoon))
+	}
 }
 
 const Tick = props => {
@@ -523,8 +554,7 @@ const Tick = props => {
 	})
 
 	useEffect(() => {
-		// console.log("useEffect")
-		const timer = setTimeout(callback, settings.speed)
+		const timer = setTimeout(callback, 1000)
 
 		return () => {
 			clearTimeout(timer)

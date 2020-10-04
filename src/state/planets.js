@@ -38,30 +38,6 @@ export const selectPlanets = selector({
 	}
 })
 
-export const selectPopulatedPlanets = selector({
-	key: 'populatedPlanets',
-	get: ({ get }) => {
-		const game = get(state.game)
-		const populated = []
-
-		game.planets.forEach(id => {
-			const planet = get(state.planets(id))
-			const owned = planet.owner ?? false
-			// console.log(planet.id, planet.owner, owned)
-			if (owned !== false)
-			{
-				populated.push(planet)
-			}
-		})
-
-		// console.log("=>", populated)
-		return populated
-	},
-	set: ({ get, set }, newValue) => {
-		set(state.planets(newValue.id), newValue)
-	}
-})
-
 const planetReducer = (planet, action) => {
 	// console.log("Planet reducer", planet, action)
 
