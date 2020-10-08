@@ -464,8 +464,8 @@ const AI = props => {
 					const other = { ...platoons.find(p => p.id === task.ref) }
 
 					first.troops = first.troops - task.troops
-					other.suit = 'suit_2'
-					other.weapon = 'weapon_2'
+					other.suit = 'suit_1'
+					other.weapon = 'weapon_1'
 					other.troops = other.troops + task.troops
 
 					set(store.platoons(first.id), first)

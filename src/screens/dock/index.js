@@ -171,6 +171,10 @@ const Dock = props => {
 		setSelected(null)
 	}
 
+	const canAssignCrew = selected && selected.crew === 0
+	const canUnloadCargo = selected && selected.cargo.reduce((c, m) => m + c, 0) > 0
+	const canDecommission = selected && selected.location.planet === props.player.capitalPlanet && selected.location.position === 'docked'
+
 	return (
 		<div className="flex-columns">
 			<div>
@@ -187,9 +191,9 @@ const Dock = props => {
 						</div>
 					</div>
 					<div className="stacked-buttons">
-						<Button onClick={onAssignCrew} disabled={!selected}>Crew</Button>
-						<Button onClick={onUnloadCargo} disabled={!selected}>Unload</Button>
-						<Button onClick={onDecommission} disabled={!selected}>Decommission</Button>
+						<Button onClick={onAssignCrew} disabled={!canAssignCrew}>Crew</Button>
+						<Button onClick={onUnloadCargo} disabled={!canUnloadCargo}>Unload</Button>
+						<Button onClick={onDecommission} disabled={!canDecommission}>Decommission</Button>
 					</div>
 				</div>
 			</div>
