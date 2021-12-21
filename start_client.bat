@@ -2,4 +2,4 @@
 
 
 start npm start
-npm link seventh-component-library
+:: npm link seventh-component-library

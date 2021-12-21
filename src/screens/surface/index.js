@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRecoilValue } from 'recoil'
-import { Button } from 'seventh-component-library'
+import Button from '../../components/button'
 import DockingBays from '../../components/dockingbays/'
 import { useChangeShipPosition, useToggleShipOnSurface, selectShipsAtPlanetPosition } from '../../state/ships'
 

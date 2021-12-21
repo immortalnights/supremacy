@@ -103,7 +103,7 @@ const Content = props => {
 			}
 			case 'dock':
 			{
-				content = (<Dock planet={props.planet} />)
+				content = (<Dock planet={props.planet} player={localPlayer} />)
 				break
 			}
 			case 'surface':

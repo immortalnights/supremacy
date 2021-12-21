@@ -172,7 +172,7 @@ const Dock = props => {
 	}
 
 	const canAssignCrew = selected && selected.crew === 0
-	const canUnloadCargo = selected && selected.cargo.reduce((c, m) => m + c, 0) > 0
+	const canUnloadCargo = selected && Object.keys(selected.cargo).reduce((c, m) => m + selected.cargo[c], 0) > 0
 	const canDecommission = selected && selected.location.planet === props.player.capitalPlanet && selected.location.position === 'docked'
 
 	return (

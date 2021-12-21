@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { RecoilRoot, useRecoilValue, useTransactionObservation_UNSTABLE } from 'recoil'
 // import { useRoutes } from 'hookrouter'
-import { useRouter, useMatchmakingRouter } from 'seventh-component-library'
 import { random } from './logic/general'
 import store from './state/atoms'
 import newGameState from './state/newgamestate'
