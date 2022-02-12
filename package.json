@@ -1,12 +1,13 @@
 {
-  "name": "sup-mp-react",
+  "name": "supremacy",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev-client": "cd client && npm start",
     "build-sim": "cd simulation && tsc --watch",
-    "dev": "concurrently --prefix \"[{name}]\" --names \"   SIM,CLIENT\" -c \"bgBlue.bold,bgGreen.bold\" \"npm run build-sim\" \"npm run dev-client\"",
+    "build-sim-types": "cd simulation && npx tsc --declaration  --outDir \"../client/src/simulation\" --emitDeclarationOnly \"./types.ts\" --watch",
+    "dev": "concurrently --prefix \"[{name}]\" --names \"   SIM,SIM_TYP,CLIENT\" -c \"bgBlue.bold,bgBlue,bgGreen.bold\" \"npm run build-sim\" \"npm run build-sim-types\" \"npm run dev-client\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
