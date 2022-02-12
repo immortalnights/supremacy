@@ -1,30 +1,40 @@
 import React, { useState, useEffect } from 'react'
-import { RecoilRoot, useRecoilValue, useTransactionObservation_UNSTABLE } from 'recoil'
+import Recoil, { atom, RecoilRoot, selector, selectorFamily, useRecoilValue } from 'recoil'
 // import { useRoutes } from 'hookrouter'
 import { random } from './logic/general'
-import store from './state/atoms'
-import newGameState from './state/newgamestate'
-import initializeState from './state/initializestate'
+// import store from './state/atoms'
+// import newGameState from './state/newgamestate'
+// import initializeState from './state/initializestate'
 import { usePersistentState, getLocalStorageValue } from './state/persistentstate'
 import Content from './content'
 import Button from './components/button'
 import Navigation from './components/navigation'
 import { viewAtom } from './state/nav'
-import Tick from './logic/tick'
-import AI from './logic/ai'
+// import Tick from './logic/tick'
+// import AI from './logic/ai'
 import './App.css'
 
+import sup, { Universe, Planet } from "./sup/"
+
+class WebWorker {
+  constructor(worker, options) {
+    const code = worker.toString();
+		console.log(code)
+    const blob = new Blob(["(" + code + ")()"]);
+    return new Worker(URL.createObjectURL(blob));
+  }
+}
 
 const PersistenceObserver = props => {
 	console.log("PersistenceObserver", props)
-	useTransactionObservation_UNSTABLE(({ atomValues, atomInfo, modifiedAtoms }) => {
-		const data = {}
-		atomValues.forEach((item, key) => {
-			data[key] = item
-		})
+	// useTransactionObservation_UNSTABLE(({ atomValues, atomInfo, modifiedAtoms }) => {
+	// 	const data = {}
+	// 	atomValues.forEach((item, key) => {
+	// 		data[key] = item
+	// 	})
 
-		window.localStorage.setItem('savegame_' + props.slot, JSON.stringify(data));
-	});
+	// 	window.localStorage.setItem('savegame_' + props.slot, JSON.stringify(data));
+	// });
 
 	return null;
 }
@@ -50,8 +60,6 @@ const GamePlay = props => {
 	console.log("Game selected,", selected)
 	return (
 		<React.Fragment>
-			<Tick />
-			<AI />
 			<Content {...view} />
 			<Navigation planet={selected} screen={view.screen} />
 		</React.Fragment>
@@ -75,55 +83,149 @@ const GameOver = props => {
 	)
 }
 
-const Game = props => {
-	const game = useRecoilValue(store.game)
+// const Game = props => {
+// 	const game = useRecoilValue(store.game)
 
-	let content
-	if (game.finished)
-	{
-		content = (<GameOver {...game} />)
-	}
-	else
-	{
-		content = (<GamePlay {...props} />)
-	}
+// 	let content
+// 	if (game.finished)
+// 	{
+// 		content = (<GameOver {...game} />)
+// 	}
+// 	else
+// 	{
+// 		content = (<GamePlay {...props} />)
+// 	}
 
-	return (content)
+// 	return (content)
+// }
+
+const uGameAtom = atom({
+	key: "ugame",
+	default: {}
+})
+
+const uPlanetsSelector = selector({
+	key: "uplanets",
+	get: ({ get }) => {
+		const d = get(uGameAtom)
+		return d.planets
+	}
+})
+
+const uPlanetSelector = selectorFamily({
+	key: "uplanet111",
+	get: (id) => ({ get }) => {
+		const d = get(uGameAtom)
+		const planet = d.planets.find(p => p.id === id)
+		console.log(d.planets, id, planet)
+		return planet
+	}
+})
+
+
+const PlanetComponent = ({ id }) => {
+	const p = useRecoilValue(uPlanetSelector(id))
+	const [ c, setC ] = useState(0)
+
+	useEffect(() => {
+		const r = c + 1
+		setC(r)
+	}, [p])
+
+	return (
+		<div>Planet {p.id} - {p.population} ({c})</div>
+	)
 }
 
-const initialGameState = gameOptions => {
-	let newGameData
-	let saveGameData
-	switch (gameOptions.action)
-	{
-		case 'new':
-		{
-			newGameData = newGameState(gameOptions)
-			break
-		}
-		case 'load':
-		{
-			saveGameData = getLocalStorageValue('savegame_' + gameOptions.slot)
-			break
-		}
-		default:
-		{
-			throw ("Invalid action")
-			break
-		}
-	}
+const Game2 = () => {
+	const planets = useRecoilValue(uPlanetsSelector)
 
-	return ({ set }) => initializeState(set, newGameData, saveGameData)
+	return (
+		<div>
+			<ul>
+				{planets.map(p => <div key={p.id}>Planet {p.id}</div>)}
+			</ul>
+			<PlanetComponent id={0} />
+			<PlanetComponent id={1} />
+		</div>
+	)
+}
+
+// const initialGameState = gameOptions => {
+// 	let newGameData
+// 	let saveGameData
+// 	switch (gameOptions.action)
+// 	{
+// 		case 'new':
+// 		{
+// 			newGameData = newGameState(gameOptions)
+// 			break
+// 		}
+// 		case 'load':
+// 		{
+// 			saveGameData = getLocalStorageValue('savegame_' + gameOptions.slot)
+// 			break
+// 		}
+// 		default:
+// 		{
+// 			throw ("Invalid action")
+// 			break
+// 		}
+// 	}
+
+// 	return ({ set }) => initializeState(set, newGameData, saveGameData)
+// }
+
+const GameRoot2 = () => {
+	const [ d, setD ] = Recoil.useRecoilState(uGameAtom)
+	const callback = Recoil.useRecoilCallback(({ snapshot, set }) => (update) => {
+		const data = snapshot.getLoadable(uGameAtom).contents
+		console.log(data)
+
+		const d = { ...data }
+		d.planets = [ ...d.planets ]
+		d.planets[1] = update.planets[1]
+
+		set(uGameAtom, d)
+	})
+
+	React.useEffect(() => {
+		// const worker = new window.Worker("./supremacy.js", { type: "module" })
+		const worker = new WebWorker(sup, { type: "module" })
+
+		worker.postMessage({ type: "START" })
+		worker.onmessage = (e) => {
+			const msg = e.data
+
+			switch (msg.type)
+			{
+				case "INITIALIZE":
+				{
+					setD(msg.data)
+					break
+				}
+				case "UPDATE":
+				{
+					callback(msg.data)
+					break
+				}
+			}
+		}
+	}, [])
+
+	return (d ? <Game2 /> : "Loading...")
 }
 
 const GameRoot = props => {
 	console.log("GameRoot", props)
-	const initialState = initialGameState(props)
+	const [ loading, setLoading ] = React.useState(true)
+	const [ state, setState ] = React.useState(null)
+
+	// const initialState = initialGameState(props)
 
 	return (
-		<RecoilRoot initializeState={initialState}>
-			<PersistenceObserver slot={props.slot} />
-			<Game />
+		<RecoilRoot initializeState={(snapshot) => snapshot.set(uGameAtom, state)}>
+			<GameRoot2 />
 		</RecoilRoot>
 	)
 }
