@@ -1,12 +1,31 @@
 import Universe from "./Universe.js"
 import Planet from "./Planet.js"
-
+import { IChanges } from "./types.js"
+import { parentPort } from "node:worker_threads"
 
 let universe: Universe | null = null
-let simulateTimeout: number | undefined
+let simulateTimeout: NodeJS.Timeout | number | undefined
+
+interface IMessage {
+  type: string,
+  changes: IChanges | undefined,
+  data: any,
+}
+
+const post = (msg: IMessage) => {
+  if (global.postMessage)
+  {
+    global.postMessage(msg)
+  }
+  else
+  {
+    parentPort?.postMessage(msg)
+  }
+}
+
+
 
 const simulate = () => {
-  const AUTO_SAVE_TIME = 2 * 60 * 1000
   const FPS = 1
 
   let time = Date.now()
@@ -17,7 +36,7 @@ const simulate = () => {
     const changes = uni.simulate(now - time)
     time = now
 
-    postMessage({
+    post({
       type: "UPDATE",
       changes: changes,
       data: uni,
@@ -27,7 +46,7 @@ const simulate = () => {
 
 const startUniverse = () => {
   console.debug("Starting universe, post initial update")
-  postMessage({
+  post({
     type: "UPDATE",
     changes: undefined,
     data: universe,
@@ -39,9 +58,8 @@ const startUniverse = () => {
   }, 1)
 }
 
-onmessage = (e) => {
-  const msg = e.data
-
+const dispatch = (msg: IMessage) => {
+  console.log("Received", msg)
   switch (msg.type)
   {
     case "LOAD":
@@ -75,7 +93,7 @@ onmessage = (e) => {
     }
     case "QUIT":
     {
-      clearInterval(simulateTimeout)
+      clearInterval(simulateTimeout as number)
       console.log("Simulation stopped")
       break
     }
@@ -85,6 +103,15 @@ onmessage = (e) => {
       break
     }
   }
+}
+
+if (global.onmessage)
+{
+  global.onmessage = (e) => dispatch(e.data)
+}
+else
+{
+  parentPort?.on("message", (message) => dispatch(message))
 }
 
 export default simulate

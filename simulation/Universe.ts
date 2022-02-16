@@ -21,7 +21,7 @@ export default class Universe
       nextShipId: 0,
       ships: [],
       platoons: [],
-      startDateTime: new Date().toString(),
+      startDateTime: Date.now(),
       finished: false
     }
     this.created = Date.now()
