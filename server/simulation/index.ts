@@ -24,7 +24,6 @@ const post = (msg: IMessage) => {
 }
 
 
-
 const simulate = () => {
   const FPS = 1
 
