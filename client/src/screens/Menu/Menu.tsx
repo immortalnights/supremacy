@@ -1,37 +1,24 @@
 import React from "react"
 import Recoil from "recoil"
 import {
-  Grid,
   Button,
-  CssBaseline,
-  ThemeProvider,
-  Typography,
-  Container,
-  createTheme,
   Stack,
 } from "@mui/material"
 import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useParams,
   useNavigate,
 } from "react-router-dom"
-import { GameContextProvider, useGameContext, initializeFn } from "../../GameContext"
-import { DGame, planetsSelector, planetSelector } from "../../data"
+import { useLocalStorageValue } from "../../data/localStorage"
 import Setup from "../Setup"
 import QuitGame from "../Quit/Quit"
-import { useLocalStorageValue } from "../../localStorage"
+import { AGame } from "../../data/Game"
 
 const Menu = () => {
-  const game = Recoil.useRecoilValue(DGame)
-  const context = useGameContext()
-  const saveGameId = useLocalStorageValue("game_id")
+  const game = Recoil.useRecoilValue(AGame)
+  const currentGameId = useLocalStorageValue("game")
   const navigate = useNavigate()
 
   const handleContinueClick = () => {
-    navigate(`/setup/${saveGameId}`)
+    navigate(`/setup/${currentGameId}`)
   }
 
   const handleNewGameClick = () => {
@@ -43,7 +30,7 @@ const Menu = () => {
   }
 
   let content
-  if (game && game.id) // || context.initialized)
+  if (game && game.id)
   {
     content = (<QuitGame />)
   }
@@ -51,7 +38,7 @@ const Menu = () => {
   {
     content = (
       <Stack>
-        <Button onClick={handleContinueClick} disabled={!(saveGameId)}>Continue</Button>
+        <Button onClick={handleContinueClick} disabled={!(currentGameId)}>Continue</Button>
         <Button onClick={handleNewGameClick}>New Game</Button>
         <Button onClick={handleHostGameClick}>Host Game</Button>
       </Stack>

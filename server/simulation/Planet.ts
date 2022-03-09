@@ -1,3 +1,4 @@
+import crypto from "crypto"
 import { IPlanet } from "./types"
 
 export default class Planet implements IPlanet

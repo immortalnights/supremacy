@@ -6,7 +6,7 @@
   "scripts": {
     "dev-client": "cd client && npm start",
     "dev-sim-types-client": "cd server\\simulation && npx tsc --declaration --outDir \"../../client/src/simulation\" --emitDeclarationOnly \"./types.ts\" --watch",
-    "dev-server": "cd server & npx nodemon ./server/index.ts",
+    "dev-server": "npx nodemon ./server/index.ts --config ./server/nodemon.json",
     "electron": "electron .",
     "build-server": "tsx ./server/",
     "start-dev": "concurrently \"npm:dev-*\"",

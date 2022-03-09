@@ -1,45 +1,86 @@
 import React from "react"
 import Recoil from "recoil"
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-  useParams,
-  useNavigate,
-} from "react-router-dom"
-import { GameContextProvider, useGameContext, initializeFn } from "../../GameContext"
-import { DGame, planetsSelector, planetSelector } from "../../data"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+import { AGame } from "../../data/Game"
+import { useLocalStorage } from "../../data/localStorage"
+
+
+// New game flow
+// xhr to server to create game
+// wait for response
+  // in the future it would be good to have this over ws and neat "start game" progress
+  // server builds universe (typically this is super fast, but separate for future expansion)
+  // wait for all players to connect (1 or more as needed)
+// response contains game id
+// play moves to game screen
+
+const states = [
+  "Creating Universe...",
+  "Joining Game..."
+]
 
 const Setup = () => {
-  const context = useGameContext()
-  const game = Recoil.useRecoilValue(DGame)
+  const [ game, setGame ] = Recoil.useRecoilState(AGame)
+  const [ currentGameId, setCurrentGameId ] = useLocalStorage("game")
+  const [ currentPlayerId, setCurrentPlayerId ] = useLocalStorage("player")
   const params = useParams()
+  const [ searchParams, setSearchParams ] = useSearchParams()
   const navigate = useNavigate()
 
-  console.log("context in Setup", context)
   React.useEffect(() => {
-    let saveGameData
+    let req
     if (params.id)
     {
-      const value = localStorage.getItem("game")
-      saveGameData = value ? JSON.parse(value) : undefined
-      console.assert(Number(params.id) === saveGameData.id, "Save game data ID mismatch")
+      req = fetch("/api/join", {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          playerId: currentPlayerId,
+          gameId: currentGameId,
+        }),
+      })
+    }
+    else
+    {
+
+      req = fetch("/api/create", {
+        method: "post",
+        body: JSON.stringify({
+          multiplayer: Number(searchParams.get("multiplayer")) === 1
+        }),
+      })
     }
 
-    (context.initialize as initializeFn)(saveGameData)
+    req.then((res) => {
+      return res.ok && res.json()
+    }).then((data) => {
+      if (data.ok)
+      {
+        // save the game id in local storage to allow continuing
+        setCurrentGameId(data.universe.id)
+        setCurrentPlayerId(data.playerId)
+        setGame(data.universe)
+      }
+    })
+
+
   }, [])
 
   React.useEffect(() => {
     if (game)
     {
-      console.log("Setup complete, navigate to game")
-      navigate(`/play/${game.id}`, { replace: true })
+      setTimeout(() => {
+        navigate(`/play/${game.id}`, { replace: true })
+      }, 2000)
     }
   }, [ game ])
 
+  let index = game ? 1 : 0
+
   return (
-    <div>setup</div>
+    <div style={{ textAlign: "center" }}>{states[index]}</div>
   )
 }
 

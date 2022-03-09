@@ -1,116 +1,92 @@
-import Universe from "./Universe.js"
-import Planet from "./Planet.js"
-import { IChanges } from "./types.js"
-import { parentPort } from "node:worker_threads"
+import Universe from "./Universe"
+import Planet from "./Planet"
+import fs from "fs"
+// import { IChanges } from "./types.ts"
 
-let universe: Universe | null = null
-let simulateTimeout: NodeJS.Timeout | number | undefined
+let simulateTimeout: NodeJS.Timeout | null = null
+const cache: { [key: string]: Universe } = {}
 
-interface IMessage {
-  type: string,
-  changes: IChanges | undefined,
-  data: any,
-}
-
-const post = (msg: IMessage) => {
-  if (global.postMessage)
-  {
-    global.postMessage(msg)
-  }
-  else
-  {
-    parentPort?.postMessage(msg)
-  }
-}
-
-
-const simulate = () => {
-  const FPS = 1
+export const simulate = () => {
+  const FPS = 2
 
   let time = Date.now()
 
   simulateTimeout = setInterval(() => {
     const now = Date.now()
-    const uni = (universe as Universe)
-    const changes = uni.simulate(now - time)
-    time = now
 
-    post({
-      type: "UPDATE",
-      changes: changes,
-      data: uni,
-    })
+    for (const [ key, uni ] of Object.entries(cache))
+    {
+      uni.simulate(now - time)
+
+      if (false === uni.finished)
+      {
+        fs.writeFileSync(`./saved_games/${uni.id}.sav`, JSON.stringify(uni.toJSON()))
+        uni.saved = now
+        // console.log(`Saved Universe ${uni.id}`)
+      }
+    }
+
+    time = now
   }, 1000 / FPS)
 }
 
-const startUniverse = () => {
-  console.debug("Starting universe, post initial update")
-  post({
-    type: "UPDATE",
-    changes: undefined,
-    data: universe,
-  })
-
-  setTimeout(() => {
-    console.debug("Starting simulation")
-    simulate()
-  }, 1)
+export const shutdown = () => {
+  clearInterval(simulateTimeout as NodeJS.Timeout)
 }
 
-const dispatch = (msg: IMessage) => {
-  console.log("Received", msg)
-  switch (msg.type)
-  {
-    case "LOAD":
-    {
-      console.debug("Parsing save game data", msg.data)
-      universe = new Universe()
-      // Assign save game data to the Universe class
-      Object.assign(universe, msg.data)
-      // Map planets as Planet instances
-      universe.planets.map(p => {
-        const planet = new Planet(p.id)
-        Object.assign(planet, p)
-        return planet
-      })
-
-      startUniverse()
-      break
-    }
-    case "CREATE":
-    {
-      // create
-      universe = new Universe()
-
-      startUniverse()
-      break
-    }
-    case "START":
-    {
-      simulate()
-      break
-    }
-    case "QUIT":
-    {
-      clearInterval(simulateTimeout as number)
-      console.log("Simulation stopped")
-      break
-    }
-    default:
-    {
-      console.error(`Received unhandled message '${msg.type}'`)
-      break
-    }
-  }
+export const createUniverse = (options: {}) => {
+  const universe = new Universe()
+  cache[universe.id] = universe
+  return universe
 }
 
-if (global.onmessage)
-{
-  global.onmessage = (e) => dispatch(e.data)
-}
-else
-{
-  parentPort?.on("message", (message) => dispatch(message))
+export const findUniverse = (id: string): Universe | undefined => {
+  return cache[id]
 }
 
-export default simulate
+// const dispatch = (msg: IMessage) => {
+//   console.log("Received", msg)
+//   switch (msg.type)
+//   {
+//     case "LOAD":
+//     {
+//       console.debug("Parsing save game data", msg.data)
+//       universe = new Universe()
+//       // Assign save game data to the Universe class
+//       Object.assign(universe, msg.data)
+//       // Map planets as Planet instances
+//       universe.planets.map(p => {
+//         const planet = new Planet(p.id)
+//         Object.assign(planet, p)
+//         return planet
+//       })
+
+//       startUniverse()
+//       break
+//     }
+//     case "CREATE":
+//     {
+//       // create
+//       universe = new Universe()
+
+//       startUniverse()
+//       break
+//     }
+//     case "START":
+//     {
+//       simulate()
+//       break
+//     }
+//     case "QUIT":
+//     {
+//       clearInterval(simulateTimeout as number)
+//       console.log("Simulation stopped")
+//       break
+//     }
+//     default:
+//     {
+//       console.error(`Received unhandled message '${msg.type}'`)
+//       break
+//     }
+//   }
+// }

@@ -1,30 +1,44 @@
-import Planet from "./Planet.js"
+import crypto from "crypto"
+import Planet from "./Planet"
 import { IChanges } from "./types"
+
+class AI
+{
+  id: string
+
+  constructor()
+  {
+    this.id = crypto.randomUUID()
+  }
+}
 
 export default class Universe
 {
-  id: number
+  id: string
+  players: string[]
   planets: Planet[]
-  game: object
+  ships: []
+  platoons: []
   created: number
+  saved: number | null
+  finished: boolean
+  nextShipId: number
+  ai: AI | null
 
   constructor()
   {
     console.log("Universe:constructor")
-    this.id = Math.floor(Math.random() * 100)
+    this.id = crypto.randomUUID()
     // this.players = []
+    this.players = []
     this.planets = []
-    this.game = {
-      id: 0,
-      players: [],
-      planets: [],
-      nextShipId: 0,
-      ships: [],
-      platoons: [],
-      startDateTime: Date.now(),
-      finished: false
-    }
+    this.nextShipId = 0
+    this.ships = []
+    this.platoons = [],
+    this.finished = false
+    this.saved = null
     this.created = Date.now()
+    this.ai = null
 
     for (let i = 0; i < 6; i++)
     {
@@ -37,6 +51,28 @@ export default class Universe
     return this
   }
 
+  addAI()
+  {
+    this.ai = new AI()
+    this.join(this.ai.id)
+  }
+
+  inProgress()
+  {
+    return this.players.length === 2
+  }
+
+  join(id: string)
+  {
+    let joined = false
+    if (this.players.length < 2)
+    {
+      this.players.push(id)
+      joined = true
+    }
+    return joined
+  }
+
   simulate(delta: number): IChanges
   {
     const changes: IChanges = {
@@ -45,9 +81,13 @@ export default class Universe
       platoons: [],
     }
 
-    // console.log("Universe:tick")
-    this.planets[1].population += 1
-    changes.planets.push(1)
+    if (this.inProgress())
+    {
+      // console.log("Universe:tick")
+      this.planets[1].population += 1
+      changes.planets.push(1)
+    }
+
     return changes
   }
 }
