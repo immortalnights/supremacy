@@ -39,7 +39,10 @@ export default class Universe
     this.saved = null
     this.created = Date.now()
     this.ai = null
+  }
 
+  generate(seed: number)
+  {
     for (let i = 0; i < 6; i++)
     {
       this.planets.push(new Planet(i))
@@ -49,6 +52,18 @@ export default class Universe
   toJSON()
   {
     return this
+  }
+
+  load(data: Universe)
+  {
+    Object.assign(this, data)
+
+    this.planets = data.planets.map((planet) => {
+      const p = new Planet(0)
+      p.load(planet)
+
+      return p
+    })
   }
 
   addAI()
@@ -69,7 +84,18 @@ export default class Universe
     {
       this.players.push(id)
       joined = true
+
+      // All capital planets are called Starbase!
+      if (this.players.length === 1)
+      {
+        this.planets[0].claim(id, "Starbase!")
+      }
+      else if (this.players.length === 2)
+      {
+        this.planets[this.planets.length - 1].claim(id, "Starbase!")
+      }
     }
+
     return joined
   }
 
@@ -84,8 +110,12 @@ export default class Universe
     if (this.inProgress())
     {
       // console.log("Universe:tick")
-      this.planets[1].population += 1
-      changes.planets.push(1)
+      this.planets.forEach((planet) => {
+        if (planet.simulate(delta))
+        {
+          changes.planets.push(planet.id)
+        }
+      })
     }
 
     return changes

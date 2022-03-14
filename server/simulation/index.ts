@@ -20,7 +20,7 @@ export const simulate = () => {
 
       if (false === uni.finished)
       {
-        fs.writeFileSync(`./saved_games/${uni.id}.sav`, JSON.stringify(uni.toJSON()))
+        fs.writeFileSync(`./saved_games/${uni.id}.sav`, JSON.stringify(uni.toJSON()), { encoding: "utf8" })
         uni.saved = now
         // console.log(`Saved Universe ${uni.id}`)
       }
@@ -36,57 +36,28 @@ export const shutdown = () => {
 
 export const createUniverse = (options: {}) => {
   const universe = new Universe()
+  universe.generate(0)
   cache[universe.id] = universe
   return universe
 }
 
 export const findUniverse = (id: string): Universe | undefined => {
+  if (!cache[id])
+  {
+    // FIXME validate the id before trying to load a file...
+    const saveFilePath = `./saved_games/${id.replace(/\/\\/g, '')}.sav`
+    console.log(`Universe ${id} not found, attempt to load`)
+    if (fs.existsSync(saveFilePath))
+    {
+      console.log(`Universe save file exists, loading...`)
+      const data = fs.readFileSync(saveFilePath, { encoding: "utf8" })
+
+      const universe = new Universe()
+      universe.load(JSON.parse(data))
+      console.log(`Loaded Universe ${universe.id}...`)
+      cache[id] = universe
+    }
+  }
+
   return cache[id]
 }
-
-// const dispatch = (msg: IMessage) => {
-//   console.log("Received", msg)
-//   switch (msg.type)
-//   {
-//     case "LOAD":
-//     {
-//       console.debug("Parsing save game data", msg.data)
-//       universe = new Universe()
-//       // Assign save game data to the Universe class
-//       Object.assign(universe, msg.data)
-//       // Map planets as Planet instances
-//       universe.planets.map(p => {
-//         const planet = new Planet(p.id)
-//         Object.assign(planet, p)
-//         return planet
-//       })
-
-//       startUniverse()
-//       break
-//     }
-//     case "CREATE":
-//     {
-//       // create
-//       universe = new Universe()
-
-//       startUniverse()
-//       break
-//     }
-//     case "START":
-//     {
-//       simulate()
-//       break
-//     }
-//     case "QUIT":
-//     {
-//       clearInterval(simulateTimeout as number)
-//       console.log("Simulation stopped")
-//       break
-//     }
-//     default:
-//     {
-//       console.error(`Received unhandled message '${msg.type}'`)
-//       break
-//     }
-//   }
-// }

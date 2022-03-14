@@ -4,7 +4,6 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { AGame } from "../../data/Game"
 import { useLocalStorage } from "../../data/localStorage"
 
-
 // New game flow
 // xhr to server to create game
 // wait for response
@@ -44,10 +43,13 @@ const Setup = () => {
     }
     else
     {
-
       req = fetch("/api/create", {
         method: "post",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
+          playerId: currentPlayerId,
           multiplayer: Number(searchParams.get("multiplayer")) === 1
         }),
       })
@@ -62,6 +64,11 @@ const Setup = () => {
         setCurrentGameId(data.universe.id)
         setCurrentPlayerId(data.playerId)
         setGame(data.universe)
+      }
+      else
+      {
+        // return to main menu
+        navigate("/")
       }
     })
 

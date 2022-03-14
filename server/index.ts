@@ -1,12 +1,28 @@
 import express from "express"
 import crypto from "crypto"
+import { Server } from "socket.io"
+import http from "http"
 import { simulate, createUniverse, findUniverse } from "./simulation/index"
-// import Universe from "../simulation/Universe"
-import { Worker } from "worker_threads"
 import { IPlanet } from "./simulation/types"
 import Universe from "./simulation/Universe"
+import Planet from "./simulation/Planet"
+
+// temp single universe
+let u: Universe = new Universe()
+u.generate(0)
+u.addAI()
+u.join("player_1")
 
 const app = express()
+
+const server = http.createServer(app)
+const socket = new Server(server, {
+  path: "/socket-io/",
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+})
 
 app.use(express.json())
 
@@ -26,9 +42,8 @@ router.get("/", (req, res) => {
 router.post("/create", (req, res) => {
   const universe = createUniverse({})
 
-  // create a new player id
-  const playerId = crypto.randomUUID()
-  universe.join(playerId)
+  // use existing player id, or create a new player id
+  const playerId = req.body.playerId || crypto.randomUUID()
 
   console.log(`Player ${playerId} has created ${universe.id}`)
 
@@ -41,6 +56,9 @@ router.post("/create", (req, res) => {
     universe.addAI()
     console.log(`AI has joined ${universe.id}`)
   }
+
+  // AI, if applicable must join first
+  universe.join(playerId)
 
   res.json({
     ok: true,
@@ -89,10 +107,28 @@ router.put("/join", (req, res) => {
   })
 })
 
-router.get("/universe", (req, res) => {
-  // TODO don't send back the universe objects (planets, ships, platoons) as they have their own API
+router.get("/planets", (req, res) => {
+  const playerId = req.headers["x-player-id"] as string
+  const gameId = (req.headers["x-game-id"] || "") as string
+
+  const universe = findUniverse(gameId)
+
+  let planets: Planet[] = []
+  if (universe)
+  {
+    planets = [ ...universe.planets ]
+
+    // Rename the enemy starbase to ensure it's distinct
+    if (planets[0].owner !== playerId && planets[0].name === "Starbase!")
+    {
+      planets[0] = planets[0].clone()
+      planets[0].name = "Enemybase"
+    }
+  }
+
   res.json({
-    ok: false,
+    ok: !!universe,
+    planets: planets
   })
 })
 
@@ -131,9 +167,33 @@ router.get("/platoons", (req, res) => {
 
 app.use("/api", router)
 
+// Socket IO
+socket.on("connection", (socket: any) => {
+  console.log("ws connected")
+
+  const timer = setInterval(() => {
+    u.simulate(0)
+
+    let data: IPlanet[] = []
+    u.planets.forEach((planet) => {
+      data.push(planet.toJSON())
+    })
+    socket.emit("planets", data)
+  }, 1000)
+
+  socket.on("connect", () => {
+    console.log("client connected")
+  })
+  socket.on("disconnect", () => {
+    console.log("client disconnected")
+    clearInterval(timer)
+  })
+})
+
+
 simulate();
 
 let port = 3010
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server online (${port})...`)
 })
