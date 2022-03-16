@@ -40,7 +40,7 @@ const Menu = () => {
       <Stack>
         <Button onClick={handleContinueClick} disabled={!(currentGameId)}>Continue</Button>
         <Button onClick={handleNewGameClick}>New Game</Button>
-        <Button onClick={handleHostGameClick}>Host Game</Button>
+        {/* <Button onClick={handleHostGameClick}>Host Game</Button> */}
       </Stack>
     )
   }

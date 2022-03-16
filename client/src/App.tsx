@@ -19,115 +19,123 @@ import Menu from "./screens/Menu"
 import GameRoot from "./screens/Game/Root"
 import Setup from "./screens/Setup"
 import { IPlanet, PlanetType } from "./simulation/types"
-import { io, Socket } from "socket.io-client"
+import IOProvider, { IOContext } from "./data/IOContext"
 import "./App.css"
+import { Player, Room, IPlayer } from "./data/Room"
 
 const theme = createTheme()
 
-interface ClientToServerEvents {
-  noArg: () => void;
-  basicEmit: (a: number, b: string, c: number[]) => void;
-}
+// const Planet = ({ name, type, population }: { name: string, type: PlanetType, population: number }) => {
+//   return (
+//     <li>
+//       {name} {type} {Math.floor(population)}
+//     </li>
+//   )
+// }
 
-interface ServerToClientEvents {
-  withAck: (d: string, cb: (e: number) => void) => void;
-}
+// const PlanetList = () => {
+//   const [ selected, setSelected ] = React.useState<string | undefined>(undefined)
+//   const planets = Recoil.useRecoilValue(planetsAtom)
 
-type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
+//   return (
+//     <ul>
+//       {planets.map((planet) => <Planet key={planet.id} {...planet} />)}
+//     </ul>
+//   )
+// }
 
-const IOContext = React.createContext<SocketIO>(undefined)
+// const planetsAtom = Recoil.atom<IPlanet[]>({
+//   key: "morePlanets",
+//   default: []
+// })
 
-const Planet = ({ name, type, population }: { name: string, type: PlanetType, population: number }) => {
+const DataProvider = ({ children }: { children: JSX.Element }) => {
+  const SocketToRecoil = () => {
+    const handleMessage = Recoil.useRecoilTransaction_UNSTABLE(( { get, set }) => (action: string, data: any) => {
+      console.log("received", action, data)
+
+      switch (action)
+      {
+        case "room-joined":
+        {
+          const isHost = (data.players.find((p: IPlayer) => p.id === data.playerID) as IPlayer).host
+          // Copy existing data (to preserve the player name)
+          const player = { ...get(Player), id: data.playerID, host: isHost }
+
+          // Set the player data, now with an ID
+          set(Player, player)
+
+          // Set the room data
+          set(Room, {
+            id: data.roomID,
+            seed: "",
+            players: data.players,
+            status: "pending",
+          })
+          break
+        }
+        case "room-closed":
+        {
+          // const room = get(Room)
+          // set(Room, {
+          //   id: "",
+          //   player1: room?.player1 || "",
+          //   player2: "",
+          //   status: "pending"
+          // })
+        }
+      }
+
+    })
+
+    return (
+      <IOProvider handleMessage={handleMessage}>
+        {children}
+      </IOProvider>
+    )
+  }
+
   return (
-    <li>
-      {name} {type} {Math.floor(population)}
-    </li>
+    <Recoil.RecoilRoot initializeState={() => {}}>
+      <SocketToRecoil />
+    </Recoil.RecoilRoot>
   )
 }
 
-const PlanetList = () => {
-  const [ selected, setSelected ] = React.useState<string | undefined>(undefined)
-  const planets = Recoil.useRecoilValue(planetsAtom)
-
+const ConnectionStatus = () => {
+  const { status } = React.useContext(IOContext)
   return (
-    <ul>
-      {planets.map((planet) => <Planet key={planet.id} {...planet} />)}
-    </ul>
+    <span style={{ float: "right" }}>({status})</span>
   )
 }
-
-const planetsAtom = Recoil.atom<IPlanet[]>({
-  key: "morePlanets",
-  default: []
-})
-
-const IOProvider = ({ children }: { children: JSX.Element }) => {
-  const [ socket, setSocket ] = React.useState<SocketIO>(undefined)
-  const handleMessage = Recoil.useRecoilTransaction_UNSTABLE(( { get, set }) => (action: string, data: any) => {
-    // console.log(data)
-    set(planetsAtom, data)
-  })
-
-  React.useEffect(() => {
-    console.log("Creating Socket.IO")
-    const socket = io("http://localhost:3000", {
-      transports: ["websocket"]
-    })
-
-    socket.on("connect_error", (err) => {
-      console.log("connection error", err)
-    })
-    socket.on("connect", () => {
-      console.log("client connected")
-    })
-    socket.on("disconnect", () => {
-      console.log("client disconnected")
-    })
-    socket.on("planets", (body) => {
-      console.log("received", "planets")
-      handleMessage("planets", body)
-    })
-
-    setSocket(socket)
-    return () => {
-      socket.disconnect()
-    }
-  }, [])
-
-  return (
-    <IOContext.Provider value={socket}>
-      {children}
-    </IOContext.Provider>
-  )
-}
-
 
 const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Recoil.RecoilRoot initializeState={() => {}}>
-        <IOProvider>
-          <Container maxWidth="lg">
-            <Typography component="h1" align="center">Supremacy</Typography>
-            <Container component="main" maxWidth="lg">
-              <PlanetList />
-              <BrowserRouter>
-                <Routes>
-                  <Route index element={<Menu />} />
-                  <Route path="/setup" element={<Setup />}>
-                    <Route path=":id" element={<Setup />} />
-                  </Route>
-                  <Route path="/play/:id/*" element={<GameRoot />} />
-                  <Route path="*" element={
-                    <div>404</div>
-                  } />
-                </Routes>
-              </BrowserRouter>
-            </Container>
+      <DataProvider>
+        <Container maxWidth="lg">
+          <Grid container>
+            <Grid item xs={2} />
+            <Grid item xs={8}><Typography component="h1" align="center">Supremacy</Typography></Grid>
+            <Grid item xs={2}><ConnectionStatus /></Grid>
+          </Grid>
+          <Container component="main" maxWidth="lg">
+            <BrowserRouter>
+              <Routes>
+                <Route index element={<Menu />} />
+                <Route path="/setup" element={<Setup />}>
+                  <Route path=":id" element={<Setup />} />
+                </Route>
+                <Route path="/play/:id/*" element={<GameRoot />} />
+                <Route path="*" element={
+                  <div>404</div>
+                } />
+              </Routes>
+            </BrowserRouter>
           </Container>
-        </IOProvider>
-      </Recoil.RecoilRoot>
+        </Container>
+      </DataProvider>
     </ThemeProvider>
   )
 }

@@ -2,11 +2,12 @@ import Recoil from "recoil"
 
 export interface IGame {
     id: string
-    player: string
+    playerID: string
+    roomID: string
     lastSaved: string
 }
 
 export const AGame = Recoil.atom<IGame | undefined>({
-    key: 'a_game',
+    key: 'another_game',
     default: undefined,
 })

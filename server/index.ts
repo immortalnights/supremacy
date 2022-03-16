@@ -1,6 +1,6 @@
 import express from "express"
 import crypto from "crypto"
-import { Server } from "socket.io"
+import { Server, Socket } from "socket.io"
 import http from "http"
 import { simulate, createUniverse, findUniverse } from "./simulation/index"
 import { IPlanet } from "./simulation/types"
@@ -16,7 +16,7 @@ u.join("player_1")
 const app = express()
 
 const server = http.createServer(app)
-const socket = new Server(server, {
+const io = new Server(server, {
   path: "/socket-io/",
   cors: {
     origin: "http://localhost:3000",
@@ -167,27 +167,246 @@ router.get("/platoons", (req, res) => {
 
 app.use("/api", router)
 
-// Socket IO
-socket.on("connection", (socket: any) => {
-  console.log("ws connected")
+// TODO tidy up based on https://socket.io/docs/v4/server-application-structure/
 
-  const timer = setInterval(() => {
-    u.simulate(0)
+const createRoom = (host: Player) => {
+  const room = new Room(host)
+  rooms.push(room)
+  return room
+}
 
-    let data: IPlanet[] = []
-    u.planets.forEach((planet) => {
-      data.push(planet.toJSON())
+class Player {
+  id: string
+  socket: Socket
+  room: Room | undefined
+  gameID: string
+
+  constructor(socket: Socket)
+  {
+    this.id = crypto.randomUUID()
+    this.socket = socket
+    this.room = undefined
+    this.gameID = ""
+
+    socket.on("room-create", () => {
+      if (this.room)
+      {
+        // Already in a room, cannot create another
+        // can sometimes be received on reload/hot reload
+        console.log("player already in a room")
+      }
+      else
+      {
+        const room = createRoom(this)
+        console.log("player created room", room.id)
+        this.room = room
+      }
     })
-    socket.emit("planets", data)
-  }, 1000)
 
-  socket.on("connect", () => {
-    console.log("client connected")
+    socket.on("room-join", (id: string) => {
+      console.log("player", this.id, "attempting to join room", id)
+      const room = rooms.find((room) => room.id === id)
+      if (room)
+      {
+        room.join(this)
+      }
+    })
+
+    socket.on("player-toggle-ready", () => {
+      console.log("toggle player ready status")
+      this.room.toggleReady(this)
+    })
+
+    socket.on("room-leave", () => {
+      if (this.room)
+      {
+        this.room.leave(this)
+        this.room = undefined
+      }
+    })
+
+    // socket.on("room-close", () => {
+    //   socket.to(this.roomID).emit("room-closed")
+    //   socket.leave(this.roomID)
+    //   this.roomID = ""
+    // })
+  }
+}
+
+class AIPlayer {
+  socket: undefined
+}
+
+interface IPlayer {
+  id: string
+  socket: Socket | undefined
+  room: Room | undefined
+  ready: boolean
+}
+
+class Room {
+  id: string
+  players: IPlayer[]
+  player1: Player | undefined
+  player2: Player | AIPlayer | undefined
+  game: undefined
+  status: string
+
+  constructor(host: Player)
+  {
+    this.id = crypto.randomUUID()
+    this.players = []
+    // FIXME convert player1/player2 into the above array as it's just better
+    this.player1 = undefined
+    this.player2 = undefined
+    this.game = undefined
+    this.status = "pending"
+
+    this.hostJoined(host)
+  }
+
+  hostJoined(player: Player)
+  {
+    this.player1 = player
+
+    // Join the socket room
+    player.socket.join(this.id)
+
+    // Inform the player about the room
+    player.socket.emit("room-joined", {
+      playerID: player.id,
+      roomID: this.id,
+      players: [
+        {
+          id: player.id,
+          name: "",
+          local: true,
+          host: true,
+        },
+        {
+          id: "",
+          name: "",
+          local: false,
+          host: false,
+        }
+      ]
+    })
+  }
+
+  join(player: Player)
+  {
+    this.player2 = player
+
+    // Join the socket room
+    player.socket.join(this.id)
+
+    // Inform the new player about the room
+    player.socket.emit("room-joined", {
+      playerID: player.id,
+      roomID: this.id,
+      players: [
+        {
+          id: this.player1?.id,
+          name: "",
+          local: false,
+          host: true,
+        },
+        {
+          id: player.id,
+          name: "",
+          local: true,
+          host: false,
+        }
+      ],
+    })
+
+    // Inform all other players in the room about the new player
+    this.player1?.socket.to(this.id).emit("room-player-joined", {
+      playerID: player.id
+    })
+  }
+
+  toggleReady(player: Player)
+  {
+    // TODO toggle the given players Ready flag and broadcast to all players
+    let ready = false
+
+    io.to(this.id).emit("ready-status-changed", {
+      playerID: player.id,
+      ready,
+    })
+  }
+
+  leave(player: Player)
+  {
+    // Remove the player from the Socket room as they don't need the broadcasts
+    player.socket.leave(this.id)
+
+    if (player === this.player1)
+    {
+      // Host left!
+      // io.to(this.id).emit("room-host-left", {
+      //   playerID: player.id
+      // })
+      this.player1 = undefined
+
+      // If the host left, kick the other player
+      this.player2?.socket?.emit("room-kicked", {})
+    }
+    else
+    {
+      // Other player left
+      io.to(this.id).emit("room-player-left", {
+        playerID: player.id
+      })
+      this.player2 = undefined
+    }
+  }
+
+  empty()
+  {
+    return !!this.player1 && !!this.player2
+  }
+}
+
+
+const players: Player[] = []
+const rooms: Room[] = []
+
+// Socket IO
+io.on("connection", (socket: Socket) => {
+  // Initialize a new Player on a new connection
+  const player = new Player(socket)
+
+  socket.on("connect_error", () => {
+    console.log("connection error")
   })
+
+  // Clean up the player on disconnection
   socket.on("disconnect", () => {
     console.log("client disconnected")
-    clearInterval(timer)
+    // clearInterval(timer)
+    const index = players.indexOf(player)
+
+    // Find the room the player is in (if any)
+    if (player.room)
+    {
+      const room = rooms.find((room) => room.id === player.room?.id) as Room
+      room.leave(player)
+
+      if (room.empty())
+      {
+        const roomIndex = rooms.indexOf(room)
+        rooms.splice(roomIndex, 1)
+      }
+
+      player.room = undefined
+    }
+
+    players.splice(index, 1)
   })
+
+  players.push(player)
 })
 
 
