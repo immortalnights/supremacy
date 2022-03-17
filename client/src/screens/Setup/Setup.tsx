@@ -1,4 +1,4 @@
-import React, { useEffect } from "react"
+import React, { useContext, useEffect } from "react"
 import Recoil from "recoil"
 import { Box, Link, Button, Grid, Typography, TextField, CardContent, CardActions, Stack, Hidden } from "@mui/material"
 import { useNavigate, useParams, useSearchParams } from "react-router-dom"
@@ -6,7 +6,8 @@ import { AGame } from "../../data/Game"
 import { useLocalStorage } from "../../data/localStorage"
 import { IOContext } from "../../data/IOContext"
 import wrapPromise from "../../wrapPromise"
-import { IRoom, Room as RoomData, IPlayer, Player as PlayerData } from "../../data/Room"
+import { Player as PlayerData, ClientPlayer } from "../../data/Player"
+import { Room as RoomData } from "../../data/Room"
 
 // New game flow
 // xhr to server to create game
@@ -31,25 +32,34 @@ const Slot = ({ index, id, name, ready }: { index: number, id: string, name: str
         Player {index} {ready ? "R" : ""}
       </Typography>
       <Typography variant="h5" component="div">
-        <TextField disabled variant="standard" size="small" value={name} />
+        <TextField disabled variant="standard" size="small" value={name || id} />
       </Typography>
     </CardContent>
   )
 }
 
 const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, isOccupied: boolean, isHost: boolean, isLocal: boolean }) => {
-  // console.log(roomID, isLocal, isHost, (isHost && !isLocal))
+  console.log(roomID, isOccupied, isLocal, isHost, (isHost && !isLocal))
+  const { } = useContext(IOContext)
 
-  const handleInvite = () => {
+  const handleClickInvite = () => {
     // FIXME to use proper Location
     navigator.clipboard.writeText(`http://localhost:3000/setup/${roomID}`)
   }
 
+  const handleClickKick = () => {
+
+  }
+
+  const handleClickAddAI = () => {
+
+  }
+
   return (
     <CardActions sx={{ visibility: isHost && !isLocal ? "block" : "hidden" }}>
-      <Button size="small" disabled={!isOccupied} onClick={handleInvite}>Invite</Button>
-      <Button size="small" disabled={isOccupied}>Kick</Button>
-      <Button size="small" disabled={!isOccupied}>Add AI</Button>
+      <Button size="small" disabled={isOccupied} onClick={handleClickInvite}>Invite</Button>
+      <Button size="small" disabled={!isOccupied} onClick={handleClickKick}>Kick</Button>
+      <Button size="small" disabled={isOccupied} onClick={handleClickAddAI}>Add AI</Button>
     </CardActions>
   )
 }
@@ -57,25 +67,52 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
 const Room = () => {
   const [ seed, setSeed ] = React.useState(randomSeedString(7))
   const roomData = Recoil.useRecoilValue(RoomData)
-  const playerData = Recoil.useRecoilValue(PlayerData)
+  const localPlayer = Recoil.useRecoilValue(PlayerData)
   const { playerToggleReady } = React.useContext(IOContext)
+  const navigate = useNavigate()
 
   const handleChangeSeed = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSeed(event.target.value)
   }
 
-  const toggleReady = () => {
+  const handleReadyClick = () => {
     if (roomData)
     {
       playerToggleReady()
     }
   }
 
+  const handleLeaveRoomClick = () => {
+    // Don't need to send the leave message as the "deconstruction" for
+    // the current screen will do so.
+    navigate("/")
+  }
+
   let content
   // FIXME - should be handled by Suspense
   if (roomData)
   {
-    const localPlayer = roomData.players.find((p) => p.id === playerData.id) as IPlayer
+    const isHost = roomData.host === localPlayer.id
+
+    const slots = roomData.players.map((player) => (
+      <Box key={player.id}>
+        <Slot index={1} id={player.id} name={player.name} ready={player.ready} />
+        <SlotControls roomID={roomData.id} isOccupied={true} isLocal={player.id === localPlayer.id} isHost={isHost} />
+      </Box>
+    ))
+
+    if (roomData.slots - roomData.players.length > 0)
+    {
+      for (let index = roomData.players.length; index < roomData.slots; index++)
+      {
+        slots.push(
+          <Box key={index}>
+            <Slot index={1} id="" name="" ready={false} />
+            <SlotControls roomID={roomData.id} isOccupied={false} isLocal={false} isHost={isHost} />
+          </Box>
+        )
+      }
+    }
 
     content = (
       <Grid container>
@@ -85,20 +122,16 @@ const Room = () => {
             <Typography component="h2">Create Game </Typography>
             <Typography component="p"><small>({roomData?.id})</small></Typography>
             <div>
-              Seed #<TextField error={!seed} disabled={!playerData.host} variant="standard" size="small" value={seed} onChange={handleChangeSeed} />
+              Seed #<TextField error={!seed} disabled={!isHost} variant="standard" size="small" value={seed} onChange={handleChangeSeed} />
             </div>
           </Box>
           <Stack direction="row" spacing={2} alignContent="center" alignItems="center" justifyContent="center">
-            {roomData.players.map((player) => (
-              <Box key={player.id}>
-                <Slot index={1} id={player.id} name={player.name} ready={player.ready} />
-                <SlotControls roomID={roomData.id} isOccupied={!player.id} isLocal={player.local} isHost={playerData.host} />
-              </Box>
-            ))}
+            {slots}
           </Stack>
-          <div style={{ textAlign: "center" }}>
-            <Button size="large" variant="contained" color={localPlayer.ready ? "error" : "success"} onClick={toggleReady}>{localPlayer.ready ? "Not Ready" : "Ready"}</Button>
-          </div>
+          <Stack alignContent="center" alignItems="center" justifyContent="center" spacing={2}>
+            <Button size="large" variant="contained" color={localPlayer.ready ? "error" : "success"} onClick={handleReadyClick}>{localPlayer.ready ? "Not Ready" : "Ready"}</Button>
+            <Button size="small" variant="text" color="inherit" onClick={handleLeaveRoomClick}>Leave</Button>
+          </Stack>
         </Grid>
         <Grid item xs={3} />
       </Grid>
@@ -146,7 +179,7 @@ const Setup = () => {
 
   useEffect(() => {
     return () => {
-      console.log("destroy room")
+      console.log("Leave room (cleanup effect)")
       leaveRoom()
     }
   }, [])
@@ -157,78 +190,5 @@ const Setup = () => {
     </React.Suspense>
   )
 }
-
-// const SetupX = () => {
-//   const [ game, setGame ] = Recoil.useRecoilState(AGame)
-//   const [ currentGameId, setCurrentGameId ] = useLocalStorage("game")
-//   const [ currentPlayerId, setCurrentPlayerId ] = useLocalStorage("player")
-//   const params = useParams()
-//   const [ searchParams, setSearchParams ] = useSearchParams()
-//   const navigate = useNavigate()
-
-//   React.useEffect(() => {
-//     let req
-//     if (params.id)
-//     {
-//       req = fetch("/api/join", {
-//         method: "put",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           playerId: currentPlayerId,
-//           gameId: currentGameId,
-//         }),
-//       })
-//     }
-//     else
-//     {
-//       req = fetch("/api/create", {
-//         method: "post",
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//         body: JSON.stringify({
-//           playerId: currentPlayerId,
-//           multiplayer: Number(searchParams.get("multiplayer")) === 1
-//         }),
-//       })
-//     }
-
-//     req.then((res) => {
-//       return res.ok && res.json()
-//     }).then((data) => {
-//       if (data.ok)
-//       {
-//         // save the game id in local storage to allow continuing
-//         setCurrentGameId(data.universe.id)
-//         setCurrentPlayerId(data.playerId)
-//         setGame(data.universe)
-//       }
-//       else
-//       {
-//         // return to main menu
-//         navigate("/")
-//       }
-//     })
-
-
-//   }, [])
-
-//   React.useEffect(() => {
-//     if (game)
-//     {
-//       setTimeout(() => {
-//         navigate(`/play/${game.id}`, { replace: true })
-//       }, 2000)
-//     }
-//   }, [ game ])
-
-//   let index = game ? 1 : 0
-
-//   return (
-//     <div style={{ textAlign: "center" }}>{states[index]}</div>
-//   )
-// }
 
 export default Setup

@@ -1,25 +1,10 @@
 import React from "react"
+import { useNavigate } from "react-router"
 import { io, Socket } from "socket.io-client"
+import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
-
-// Messages from the client to the Server
-interface ClientToServerEvents {
-  "room-create": () => void
-  "room-join": (id: string) => void
-  "room-leave": () => void
-  "room-set-options": () => void
-  "player-ready-toggle": () => void
-  "create-game": (seed: number) => void
-}
-
-// Messages from the server to the client
-interface ServerToClientEvents {
-  withAck: (d: string, cb: (e: number) => void) => void
-  "room-joined": (roomID: string) => void
-  "room-closed": (roomID: string) => void
-}
 
 // Socket connection status
 export type Status = "disconnected" | "connecting" | "connected"
@@ -50,10 +35,13 @@ export type MessageHandler = (action: string, data: any) => void
 const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: JSX.Element }) => {
   const [ status, setStatus ] = React.useState<Status>("disconnected")
   const [ socket, setSocket ] = React.useState<SocketIO>(undefined)
+  const navigate = useNavigate()
+
+  console.log("provider has changed", !!socket)
 
   React.useEffect(() => {
     console.log("Creating Socket.IO")
-    const socket = io("http://localhost:3000", {
+    const socket: SocketIO = io("http://localhost:3000", {
       transports: ["websocket"]
     })
 
@@ -68,45 +56,48 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     socket.on("disconnect", () => {
       console.log("client disconnected")
       setStatus("disconnected")
+      handleMessage("disconnect", {})
+      navigate("/")
     })
 
+    socket.on("registered", (data) => handleMessage("registered", data))
     socket.on("room-joined", (data) => handleMessage("room-joined", data))
-    socket.on("room-closed", (data) => handleMessage("room-closed", data))
-    //  ({ playerID, roomID }) => {
-    //   console.log(playerID, "joined room", roomID)
-    //   handleMessage("room-joined", { playerID, roomID })
-    // })
-
-    // socket.on("room-closed", () => {
-    //   console.log("closed room")
-    //   handleMessage("room-closed")
-    // })
-
-    socket.on("update", handleMessage)
+    socket.on("room-player-joined", (data) => handleMessage("room-player-joined", data))
+    socket.on("room-player-left", (data) => handleMessage("room-player-left", data))
+    socket.on("room-player-kicked", () => handleMessage("room-player-kicked", {}))
+    socket.on("player-ready-status-changed", (data) => handleMessage("player-ready-status-changed", data))
 
     setSocket(socket)
     return () => {
+      console.log("Clean up IOProvider")
       socket.disconnect()
       setSocket(undefined)
       setStatus("disconnected")
+      handleMessage("disconnect", {})
+      navigate("/")
     }
   }, [])
 
   const contextValue = {
     status,
     createRoom: () => {
+      console.assert(socket, "Socket is invalid!")
       socket?.emit("room-create")
     },
     joinRoom: (id: string) => {
+      console.assert(socket, "Socket is invalid!")
       socket?.emit("room-join", id)
     },
     leaveRoom: () => {
+      console.assert(socket, "Socket is invalid!")
       socket?.emit("room-leave")
     },
     playerToggleReady: () => {
+      console.assert(socket, "Socket is invalid!")
       socket?.emit("player-ready-toggle")
     },
     createGame: () => {
+      console.assert(socket, "Socket is invalid!")
       socket?.emit("create-game", 0)
     },
   }

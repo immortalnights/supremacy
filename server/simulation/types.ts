@@ -1,9 +1,4 @@
 
-export interface IPlayer {
-  id: number
-  ai: boolean
-}
-
 export interface IResources {
   credits: number
   food: number

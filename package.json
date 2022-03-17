@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev-client": "cd client && npm start",
-    "dev-sim-types-client": "cd server\\simulation && npx tsc --declaration --outDir \"../../client/src/simulation\" --emitDeclarationOnly \"./types.ts\" --watch",
+    "dev-server-types-client": "cd server && npx tsc \"types.ts\" --outdir \"../client/src\" --declaration --emitDeclarationOnly --watch",
+    "dev-sim-types-client": "cd server && npx tsc \"simulation/types.ts\" --outdir \"../client/src/simulation\" --declaration --emitDeclarationOnly --watch",
     "dev-server": "npx nodemon ./server/index.ts --config ./server/nodemon.json",
     "electron": "electron .",
     "build-server": "tsx ./server/",

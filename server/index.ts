@@ -6,17 +6,14 @@ import { simulate, createUniverse, findUniverse } from "./simulation/index"
 import { IPlanet } from "./simulation/types"
 import Universe from "./simulation/Universe"
 import Planet from "./simulation/Planet"
+import { ServerToClientEvents, ClientToServerEvents, IPlayer, IRoom } from "./types"
 
-// temp single universe
-let u: Universe = new Universe()
-u.generate(0)
-u.addAI()
-u.join("player_1")
+type SocketIO = Socket<ClientToServerEvents, ServerToClientEvents>
 
 const app = express()
 
 const server = http.createServer(app)
-const io = new Server(server, {
+const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
   path: "/socket-io/",
   cors: {
     origin: "http://localhost:3000",
@@ -39,134 +36,6 @@ router.get("/", (req, res) => {
   })
 })
 
-router.post("/create", (req, res) => {
-  const universe = createUniverse({})
-
-  // use existing player id, or create a new player id
-  const playerId = req.body.playerId || crypto.randomUUID()
-
-  console.log(`Player ${playerId} has created ${universe.id}`)
-
-  if (req.body.multiplayer)
-  {
-    console.log(`Universe waiting for other player...`)
-  }
-  else
-  {
-    universe.addAI()
-    console.log(`AI has joined ${universe.id}`)
-  }
-
-  // AI, if applicable must join first
-  universe.join(playerId)
-
-  res.json({
-    ok: true,
-    playerId,
-    universe,
-  })
-})
-
-router.put("/join", (req, res) => {
-  let ok = false
-  let playerId = req.body.playerId
-  let universe: Universe | undefined = findUniverse(req.body.gameId)
-  // If the universe has been found, attempt to join it
-  if (universe)
-  {
-    // If the player has an ID, join only if they are already in the game (reconnecting)
-    if (playerId)
-    {
-      if (universe.players.includes(playerId))
-      {
-        console.log(`Player ${playerId} has reconnected to ${universe.id}`)
-        ok = true
-      }
-    }
-    else if (universe.players.length < 2)
-    {
-      playerId = crypto.randomUUID()
-      if (universe.join(playerId))
-      {
-        console.log(`Player ${playerId} has joined ${universe.id}`)
-        ok = true
-      }
-    }
-  }
-
-  if (!ok)
-  {
-    playerId = undefined
-    universe = undefined
-  }
-
-  res.json({
-    ok,
-    playerId,
-    universe,
-  })
-})
-
-router.get("/planets", (req, res) => {
-  const playerId = req.headers["x-player-id"] as string
-  const gameId = (req.headers["x-game-id"] || "") as string
-
-  const universe = findUniverse(gameId)
-
-  let planets: Planet[] = []
-  if (universe)
-  {
-    planets = [ ...universe.planets ]
-
-    // Rename the enemy starbase to ensure it's distinct
-    if (planets[0].owner !== playerId && planets[0].name === "Starbase!")
-    {
-      planets[0] = planets[0].clone()
-      planets[0].name = "Enemybase"
-    }
-  }
-
-  res.json({
-    ok: !!universe,
-    planets: planets
-  })
-})
-
-router.get("/planets/:planetId?", (req, res) => {
-  // TODO don't send back the universe objects (planets, ships, platoons) as they have their own API
-  const planetId = req.params?.planetId
-  // if (planetId)
-  // {
-  //   res.json(games[id].cache.planets[planetId])
-  // }
-  // else
-  // {
-  //   res.json(games[id].cache.planets.map((planet: IPlanet) => ({ id: planet.id })))
-  // }
-
-  res.json({
-    ok: false,
-  })
-})
-
-router.get("/ships", (req, res) => {
-  // TODO don't send back the universe objects (planets, ships, platoons) as they have their own API
-  // res.json(games[id].cache)
-  res.json({
-    ok: false,
-  })
-})
-
-router.get("/platoons", (req, res) => {
-  // TODO don't send back the universe objects (planets, ships, platoons) as they have their own API
-  res.json({
-    ok: false,
-  })
-  // res.json(games[id].cache)
-})
-
-app.use("/api", router)
-
 // TODO tidy up based on https://socket.io/docs/v4/server-application-structure/
 
 const createRoom = (host: Player) => {
@@ -175,18 +44,25 @@ const createRoom = (host: Player) => {
   return room
 }
 
-class Player {
+
+class Player implements IPlayer {
   id: string
-  socket: Socket
+  socket: SocketIO
+  name: string
   room: Room | undefined
+  ready: boolean
   gameID: string
 
-  constructor(socket: Socket)
+  constructor(socket: SocketIO)
   {
     this.id = crypto.randomUUID()
     this.socket = socket
+    this.name = ""
     this.room = undefined
+    this.ready = false
     this.gameID = ""
+
+    socket.emit("registered", { id: this.id })
 
     socket.on("room-create", () => {
       if (this.room)
@@ -209,15 +85,27 @@ class Player {
       if (room)
       {
         room.join(this)
+        this.room = room
       }
     })
 
-    socket.on("player-toggle-ready", () => {
-      console.log("toggle player ready status")
-      this.room.toggleReady(this)
+    socket.on("player-ready-toggle", () => {
+      if (this.room)
+      {
+        console.log(`Toggle player ${this.id} ready status ${this.ready}`)
+
+        this.ready = !this.ready
+
+        this.room.toggleReady(this)
+      }
+      else
+      {
+        console.warn(`Player ${this.id} is not in a room!`)
+      }
     })
 
     socket.on("room-leave", () => {
+      console.log(`(room-leave) Player ${this.id} left room ${this.room?.id}`)
       if (this.room)
       {
         this.room.leave(this)
@@ -233,32 +121,42 @@ class Player {
   }
 }
 
-class AIPlayer {
-  socket: undefined
-}
-
-interface IPlayer {
+class AIPlayer implements IPlayer {
   id: string
-  socket: Socket | undefined
+  name: string
   room: Room | undefined
   ready: boolean
+
+  constructor()
+  {
+    this.id = crypto.randomUUID()
+    this.name = ""
+    this.room = undefined
+    this.ready = true
+  }
+
+  send(message: string, data: object)
+  {
+
+  }
 }
 
-class Room {
+class Room implements IRoom {
   id: string
+  options: object
+  host: string
+  slots: number
   players: IPlayer[]
-  player1: Player | undefined
-  player2: Player | AIPlayer | undefined
   game: undefined
   status: string
 
   constructor(host: Player)
   {
     this.id = crypto.randomUUID()
+    this.options = {}
+    this.host = ""
+    this.slots = 2
     this.players = []
-    // FIXME convert player1/player2 into the above array as it's just better
-    this.player1 = undefined
-    this.player2 = undefined
     this.game = undefined
     this.status = "pending"
 
@@ -267,120 +165,120 @@ class Room {
 
   hostJoined(player: Player)
   {
-    this.player1 = player
+    this.host = player.id
+    this.players.push(player)
 
     // Join the socket room
     player.socket.join(this.id)
 
     // Inform the player about the room
     player.socket.emit("room-joined", {
-      playerID: player.id,
-      roomID: this.id,
-      players: [
-        {
-          id: player.id,
-          name: "",
-          local: true,
-          host: true,
-        },
-        {
-          id: "",
-          name: "",
-          local: false,
-          host: false,
+      id: this.id,
+      host: this.host,
+      slots: this.slots,
+      players: this.players.map((player) => {
+        const { id, name, ready } = player
+        return {
+          id,
+          name,
+          ready,
         }
-      ]
+      })
     })
   }
 
   join(player: Player)
   {
-    this.player2 = player
+    this.players.push(player)
 
     // Join the socket room
     player.socket.join(this.id)
 
     // Inform the new player about the room
     player.socket.emit("room-joined", {
-      playerID: player.id,
-      roomID: this.id,
-      players: [
-        {
-          id: this.player1?.id,
-          name: "",
-          local: false,
-          host: true,
-        },
-        {
-          id: player.id,
-          name: "",
-          local: true,
-          host: false,
+      id: this.id,
+      host: this.host,
+      slots: this.slots,
+      players: this.players.map((player) => {
+        const { id, name, ready } = player
+        return {
+          id,
+          name,
+          ready,
         }
-      ],
+      })
     })
 
     // Inform all other players in the room about the new player
-    this.player1?.socket.to(this.id).emit("room-player-joined", {
-      playerID: player.id
+    player.socket.to(this.id).emit("room-player-joined", {
+      id: player.id,
+      name: player.name,
+      ready: false,
     })
   }
 
   toggleReady(player: Player)
   {
-    // TODO toggle the given players Ready flag and broadcast to all players
-    let ready = false
+    // console.log(`Broadcast ready state change ${this.id}, ${player.id}, ${player.ready}`)
 
-    io.to(this.id).emit("ready-status-changed", {
-      playerID: player.id,
-      ready,
+    // Broadcast to all players (including the one that made the request)
+    io.to(this.id).emit("player-ready-status-changed", {
+      id: player.id,
+      ready: player.ready,
     })
   }
 
   leave(player: Player)
   {
-    // Remove the player from the Socket room as they don't need the broadcasts
+    // Remove the player from the socket room
     player.socket.leave(this.id)
 
-    if (player === this.player1)
+    if (this.host === player.id)
     {
-      // Host left!
-      // io.to(this.id).emit("room-host-left", {
-      //   playerID: player.id
-      // })
-      this.player1 = undefined
+      console.log(`The host has left the room ${this.id}`)
 
-      // If the host left, kick the other player
-      this.player2?.socket?.emit("room-kicked", {})
+      // Remove the host from the player list, so they don't get kicked
+      const index = this.players.findIndex((p) => p.id === player.id)
+      this.players.splice(index, 1)
+
+      // If the host left, kick the other players
+      this.players.forEach((player) => {
+        if (player instanceof Player)
+        {
+          player.socket.emit("room-player-kicked")
+        }
+      })
+
+      // Remove all players from the room
+      this.players = []
     }
     else
     {
-      // Other player left
+      console.log(`A player has left the room ${this.id}`)
+      // Other player left, breadcast to everyone
       io.to(this.id).emit("room-player-left", {
-        playerID: player.id
+        id: player.id
       })
-      this.player2 = undefined
     }
   }
 
   empty()
   {
-    return !!this.player1 && !!this.player2
+    return this.players.length === 0
   }
 }
-
 
 const players: Player[] = []
 const rooms: Room[] = []
 
 // Socket IO
-io.on("connection", (socket: Socket) => {
+io.on("connection", (socket) => {
   // Initialize a new Player on a new connection
   const player = new Player(socket)
 
-  socket.on("connect_error", () => {
-    console.log("connection error")
-  })
+  // socket.on("connect_error", () => {
+  //   console.log("connection error")
+  // })
 
   // Clean up the player on disconnection
   socket.on("disconnect", () => {
@@ -391,13 +289,17 @@ io.on("connection", (socket: Socket) => {
     // Find the room the player is in (if any)
     if (player.room)
     {
-      const room = rooms.find((room) => room.id === player.room?.id) as Room
-      room.leave(player)
+      const room = rooms.find((room) => room.id === player.room?.id)
 
-      if (room.empty())
+      if (room)
       {
-        const roomIndex = rooms.indexOf(room)
-        rooms.splice(roomIndex, 1)
+        room.leave(player)
+
+        if (room.empty())
+        {
+          const roomIndex = rooms.indexOf(room)
+          rooms.splice(roomIndex, 1)
+        }
       }
 
       player.room = undefined
