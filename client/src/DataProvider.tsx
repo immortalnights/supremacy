@@ -45,6 +45,19 @@ const handleRoomPlayerJoined: TransactionHandler = (player: IPlayer, { get, set 
   }
 }
 
+const handleRoomPlayerLeft: TransactionHandler = ({ id }: { id: string }, { get, set }) => {
+  const room = get(Room) as IRoom
+
+  const index = room.players.findIndex((p) => p.id === id)
+  if (index !== -1)
+  {
+    const players = [ ...room.players ]
+    players.splice(index, 1)
+    set(Room, { ...room, players })
+  }
+
+}
+
 const handleReadyStateChanged: TransactionHandler = ({ id, ready }: { id: string, ready: boolean }, { get, set }) => {
   const room = get(Room) as IRoom
   const player = get(Player)
@@ -72,12 +85,14 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "room-joined": handleRoomJoined,
   "room-player-kicked": handleRoomKickPlayer,
   "room-player-joined": handleRoomPlayerJoined,
+  "room-player-left": handleRoomPlayerLeft,
   "player-ready-status-changed": handleReadyStateChanged,
 }
 
 
 // Binds the Socket and Recoil data together using RecoilTransaction
 const DataProvider = ({ children }: { children: JSX.Element }) => {
+  console.log("Render DataProvider")
   const SocketToRecoil = () => {
     const handleMessage = Recoil.useRecoilTransaction_UNSTABLE((callback) => (action: string, data: any = {}) => {
       console.log("received", action, data)

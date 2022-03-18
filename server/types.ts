@@ -17,10 +17,10 @@ export interface IPlayer {
 
 // Messages from the client to the Server
 export interface ClientToServerEvents {
-  // Player creates a new room (new game)
-  "room-create": () => void
-  // Player joins an existing room
-  "room-join": (id: string) => void
+  // Player creates a new room (new game), callback if room cannot be created
+  "room-create": (callback: (ok: boolean) => void) => void
+  // Player joins an existing room, callback if room cannot be joined
+  "room-join": (id: string, callback: (ok: boolean) => void) => void
   // Player leaves
   "room-leave": () => void
   "room-set-options": () => void

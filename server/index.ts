@@ -64,28 +64,36 @@ class Player implements IPlayer {
 
     socket.emit("registered", { id: this.id })
 
-    socket.on("room-create", () => {
+    socket.on("room-create", (callback) => {
       if (this.room)
       {
         // Already in a room, cannot create another
         // can sometimes be received on reload/hot reload
         console.log("player already in a room")
+        this.room.sendRoomDetailsTo(this)
+        callback(true)
       }
       else
       {
         const room = createRoom(this)
         console.log("player created room", room.id)
         this.room = room
+        callback(true)
       }
     })
 
-    socket.on("room-join", (id: string) => {
+    socket.on("room-join", (id: string, callback) => {
       console.log("player", this.id, "attempting to join room", id)
       const room = rooms.find((room) => room.id === id)
-      if (room)
+      if (room && room.players.length < room.slots)
       {
         room.join(this)
         this.room = room
+        callback(true)
+      }
+      else
+      {
+        callback(false)
       }
     })
 
@@ -109,15 +117,18 @@ class Player implements IPlayer {
       if (this.room)
       {
         this.room.leave(this)
+
+        // Clean up the room if no one is left in it
+        if (this.room.empty())
+        {
+          const index = rooms.indexOf(this.room)
+          const removed = rooms.splice(index, 1)[0]
+          console.info(`Room ${removed.id} deleted`)
+        }
+
         this.room = undefined
       }
     })
-
-    // socket.on("room-close", () => {
-    //   socket.to(this.roomID).emit("room-closed")
-    //   socket.leave(this.roomID)
-    //   this.roomID = ""
-    // })
   }
 }
 
@@ -171,20 +182,7 @@ class Room implements IRoom {
     // Join the socket room
     player.socket.join(this.id)
 
-    // Inform the player about the room
-    player.socket.emit("room-joined", {
-      id: this.id,
-      host: this.host,
-      slots: this.slots,
-      players: this.players.map((player) => {
-        const { id, name, ready } = player
-        return {
-          id,
-          name,
-          ready,
-        }
-      })
-    })
+    this.sendRoomDetailsTo(player)
   }
 
   join(player: Player)
@@ -195,19 +193,7 @@ class Room implements IRoom {
     player.socket.join(this.id)
 
     // Inform the new player about the room
-    player.socket.emit("room-joined", {
-      id: this.id,
-      host: this.host,
-      slots: this.slots,
-      players: this.players.map((player) => {
-        const { id, name, ready } = player
-        return {
-          id,
-          name,
-          ready,
-        }
-      })
-    })
+    this.sendRoomDetailsTo(player)
 
     // Inform all other players in the room about the new player
     player.socket.to(this.id).emit("room-player-joined", {
@@ -215,6 +201,27 @@ class Room implements IRoom {
       name: player.name,
       ready: false,
     })
+  }
+
+  sendRoomDetailsTo(to: Player)
+  {
+    // Optional delay to verify UI
+    setTimeout(() => {
+      // Inform the player about the room
+      to.socket.emit("room-joined", {
+        id: this.id,
+        host: this.host,
+        slots: this.slots,
+        players: this.players.map((player) => {
+          const { id, name, ready } = player
+          return {
+            id,
+            name,
+            ready,
+          }
+        })
+      })
+    }, 1000)
   }
 
   toggleReady(player: Player)
@@ -255,7 +262,11 @@ class Room implements IRoom {
     else
     {
       console.log(`A player has left the room ${this.id}`)
-      // Other player left, breadcast to everyone
+
+      const index = this.players.findIndex((p) => p.id === player.id)
+      this.players.splice(index, 1)
+
+      // Other player left, broadcast to everyone
       io.to(this.id).emit("room-player-left", {
         id: player.id
       })
@@ -313,6 +324,14 @@ io.on("connection", (socket) => {
 
 
 simulate();
+
+setInterval(() => {
+  console.log(`${players.length} players connected, ${rooms.length} rooms`)
+
+  rooms.forEach((room) => {
+    console.log(`  Room ${room.id} has ${room.players.length} players`)
+  })
+}, 5000)
 
 let port = 3010
 server.listen(port, () => {

@@ -1,7 +1,9 @@
 import React from "react"
-import { useNavigate } from "react-router"
+import Recoil from "recoil"
 import { io, Socket } from "socket.io-client"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
+import { useNavigate } from "react-router-dom"
+import { Room } from "../data/Room"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
@@ -11,9 +13,9 @@ export type Status = "disconnected" | "connecting" | "connected"
 
 // Context interface
 export interface IIOContext {
-  status: Status
-  createRoom: () => void
-  joinRoom: (id: string) => void
+  connected: () => boolean
+  createRoom: () => Promise<void>
+  joinRoom: (id: string) => Promise<void>
   leaveRoom: () => void
   playerToggleReady: () => void
   createGame: () => void
@@ -21,9 +23,9 @@ export interface IIOContext {
 
 // Connection Context
 export const IOContext = React.createContext<IIOContext>({
-  status: "disconnected",
-  createRoom: () => {},
-  joinRoom: () => {},
+  connected: () => false,
+  createRoom: () => Promise.reject(),
+  joinRoom: () => Promise.reject(),
   leaveRoom: () => {},
   playerToggleReady: () => {},
   createGame: () => {},
@@ -33,11 +35,10 @@ export type MessageHandler = (action: string, data: any) => void
 
 // Context Provider
 const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: JSX.Element }) => {
-  const [ status, setStatus ] = React.useState<Status>("disconnected")
   const [ socket, setSocket ] = React.useState<SocketIO>(undefined)
   const navigate = useNavigate()
 
-  console.log("provider has changed", !!socket)
+  console.log("Render IOProvider")
 
   React.useEffect(() => {
     console.log("Creating Socket.IO")
@@ -47,15 +48,15 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
     socket.on("connect_error", (err) => {
       console.log("connection error", err)
-      setStatus("disconnected")
+      setSocket(undefined)
     })
     socket.on("connect", () => {
-      console.log("client connected")
-      setStatus("connected")
+      console.log("client connected", socket.id)
+      setSocket(socket)
     })
     socket.on("disconnect", () => {
       console.log("client disconnected")
-      setStatus("disconnected")
+      setSocket(undefined)
       handleMessage("disconnect", {})
       navigate("/")
     })
@@ -67,40 +68,69 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     socket.on("room-player-kicked", () => handleMessage("room-player-kicked", {}))
     socket.on("player-ready-status-changed", (data) => handleMessage("player-ready-status-changed", data))
 
-    setSocket(socket)
+    console.log("Init socket", socket.id)
     return () => {
       console.log("Clean up IOProvider")
       socket.disconnect()
       setSocket(undefined)
-      setStatus("disconnected")
       handleMessage("disconnect", {})
       navigate("/")
     }
-  }, [])
+  }, [ handleMessage, setSocket ])
 
   const contextValue = {
-    status,
+    connected: () => !!socket,
     createRoom: () => {
+      console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
-      socket?.emit("room-create")
+      return new Promise<void>((resolve, reject) => {
+        socket?.emit("room-create", (ok: boolean) => {
+          if (ok)
+          {
+            resolve()
+          }
+          else
+          {
+            reject()
+          }
+        })
+      })
     },
     joinRoom: (id: string) => {
+      console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
-      socket?.emit("room-join", id)
+      return new Promise<void>((resolve, reject) => {
+        socket?.emit("room-join", id, (ok: boolean) => {
+          if (ok)
+          {
+            resolve()
+          }
+          else
+          {
+            reject()
+          }
+        })
+      })
     },
     leaveRoom: () => {
+      console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       socket?.emit("room-leave")
+      handleMessage("room-player-kicked", {})
     },
     playerToggleReady: () => {
+      console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       socket?.emit("player-ready-toggle")
     },
     createGame: () => {
+      console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       socket?.emit("create-game", 0)
     },
   }
+
+  console.log("Socket id", socket?.id)
 
   return (
     <IOContext.Provider value={contextValue}>

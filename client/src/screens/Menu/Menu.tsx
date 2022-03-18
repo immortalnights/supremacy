@@ -13,7 +13,6 @@ import QuitGame from "../Quit/Quit"
 import { AGame } from "../../data/Game"
 
 const Menu = () => {
-  const game = Recoil.useRecoilValue(AGame)
   const currentGameId = useLocalStorageValue("game")
   const navigate = useNavigate()
 
@@ -21,31 +20,21 @@ const Menu = () => {
     navigate(`/setup/${currentGameId}`)
   }
 
+  const handleJoinGameClick = () => {
+    navigate("/browse/")
+  }
+
   const handleNewGameClick = () => {
     navigate("/setup")
   }
 
-  const handleHostGameClick = () => {
-    navigate("/setup/?multiplayer=true")
-  }
-
-  let content
-  if (game && game.id)
-  {
-    content = (<QuitGame />)
-  }
-  else
-  {
-    content = (
-      <Stack>
-        <Button onClick={handleContinueClick} disabled={!(currentGameId)}>Continue</Button>
-        <Button onClick={handleNewGameClick}>New Game</Button>
-        {/* <Button onClick={handleHostGameClick}>Host Game</Button> */}
-      </Stack>
-    )
-  }
-
-  return content
+  return (
+    <Stack>
+      <Button onClick={handleContinueClick} disabled={true}>Continue</Button>
+      <Button onClick={handleNewGameClick}>New Game</Button>
+      <Button onClick={handleJoinGameClick}>Join Game</Button>
+    </Stack>
+  )
 }
 
 export default Menu
