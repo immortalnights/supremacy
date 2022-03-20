@@ -1,7 +1,7 @@
 import React from "react"
 import Recoil, { TransactionInterface_UNSTABLE } from "recoil"
 import IOProvider from "./data/IOContext"
-import { IPlayer, IRoom, IRoomDetails } from "./types.d"
+import { IPlayer, IRoom, IRoomOptions, RoomStatus } from "./types.d"
 import { Player } from "./data/Player"
 import { Room } from "./data/Room"
 
@@ -12,10 +12,8 @@ const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInter
 
 type TransactionHandler = (data: any, callback: TransactionInterface_UNSTABLE) => void
 
-const handleRoomJoined: TransactionHandler = (data: IRoomDetails, { get, set }) => {
+const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
   const player = get(Player)
-
-  const isHost = player.id === data.host
 
   set(Player, { ...player, ready: false })
 
@@ -23,10 +21,10 @@ const handleRoomJoined: TransactionHandler = (data: IRoomDetails, { get, set }) 
   set(Room, {
     id: data.id,
     host: data.host,
-    options: {},
+    options: { ...data.options },
     slots: data.slots,
     players: data.players,
-    status: "pending",
+    status: data.status,
   })
 }
 
@@ -55,7 +53,13 @@ const handleRoomPlayerLeft: TransactionHandler = ({ id }: { id: string }, { get,
     players.splice(index, 1)
     set(Room, { ...room, players })
   }
+}
 
+const handleRoomUpdate: TransactionHandler = ({ id, status, options }: { id: string, status: RoomStatus, options: IRoomOptions }, { get, set }) => {
+  const room = get(Room) as IRoom
+  console.assert(room.id === id, "Current room does not match ID of received update")
+  // replace options with new options
+  set(Room, { ...room, status, options })
 }
 
 const handleReadyStateChanged: TransactionHandler = ({ id, ready }: { id: string, ready: boolean }, { get, set }) => {
@@ -86,6 +90,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "room-player-kicked": handleRoomKickPlayer,
   "room-player-joined": handleRoomPlayerJoined,
   "room-player-left": handleRoomPlayerLeft,
+  "room-update": handleRoomUpdate,
   "player-ready-status-changed": handleReadyStateChanged,
 }
 

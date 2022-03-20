@@ -1,6 +1,6 @@
 
 const Browse = () => {
-  return ("Display current games here")
+  return (<p>Display current games here...</p>)
 }
 
 export default Browse

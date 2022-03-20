@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { IRoom } from "../types.d"
+import { IRoom, RoomStatus } from "../types.d"
 
 export type { IRoom }
 

@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { useNavigate, useParams, Link as RouterLink } from "react-router-dom"
+import { useNavigate, useParams, Link as RouterLink, Navigate } from "react-router-dom"
 import {
   Box,
   Button,
@@ -10,15 +10,43 @@ import {
   TextField,
   CardContent,
   CardActions,
-  Stack
+  Stack,
+  CircularProgress,
+  CircularProgressProps,
 } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
-import { IRoom, Room as RoomData } from "../../data/Room"
+import { Room as RoomData, IRoom } from "../../data/Room"
+import { RoomStatus } from "../../types"
 import { Player as PlayerData, IClientPlayer } from "../../data/Player"
 
-const randomSeedString = (length: number) => {
-  return (Math.random() + 1).toString(36).substring(length);
+function CircularProgressWithLabel(
+  props: CircularProgressProps & { value: number },
+) {
+  return (
+    <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+      <CircularProgress variant="determinate" {...props} />
+      <Box
+        sx={{
+          top: 0,
+          left: 0,
+          bottom: 0,
+          right: 0,
+          position: 'absolute',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Typography
+          variant="caption"
+          component="div"
+          color="text.secondary"
+        >{`${Math.round(props.value / 10)}`}</Typography>
+      </Box>
+    </Box>
+  );
 }
+
 
 const Slot = ({ index, id, name, ready }: { index: number, id: string, name: string, ready: boolean }) => {
   // console.log(index, id, name)
@@ -61,24 +89,55 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
   )
 }
 
-const Room = ({ data }: { data: IRoom }) => {
-  const [ seed, setSeed ] = React.useState(randomSeedString(7))
+const ReadyStatus = ({ status, countdown }: { status: RoomStatus, countdown: number }) => {
   const localPlayer = Recoil.useRecoilValue(PlayerData)
   const { playerToggleReady } = React.useContext(IOContext)
-  const navigate = useNavigate()
-
-  const handleChangeSeed = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSeed(event.target.value)
-  }
 
   const handleReadyClick = () => {
     playerToggleReady()
   }
 
-  const handleLeaveRoomClick = () => {
-    // Don't need to send the leave message as the "deconstruction" for
-    // the current screen will do so.
-    navigate("/")
+  let content
+  switch (status)
+  {
+    case RoomStatus.Setup:
+    {
+      content = (
+        <Button size="large" variant="contained" color={localPlayer.ready ? "error" : "success"} onClick={handleReadyClick}>{localPlayer.ready ? "Not Ready" : "Ready"}</Button>
+      )
+      break
+    }
+    case RoomStatus.Starting:
+    {
+      content = (
+        <CircularProgressWithLabel variant="determinate" value={(10 * countdown)} />
+      )
+      break
+    }
+    case RoomStatus.Playing:
+    {
+      content = (<Navigate to="/game/123" replace />)
+      break
+    }
+    default:
+    {
+      // Other status should not be handled here
+      content = (<>Error</>)
+      break
+    }
+  }
+
+  return content
+}
+
+const Room = ({ data }: { data: IRoom }) => {
+  const [ seed, setSeed ] = React.useState(data.options.seed)
+  const localPlayer = Recoil.useRecoilValue(PlayerData)
+  // const { playerToggleReady } = React.useContext(IOContext)
+  // const navigate = useNavigate()
+
+  const handleChangeSeed = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSeed(event.target.value)
   }
 
   const isHost = data.host === localPlayer.id
@@ -118,7 +177,7 @@ const Room = ({ data }: { data: IRoom }) => {
           {slots}
         </Stack>
         <Stack alignContent="center" alignItems="center" justifyContent="center" spacing={2}>
-          <Button size="large" variant="contained" color={localPlayer.ready ? "error" : "success"} onClick={handleReadyClick}>{localPlayer.ready ? "Not Ready" : "Ready"}</Button>
+          <ReadyStatus status={data.status} countdown={data.options.countdown} />
           <Link to="/" component={RouterLink}>Leave</Link>
         </Stack>
       </Grid>

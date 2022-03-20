@@ -1,14 +1,9 @@
 import express from "express"
-import crypto from "crypto"
-import { Server, Socket } from "socket.io"
+import { Server } from "socket.io"
 import http from "http"
-import { simulate, createUniverse, findUniverse } from "./simulation/index"
-import { IPlanet } from "./simulation/types"
-import Universe from "./simulation/Universe"
-import Planet from "./simulation/Planet"
-import { ServerToClientEvents, ClientToServerEvents, IPlayer, IRoom } from "./types"
-
-type SocketIO = Socket<ClientToServerEvents, ServerToClientEvents>
+import Player from "./Player"
+import Room, { createRoom } from "./lobby/Room"
+import { ServerToClientEvents, ClientToServerEvents, IPlayer, IRoom, IRoomOptions } from "./types"
 
 const app = express()
 
@@ -36,295 +31,110 @@ router.get("/", (req, res) => {
   })
 })
 
-// TODO tidy up based on https://socket.io/docs/v4/server-application-structure/
-
-const createRoom = (host: Player) => {
-  const room = new Room(host)
-  rooms.push(room)
-  return room
-}
-
-
-class Player implements IPlayer {
-  id: string
-  socket: SocketIO
-  name: string
-  room: Room | undefined
-  ready: boolean
-  gameID: string
-
-  constructor(socket: SocketIO)
-  {
-    this.id = crypto.randomUUID()
-    this.socket = socket
-    this.name = ""
-    this.room = undefined
-    this.ready = false
-    this.gameID = ""
-
-    socket.emit("registered", { id: this.id })
-
-    socket.on("room-create", (callback) => {
-      if (this.room)
-      {
-        // Already in a room, cannot create another
-        // can sometimes be received on reload/hot reload
-        console.log("player already in a room")
-        this.room.sendRoomDetailsTo(this)
-        callback(true)
-      }
-      else
-      {
-        const room = createRoom(this)
-        console.log("player created room", room.id)
-        this.room = room
-        callback(true)
-      }
-    })
-
-    socket.on("room-join", (id: string, callback) => {
-      console.log("player", this.id, "attempting to join room", id)
-      const room = rooms.find((room) => room.id === id)
-      if (room && room.players.length < room.slots)
-      {
-        room.join(this)
-        this.room = room
-        callback(true)
-      }
-      else
-      {
-        callback(false)
-      }
-    })
-
-    socket.on("player-ready-toggle", () => {
-      if (this.room)
-      {
-        console.log(`Toggle player ${this.id} ready status ${this.ready}`)
-
-        this.ready = !this.ready
-
-        this.room.toggleReady(this)
-      }
-      else
-      {
-        console.warn(`Player ${this.id} is not in a room!`)
-      }
-    })
-
-    socket.on("room-leave", () => {
-      console.log(`(room-leave) Player ${this.id} left room ${this.room?.id}`)
-      if (this.room)
-      {
-        this.room.leave(this)
-
-        // Clean up the room if no one is left in it
-        if (this.room.empty())
-        {
-          const index = rooms.indexOf(this.room)
-          const removed = rooms.splice(index, 1)[0]
-          console.info(`Room ${removed.id} deleted`)
-        }
-
-        this.room = undefined
-      }
-    })
-  }
-}
-
-class AIPlayer implements IPlayer {
-  id: string
-  name: string
-  room: Room | undefined
-  ready: boolean
-
-  constructor()
-  {
-    this.id = crypto.randomUUID()
-    this.name = ""
-    this.room = undefined
-    this.ready = true
-  }
-
-  send(message: string, data: object)
-  {
-
-  }
-}
-
-class Room implements IRoom {
-  id: string
-  options: object
-  host: string
-  slots: number
-  players: IPlayer[]
-  game: undefined
-  status: string
-
-  constructor(host: Player)
-  {
-    this.id = crypto.randomUUID()
-    this.options = {}
-    this.host = ""
-    this.slots = 2
-    this.players = []
-    this.game = undefined
-    this.status = "pending"
-
-    this.hostJoined(host)
-  }
-
-  hostJoined(player: Player)
-  {
-    this.host = player.id
-    this.players.push(player)
-
-    // Join the socket room
-    player.socket.join(this.id)
-
-    this.sendRoomDetailsTo(player)
-  }
-
-  join(player: Player)
-  {
-    this.players.push(player)
-
-    // Join the socket room
-    player.socket.join(this.id)
-
-    // Inform the new player about the room
-    this.sendRoomDetailsTo(player)
-
-    // Inform all other players in the room about the new player
-    player.socket.to(this.id).emit("room-player-joined", {
-      id: player.id,
-      name: player.name,
-      ready: false,
-    })
-  }
-
-  sendRoomDetailsTo(to: Player)
-  {
-    // Optional delay to verify UI
-    setTimeout(() => {
-      // Inform the player about the room
-      to.socket.emit("room-joined", {
-        id: this.id,
-        host: this.host,
-        slots: this.slots,
-        players: this.players.map((player) => {
-          const { id, name, ready } = player
-          return {
-            id,
-            name,
-            ready,
-          }
-        })
-      })
-    }, 1000)
-  }
-
-  toggleReady(player: Player)
-  {
-    // console.log(`Broadcast ready state change ${this.id}, ${player.id}, ${player.ready}`)
-
-    // Broadcast to all players (including the one that made the request)
-    io.to(this.id).emit("player-ready-status-changed", {
-      id: player.id,
-      ready: player.ready,
-    })
-  }
-
-  leave(player: Player)
-  {
-    // Remove the player from the socket room
-    player.socket.leave(this.id)
-
-    if (this.host === player.id)
-    {
-      console.log(`The host has left the room ${this.id}`)
-
-      // Remove the host from the player list, so they don't get kicked
-      const index = this.players.findIndex((p) => p.id === player.id)
-      this.players.splice(index, 1)
-
-      // If the host left, kick the other players
-      this.players.forEach((player) => {
-        if (player instanceof Player)
-        {
-          player.socket.emit("room-player-kicked")
-        }
-      })
-
-      // Remove all players from the room
-      this.players = []
-    }
-    else
-    {
-      console.log(`A player has left the room ${this.id}`)
-
-      const index = this.players.findIndex((p) => p.id === player.id)
-      this.players.splice(index, 1)
-
-      // Other player left, broadcast to everyone
-      io.to(this.id).emit("room-player-left", {
-        id: player.id
-      })
-    }
-  }
-
-  empty()
-  {
-    return this.players.length === 0
-  }
-}
+// TODO tidy socket message handling up based on https://socket.io/docs/v4/server-application-structure/
 
 const players: Player[] = []
 const rooms: Room[] = []
 
+const playerCreateRoom = (player: IPlayer) => {
+  const p = player as Player
+  const room = createRoom(io, p)
+
+  room.events.on("room-cleanup", cleanupRoom)
+
+  console.log("Player created room", room.id)
+  // FIXME not good form
+  rooms.push(room)
+  // The event has to use IPlayer (due to circular references)
+  p.room = room
+}
+
+const playerJoinRoom = (player: IPlayer, id: string) => {
+  const room = rooms.find((room) => room.id === id)
+  if (room && room.players.length < room.slots)
+  {
+    const p = player as Player
+    room.join(p)
+    // The event has to use IPlayer (due to circular references)
+    p.room = room
+  }
+}
+
+const cleanupRoom = (id: string) => {
+  const index = rooms.findIndex((room) => room.id === id)
+
+  if (index !== -1)
+  {
+    const room = rooms[index]
+    if (room.empty())
+    {
+      const removed = rooms.splice(index, 1)[0]
+      console.info(`Room ${removed.id} deleted`)
+    }
+
+    room.events.removeAllListeners()
+  }
+}
+
+const removePlayerFromRoom = (player: Player) => {
+  if (player.room)
+  {
+    const room = rooms.find((room) => room.id === player.room?.id)
+
+    if (room)
+    {
+      room.leave(player)
+
+      if (room.empty())
+      {
+        const roomIndex = rooms.indexOf(room)
+        rooms.splice(roomIndex, 1)
+      }
+    }
+    else
+    {
+      console.warn(`Failed to find room ${player.room.id} for player ${player.id}`)
+    }
+
+    player.room = undefined
+  }
+}
+
 // Socket IO
 io.on("connection", (socket) => {
+  console.log("Client connected", socket.id)
   // Initialize a new Player on a new connection
   const player = new Player(socket)
 
-  // socket.on("connect_error", () => {
-  //   console.log("connection error")
-  // })
+  // Listen to Player events
+  player.events.on("player-create-room", playerCreateRoom)
+  player.events.on("player-join-room", playerJoinRoom)
+
+  socket.on("connect_error", () => {
+    console.log("Connection error", socket.id)
+  })
 
   // Clean up the player on disconnection
   socket.on("disconnect", () => {
-    console.log("client disconnected")
-    // clearInterval(timer)
+    console.log("Client disconnected", socket.id)
+    // TODO room the player form any game
+
+    // Remove the player from any room
+    removePlayerFromRoom(player)
+
+    // Remove the player entirely
     const index = players.indexOf(player)
-
-    // Find the room the player is in (if any)
-    if (player.room)
-    {
-      const room = rooms.find((room) => room.id === player.room?.id)
-
-      if (room)
-      {
-        room.leave(player)
-
-        if (room.empty())
-        {
-          const roomIndex = rooms.indexOf(room)
-          rooms.splice(roomIndex, 1)
-        }
-      }
-
-      player.room = undefined
-    }
-
     players.splice(index, 1)
+
+    // Stop listening to the player
+    player.events.removeAllListeners()
   })
 
+  // Remember the player
   players.push(player)
 })
 
-
-simulate();
-
+// debug output
 setInterval(() => {
   console.log(`${players.length} players connected, ${rooms.length} rooms`)
 

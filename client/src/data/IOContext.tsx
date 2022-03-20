@@ -1,9 +1,7 @@
 import React from "react"
-import Recoil from "recoil"
 import { io, Socket } from "socket.io-client"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
-import { useNavigate } from "react-router-dom"
-import { Room } from "../data/Room"
+import { useNavigate, NavigateFunction } from "react-router-dom"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
@@ -61,12 +59,14 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       navigate("/")
     })
 
-    socket.on("registered", (data) => handleMessage("registered", data))
-    socket.on("room-joined", (data) => handleMessage("room-joined", data))
-    socket.on("room-player-joined", (data) => handleMessage("room-player-joined", data))
-    socket.on("room-player-left", (data) => handleMessage("room-player-left", data))
-    socket.on("room-player-kicked", () => handleMessage("room-player-kicked", {}))
-    socket.on("player-ready-status-changed", (data) => handleMessage("player-ready-status-changed", data))
+    // socket.on("registered", (data) => handleMessage("registered", data))
+    // socket.on("room-joined", (data) => handleMessage("room-joined", data))
+    // socket.on("room-player-joined", (data) => handleMessage("room-player-joined", data))
+    // socket.on("room-player-left", (data) => handleMessage("room-player-left", data))
+    // socket.on("room-player-kicked", () => handleMessage("room-player-kicked", {}))
+    // socket.on("room-update", () => handleMessage("room-update", {}))
+    // socket.on("player-ready-status-changed", (data) => handleMessage("player-ready-status-changed", data))
+    socket.onAny(handleMessage)
 
     console.log("Init socket", socket.id)
     return () => {
@@ -126,7 +126,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     createGame: () => {
       console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
-      socket?.emit("create-game", 0)
+      socket?.emit("create-game")
     },
   }
 

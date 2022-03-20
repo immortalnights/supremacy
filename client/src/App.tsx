@@ -18,6 +18,7 @@ import ConnectionStatus from "./lobby/ConnectionStatus"
 import { IOContext } from "./data/IOContext"
 import Menu from "./screens/Menu"
 import Setup from "./screens/Setup"
+import Browse from "./screens/Browse"
 import Room from "./screens/Room"
 import GameRoot from "./screens/Game/Root"
 import "./App.css"
@@ -34,6 +35,7 @@ const Content = () => {
       <Routes>
         <Route index element={<Menu />} />
         <Route path="/setup" element={<Setup />} />
+        <Route path="/browse" element={<Browse />} />
         <Route path="/room/:id" element={<Room />} />
         <Route path="/play/:id/*" element={<GameRoot />} />
         <Route path="*" element={
