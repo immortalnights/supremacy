@@ -1,13 +1,9 @@
 import Recoil from "recoil"
+import { IGame } from "../types.d"
 
-export interface IGame {
-    id: string
-    playerID: string
-    roomID: string
-    lastSaved: string
-}
+export type { IGame }
 
-export const AGame = Recoil.atom<IGame | undefined>({
-    key: 'another_game',
+export const Game = Recoil.atom<IGame | undefined>({
+    key: 'game',
     default: undefined,
 })

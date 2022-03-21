@@ -2,6 +2,7 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { SocketIO, ServerEventEmitter } from "./serverTypes"
 import Room from "./lobby/Room"
+import Game from "./Game"
 import { IPlayer } from "./types"
 
 class Player implements IPlayer {
@@ -9,8 +10,8 @@ class Player implements IPlayer {
   socket: SocketIO
   name: string
   room: Room | undefined
+  game: Game | undefined
   ready: boolean
-  game: string | undefined
   events: ServerEventEmitter
 
   constructor(socket: SocketIO)
@@ -19,64 +20,69 @@ class Player implements IPlayer {
     this.socket = socket
     this.name = ""
     this.room = undefined
-    this.ready = false
     this.game = undefined
+    this.ready = false
     this.events = new EventEmitter() as ServerEventEmitter
 
     socket.emit("registered", { id: this.id })
 
-    // FIXME maybe move room specific events to room handler
-    // stop listening for these when the player is in a game?
-    // listen to room-create / room-join from the server and the rest from within the room class?
+    // bind socket events
+    this.handleReadyToggle = this.handleReadyToggle.bind(this)
+    this.handleLeaveRoom = this.handleLeaveRoom.bind(this)
+    this.handleLeaveGame = this.handleLeaveGame.bind(this)
+  }
 
-    socket.on("room-create", (callback) => {
-      if (this.room)
-      {
-        // Already in a room, cannot create another
-        // can sometimes be received on reload/hot reload
-        console.log("player already in a room")
-        this.room.sendRoomDetailsTo(this)
-        callback(true)
-      }
-      else
-      {
-        this.events.emit("player-create-room", this)
-        callback(!!this.room)
-      }
-    })
+  handleJoinRoom(room: Room)
+  {
+    this.ready = false
+    this.room = room
 
-    socket.on("room-join", (id: string, callback) => {
-      console.log("player", this.id, "attempting to join room", id)
-      // Ensure the players ready state is false
+    this.socket.once("player-ready-toggle", this.handleReadyToggle)
+    this.socket.on("player-leave-room", this.handleLeaveRoom)
+  }
+
+  handleReadyToggle()
+  {
+    console.log(`Toggle player ${this.id} ready status ${this.ready}`)
+
+    this.ready = !this.ready
+
+    console.assert(this.room, `Player ${this.id} is not in a room`)
+    this.room?.onTogglePlayerReady(this)
+  }
+
+  handleLeaveRoom()
+  {
+    console.log(`Player ${this.id} leave room ${this.room?.id}`)
+    if (this.room)
+    {
+      this.room.leave(this)
+      this.room = undefined
       this.ready = false
-      this.events.emit("player-join-room", this, id)
-      callback(!!this.room)
-    })
+    }
 
-    socket.on("player-ready-toggle", () => {
-      if (this.room)
-      {
-        console.log(`Toggle player ${this.id} ready status ${this.ready}`)
+    this.socket.off("player-ready-toggle", this.handleReadyToggle)
+    this.socket.off("player-leave-room", this.handleLeaveRoom)
+  }
 
-        this.ready = !this.ready
+  handleJoinGame(game: Game)
+  {
+    this.game = game
 
-        this.room.toggleReady(this)
-      }
-      else
-      {
-        console.warn(`Player ${this.id} is not in a room!`)
-      }
-    })
+    this.socket.once("player-leave-game", this.handleLeaveGame)
+  }
 
-    socket.on("room-leave", () => {
-      console.log(`(room-leave) Player ${this.id} left room ${this.room?.id}`)
-      if (this.room)
-      {
-        this.room.leave(this)
-        this.room = undefined
-        this.ready = false
-      }
-    })
+  handleLeaveGame()
+  {
+    console.log(`Player ${this.id} leave game ${this.room?.id}`)
+    if (this.game)
+    {
+      this.game.leave(this)
+      this.game = undefined
+      this.ready = false
+    }
+
+    this.socket.off("player-leave-game", this.handleLeaveGame)
   }
 }
 

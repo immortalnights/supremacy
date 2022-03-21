@@ -20,7 +20,7 @@ import Menu from "./screens/Menu"
 import Setup from "./screens/Setup"
 import Browse from "./screens/Browse"
 import Room from "./screens/Room"
-import GameRoot from "./screens/Game/Root"
+import Game from "./screens/Game"
 import "./App.css"
 
 const theme = createTheme()
@@ -37,7 +37,7 @@ const Content = () => {
         <Route path="/setup" element={<Setup />} />
         <Route path="/browse" element={<Browse />} />
         <Route path="/room/:id" element={<Room />} />
-        <Route path="/play/:id/*" element={<GameRoot />} />
+        <Route path="/game/:id/*" element={<Game />} />
         <Route path="*" element={
           <div>404</div>
         } />

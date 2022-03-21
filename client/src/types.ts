@@ -4,7 +4,13 @@ import * as SimulationTypes from "./simulation/types.d"
 export enum RoomStatus {
   Setup,
   Starting,
+  Closed,
+}
+
+export enum GameStatus {
+  Starting,
   Playing,
-  Complete,
+  Finished,
+  Paused,
   Closed,
 }

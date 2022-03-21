@@ -2,8 +2,9 @@ import express from "express"
 import { Server } from "socket.io"
 import http from "http"
 import Player from "./Player"
-import Room, { createRoom } from "./lobby/Room"
-import { ServerToClientEvents, ClientToServerEvents, IPlayer, IRoom, IRoomOptions } from "./types"
+import Room from "./lobby/Room"
+import Game from "./Game"
+import { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
 
 const app = express()
 
@@ -35,30 +36,7 @@ router.get("/", (req, res) => {
 
 const players: Player[] = []
 const rooms: Room[] = []
-
-const playerCreateRoom = (player: IPlayer) => {
-  const p = player as Player
-  const room = createRoom(io, p)
-
-  room.events.on("room-cleanup", cleanupRoom)
-
-  console.log("Player created room", room.id)
-  // FIXME not good form
-  rooms.push(room)
-  // The event has to use IPlayer (due to circular references)
-  p.room = room
-}
-
-const playerJoinRoom = (player: IPlayer, id: string) => {
-  const room = rooms.find((room) => room.id === id)
-  if (room && room.players.length < room.slots)
-  {
-    const p = player as Player
-    room.join(p)
-    // The event has to use IPlayer (due to circular references)
-    p.room = room
-  }
-}
+const games: Game[] = []
 
 const cleanupRoom = (id: string) => {
   const index = rooms.findIndex((room) => room.id === id)
@@ -68,11 +46,11 @@ const cleanupRoom = (id: string) => {
     const room = rooms[index]
     if (room.empty())
     {
+      room.events.removeAllListeners()
+
       const removed = rooms.splice(index, 1)[0]
       console.info(`Room ${removed.id} deleted`)
     }
-
-    room.events.removeAllListeners()
   }
 }
 
@@ -84,12 +62,6 @@ const removePlayerFromRoom = (player: Player) => {
     if (room)
     {
       room.leave(player)
-
-      if (room.empty())
-      {
-        const roomIndex = rooms.indexOf(room)
-        rooms.splice(roomIndex, 1)
-      }
     }
     else
     {
@@ -100,6 +72,27 @@ const removePlayerFromRoom = (player: Player) => {
   }
 }
 
+const handleCreateGame = (options: IGameOptions, players: Player[]) => {
+  console.log(`Creating new game for ${players.map((p) => p.id).join(", ")}`)
+  const game = new Game(io, options, players)
+
+  games.push(game)
+
+  // Notify the players of the game, so they can join it
+  players.forEach((player) => {
+    console.log(`Notify ${player.id} of new game`)
+    player.socket.emit("game-created", {
+      id: game.id,
+      players: game.allocatedPlayers.map((p) => ({
+        id: player.id,
+        name: player.name,
+        ready: player.ready,
+      })),
+      status: game.status,
+    })
+  })
+}
+
 // Socket IO
 io.on("connection", (socket) => {
   console.log("Client connected", socket.id)
@@ -107,8 +100,63 @@ io.on("connection", (socket) => {
   const player = new Player(socket)
 
   // Listen to Player events
-  player.events.on("player-create-room", playerCreateRoom)
-  player.events.on("player-join-room", playerJoinRoom)
+  // player.events.on("player-create-room", playerCreateRoom)
+  // player.events.on("player-join-room", playerJoinRoom)
+
+  socket.on("player-create-room", (callback) => {
+    if (player.room)
+    {
+      // Already in a room, cannot create another
+      // can sometimes be received on reload/hot reload
+      console.log(`Player ${player.id} already in a room ${player.room.id}`)
+      player.room.sendRoomDetailsTo(player)
+    }
+    else
+    {
+      const room = new Room(io, player)
+
+      room.events.once("room-cleanup", cleanupRoom)
+      room.events.once("create-game", handleCreateGame)
+
+      console.log(`Player ${player.id} created room ${room.id}`)
+
+      rooms.push(room)
+
+      player.handleJoinRoom(room)
+    }
+
+    callback(!!player.room)
+  })
+
+  socket.on("player-join-room", (id, callback) => {
+    console.log(`Player ${player.id} attempting to join room ${id}`)
+
+    const room = rooms.find((room) => room.id === id)
+    if (room && room.players.length < room.slots)
+    {
+      room.join(player)
+      player.handleJoinRoom(room)
+    }
+
+    callback(!!player.room)
+  })
+
+  socket.on("player-join-game", (id, callback) => {
+    console.log(`Player ${player.id} attempting to join game ${id}`)
+
+    const game = games.find((game) => game.id === id)
+    if (game && game.canJoin(player))
+    {
+      game.join(player)
+      player.handleJoinGame(game)
+    }
+    else
+    {
+      console.warn(`Player ${player.id} cannot join game ${game?.id}`)
+    }
+
+    callback(!!player.game)
+  })
 
   socket.on("connect_error", () => {
     console.log("Connection error", socket.id)
@@ -136,11 +184,16 @@ io.on("connection", (socket) => {
 
 // debug output
 setInterval(() => {
-  console.log(`${players.length} players connected, ${rooms.length} rooms`)
+  console.log(`${players.length} players connected, ${rooms.length} rooms, ${games.length} games`)
 
   rooms.forEach((room) => {
     console.log(`  Room ${room.id} has ${room.players.length} players`)
   })
+
+  games.forEach((game) => {
+    console.log(`  Game ${game.id} has ${game.allocatedPlayers.length} players (${game.players.length} ready)`)
+  })
+
 }, 5000)
 
 let port = 3010

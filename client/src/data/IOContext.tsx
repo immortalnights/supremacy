@@ -1,7 +1,7 @@
 import React from "react"
 import { io, Socket } from "socket.io-client"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
-import { useNavigate, NavigateFunction } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
@@ -15,8 +15,9 @@ export interface IIOContext {
   createRoom: () => Promise<void>
   joinRoom: (id: string) => Promise<void>
   leaveRoom: () => void
-  playerToggleReady: () => void
-  createGame: () => void
+  playerToggleReady: () => void,
+  joinGame: (id: string) => Promise<void>
+  leaveGame: () => void,
 }
 
 // Connection Context
@@ -26,7 +27,8 @@ export const IOContext = React.createContext<IIOContext>({
   joinRoom: () => Promise.reject(),
   leaveRoom: () => {},
   playerToggleReady: () => {},
-  createGame: () => {},
+  joinGame: () => Promise.reject(),
+  leaveGame: () => {},
 })
 
 export type MessageHandler = (action: string, data: any) => void
@@ -68,6 +70,11 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     // socket.on("player-ready-status-changed", (data) => handleMessage("player-ready-status-changed", data))
     socket.onAny(handleMessage)
 
+    socket.on("game-created", ({ id }) => {
+      // console.log(`Received game-created for ${id}`)
+      navigate(`/game/${id}`)
+    })
+
     console.log("Init socket", socket.id)
     return () => {
       console.log("Clean up IOProvider")
@@ -81,10 +88,10 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
   const contextValue = {
     connected: () => !!socket,
     createRoom: () => {
-      console.log("Socket id", socket?.id)
+      // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       return new Promise<void>((resolve, reject) => {
-        socket?.emit("room-create", (ok: boolean) => {
+        socket?.emit("player-create-room", (ok: boolean) => {
           if (ok)
           {
             resolve()
@@ -97,10 +104,10 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       })
     },
     joinRoom: (id: string) => {
-      console.log("Socket id", socket?.id)
+      // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       return new Promise<void>((resolve, reject) => {
-        socket?.emit("room-join", id, (ok: boolean) => {
+        socket?.emit("player-join-room", id, (ok: boolean) => {
           if (ok)
           {
             resolve()
@@ -113,20 +120,37 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       })
     },
     leaveRoom: () => {
-      console.log("Socket id", socket?.id)
+      // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
-      socket?.emit("room-leave")
+      socket?.emit("player-leave-room")
       handleMessage("room-player-kicked", {})
     },
     playerToggleReady: () => {
-      console.log("Socket id", socket?.id)
+      // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
       socket?.emit("player-ready-toggle")
     },
-    createGame: () => {
-      console.log("Socket id", socket?.id)
+    joinGame: (id: string) => {
+      // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")
-      socket?.emit("create-game")
+      return new Promise<void>((resolve, reject) => {
+        socket?.emit("player-join-game", id, (ok: boolean) => {
+          if (ok)
+          {
+            resolve()
+          }
+          else
+          {
+            reject()
+          }
+        })
+      })
+    },
+    leaveGame: () => {
+      // console.log("Socket id", socket?.id)
+      console.assert(socket, "Socket is invalid!")
+      socket?.emit("player-leave-game")
+      handleMessage("game-player-kicked", {})
     },
   }
 

@@ -1,7 +1,7 @@
 import React from "react"
 import Recoil from "recoil"
 import { BrowserRouter, Routes, Route, Navigate, Link as RouterLink } from "react-router-dom"
-import { AGame } from "../../data/Game"
+import { Game as GameData } from "../../data/Game"
 import { Box, Link, Button, Grid } from "@mui/material"
 import { useLocalStorageValue } from "../../data/localStorage"
 // import SolarSystem from "./solarsystem"
@@ -51,7 +51,7 @@ const Game = () => {
 }
 
 const GameRoot = () => {
-  const game = Recoil.useRecoilValue(AGame)
+  const game = Recoil.useRecoilValue(GameData)
 
   let content
 

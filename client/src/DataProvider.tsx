@@ -1,9 +1,10 @@
 import React from "react"
 import Recoil, { TransactionInterface_UNSTABLE } from "recoil"
 import IOProvider from "./data/IOContext"
-import { IPlayer, IRoom, IRoomOptions, RoomStatus } from "./types.d"
+import { IPlayer, IRoom, RoomStatus, IGameOptions, IGame, GameStatus } from "./types.d"
 import { Player } from "./data/Player"
 import { Room } from "./data/Room"
+import { Game } from "./data/Game"
 
 const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInterface_UNSTABLE) => {
   const player = { ...get(Player), id, }
@@ -18,19 +19,12 @@ const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
   set(Player, { ...player, ready: false })
 
   // Set the room data
-  set(Room, {
-    id: data.id,
-    host: data.host,
-    options: { ...data.options },
-    slots: data.slots,
-    players: data.players,
-    status: data.status,
-  })
+  set(Room, data)
 }
 
-const handleRoomKickPlayer: TransactionHandler = (data, { get, set }) => {
+const handleRoomKickPlayer: TransactionHandler = (data, { reset }) => {
   // Player has been kicked, push them back to the main menu
-  set(Room, undefined)
+  reset(Room)
 }
 
 const handleRoomPlayerJoined: TransactionHandler = (player: IPlayer, { get, set }) => {
@@ -55,11 +49,21 @@ const handleRoomPlayerLeft: TransactionHandler = ({ id }: { id: string }, { get,
   }
 }
 
-const handleRoomUpdate: TransactionHandler = ({ id, status, options }: { id: string, status: RoomStatus, options: IRoomOptions }, { get, set }) => {
+interface RoomUpdateArgs { id: string, status: RoomStatus, countdown: number, options: IGameOptions }
+
+const handleRoomUpdate: TransactionHandler = ({ id, status, countdown, options }: RoomUpdateArgs, { get, set }) => {
   const room = get(Room) as IRoom
-  console.assert(room.id === id, "Current room does not match ID of received update")
-  // replace options with new options
-  set(Room, { ...room, status, options })
+
+  if (room)
+  {
+    // replace options with new options
+    console.assert(room.id === id, "Current room does not match ID of received update")
+    set(Room, { ...room, status, countdown, options })
+  }
+  else
+  {
+    console.warn("Received room update when no longer in a room")
+  }
 }
 
 const handleReadyStateChanged: TransactionHandler = ({ id, ready }: { id: string, ready: boolean }, { get, set }) => {
@@ -80,6 +84,35 @@ const handleReadyStateChanged: TransactionHandler = ({ id, ready }: { id: string
   }
 }
 
+const handleGameCreated: TransactionHandler = (data: IGame, { get, set }) => {
+  // The create game message is handle in a specific handler
+  // and triggers a navigate to the game screen, where the
+  // the game data is received once the player has joined the
+  // game.
+}
+
+const handleGameJoined: TransactionHandler = (data: IGame, { get, set }) => {
+  const player = get(Player)
+
+  set(Player, { ...player, ready: false })
+
+  set(Game, data)
+}
+
+const handleGamePlayerJoined: TransactionHandler = (player: IPlayer, { get, set }) => {
+  const game = get(Game) as IGame
+
+  const existingPlayer = game.players.find((p) => p.id === player.id)
+  if (!existingPlayer)
+  {
+    set(Game, { ...game, players: [ ...game.players, player ] })
+  }
+}
+
+const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
+  reset(Game)
+}
+
 interface IMessageHandlerMap {
   [key: string]: TransactionHandler
 }
@@ -92,6 +125,10 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "room-player-left": handleRoomPlayerLeft,
   "room-update": handleRoomUpdate,
   "player-ready-status-changed": handleReadyStateChanged,
+  "game-created": handleGameCreated,
+  "game-joined": handleGameJoined,
+  "game-player-joined": handleGamePlayerJoined,
+  "game-player-kicked": handleGamePlayerKicked,
 }
 
 
@@ -107,6 +144,7 @@ const DataProvider = ({ children }: { children: JSX.Element }) => {
         console.log("Disconnected!")
         callback.reset(Player)
         callback.reset(Room)
+        callback.reset(Game)
       }
       else if (MessageHandlerMap[action])
       {

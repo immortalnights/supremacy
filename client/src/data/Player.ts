@@ -1,6 +1,8 @@
 import Recoil from "recoil"
 import { IPlayer } from "../types.d"
 
+export type { IPlayer }
+
 export interface IClientPlayer extends IPlayer {
   // Is _this_ client this player
   local: boolean

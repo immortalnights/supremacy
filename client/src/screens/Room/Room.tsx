@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { useNavigate, useParams, Link as RouterLink, Navigate } from "react-router-dom"
+import { useNavigate, useParams, Link as RouterLink } from "react-router-dom"
 import {
   Box,
   Button,
@@ -17,11 +17,9 @@ import {
 import { IOContext } from "../../data/IOContext"
 import { Room as RoomData, IRoom } from "../../data/Room"
 import { RoomStatus } from "../../types"
-import { Player as PlayerData, IClientPlayer } from "../../data/Player"
+import { Player as PlayerData } from "../../data/Player"
 
-function CircularProgressWithLabel(
-  props: CircularProgressProps & { value: number },
-) {
+const CircularProgressWithLabel = (props: CircularProgressProps & { value: number }) => {
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
       <CircularProgress variant="determinate" {...props} />
@@ -44,9 +42,8 @@ function CircularProgressWithLabel(
         >{`${Math.round(props.value / 10)}`}</Typography>
       </Box>
     </Box>
-  );
+  )
 }
-
 
 const Slot = ({ index, id, name, ready }: { index: number, id: string, name: string, ready: boolean }) => {
   // console.log(index, id, name)
@@ -114,11 +111,11 @@ const ReadyStatus = ({ status, countdown }: { status: RoomStatus, countdown: num
       )
       break
     }
-    case RoomStatus.Playing:
-    {
-      content = (<Navigate to="/game/123" replace />)
-      break
-    }
+    // case RoomStatus.Playing:
+    // {
+    //   content = (<Navigate to="/game/123" replace />)
+    //   break
+    // }
     default:
     {
       // Other status should not be handled here
@@ -177,7 +174,7 @@ const Room = ({ data }: { data: IRoom }) => {
           {slots}
         </Stack>
         <Stack alignContent="center" alignItems="center" justifyContent="center" spacing={2}>
-          <ReadyStatus status={data.status} countdown={data.options.countdown} />
+          <ReadyStatus status={data.status} countdown={data.countdown} />
           <Link to="/" component={RouterLink}>Leave</Link>
         </Stack>
       </Grid>
