@@ -5,6 +5,7 @@ import Player from "./Player"
 import Room from "./lobby/Room"
 import Game from "./Game"
 import { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
+import Universe from "./simulation/Universe"
 
 const app = express()
 
@@ -36,7 +37,7 @@ router.get("/", (req, res) => {
 
 const players: Player[] = []
 const rooms: Room[] = []
-const games: Game[] = []
+const games: Game<Universe>[] = []
 
 const cleanupRoom = (id: string) => {
   const index = rooms.findIndex((room) => room.id === id)
@@ -74,7 +75,20 @@ const removePlayerFromRoom = (player: Player) => {
 
 const handleCreateGame = (options: IGameOptions, players: Player[]) => {
   console.log(`Creating new game for ${players.map((p) => p.id).join(", ")}`)
-  const game = new Game(io, options, players)
+  const game = new Game<Universe>(io, options, players, (opts: IGameOptions) => {
+    const u = new Universe()
+    u.generate(0) // (opts.seed)
+
+    // join any AI players
+    players.forEach((player) => {
+      // if (player.isAI)
+      // {
+      //   u.join(player.id, true)
+      // }
+    })
+
+    return u
+  })
 
   games.push(game)
 
@@ -102,6 +116,10 @@ io.on("connection", (socket) => {
   // Listen to Player events
   // player.events.on("player-create-room", playerCreateRoom)
   // player.events.on("player-join-room", playerJoinRoom)
+
+  socket.on("request-rooms", () => {
+    socket.emit("room-list", rooms.map((room) => room.toJSON()))
+  })
 
   socket.on("player-create-room", (callback) => {
     if (player.room)
@@ -149,6 +167,9 @@ io.on("connection", (socket) => {
     {
       game.join(player)
       player.handleJoinGame(game)
+
+      // If the game has all the players, start
+      game.start()
     }
     else
     {
@@ -181,6 +202,13 @@ io.on("connection", (socket) => {
   // Remember the player
   players.push(player)
 })
+
+// simulation
+setInterval(() => {
+  games.forEach((game) => {
+    game.simulate()
+  })
+}, 250)
 
 // debug output
 setInterval(() => {

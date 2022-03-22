@@ -3,7 +3,7 @@ import { IPlayer, IRoom } from "./types"
 class AIPlayer implements IPlayer {
   id: string
   name: string
-  room: IRoom | undefined
+  room?: IRoom
   ready: boolean
 
   constructor()

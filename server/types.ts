@@ -44,6 +44,9 @@ export interface IGame {
 // Messages from the client to the Server
 export interface ClientToServerEvents {
   "connect_error": (...args: any[]) => void
+  // Player requested available rooms
+  // FIXME make this subscribe/unsubscribe and send room details on changes rather than a (client) poller
+  "request-rooms": () => void
   // Player creates a new room (new game), callback if room cannot be created
   "player-create-room": (callback: (ok: boolean) => void) => void
   // Player joins an existing room, callback true if joined otherwise false
@@ -63,6 +66,8 @@ export interface ClientToServerEvents {
 export interface ServerToClientEvents {
   // Send player ID back to newly connected client
   "registered": ({ id }: { id: string }) => void
+  // Send player available rooms
+  "room-list": (data: IRoom[]) => void
   // Send room details to the player that has just joined (or created) a room
   "room-joined": (data: IRoom) => void
   // Send new player details to all players within the room
@@ -83,4 +88,6 @@ export interface ServerToClientEvents {
   "game-player-joined": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
   // Send leavers details to all other players in the game
   "game-player-kicked": ({ id }: { id: string }) => void
+  // Send game update to player
+  "game-update": (data: any) => void
 }

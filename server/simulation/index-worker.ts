@@ -7,9 +7,9 @@ let universe: Universe | null = null
 let simulateTimeout: NodeJS.Timeout | number | undefined
 
 interface IMessage {
-  type: string,
-  changes: IChanges | undefined,
-  data: any,
+  type: string
+  changes?: IChanges
+  data: any
 }
 
 const post = (msg: IMessage) => {

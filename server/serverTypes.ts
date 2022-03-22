@@ -18,3 +18,14 @@ interface ServerToResourceEvents {
 }
 
 export type ServerEventEmitter = TypedEmitter<ServerToResourceEvents>
+
+export interface IConnectedPlayer {
+  id: string
+  socket: SocketIO
+}
+
+export interface IWorld {
+  join: (player: string, ai: boolean) => boolean
+  simulate: (delta: number) => void
+  sendUpdates: (players: IConnectedPlayer[]) => void
+}

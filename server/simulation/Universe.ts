@@ -1,6 +1,8 @@
 import crypto from "crypto"
 import Planet from "./Planet"
-import { IChanges } from "./types"
+import { PlanetType, IPlanetBasic, IPlanet, IChanges, IUpdate } from "./types"
+import { IWorld, IConnectedPlayer } from "../serverTypes"
+
 
 class AI
 {
@@ -12,7 +14,7 @@ class AI
   }
 }
 
-export default class Universe
+export default class Universe implements IWorld
 {
   id: string
   players: string[]
@@ -20,7 +22,7 @@ export default class Universe
   ships: []
   platoons: []
   created: number
-  saved: number | null
+  saved: number
   finished: boolean
   nextShipId: number
   ai: AI | null
@@ -36,7 +38,7 @@ export default class Universe
     this.ships = []
     this.platoons = [],
     this.finished = false
-    this.saved = null
+    this.saved = 0
     this.created = Date.now()
     this.ai = null
   }
@@ -47,6 +49,34 @@ export default class Universe
     {
       this.planets.push(new Planet(i))
     }
+  }
+
+  join(player: string, ai: boolean)
+  {
+    let ok = false
+    if (this.players.length < 2) // Maximum players
+    {
+      this.players.push(player)
+
+      if (ai)
+      {
+        // TODO
+      }
+
+      // Fist player, starts at the top
+      if (this.players.length === 1)
+      {
+        this.planets[0].claim(player, "Starbase!")
+        ok = true
+      }
+      else if (this.players.length === 2)
+      {
+        this.planets[this.planets.length - 1].claim(player, "Starbase!")
+        ok = true
+      }
+    }
+
+    return ok
   }
 
   toJSON()
@@ -66,40 +96,40 @@ export default class Universe
     })
   }
 
-  addAI()
-  {
-    this.ai = new AI()
-    this.join(this.ai.id)
-  }
+  // addAI()
+  // {
+  //   this.ai = new AI()
+  //   this.join(this.ai.id)
+  // }
 
-  inProgress()
-  {
-    return this.players.length === 2
-  }
+  // inProgress()
+  // {
+  //   return this.players.length === 2
+  // }
 
-  join(id: string)
-  {
-    let joined = false
-    if (this.players.length < 2)
-    {
-      this.players.push(id)
-      joined = true
+  // join(id: string)
+  // {
+  //   let joined = false
+  //   if (this.players.length < 2)
+  //   {
+  //     this.players.push(id)
+  //     joined = true
 
-      // All capital planets are called Starbase!
-      if (this.players.length === 1)
-      {
-        this.planets[0].claim(id, "Starbase!")
-      }
-      else if (this.players.length === 2)
-      {
-        this.planets[this.planets.length - 1].claim(id, "Starbase!")
-      }
-    }
+  //     // All capital planets are called Starbase!
+  //     if (this.players.length === 1)
+  //     {
+  //       this.planets[0].claim(id, "Starbase!")
+  //     }
+  //     else if (this.players.length === 2)
+  //     {
+  //       this.planets[this.planets.length - 1].claim(id, "Starbase!")
+  //     }
+  //   }
 
-    return joined
-  }
+  //   return joined
+  // }
 
-  simulate(delta: number): IChanges
+  simulate(delta: number): void
   {
     const changes: IChanges = {
       planets: [],
@@ -107,17 +137,71 @@ export default class Universe
       platoons: [],
     }
 
-    if (this.inProgress())
-    {
-      // console.log("Universe:tick")
-      this.planets.forEach((planet) => {
-        if (planet.simulate(delta))
-        {
-          changes.planets.push(planet.id)
-        }
-      })
+    // console.log("Universe:tick")
+    this.planets.forEach((planet) => {
+      if (planet.simulate(delta))
+      {
+        // changes.planets.push(planet.id)
+      }
+    })
+  }
+
+  sendUpdates(players: IConnectedPlayer[]): void
+  {
+
+    // Send each player the entire game data
+    players.forEach((player) => {
+      this.sendUpdateTo(player)
+    })
+  }
+
+  sendUpdateTo(player: IConnectedPlayer)
+  {
+    const update: IUpdate = {
+      id: this.id,
+      lastSave: this.saved,
+      created: this.created,
+      planets: [],
+      ships: [],
+      platoons: [],
     }
 
-    return changes
+    this.planets.forEach((planet) => {
+      let planetData: IPlanetBasic | IPlanet = {
+        id: planet.id,
+        type: planet.type,
+        owner: planet.owner,
+        name: "",
+        radius: planet.radius,
+        location: planet.location,
+      }
+
+      if (planet.type === PlanetType.Lifeless)
+      {
+        // No additional data
+        planetData.name = "Lifeless"
+      }
+      else if (planet.owner === player.id)
+      {
+        // Send all data
+        planetData = {
+          ...planet
+        }
+      }
+      else
+      {
+        // Send limited data
+        planetData.name = "Classified"
+      }
+
+      update.planets.push(planetData)
+    })
+
+    // TODO ships
+
+    // TODO platoons
+
+    // Send
+    player.socket.emit("game-update", update)
   }
 }

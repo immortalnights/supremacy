@@ -16,13 +16,17 @@ export enum PlanetType {
   Metropolis = "Metropolis",
 }
 
-export interface IPlanet {
+export interface IPlanetBasic {
   id: number
+  type: PlanetType
   owner?: string
   name: string
-  habitable: boolean
-  type: PlanetType
   radius: number
+  location: number // ?
+}
+
+export interface IPlanet extends IPlanetBasic {
+  habitable: boolean
   population: number
   terraforming: boolean
   terraformDuration: number
@@ -32,7 +36,6 @@ export interface IPlanet {
   morale: number
   tax: number
   status: string
-  location: number // ?
   resources: IResources
   multipliers: boolean
 }
@@ -47,14 +50,14 @@ export interface IPlatoon {
 
 export interface IUniverse {
   id: string
-  players: string[]
-  planets: IPlanet[]
-  ships: IShip[]
-  platoons: IPlatoon[]
   created: number
-  saved: number | null
-  finished: boolean
-  nextShipId: number
+  lastSave: number
+}
+
+export interface IUpdate extends IUniverse {
+  planets: (IPlanetBasic | IPlanet)[]
+  ships: []
+  platoons: []
 }
 
 export interface IChanges {

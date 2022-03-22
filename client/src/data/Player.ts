@@ -3,12 +3,12 @@ import { IPlayer } from "../types.d"
 
 export type { IPlayer }
 
-export interface IClientPlayer extends IPlayer {
+export interface ILocalPlayer extends IPlayer {
   // Is _this_ client this player
   local: boolean
 }
 
-export const Player = Recoil.atom<IClientPlayer>({
+export const Player = Recoil.atom<ILocalPlayer>({
   key: "player",
   default: {
     id: "",

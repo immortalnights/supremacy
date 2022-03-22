@@ -1,16 +1,16 @@
 import crypto from "crypto"
 import EventEmitter from "events"
-import { SocketIO, ServerEventEmitter } from "./serverTypes"
+import { SocketIO, ServerEventEmitter, IConnectedPlayer } from "./serverTypes"
 import Room from "./lobby/Room"
 import Game from "./Game"
 import { IPlayer } from "./types"
 
-class Player implements IPlayer {
+class Player implements IConnectedPlayer, IPlayer {
   id: string
   socket: SocketIO
   name: string
-  room: Room | undefined
-  game: Game | undefined
+  room?: Room
+  game?: Game<any>
   ready: boolean
   events: ServerEventEmitter
 
@@ -37,8 +37,8 @@ class Player implements IPlayer {
     this.ready = false
     this.room = room
 
-    this.socket.once("player-ready-toggle", this.handleReadyToggle)
-    this.socket.on("player-leave-room", this.handleLeaveRoom)
+    this.socket.on("player-ready-toggle", this.handleReadyToggle)
+    this.socket.once("player-leave-room", this.handleLeaveRoom)
   }
 
   handleReadyToggle()
@@ -65,7 +65,7 @@ class Player implements IPlayer {
     this.socket.off("player-leave-room", this.handleLeaveRoom)
   }
 
-  handleJoinGame(game: Game)
+  handleJoinGame(game: Game<any>)
   {
     this.game = game
 

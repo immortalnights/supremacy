@@ -21,7 +21,7 @@ class Room implements IRoom {
   io: Server
   events: ServerEventEmitter
   countdown: number
-  countdownTimer: NodeJS.Timer | undefined
+  countdownTimer?: NodeJS.Timer
 
   constructor(io: Server, host: Player)
   {
@@ -39,6 +39,26 @@ class Room implements IRoom {
     this.countdownTimer = undefined
 
     this.hostJoined(host)
+  }
+
+  toJSON()
+  {
+    return {
+      id: this.id,
+      host: this.host,
+      options: this.options,
+      slots: this.slots,
+      players: this.players.map((player) => {
+        const { id, name, ready } = player
+        return {
+          id,
+          name,
+          ready,
+        }
+      }),
+      status: this.status,
+      countdown: 0,
+    }
   }
 
   hostJoined(player: Player)
@@ -145,22 +165,7 @@ class Room implements IRoom {
   sendRoomDetailsTo(to: Player)
   {
     // Inform the player about the room
-    to.socket.emit("room-joined", {
-      id: this.id,
-      host: this.host,
-      options: this.options,
-      slots: this.slots,
-      players: this.players.map((player) => {
-        const { id, name, ready } = player
-        return {
-          id,
-          name,
-          ready,
-        }
-      }),
-      status: this.status,
-      countdown: 0,
-    })
+    to.socket.emit("room-joined", this.toJSON())
   }
 
   sendRoomUpdate()

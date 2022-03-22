@@ -37,7 +37,7 @@ export default class Planet implements IPlanet
     this.name = "Lifeless"
     this.habitable = false
     this.type = PlanetType.Lifeless
-    this.radius = random(4000, 25000)
+    this.radius = Math.floor(random(4000, 25000))
     this.population = 0
     this.terraforming = false
     this.terraformDuration = random(5, 10)

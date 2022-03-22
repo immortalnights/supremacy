@@ -12,6 +12,7 @@ export type Status = "disconnected" | "connecting" | "connected"
 // Context interface
 export interface IIOContext {
   connected: () => boolean
+  requestRooms: () => void
   createRoom: () => Promise<void>
   joinRoom: (id: string) => Promise<void>
   leaveRoom: () => void
@@ -23,6 +24,7 @@ export interface IIOContext {
 // Connection Context
 export const IOContext = React.createContext<IIOContext>({
   connected: () => false,
+  requestRooms: () => {},
   createRoom: () => Promise.reject(),
   joinRoom: () => Promise.reject(),
   leaveRoom: () => {},
@@ -87,6 +89,10 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
   const contextValue = {
     connected: () => !!socket,
+    requestRooms: () => {
+      console.assert(socket, "Socket is invalid!")
+      socket?.emit("request-rooms")
+    },
     createRoom: () => {
       // console.log("Socket id", socket?.id)
       console.assert(socket, "Socket is invalid!")

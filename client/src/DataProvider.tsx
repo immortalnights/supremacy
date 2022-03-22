@@ -3,8 +3,13 @@ import Recoil, { TransactionInterface_UNSTABLE } from "recoil"
 import IOProvider from "./data/IOContext"
 import { IPlayer, IRoom, RoomStatus, IGameOptions, IGame, GameStatus } from "./types.d"
 import { Player } from "./data/Player"
-import { Room } from "./data/Room"
+import { Room, AvailableRooms } from "./data/Room"
 import { Game } from "./data/Game"
+import { Universe } from "./data/Universe"
+import { Planets } from "./data/Planets"
+import { Ships } from "./data/Ships"
+import { Platoons } from "./data/Platoons"
+import { IUpdate } from "./simulation/types"
 
 const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInterface_UNSTABLE) => {
   const player = { ...get(Player), id, }
@@ -12,6 +17,10 @@ const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInter
 }
 
 type TransactionHandler = (data: any, callback: TransactionInterface_UNSTABLE) => void
+
+const handleRoomList: TransactionHandler = (data: any, { get, set }) => {
+  set(AvailableRooms, data)
+}
 
 const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
   const player = get(Player)
@@ -113,12 +122,24 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(Game)
 }
 
+const handleGameUpdate: TransactionHandler = (data: IUpdate, { get, set }) => {
+  // Apply the game data to the different atoms;
+
+  const { planets, ships, platoons, ...universe } = data
+
+  set(Universe, universe)
+  set(Planets, planets)
+  set(Ships, ships)
+  set(Platoons, platoons)
+}
+
 interface IMessageHandlerMap {
   [key: string]: TransactionHandler
 }
 
 const MessageHandlerMap: IMessageHandlerMap = {
   "registered": handleRegistered,
+  "room-list": handleRoomList,
   "room-joined": handleRoomJoined,
   "room-player-kicked": handleRoomKickPlayer,
   "room-player-joined": handleRoomPlayerJoined,
@@ -129,6 +150,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "game-joined": handleGameJoined,
   "game-player-joined": handleGamePlayerJoined,
   "game-player-kicked": handleGamePlayerKicked,
+  "game-update": handleGameUpdate,
 }
 
 

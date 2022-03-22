@@ -17,12 +17,15 @@ import {
 import { IOContext } from "../../data/IOContext"
 import { Room as RoomData, IRoom } from "../../data/Room"
 import { RoomStatus } from "../../types"
-import { Player as PlayerData } from "../../data/Player"
+import { Player as PlayerData, ILocalPlayer } from "../../data/Player"
 
 const CircularProgressWithLabel = (props: CircularProgressProps & { value: number }) => {
+  const COUNTDOWN_DURATION = 3
+
+  const progressValue = (100 / COUNTDOWN_DURATION) * props.value
   return (
     <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-      <CircularProgress variant="determinate" {...props} />
+      <CircularProgress variant="determinate" {...{ ...props, value: progressValue }} />
       <Box
         sx={{
           top: 0,
@@ -39,7 +42,7 @@ const CircularProgressWithLabel = (props: CircularProgressProps & { value: numbe
           variant="caption"
           component="div"
           color="text.secondary"
-        >{`${Math.round(props.value / 10)}`}</Typography>
+        >{`${Math.round(props.value)}`}</Typography>
       </Box>
     </Box>
   )
@@ -86,8 +89,7 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
   )
 }
 
-const ReadyStatus = ({ status, countdown }: { status: RoomStatus, countdown: number }) => {
-  const localPlayer = Recoil.useRecoilValue(PlayerData)
+const ReadyStatus = ({ localPlayer, status, countdown }: { localPlayer: ILocalPlayer, status: RoomStatus, countdown: number }) => {
   const { playerToggleReady } = React.useContext(IOContext)
 
   const handleReadyClick = () => {
@@ -107,7 +109,7 @@ const ReadyStatus = ({ status, countdown }: { status: RoomStatus, countdown: num
     case RoomStatus.Starting:
     {
       content = (
-        <CircularProgressWithLabel variant="determinate" value={(10 * countdown)} />
+        <Button variant="text" onClick={handleReadyClick}><CircularProgressWithLabel variant="determinate" value={countdown} /></Button>
       )
       break
     }
@@ -130,8 +132,6 @@ const ReadyStatus = ({ status, countdown }: { status: RoomStatus, countdown: num
 const Room = ({ data }: { data: IRoom }) => {
   const [ seed, setSeed ] = React.useState(data.options.seed)
   const localPlayer = Recoil.useRecoilValue(PlayerData)
-  // const { playerToggleReady } = React.useContext(IOContext)
-  // const navigate = useNavigate()
 
   const handleChangeSeed = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSeed(event.target.value)
@@ -174,7 +174,7 @@ const Room = ({ data }: { data: IRoom }) => {
           {slots}
         </Stack>
         <Stack alignContent="center" alignItems="center" justifyContent="center" spacing={2}>
-          <ReadyStatus status={data.status} countdown={data.countdown} />
+          <ReadyStatus localPlayer={localPlayer} status={data.status} countdown={data.countdown} />
           <Link to="/" component={RouterLink}>Leave</Link>
         </Stack>
       </Grid>
