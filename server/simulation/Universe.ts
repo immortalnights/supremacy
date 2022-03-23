@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import Planet from "./Planet"
-import { PlanetType, IPlanetBasic, IPlanet, IChanges, IUpdate } from "./types"
-import { IWorld, IConnectedPlayer } from "../serverTypes"
+import { PlanetType, IPlanetBasic, IPlanet, IUniverse, DAYS_PER_YEAR, IDate } from "./types"
+import type { IWorld, IConnectedPlayer } from "../serverTypes"
 
 
 class AI
@@ -14,33 +14,29 @@ class AI
   }
 }
 
-export default class Universe implements IWorld
+export default class Universe implements IUniverse, IWorld
 {
-  id: string
+  date: IDate
+  // FIXME would be better if this was not a member
+  yearDuration: number
   players: string[]
   planets: Planet[]
   ships: []
   platoons: []
-  created: number
-  saved: number
   finished: boolean
   nextShipId: number
-  ai: AI | null
 
   constructor()
   {
     console.log("Universe:constructor")
-    this.id = crypto.randomUUID()
-    // this.players = []
+    this.date = { day: 1, year: 3000 }
+    this.yearDuration = DAYS_PER_YEAR
     this.players = []
     this.planets = []
-    this.nextShipId = 0
     this.ships = []
     this.platoons = [],
     this.finished = false
-    this.saved = 0
-    this.created = Date.now()
-    this.ai = null
+    this.nextShipId = 0
   }
 
   generate(seed: number)
@@ -96,48 +92,17 @@ export default class Universe implements IWorld
     })
   }
 
-  // addAI()
-  // {
-  //   this.ai = new AI()
-  //   this.join(this.ai.id)
-  // }
-
-  // inProgress()
-  // {
-  //   return this.players.length === 2
-  // }
-
-  // join(id: string)
-  // {
-  //   let joined = false
-  //   if (this.players.length < 2)
-  //   {
-  //     this.players.push(id)
-  //     joined = true
-
-  //     // All capital planets are called Starbase!
-  //     if (this.players.length === 1)
-  //     {
-  //       this.planets[0].claim(id, "Starbase!")
-  //     }
-  //     else if (this.players.length === 2)
-  //     {
-  //       this.planets[this.planets.length - 1].claim(id, "Starbase!")
-  //     }
-  //   }
-
-  //   return joined
-  // }
-
   simulate(delta: number): void
   {
-    const changes: IChanges = {
-      planets: [],
-      ships: [],
-      platoons: [],
+    // console.log("Universe:tick")
+    this.date.day += 1 * delta
+
+    if (this.date.day > this.yearDuration)
+    {
+      this.date.day = 1
+      this.date.year += 1
     }
 
-    // console.log("Universe:tick")
     this.planets.forEach((planet) => {
       if (planet.simulate(delta))
       {
@@ -146,21 +111,12 @@ export default class Universe implements IWorld
     })
   }
 
-  sendUpdates(players: IConnectedPlayer[]): void
+  updateFor(id: string): IUniverse
   {
-
-    // Send each player the entire game data
-    players.forEach((player) => {
-      this.sendUpdateTo(player)
-    })
-  }
-
-  sendUpdateTo(player: IConnectedPlayer)
-  {
-    const update: IUpdate = {
-      id: this.id,
-      lastSave: this.saved,
-      created: this.created,
+    const universe: IUniverse = {
+      // Don't send partial days
+      date: { day: Math.floor(this.date.day), year: this.date.year },
+      yearDuration: this.yearDuration, // DAYS_PER_YEAR
       planets: [],
       ships: [],
       platoons: [],
@@ -181,7 +137,7 @@ export default class Universe implements IWorld
         // No additional data
         planetData.name = "Lifeless"
       }
-      else if (planet.owner === player.id)
+      else if (planet.owner === id)
       {
         // Send all data
         planetData = {
@@ -194,14 +150,14 @@ export default class Universe implements IWorld
         planetData.name = "Classified"
       }
 
-      update.planets.push(planetData)
+      universe.planets.push(planetData)
     })
 
     // TODO ships
 
     // TODO platoons
 
-    // Send
-    player.socket.emit("game-update", update)
+    // Return
+    return universe
   }
 }

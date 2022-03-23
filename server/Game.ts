@@ -2,14 +2,18 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { Server } from "socket.io"
 import { ServerEventEmitter, IWorld } from "./serverTypes"
-import { IGame, IGameOptions, GameStatus, IPlayer } from "./types"
+import { IGame, IGameOptions, GameStatus, IPlayer, IUpdate } from "./types"
 import Player from "./Player"
+import type { IUniverse } from "./simulation/types"
 
 class Game<T extends IWorld> implements IGame {
   id: string
   // The players that are supposed to be in this game
   allocatedPlayers: string[]
   players: Player[]
+  options: IGameOptions
+  saved: number
+  created: number
   status: GameStatus
   io: Server
   events: ServerEventEmitter
@@ -20,7 +24,10 @@ class Game<T extends IWorld> implements IGame {
   {
     this.id = crypto.randomUUID()
     this.allocatedPlayers = players.map((p) => p.id)
+    this.options = options
     this.players = []
+    this.saved = 0
+    this.created = Date.now()
     this.status = GameStatus.Starting
     this.io = io
     this.world = worldFactory(options)
@@ -40,7 +47,7 @@ class Game<T extends IWorld> implements IGame {
 
   canJoin(player: Player): boolean
   {
-    return !!this.allocatedPlayers.find((pID) => pID === player.id)
+    return this.players.length < 2 // !!this.allocatedPlayers.find((pID) => pID === player.id)
   }
 
   join(player: Player)
@@ -48,9 +55,12 @@ class Game<T extends IWorld> implements IGame {
     console.log(`Player ${player.id} joined game ${this.id}`)
 
     const allocatedPlayer = this.allocatedPlayers.find((pID) => pID === player.id)
-    console.assert(allocatedPlayer, `Failed to find allocated player ${player.id} in game ${this.id}`)
+    if (!allocatedPlayer)
+    {
+      console.warn(`Failed to find allocated player ${player.id} in game ${this.id}`)
+    }
 
-    if (allocatedPlayer)
+    // if (allocatedPlayer)
     {
       this.players.push(player)
 
@@ -59,6 +69,9 @@ class Game<T extends IWorld> implements IGame {
 
       player.socket.emit("game-joined", {
         id: this.id,
+        options: this.options,
+        saved: this.saved,
+        created: this.saved,
         players: this.players.map((player) => ({
           id: player.id,
           name: player.name,
@@ -82,12 +95,10 @@ class Game<T extends IWorld> implements IGame {
   {
     console.log(`Player ${player.id} left game ${this.id}`)
 
-    const allocatedPlayer = this.allocatedPlayers.find((pID) => pID === player.id)
-    console.assert(allocatedPlayer, `Failed to find allocated player ${player.id} in game ${this.id}`)
+    const index = this.players.findIndex((p) => p.id === player.id)
 
-    if (allocatedPlayer)
+    if (index !== -1)
     {
-      const index = this.players.findIndex((p) => p.id === player.id)
       this.players.splice(index, 1)
 
       // Leave the socket room
@@ -97,6 +108,10 @@ class Game<T extends IWorld> implements IGame {
       this.io.to(this.id).emit("game-player-left", {
         id: player.id
       })
+    }
+    else
+    {
+      console.warn(`Player ${player.id} is not in game ${this.id}`)
     }
   }
 
@@ -108,8 +123,26 @@ class Game<T extends IWorld> implements IGame {
       {
         const now = Date.now()
 
-        this.world.simulate(now - this.lastTick)
-        this.world.sendUpdates(this.players)
+        // prevent the first delta being huge
+        if (this.lastTick === 0)
+        {
+          this.lastTick = now
+        }
+
+        this.world.simulate((now - this.lastTick) / 1000)
+        this.players.forEach((player) => {
+          const data = this.world.updateFor(player.id) as IUniverse
+
+          // FIXME should not be done _in_ Game implementation
+          const update: IUpdate<IUniverse> = {
+            id: this.id,
+            saved: this.saved,
+            created: this.created,
+            world: data,
+          }
+
+          player.socket.emit("game-update", update)
+        })
 
         this.lastTick = now
         break

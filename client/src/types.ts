@@ -1,6 +1,5 @@
-import * as SimulationTypes from "./simulation/types.d"
+// Duplicate of server/types.ts
 
-// duplicate of server/types.ts until a better way is found
 export enum RoomStatus {
   Setup,
   Starting,

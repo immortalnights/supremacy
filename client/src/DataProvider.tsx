@@ -1,15 +1,15 @@
 import React from "react"
 import Recoil, { TransactionInterface_UNSTABLE } from "recoil"
 import IOProvider from "./data/IOContext"
-import { IPlayer, IRoom, RoomStatus, IGameOptions, IGame, GameStatus } from "./types.d"
+import { IPlayer, IRoom, RoomStatus, IGameOptions, IGame, IUpdate } from "./types.d"
 import { Player } from "./data/Player"
 import { Room, AvailableRooms } from "./data/Room"
 import { Game } from "./data/Game"
-import { Universe } from "./data/Universe"
+import { SolarSystem, SelectedPlanet } from "./data/SolarSystem"
 import { Planets } from "./data/Planets"
 import { Ships } from "./data/Ships"
 import { Platoons } from "./data/Platoons"
-import { IUpdate } from "./simulation/types"
+import type { IUniverse } from "./simulation/types.d"
 
 const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInterface_UNSTABLE) => {
   const player = { ...get(Player), id, }
@@ -122,12 +122,36 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(Game)
 }
 
-const handleGameUpdate: TransactionHandler = (data: IUpdate, { get, set }) => {
+const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
   // Apply the game data to the different atoms;
 
-  const { planets, ships, platoons, ...universe } = data
+  const { planets, ships, platoons, ...solarSystem } = data.world
 
-  set(Universe, universe)
+  // FIXME do this somewhere better
+  let selected = get(SelectedPlanet)
+  if (selected === -1)
+  {
+    const player = get(Player)
+    if (planets[0].owner === player.id)
+    {
+      selected = planets[0].id
+    }
+    else if (planets[planets.length - 1].owner === player.id)
+    {
+      selected = planets[planets.length - 1].id
+    }
+    else
+    {
+      // Find the first from 0 to x, would be better if the search was
+      // based on the assumed players' capital
+      const firstOwned = planets.find((planet) => planet.owner === player.id)
+      selected = firstOwned?.id || 0
+    }
+
+    set(SelectedPlanet, selected)
+  }
+
+  set(SolarSystem, solarSystem)
   set(Planets, planets)
   set(Ships, ships)
   set(Platoons, platoons)

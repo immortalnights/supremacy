@@ -13,6 +13,11 @@ export enum RoomStatus {
   Closed,
 }
 
+// Maybe should be applied as a generic
+export interface IGameOptions {
+  seed: string
+}
+
 export interface IRoom {
   id: string
   options: IGameOptions
@@ -31,14 +36,25 @@ export enum GameStatus {
   Closed,
 }
 
-export interface IGameOptions {
-  seed: string
-}
-
 export interface IGame {
   id: string
+  options: IGameOptions
   players: IPlayer[]
+  // date/time of last save
+  saved: number
+  // date/time game was created
+  created: number
   status: GameStatus
+}
+
+export interface IUpdate<T> {
+  // game ID
+  id: string
+  // date/time of last save
+  saved: number
+  // date/time game was created
+  created: number
+  world: T
 }
 
 // Messages from the client to the Server
@@ -89,5 +105,5 @@ export interface ServerToClientEvents {
   // Send leavers details to all other players in the game
   "game-player-kicked": ({ id }: { id: string }) => void
   // Send game update to player
-  "game-update": (data: any) => void
+  "game-update": (data: IUpdate<unknown>) => void
 }

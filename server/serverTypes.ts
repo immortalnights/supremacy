@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { ServerToClientEvents, ClientToServerEvents, IPlayer } from "./types"
+import { ServerToClientEvents, ClientToServerEvents, IPlayer, IGame } from "./types"
 import TypedEmitter from "typed-emitter"
 
 export type SocketIO = Socket<ClientToServerEvents, ServerToClientEvents>
@@ -24,8 +24,10 @@ export interface IConnectedPlayer {
   socket: SocketIO
 }
 
+type UpdateForFn<U> = (id: string) => U
+
 export interface IWorld {
   join: (player: string, ai: boolean) => boolean
   simulate: (delta: number) => void
-  sendUpdates: (players: IConnectedPlayer[]) => void
+  updateFor: UpdateForFn<unknown>
 }

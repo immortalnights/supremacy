@@ -1,70 +1,55 @@
 import React from "react"
-import { Button, Grid } from "@mui/material"
+import Recoil from "recoil"
+import { Box, Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText } from "@mui/material"
+import { Link as RouterLink, useNavigate } from "react-router-dom"
+import { formatDate, SolarSystem as SolarSystemData, SelectedPlanet } from "../../../data/SolarSystem"
+import { Planets as PlanetData } from "../../../data/Planets"
 import { useLocalStorageValue } from "../../../data/localStorage"
-import { IPlanet } from "../../../simulation/types"
+import type { IPlanet, ISolarSystem } from "../../../simulation/types.d"
+import { Game as GameData } from "../../../data/Game"
 
-const PlanetList = () => {
-  const [ planets, setPlanets ] = React.useState<IPlanet[]>([])
-  const currentPlayerId = useLocalStorageValue("player") as string
-  const currentGameId = useLocalStorageValue("game") as string
-
-  const fetchPlanets = () => {
-    return fetch("/api/planets", {
-      headers: {
-        "Content-Type": "application/json",
-        "X-Player-ID": currentPlayerId,
-        "X-Game-ID": currentGameId,
-      }
-    })
-    .then((r) => r.json())
-  }
-
-  React.useEffect(() => {
-    const fetch = () => {
-      fetchPlanets()
-      .then((r) => {
-        if (r.ok)
-        {
-          setPlanets(r.planets)
-        }
-      })
-    }
-
-    const poller = window.setInterval(fetch, 1000)
-    fetch()
-
-    return () => {
-      clearInterval(poller)
-    }
-  }, [])
+const StarDate = () => {
+  const data = Recoil.useRecoilValue(SolarSystemData) as ISolarSystem
 
   return (
-    <ul>
-      {planets.map((planet) => (
-        <li key={planet.id}>{planet.name}</li>
-      ))}
-    </ul>
+    <div>{data ? formatDate(data.date) : "-"}</div>
   )
 }
 
-const Planets = () => {
+const PlanetList = () => {
+  const game = Recoil.useRecoilValue(GameData)
+  const planets = Recoil.useRecoilValue(PlanetData)
+  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanet)
+  const navigate = useNavigate()
+
+  const handlePlanetClick = (id: number) => {
+    setSelected(id)
+    navigate(`/game/${game?.id}/overview/${id}`)
+  }
+//<ListItemButton key={planet.id} component={RouterLink} to={`/game/${game?.id}/overview/${planet.id}`}>
   return (
-    <React.Suspense fallback={"Loading..."}>
-      <PlanetList />
-    </React.Suspense>
+    <List dense sx={{
+      padding: "1em",
+    }}>
+      {planets.map((planet) => (
+        <ListItemButton key={planet.id} onClick={() => handlePlanetClick(planet.id)} selected={planet.id === selected}>
+          <ListItemAvatar />
+          <ListItemText primary={`${planet.name}`} />
+        </ListItemButton>
+      ))}
+    </List>
   )
 }
 
 const SolarSystem = () => {
   return (
     <Grid container>
-      <Grid item xs={2} />
-      <Grid item xs={4}>
-        <Planets />
+      <Grid item xs={8}>
+        <PlanetList />
       </Grid>
       <Grid item xs={4}>
         <div>
-          <div>stardate</div>
+          <div><StarDate /></div>
           <div>image</div>
           <div>display name</div>
         </div>
@@ -73,7 +58,6 @@ const SolarSystem = () => {
           <Button>Espionage</Button>
         </div>
       </Grid>
-      <Grid item xs={2} />
     </Grid>
   )
 }

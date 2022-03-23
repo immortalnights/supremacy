@@ -1,3 +1,4 @@
+export const DAYS_PER_YEAR = 48
 
 export interface IResources {
   credits: number
@@ -48,20 +49,19 @@ export interface IPlatoon {
 
 }
 
-export interface IUniverse {
-  id: string
-  created: number
-  lastSave: number
+export interface IDate {
+  day: number
+  year: number
 }
 
-export interface IUpdate extends IUniverse {
+export interface ISolarSystem {
+  date: IDate
+  yearDuration: number
+}
+
+export interface IUniverse extends ISolarSystem {
   planets: (IPlanetBasic | IPlanet)[]
-  ships: []
-  platoons: []
+  ships: IShip[]
+  platoons: IPlatoon[]
 }
 
-export interface IChanges {
-  planets: number[]
-  ships: []
-  platoons: []
-}

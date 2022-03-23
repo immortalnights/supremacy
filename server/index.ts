@@ -4,7 +4,7 @@ import http from "http"
 import Player from "./Player"
 import Room from "./lobby/Room"
 import Game from "./Game"
-import { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
+import type { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
 import Universe from "./simulation/Universe"
 
 const app = express()
@@ -73,6 +73,24 @@ const removePlayerFromRoom = (player: Player) => {
   }
 }
 
+const removePlayerFromGame = (player: Player) => {
+  if (player.game)
+  {
+    const game = games.find((game) => game.id === player.game?.id)
+
+    if (game)
+    {
+      game.leave(player)
+    }
+    else
+    {
+      console.warn(`Failed to find game ${player.game.id} for player ${player.id}`)
+    }
+
+    player.game = undefined
+  }
+}
+
 const handleCreateGame = (options: IGameOptions, players: Player[]) => {
   console.log(`Creating new game for ${players.map((p) => p.id).join(", ")}`)
   const game = new Game<Universe>(io, options, players, (opts: IGameOptions) => {
@@ -97,6 +115,9 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
     console.log(`Notify ${player.id} of new game`)
     player.socket.emit("game-created", {
       id: game.id,
+      options: game.options,
+      saved: game.saved,
+      created: game.created,
       players: game.allocatedPlayers.map((p) => ({
         id: player.id,
         name: player.name,
@@ -190,6 +211,7 @@ io.on("connection", (socket) => {
 
     // Remove the player from any room
     removePlayerFromRoom(player)
+    removePlayerFromGame(player)
 
     // Remove the player entirely
     const index = players.indexOf(player)
