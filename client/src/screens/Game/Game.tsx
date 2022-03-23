@@ -1,16 +1,15 @@
 import React from "react"
 import Recoil from "recoil"
 import { Box, Link, Button, Grid } from "@mui/material"
-import { Routes, Route, Link as RouterLink, useNavigate, useParams } from "react-router-dom"
+import { Routes, Route, NavLink, useNavigate, useParams } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
 import { IPlayer } from "../../data/Player"
 import SolarSystem from "./solarsystem/"
 import { Game as GameData, IGame } from "../../data/Game"
+import "./game.css"
 
 
 const Game = ({ data }: { data: IGame }) => {
-
-
   return (
     <>
       <Box sx={{
@@ -27,6 +26,7 @@ const Game = ({ data }: { data: IGame }) => {
           <Route path="/shipyard" element="shipyard" />
           <Route path="/surface" element="surface" />
           <Route path="/training" element="training" />
+          <Route path="*" element="Game 404" />
         </Routes>
       </Box>
       <Box
@@ -40,14 +40,14 @@ const Game = ({ data }: { data: IGame }) => {
           },
         }}
       >
-        <Link component={RouterLink} to={`/game/${data.id}/`}>Solar System</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/combat`}>Combat</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/dock`}>Dock</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/fleet`}>Fleet</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/overview`}>Overview</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/shipyard`}>Shipyard</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/surface`}>Surface</Link>
-        <Link component={RouterLink} to={`/game/${data.id}/training`}>Training</Link>
+        <Link component={NavLink} to={`/game/${data.id}/`}>Solar System</Link>
+        <Link component={NavLink} to={`/game/${data.id}/combat`}>Combat</Link>
+        <Link component={NavLink} to={`/game/${data.id}/dock`}>Dock</Link>
+        <Link component={NavLink} to={`/game/${data.id}/fleet`}>Fleet</Link>
+        <Link component={NavLink} to={`/game/${data.id}/overview`}>Overview</Link>
+        <Link component={NavLink} to={`/game/${data.id}/shipyard`}>Shipyard</Link>
+        <Link component={NavLink} to={`/game/${data.id}/surface`}>Surface</Link>
+        <Link component={NavLink} to={`/game/${data.id}/training`}>Training</Link>
       </Box>
     </>
   )

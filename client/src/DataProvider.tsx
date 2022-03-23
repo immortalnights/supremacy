@@ -100,10 +100,17 @@ const handleGameCreated: TransactionHandler = (data: IGame, { get, set }) => {
   // game.
 }
 
-const handleGameJoined: TransactionHandler = (data: IGame, { get, set }) => {
+const handleGameJoined: TransactionHandler = (data: IGame, { get, set, reset }) => {
   const player = get(Player)
 
   set(Player, { ...player, ready: false })
+
+  // Reset any lingering game data
+  reset(SolarSystem)
+  reset(Planets)
+  reset(Ships)
+  reset(Platoons)
+  reset(SelectedPlanet)
 
   set(Game, data)
 }
@@ -120,6 +127,11 @@ const handleGamePlayerJoined: TransactionHandler = (player: IPlayer, { get, set 
 
 const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(Game)
+  reset(SolarSystem)
+  reset(Planets)
+  reset(Ships)
+  reset(Platoons)
+  reset(SelectedPlanet)
 }
 
 const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
@@ -132,6 +144,7 @@ const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, s
   if (selected === -1)
   {
     const player = get(Player)
+    console.warn(player.id, planets[0].owner, planets[planets.length - 1].owner )
     if (planets[0].owner === player.id)
     {
       selected = planets[0].id
@@ -173,6 +186,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "game-created": handleGameCreated,
   "game-joined": handleGameJoined,
   "game-player-joined": handleGamePlayerJoined,
+  // "game-player-left": handleGamePlayerLeft,
   "game-player-kicked": handleGamePlayerKicked,
   "game-update": handleGameUpdate,
 }
@@ -191,6 +205,8 @@ const DataProvider = ({ children }: { children: JSX.Element }) => {
         callback.reset(Player)
         callback.reset(Room)
         callback.reset(Game)
+        callback.reset(SolarSystem)
+        callback.reset(SelectedPlanet)
       }
       else if (MessageHandlerMap[action])
       {

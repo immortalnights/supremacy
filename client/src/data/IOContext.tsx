@@ -74,7 +74,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
     socket.on("game-created", ({ id }) => {
       // console.log(`Received game-created for ${id}`)
-      navigate(`/game/${id}`)
+      navigate(`/game/${id}/`, { replace: true })
     })
 
     console.log("Init socket", socket.id)
