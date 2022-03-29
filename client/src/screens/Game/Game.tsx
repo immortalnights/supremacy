@@ -5,6 +5,7 @@ import { Routes, Route, NavLink, useNavigate, useParams } from "react-router-dom
 import { IOContext } from "../../data/IOContext"
 import { IPlayer } from "../../data/Player"
 import SolarSystem from "./solarsystem/"
+import Overview from "./overview/"
 import { Game as GameData, IGame } from "../../data/Game"
 import "./game.css"
 
@@ -22,7 +23,7 @@ const Game = ({ data }: { data: IGame }) => {
           <Route path="/combat" element="combat" />
           <Route path="/dock" element="dock" />
           <Route path="/fleet" element="fleet" />
-          <Route path="/overview" element={"overview"} />
+          <Route path="/overview" element={<Overview />} />
           <Route path="/shipyard" element="shipyard" />
           <Route path="/surface" element="surface" />
           <Route path="/training" element="training" />

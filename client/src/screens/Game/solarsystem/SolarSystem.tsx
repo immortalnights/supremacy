@@ -2,19 +2,14 @@ import React from "react"
 import Recoil from "recoil"
 import { Box, Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
-import { formatDate, SolarSystem as SolarSystemData, SelectedPlanet } from "../../../data/SolarSystem"
+import { formatDate, SelectedPlanet } from "../../../data/General"
+import { SolarSystem as SolarSystemData } from "../../../data/SolarSystem"
 import { Planets as PlanetData } from "../../../data/Planets"
 import { useLocalStorageValue } from "../../../data/localStorage"
 import type { IPlanet, ISolarSystem } from "../../../simulation/types.d"
 import { Game as GameData } from "../../../data/Game"
+import { StarDate } from "../../../components/StarDate"
 
-const StarDate = () => {
-  const data = Recoil.useRecoilValue(SolarSystemData) as ISolarSystem
-
-  return (
-    <div>{data ? formatDate(data.date) : "-"}</div>
-  )
-}
 
 const PlanetList = () => {
   const game = Recoil.useRecoilValue(GameData)
@@ -24,7 +19,7 @@ const PlanetList = () => {
 
   const handlePlanetClick = (id: number) => {
     setSelected(id)
-    navigate(`/game/${game?.id}/overview/${id}`)
+    navigate(`/game/${game?.id}/overview`)
   }
 //<ListItemButton key={planet.id} component={RouterLink} to={`/game/${game?.id}/overview/${planet.id}`}>
   return (

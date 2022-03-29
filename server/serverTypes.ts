@@ -28,6 +28,7 @@ type UpdateForFn<U> = (id: string) => U
 
 export interface IWorld {
   join: (player: string, ai: boolean) => boolean
+  transferOwnership: (fromPlayerID: string, toPlayerID: string) => void
   simulate: (delta: number) => void
   updateFor: UpdateForFn<unknown>
 }

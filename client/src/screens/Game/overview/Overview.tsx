@@ -1,5 +1,8 @@
 import React from "react"
+import Recoil from "recoil"
 import { Button } from "@mui/material"
+import { SelectedPlanet } from "../../../data/Planets"
+import { StarDate } from "../../../components/StarDate"
 
 
 const TaxControls = (props: any) => {
@@ -27,7 +30,7 @@ const TaxControls = (props: any) => {
 
 const PlanetOverview = (props: any) => {
 	// const platoons = useRecoilValue(store.platoons)
-	const planet: any = {} // useRecoilValue(store.planets(props.id))
+	const planet = Recoil.useRecoilValue(SelectedPlanet)
 
 	if (!planet)
 	{
@@ -40,7 +43,7 @@ const PlanetOverview = (props: any) => {
 				<dt>Planet</dt>
 				<dd>{planet.name || planet.id}</dd>
 				<dt>Date</dt>
-				<dd>{/*<StarDate />*/}</dd>
+				<dd><StarDate /></dd>
 				<dt>Status</dt>
 				<dd>{planet.status}</dd>
 				<dt>Credits</dt>

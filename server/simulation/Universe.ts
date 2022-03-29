@@ -92,6 +92,30 @@ export default class Universe implements IUniverse, IWorld
     })
   }
 
+  transferOwnership(fromPlayerID: string, toPlayerID: string)
+  {
+    this.planets.forEach((planet) => {
+      if (planet.owner === fromPlayerID)
+      {
+        planet.owner = toPlayerID
+      }
+    })
+    // this.ships.forEach((ship) => {
+    //   if (ship.owner === fromPlayerID)
+    //   {
+    //     ship.owner = toPlayerID
+    //   }
+    // })
+    // this.platoons.forEach((platoon) => {
+    //   if (platoon.owner === fromPlayerID)
+    //   {
+    //     platoon.owner = toPlayerID
+    //   }
+    // })
+
+    console.log(`Transferred items from '${fromPlayerID}' to '${toPlayerID}'`)
+  }
+
   simulate(delta: number): void
   {
     // console.log("Universe:tick")

@@ -55,9 +55,17 @@ class Game<T extends IWorld> implements IGame {
     console.log(`Player ${player.id} joined game ${this.id}`)
 
     const allocatedPlayer = this.allocatedPlayers.find((pID) => pID === player.id)
+    // If this isn't an allocated player; identify the missing place and transfer all items to the new player
     if (!allocatedPlayer)
     {
-      console.warn(`Failed to find allocated player ${player.id} in game ${this.id}`)
+      const missingPlayer = this.allocatedPlayers.find((allocatedPlayerID) => {
+        return !this.players.find((activePlayer) => allocatedPlayerID === activePlayer.id)
+      })
+
+      if (missingPlayer)
+      {
+        this.world.transferOwnership(missingPlayer, player.id)
+      }
     }
 
     // if (allocatedPlayer)
