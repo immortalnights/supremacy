@@ -2,8 +2,10 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { Server } from "socket.io"
 import { ServerEventEmitter } from "../serverTypes"
-import { IRoom, RoomStatus, IGameOptions } from "../types"
+import { IRoom, RoomStatus, IGameOptions, IActionCallback, IPlayer } from "../types"
 import Player from "../Player"
+import ConnectedPlayer from "../ConnectedPlayer"
+import AIPlayer from "../AIPlayer"
 
 const randomSeedString = (length: number = 6) => {
   return (Math.random() + 1).toString(36).substring(length);
@@ -23,7 +25,7 @@ class Room implements IRoom {
   countdown: number
   countdownTimer?: NodeJS.Timer
 
-  constructor(io: Server, host: Player)
+  constructor(io: Server, host: ConnectedPlayer)
   {
     this.id = crypto.randomUUID()
     this.options = {
@@ -61,7 +63,7 @@ class Room implements IRoom {
     }
   }
 
-  hostJoined(player: Player)
+  hostJoined(player: ConnectedPlayer)
   {
     this.host = player.id
     this.players.push(player)
@@ -72,7 +74,7 @@ class Room implements IRoom {
     this.sendRoomDetailsTo(player)
   }
 
-  join(player: Player)
+  join(player: ConnectedPlayer)
   {
     this.players.push(player)
 
@@ -89,18 +91,52 @@ class Room implements IRoom {
       ready: false,
     })
 
-    // Unset ready state on all players
+    // Unset ready state on all connected players
     this.players.forEach((other) => {
-      other.ready = false
+      if (other instanceof ConnectedPlayer)
+      {
+        other.ready = false
 
-      this.io.to(this.id).emit("player-ready-status-changed", {
-        id: other.id,
-        ready: other.ready,
-      })
+        this.io.to(this.id).emit("player-changed", {
+          id: other.id,
+          name: other.name,
+          ready: other.ready,
+        })
+      }
     })
   }
 
-  leave(player: Player)
+  joinAI(player: AIPlayer)
+  {
+    this.players.push(player)
+
+    // AI is always ready
+    player.ready = true
+
+    // FIXME deduplicate from ::join
+    // Inform all other players in the room about the new player
+    this.io.to(this.id).emit("room-player-joined", {
+      id: player.id,
+      name: player.name,
+      ready: player.ready,
+    })
+
+    // Unset ready state on all players
+    this.players.forEach((other) => {
+      if (other instanceof ConnectedPlayer)
+      {
+        other.ready = false
+
+        this.io.to(this.id).emit("player-changed", {
+          id: other.id,
+          name: other.name,
+          ready: other.ready,
+        })
+      }
+    })
+  }
+
+  leave(player: ConnectedPlayer)
   {
     // Remove the player from the socket room
     player.socket.leave(this.id)
@@ -115,7 +151,10 @@ class Room implements IRoom {
 
       // If the host left, kick the other players
       this.players.forEach((player) => {
-        player.socket.emit("room-player-kicked")
+        if (player instanceof ConnectedPlayer)
+        {
+          (player as ConnectedPlayer).socket.emit("room-player-kicked")
+        }
       })
 
       // Remove all players from the room
@@ -138,14 +177,58 @@ class Room implements IRoom {
 
       // Unset ready state on all remaining players
       this.players.forEach((other) => {
-        other.ready = false
+        if (other instanceof ConnectedPlayer)
+        {
+          other.ready = false
 
-        this.io.to(this.id).emit("player-ready-status-changed", {
-          id: other.id,
-          ready: other.ready,
-        })
+          this.io.to(this.id).emit("player-changed", {
+            id: other.id,
+            name: other.name,
+            ready: other.ready,
+          })
+        }
       })
     }
+
+    this.handleReadyStateChanged()
+  }
+
+  handlePlayerAction(player: Player, name: string, data: any, callback: IActionCallback)
+  {
+    const result = {
+      result: false,
+      message: "",
+      data: {}
+    }
+
+    switch (name)
+    {
+      case "change-room-name":
+      {
+        break
+      }
+      case "change-seed":
+      {
+        break
+      }
+      case "add-ai-player":
+      {
+        const p = new AIPlayer()
+        this.joinAI(p)
+        break
+      }
+    }
+
+    callback(result.result, result.message, result.data)
+  }
+
+  onPlayerChanged(player: Player)
+  {
+    this.io.to(this.id).emit("player-changed", {
+      id: player.id,
+      name: player.name,
+      ready: player.ready,
+    })
 
     this.handleReadyStateChanged()
   }
@@ -154,15 +237,16 @@ class Room implements IRoom {
   {
     // console.log(`Broadcast ready state change ${this.id}, ${player.id}, ${player.ready}`)
     // Broadcast to all players (including the one that made the request)
-    this.io.to(this.id).emit("player-ready-status-changed", {
+    this.io.to(this.id).emit("player-changed", {
       id: player.id,
+      name: player.name,
       ready: player.ready,
     })
 
     this.handleReadyStateChanged()
   }
 
-  sendRoomDetailsTo(to: Player)
+  sendRoomDetailsTo(to: ConnectedPlayer)
   {
     // Inform the player about the room
     to.socket.emit("room-joined", this.toJSON())

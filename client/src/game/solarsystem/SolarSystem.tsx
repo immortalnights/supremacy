@@ -1,12 +1,9 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText } from "@mui/material"
+import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
-import { formatDate, SelectedPlanet } from "../../data/General"
-import { SolarSystem as SolarSystemData } from "../../data/SolarSystem"
+import { SelectedPlanet } from "../../data/General"
 import { Planets as PlanetData } from "../../data/Planets"
-import { useLocalStorageValue } from "../../data/localStorage"
-import type { IPlanet, ISolarSystem } from "../../simulation/types.d"
 import { Game as GameData } from "../../data/Game"
 import { StarDate } from "../components/StarDate"
 
@@ -17,9 +14,13 @@ const PlanetList = () => {
   const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanet)
   const navigate = useNavigate()
 
-  const handlePlanetClick = (id: number) => {
+  const handlePlanetClick = (id: number, nav: boolean = false) => {
     setSelected(id)
-    // navigate(`/game/${game?.id}/overview`)
+
+    if (nav)
+    {
+      navigate(`/game/${game?.id}/overview`)
+    }
   }
 //<ListItemButton key={planet.id} component={RouterLink} to={`/game/${game?.id}/overview/${planet.id}`}>
   return (
@@ -27,7 +28,7 @@ const PlanetList = () => {
       padding: "1em",
     }}>
       {planets.map((planet) => (
-        <ListItemButton key={planet.id} onClick={() => handlePlanetClick(planet.id)} selected={planet.id === selected}>
+        <ListItemButton key={planet.id} selected={planet.id === selected} onClick={() => handlePlanetClick(planet.id)} onDoubleClick={() => handlePlanetClick(planet.id, true)}>
           <ListItemAvatar />
           <ListItemText primary={`${planet.name}`} />
         </ListItemButton>

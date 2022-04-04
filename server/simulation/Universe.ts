@@ -12,9 +12,10 @@ import {
   IShipDetails,
   DAYS_PER_YEAR,
   IDate,
-  Difficulty
+  Difficulty,
+  PlayerGameAction,
 } from "./types"
-import type { IWorld, IConnectedPlayer } from "../serverTypes"
+import type { IWorld } from "../serverTypes"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
 
@@ -150,7 +151,7 @@ export default class Universe implements IUniverse, IWorld
 
     console.log(`Handle ${action} from ${player}`)
 
-    switch (action)
+    switch (action as PlayerGameAction)
     {
       case "rename-planet":
       {

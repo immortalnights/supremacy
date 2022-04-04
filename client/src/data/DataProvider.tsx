@@ -77,20 +77,20 @@ const handleRoomUpdate: TransactionHandler = ({ id, status, countdown, options }
   }
 }
 
-const handleReadyStateChanged: TransactionHandler = ({ id, ready }: { id: string, ready: boolean }, { get, set }) => {
+const handlePlayerChanged: TransactionHandler = ({ id, name, ready }: { id: string, name: string, ready: boolean }, { get, set }) => {
   const room = get(Room) as IRoom
   const player = get(Player)
 
   if (id === player.id)
   {
-    set(Player, { ...player, ready })
+    set(Player, { ...player, name, ready })
   }
 
   const index = room.players.findIndex((p) => p.id === id)
   if (index !== -1)
   {
     const players = [ ...room.players ]
-    players[index] = { ...players[index], ready }
+    players[index] = { ...players[index], name, ready }
     set(Room, { ...room, players })
   }
 }
@@ -228,7 +228,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "room-player-joined": handleRoomPlayerJoined,
   "room-player-left": handleRoomPlayerLeft,
   "room-update": handleRoomUpdate,
-  "player-ready-status-changed": handleReadyStateChanged,
+  "player-changed": handlePlayerChanged,
   "game-created": handleGameCreated,
   "game-joined": handleGameJoined,
   "game-player-joined": handleGamePlayerJoined,

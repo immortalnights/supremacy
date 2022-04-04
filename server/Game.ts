@@ -2,9 +2,11 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { Server } from "socket.io"
 import { ServerEventEmitter, IWorld } from "./serverTypes"
-import { IGame, IGameOptions, GameStatus, IPlayer, IUpdate } from "./types"
+import { IGame, IGameOptions, GameStatus, IPlayer, IUpdate, IActionCallback } from "./types"
+import ConnectedPlayer from "./ConnectedPlayer"
 import Player from "./Player"
 import type { IUniverse } from "./simulation/types"
+import AIPlayer from "./AIPlayer"
 
 class Game<T extends IWorld> implements IGame {
   id: string
@@ -55,7 +57,7 @@ class Game<T extends IWorld> implements IGame {
     console.log(`Player ${player.id} joined game ${this.id}`)
 
     const allocatedPlayer = this.allocatedPlayers.find((pID) => pID === player.id)
-    // If this isn't an allocated player; identify the missing place and transfer all items to the new player
+    // If this isn't an allocated player; identify the missing player and transfer all items to the new player
     if (!allocatedPlayer)
     {
       const missingPlayer = this.allocatedPlayers.find((allocatedPlayerID) => {
@@ -68,10 +70,10 @@ class Game<T extends IWorld> implements IGame {
       }
     }
 
-    // if (allocatedPlayer)
-    {
-      this.players.push(player)
+    this.players.push(player)
 
+    if (player instanceof ConnectedPlayer)
+    {
       // Join the socket room
       player.socket.join(this.id)
 
@@ -100,6 +102,10 @@ class Game<T extends IWorld> implements IGame {
         ready: true,
       })
     }
+    else if (player instanceof AIPlayer)
+    {
+      this.world.join(player.id, true)
+    }
   }
 
   leave(player: Player)
@@ -112,8 +118,11 @@ class Game<T extends IWorld> implements IGame {
     {
       this.players.splice(index, 1)
 
-      // Leave the socket room
-      player.socket.leave(this.id)
+      if (player instanceof ConnectedPlayer)
+      {
+        // Leave the socket room
+        player.socket.leave(this.id)
+      }
 
       // Other player left, broadcast to everyone
       this.io.to(this.id).emit("game-player-left", {
@@ -124,6 +133,13 @@ class Game<T extends IWorld> implements IGame {
     {
       console.warn(`Player ${player.id} is not in game ${this.id}`)
     }
+  }
+
+  handlePlayerAction(player: Player, name: string, data: object, callback: IActionCallback)
+  {
+    console.debug(`Player ${player.id} action ${name}`)
+    const result = this.world.dispatch(name, player.id, data)
+    callback(result.result, result.reason, result.data)
   }
 
   simulate()
@@ -152,7 +168,14 @@ class Game<T extends IWorld> implements IGame {
             world: data,
           }
 
-          player.socket.emit("game-update", update)
+          if (player instanceof ConnectedPlayer)
+          {
+            player.socket.emit("game-update", update)
+          }
+          else if (player instanceof AIPlayer)
+          {
+            // TODO
+          }
         })
 
         this.lastTick = now

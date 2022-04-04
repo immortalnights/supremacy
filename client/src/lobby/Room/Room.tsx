@@ -49,7 +49,7 @@ const CircularProgressWithLabel = (props: CircularProgressProps & { value: numbe
 }
 
 const Slot = ({ index, id, name, ready }: { index: number, id: string, name: string, ready: boolean }) => {
-  // console.log(index, id, name)
+  console.log("SLOT", index, id, name)
 
   return (
     <CardContent>
@@ -65,7 +65,7 @@ const Slot = ({ index, id, name, ready }: { index: number, id: string, name: str
 
 const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, isOccupied: boolean, isHost: boolean, isLocal: boolean }) => {
   console.log(roomID, isOccupied, isLocal, isHost, (isHost && !isLocal))
-  const { } = React.useContext(IOContext)
+  const { roomAction } = React.useContext(IOContext)
 
   const handleClickInvite = () => {
     // FIXME to use proper Location
@@ -73,11 +73,11 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
   }
 
   const handleClickKick = () => {
-
+    // roomAction("kick-player", { who? })
   }
 
   const handleClickAddAI = () => {
-
+    roomAction("add-ai-player", {})
   }
 
   return (
@@ -90,10 +90,10 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
 }
 
 const ReadyStatus = ({ localPlayer, status, countdown }: { localPlayer: ILocalPlayer, status: RoomStatus, countdown: number }) => {
-  const { playerToggleReady } = React.useContext(IOContext)
+  const { roomAction } = React.useContext(IOContext)
 
   const handleReadyClick = () => {
-    playerToggleReady()
+    roomAction("toggle-ready", {})
   }
 
   let content
@@ -139,9 +139,9 @@ const Room = ({ data }: { data: IRoom }) => {
 
   const isHost = data.host === localPlayer.id
 
-  const slots = data.players.map((player) => (
+  const slots = data.players.map((player, index) => (
     <Box key={player.id}>
-      <Slot index={1} id={player.id} name={player.name} ready={player.ready} />
+      <Slot index={index + 1} id={player.id} name={player.name} ready={player.ready} />
       <SlotControls roomID={data.id} isOccupied={true} isLocal={player.id === localPlayer.id} isHost={isHost} />
     </Box>
   ))
@@ -152,7 +152,7 @@ const Room = ({ data }: { data: IRoom }) => {
     {
       slots.push(
         <Box key={index}>
-          <Slot index={1} id="" name="" ready={false} />
+          <Slot index={index + 1} id="" name="" ready={false} />
           <SlotControls roomID={data.id} isOccupied={false} isLocal={false} isHost={isHost} />
         </Box>
       )

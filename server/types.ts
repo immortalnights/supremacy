@@ -2,7 +2,6 @@
 export interface IPlayer {
   id: string
   name: string
-  // FIXME is this needed, can IRoom->Player not have it there instead?
   ready: boolean
 }
 
@@ -61,6 +60,8 @@ export interface IActionCallback {
   (ok: boolean, reason: string, data: object): void
 }
 
+export type PlayerRoomAction = "toggle-ready" | "change-name" | "change-room-name" | "change-room-seed" | "add-ai-player"
+
 // Messages from the client to the Server
 export interface ClientToServerEvents {
   "connect_error": (...args: any[]) => void
@@ -71,8 +72,7 @@ export interface ClientToServerEvents {
   "player-create-room": (callback: (ok: boolean) => void) => void
   // Player joins an existing room, callback true if joined otherwise false
   "player-join-room": (id: string, callback: (ok: boolean) => void) => void
-  // Player changes their ready status
-  "player-ready-toggle": () => void
+  "player-room-action": (name: PlayerRoomAction, data: any, callback: IActionCallback) => void
   // Player left the room
   "player-leave-room": () => void
   // Host changes game or room options
@@ -100,6 +100,8 @@ export interface ServerToClientEvents {
   "room-player-kicked": () => void
   // Room updates, settings or start timer
   "room-update": ({ id, options }: { id: string, status: string, options: IGameOptions }) => void
+  // Send an update to all players within the room when anopther player details change
+  "player-changed": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
   // Send an update to all players within the room when another players ready state has changed
   "player-ready-status-changed": ({ id, ready }: { id: string, ready: boolean }) => void
   // Notify players of game created by room

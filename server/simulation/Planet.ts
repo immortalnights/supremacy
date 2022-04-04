@@ -1,10 +1,7 @@
 import crypto from "crypto"
 import plantTypes from "./data/planettypes.json"
 import { IPlanet, IPlanetResources, PlanetType } from "./types"
-
-export const random = (min: number, max: number) => {
-  return (Math.random() * (max - min)) + min
-}
+import { random, randomFloat } from "./utilities"
 
 const PLANET_POPULATION_LIMIT = 30000
 
@@ -38,10 +35,10 @@ export default class Planet implements IPlanet
     this.name = "Lifeless"
     this.habitable = false
     this.type = PlanetType.Lifeless
-    this.radius = Math.floor(random(4000, 25000))
+    this.radius = random(4000, 25000)
     this.population = 0
     this.terraforming = false
-    this.terraformDuration = random(5, 10)
+    this.terraformDuration = randomFloat(5, 10)
     this.capital = false
     this.growth = 0
     this.growthChange = 0
@@ -157,12 +154,12 @@ export default class Planet implements IPlanet
     this.terraform(name)
     this.owner = owner
     this.capital = capital
-    this.population = (Math.random() * 1000) + 1000
-    this.resources.credits = (Math.random() * 10000) + 50000
-    this.resources.food = (Math.random() * 5000) + 2000
-    this.resources.minerals = (Math.random() * 5000) + 2000
-    this.resources.fuels = (Math.random() * 5000) + 2000
-    this.resources.energy = (Math.random() * 5000) + 2000
+    this.population = random(1000, 2000)
+    this.resources.credits = random(50000, 60000)
+    this.resources.food = random(2000, 5000)
+    this.resources.minerals = random(2000, 5000)
+    this.resources.fuels = random(2000, 5000)
+    this.resources.energy = random(2000, 5000)
   }
 
   terraform(name: string)

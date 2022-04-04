@@ -2,10 +2,12 @@ import express from "express"
 import { Server } from "socket.io"
 import http from "http"
 import Player from "./Player"
+import ConnectedPlayer from "./ConnectedPlayer"
 import Room from "./lobby/Room"
 import Game from "./Game"
 import type { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
 import Universe from "./simulation/Universe"
+import AIPlayer from "./AIPlayer"
 
 const app = express()
 
@@ -35,7 +37,7 @@ router.get("/", (req, res) => {
 
 // TODO tidy socket message handling up based on https://socket.io/docs/v4/server-application-structure/
 
-const players: Player[] = []
+const players: ConnectedPlayer[] = []
 const rooms: Room[] = []
 const games: Game<Universe>[] = []
 
@@ -55,7 +57,7 @@ const cleanupRoom = (id: string) => {
   }
 }
 
-const removePlayerFromRoom = (player: Player) => {
+const removePlayerFromRoom = (player: ConnectedPlayer) => {
   if (player.room)
   {
     const room = rooms.find((room) => room.id === player.room?.id)
@@ -73,7 +75,7 @@ const removePlayerFromRoom = (player: Player) => {
   }
 }
 
-const removePlayerFromGame = (player: Player) => {
+const removePlayerFromGame = (player: ConnectedPlayer) => {
   if (player.game)
   {
     const game = games.find((game) => game.id === player.game?.id)
@@ -97,34 +99,42 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
     const u = new Universe()
     u.generate(0) // (opts.seed)
 
-    // join any AI players
-    players.forEach((player) => {
-      // if (player.isAI)
-      // {
-      //   u.join(player.id, true)
-      // }
-    })
-
     return u
   })
 
   games.push(game)
 
+  // Join any AI players
+  players.forEach((player) => {
+    if (player instanceof AIPlayer)
+    {
+      game.join(player)
+    }
+  })
+
   // Notify the players of the game, so they can join it
   players.forEach((player) => {
     console.log(`Notify ${player.id} of new game`)
-    player.socket.emit("game-created", {
-      id: game.id,
-      options: game.options,
-      saved: game.saved,
-      created: game.created,
-      players: game.allocatedPlayers.map((p) => ({
-        id: player.id,
-        name: player.name,
-        ready: player.ready,
-      })),
-      status: game.status,
-    })
+
+    if (player instanceof ConnectedPlayer)
+    {
+      player.socket.emit("game-created", {
+        id: game.id,
+        options: game.options,
+        saved: game.saved,
+        created: game.created,
+        players: game.allocatedPlayers.map((p) => ({
+          id: player.id,
+          name: player.name,
+          ready: player.ready,
+        })),
+        status: game.status,
+      })
+    }
+    else
+    {
+      // AI Player has already joined
+    }
   })
 }
 
@@ -132,7 +142,7 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
 io.on("connection", (socket) => {
   console.log("Client connected", socket.id)
   // Initialize a new Player on a new connection
-  const player = new Player(socket)
+  const player = new ConnectedPlayer(socket)
 
   // Listen to Player events
   // player.events.on("player-create-room", playerCreateRoom)
@@ -200,19 +210,6 @@ io.on("connection", (socket) => {
     callback(!!player.game)
   })
 
-  socket.on("player-game-action", (name: string, data: object, callback: (ok: boolean, reason: string, data: object) => void) => {
-    if (player.game)
-    {
-      console.log("Received player action", name)
-      const result = player.game.world.dispatch(name, player.id, data)
-      callback(result.result, result.message, result.data)
-    }
-    else
-    {
-      console.error("Received action from player not in a game!")
-    }
-  })
-
   socket.on("connect_error", () => {
     console.log("Connection error", socket.id)
   })
@@ -220,8 +217,6 @@ io.on("connection", (socket) => {
   // Clean up the player on disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id)
-    // TODO room the player form any game
-
     // Remove the player from any room
     removePlayerFromRoom(player)
     removePlayerFromGame(player)

@@ -1,5 +1,10 @@
 export const DAYS_PER_YEAR = 48
 
+export type PlayerGameAction = "rename-planet"
+  | "transfer-credits"
+  | "planet-modify-tax"
+  | "purchase-ship"
+
 export enum Difficulty {
   Easy,
   Medium,

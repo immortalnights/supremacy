@@ -19,11 +19,6 @@ interface ServerToResourceEvents {
 
 export type ServerEventEmitter = TypedEmitter<ServerToResourceEvents>
 
-export interface IConnectedPlayer {
-  id: string
-  socket: SocketIO
-}
-
 type UpdateForFn<U> = (id: string) => U
 
 export interface IWorld {
@@ -34,7 +29,7 @@ export interface IWorld {
   // Transfer all player assets to another player
   transferOwnership: (fromPlayerID: string, toPlayerID: string) => void
   // Handle player in-game action
-  dispatch: (action: string, player: string, data: object) => { result: boolean, reason: string }
+  dispatch: (action: string, player: string, data: object) => { result: boolean, reason: string, data: object }
   // Simulate the game world
   simulate: (delta: number) => void
   // Get the game world data for a specific player
