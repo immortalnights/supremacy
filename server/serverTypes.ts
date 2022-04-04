@@ -27,8 +27,16 @@ export interface IConnectedPlayer {
 type UpdateForFn<U> = (id: string) => U
 
 export interface IWorld {
+  // Player joining the game
   join: (player: string, ai: boolean) => boolean
+  // Get static game data to send to the client after joining
+  getStaticData: () => object
+  // Transfer all player assets to another player
   transferOwnership: (fromPlayerID: string, toPlayerID: string) => void
+  // Handle player in-game action
+  dispatch: (action: string, player: string, data: object) => { result: boolean, reason: string }
+  // Simulate the game world
   simulate: (delta: number) => void
+  // Get the game world data for a specific player
   updateFor: UpdateForFn<unknown>
 }

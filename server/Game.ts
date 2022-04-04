@@ -90,6 +90,9 @@ class Game<T extends IWorld> implements IGame {
 
       this.world.join(player.id, false)
 
+      const data = this.world.getStaticData()
+      player.socket.emit("game-static-data", data)
+
       // Inform all other players in the game about the new player
       player.socket.to(this.id).emit("game-player-joined", {
         id: player.id,

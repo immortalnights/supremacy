@@ -1,6 +1,6 @@
 import crypto from "crypto"
 import plantTypes from "./data/planettypes.json"
-import { IPlanet, IResources, PlanetType } from "./types"
+import { IPlanet, IPlanetResources, PlanetType } from "./types"
 
 export const random = (min: number, max: number) => {
   return (Math.random() * (max - min)) + min
@@ -20,13 +20,14 @@ export default class Planet implements IPlanet
   terraforming: boolean
   terraformDuration: number
 
+  capital: boolean
   growth: number
   growthChange: number
   morale: number
   tax: number
   status: string
   location: number // ?
-  resources: IResources
+  resources: IPlanetResources
   multipliers: boolean
 
   constructor(id: number)
@@ -41,6 +42,7 @@ export default class Planet implements IPlanet
     this.population = 0
     this.terraforming = false
     this.terraformDuration = random(5, 10)
+    this.capital = false
     this.growth = 0
     this.growthChange = 0
     this.morale = 0
@@ -150,10 +152,17 @@ export default class Planet implements IPlanet
     return changed
   }
 
-  claim(owner: string, name: string)
+  claim(owner: string, name: string, capital: boolean = false)
   {
     this.terraform(name)
     this.owner = owner
+    this.capital = capital
+    this.population = (Math.random() * 1000) + 1000
+    this.resources.credits = (Math.random() * 10000) + 50000
+    this.resources.food = (Math.random() * 5000) + 2000
+    this.resources.minerals = (Math.random() * 5000) + 2000
+    this.resources.fuels = (Math.random() * 5000) + 2000
+    this.resources.energy = (Math.random() * 5000) + 2000
   }
 
   terraform(name: string)
@@ -161,7 +170,7 @@ export default class Planet implements IPlanet
     const planetTypeKeys = Object.keys(PlanetType)
 
     this.name = name
-    this.population = 1000
+    this.population = 0
     this.habitable = true
     this.type = (planetTypeKeys[random(0, planetTypeKeys.length)] as PlanetType)
     this.population = random(1500, 3000)

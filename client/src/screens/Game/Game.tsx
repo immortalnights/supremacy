@@ -6,6 +6,7 @@ import { IOContext } from "../../data/IOContext"
 import { IPlayer } from "../../data/Player"
 import SolarSystem from "./solarsystem/"
 import Overview from "./overview/"
+import Shipyard from "./shipyard/"
 import { Game as GameData, IGame } from "../../data/Game"
 import "./game.css"
 
@@ -24,7 +25,7 @@ const Game = ({ data }: { data: IGame }) => {
           <Route path="/dock" element="dock" />
           <Route path="/fleet" element="fleet" />
           <Route path="/overview" element={<Overview />} />
-          <Route path="/shipyard" element="shipyard" />
+          <Route path="/shipyard" element={<Shipyard />} />
           <Route path="/surface" element="surface" />
           <Route path="/training" element="training" />
           <Route path="*" element="Game 404" />
@@ -49,6 +50,7 @@ const Game = ({ data }: { data: IGame }) => {
         <Link component={NavLink} to={`/game/${data.id}/shipyard`}>Shipyard</Link>
         <Link component={NavLink} to={`/game/${data.id}/surface`}>Surface</Link>
         <Link component={NavLink} to={`/game/${data.id}/training`}>Training</Link>
+         | <Link component={NavLink} to={`/`}>Quit</Link>
       </Box>
     </>
   )

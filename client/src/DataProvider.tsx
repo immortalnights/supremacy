@@ -4,6 +4,7 @@ import IOProvider from "./data/IOContext"
 import { IPlayer, IRoom, RoomStatus, IGameOptions, IGame, IUpdate } from "./types.d"
 import { Player } from "./data/Player"
 import { Room, AvailableRooms } from "./data/Room"
+import { StaticShips, StaticEquipment } from "./data/StaticData"
 import { Game } from "./data/Game"
 import { SelectedPlanet } from "./data/General"
 import { SolarSystem } from "./data/SolarSystem"
@@ -135,6 +136,11 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(SelectedPlanet)
 }
 
+const handleStaticGameData: TransactionHandler = (data: any, { get, set }) => {
+  set(StaticShips, data.ships)
+  set(StaticEquipment, data.equipment)
+}
+
 const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
   // Apply the game data to the different atoms;
 
@@ -171,6 +177,45 @@ const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, s
   set(Platoons, platoons)
 }
 
+const handlePartialGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
+  const { planets, ships, platoons, ...solarSystem } = data.world
+
+  if (planets)
+  {
+    // Copy the main planets array
+    const existingPlanets = [ ...get(Planets) ]
+
+    planets.forEach((planet) => {
+      const index = existingPlanets.findIndex((p) =>  p.id === planet.id)
+      console.assert(index >= 0, "Invalid planet index", index)
+      existingPlanets[index] = planet
+    })
+
+    set(Planets, existingPlanets)
+  }
+
+  if (ships)
+  {
+    const existingShips = [ ...get(Ships) ]
+
+    ships.forEach((ship) => {
+      const index = existingShips.findIndex((s) => s.id === ship.id)
+      if (index === -1)
+      {
+        existingShips.push(ship)
+      }
+      else
+      {
+        existingShips[index] = ship
+      }
+    })
+
+    set(Ships, existingShips)
+  }
+
+  // TODO rest
+}
+
 interface IMessageHandlerMap {
   [key: string]: TransactionHandler
 }
@@ -189,7 +234,9 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "game-player-joined": handleGamePlayerJoined,
   // "game-player-left": handleGamePlayerLeft,
   "game-player-kicked": handleGamePlayerKicked,
+  "game-static-data": handleStaticGameData,
   "game-update": handleGameUpdate,
+  "partial-game-update": handlePartialGameUpdate,
 }
 
 
@@ -198,7 +245,7 @@ const DataProvider = ({ children }: { children: JSX.Element }) => {
   console.log("Render DataProvider")
   const SocketToRecoil = () => {
     const handleMessage = Recoil.useRecoilTransaction_UNSTABLE((callback) => (action: string, data: any = {}) => {
-      console.log("received", action, data)
+      // console.log("received", action, data)
 
       if (action === "disconnect")
       {

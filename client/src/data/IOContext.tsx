@@ -19,6 +19,7 @@ export interface IIOContext {
   playerToggleReady: () => void,
   joinGame: (id: string) => Promise<void>
   leaveGame: () => void,
+  action: (name: string, data: any) => Promise<void>
 }
 
 // Connection Context
@@ -31,6 +32,7 @@ export const IOContext = React.createContext<IIOContext>({
   playerToggleReady: () => {},
   joinGame: () => Promise.reject(),
   leaveGame: () => {},
+  action: (name: string, data: any) => Promise.reject(),
 })
 
 export type MessageHandler = (action: string, data: any) => void
@@ -158,6 +160,23 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       socket?.emit("player-leave-game")
       handleMessage("game-player-kicked", {})
     },
+    action: (name: string, data: any) => {
+      console.assert(socket, "Socket is invalid!")
+      return new Promise<void>((resolve, reject) => {
+        console.debug(`Sending ${name}`, data)
+        socket?.emit("player-game-action", name, data, (ok: boolean, reason: string, data: object) => {
+          if (ok)
+          {
+            handleMessage("partial-game-update", data)
+            resolve()
+          }
+          else
+          {
+            reject(reason)
+          }
+        })
+      })
+    }
   }
 
   console.log("Socket id", socket?.id)

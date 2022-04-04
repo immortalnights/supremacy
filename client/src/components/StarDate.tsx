@@ -1,7 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { SolarSystem as SolarSystemData } from "../data/SolarSystem"
-import type { ISolarSystem } from "../simulation/types.d"
+import { SolarSystem as SolarSystemData, ISolarSystem } from "../data/SolarSystem"
 import { formatDate } from "../data/General"
 
 export const StarDate = () => {

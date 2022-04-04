@@ -57,6 +57,10 @@ export interface IUpdate<T> {
   world: T
 }
 
+export interface IActionCallback {
+  (ok: boolean, reason: string, data: object): void
+}
+
 // Messages from the client to the Server
 export interface ClientToServerEvents {
   "connect_error": (...args: any[]) => void
@@ -76,6 +80,8 @@ export interface ClientToServerEvents {
   // Player joins an existing game, callback true if joined otherwise false
   "player-join-game": (id: string, callback: (ok: boolean) => void) => void
   "player-leave-game": () => void
+  // Generic game play action
+  "player-game-action": (name: string, data: object, callback: IActionCallback) => void
 }
 
 // Messages from the server to the client
@@ -104,6 +110,8 @@ export interface ServerToClientEvents {
   "game-player-joined": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
   // Send leavers details to all other players in the game
   "game-player-kicked": ({ id }: { id: string }) => void
+  // Static game data required by the client
+  "game-static-data": (data: object) => void
   // Send game update to player
   "game-update": (data: IUpdate<unknown>) => void
 }

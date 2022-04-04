@@ -19,7 +19,7 @@ const PlanetList = () => {
 
   const handlePlanetClick = (id: number) => {
     setSelected(id)
-    navigate(`/game/${game?.id}/overview`)
+    // navigate(`/game/${game?.id}/overview`)
   }
 //<ListItemButton key={planet.id} component={RouterLink} to={`/game/${game?.id}/overview/${planet.id}`}>
   return (

@@ -200,6 +200,19 @@ io.on("connection", (socket) => {
     callback(!!player.game)
   })
 
+  socket.on("player-game-action", (name: string, data: object, callback: (ok: boolean, reason: string, data: object) => void) => {
+    if (player.game)
+    {
+      console.log("Received player action", name)
+      const result = player.game.world.dispatch(name, player.id, data)
+      callback(result.result, result.message, result.data)
+    }
+    else
+    {
+      console.error("Received action from player not in a game!")
+    }
+  })
+
   socket.on("connect_error", () => {
     console.log("Connection error", socket.id)
   })
