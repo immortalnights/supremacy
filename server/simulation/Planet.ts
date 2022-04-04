@@ -8,8 +8,8 @@ const PLANET_POPULATION_LIMIT = 30000
 export default class Planet implements IPlanet
 {
   id: number
-  owner?: string
   name: string
+  owner?: string
   habitable: boolean
   type: PlanetType
   radius: number
@@ -31,8 +31,8 @@ export default class Planet implements IPlanet
   {
     console.log("Planet:constructor")
     this.id = id
-    this.owner = undefined
     this.name = "Lifeless"
+    this.owner = undefined
     this.habitable = false
     this.type = PlanetType.Lifeless
     this.radius = random(4000, 25000)
@@ -154,9 +154,11 @@ export default class Planet implements IPlanet
     this.terraform(name)
     this.owner = owner
     this.capital = capital
+    this.type = capital ? PlanetType.Metropolis : this.type
     this.population = random(1000, 2000)
     this.resources.credits = random(50000, 60000)
-    this.resources.food = random(2000, 5000)
+    this.resources.food = random(3000, 5000)
+    this.resources.foodChange = 0
     this.resources.minerals = random(2000, 5000)
     this.resources.fuels = random(2000, 5000)
     this.resources.energy = random(2000, 5000)
@@ -175,13 +177,11 @@ export default class Planet implements IPlanet
     this.growthChange = 0
     this.morale = 75
     this.tax = 25
-    this.resources = {
-      credits: 0,
-      food: random(1000, 3000),
-      foodChange: 0,
-      minerals: 20,
-      fuels: 150,
-      energy: 35
-    }
+    this.resources.credits = 0
+    this.resources.food = random(1000, 3000)
+    this.resources.foodChange = 0
+    this.resources.minerals = 20
+    this.resources.fuels = 150
+    this.resources.energy = 3
   }
 }

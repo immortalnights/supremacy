@@ -1,7 +1,3 @@
-dt {
-	font-weight: 600;
-}
-
 .icon-grid {
 	margin: auto 0;
 }
@@ -14,7 +10,6 @@ dt {
 	border: 1px solid darkgray;
 	text-align: center;
 }
-
 .icon-grid .empty {
 	color: lightgray;
 }

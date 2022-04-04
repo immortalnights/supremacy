@@ -43,13 +43,13 @@ const Game = ({ data }: { data: IGame }) => {
         }}
       >
         <Link component={NavLink} to={`/game/${data.id}/`}>Solar System</Link>
-        <Link component={NavLink} to={`/game/${data.id}/combat`}>Combat</Link>
+        <Link component={NavLink} to={`/game/${data.id}/overview`}>Overview</Link>
+        <Link component={NavLink} to={`/game/${data.id}/surface`}>Surface</Link>
         <Link component={NavLink} to={`/game/${data.id}/dock`}>Dock</Link>
         <Link component={NavLink} to={`/game/${data.id}/fleet`}>Fleet</Link>
-        <Link component={NavLink} to={`/game/${data.id}/overview`}>Overview</Link>
         <Link component={NavLink} to={`/game/${data.id}/shipyard`}>Shipyard</Link>
-        <Link component={NavLink} to={`/game/${data.id}/surface`}>Surface</Link>
         <Link component={NavLink} to={`/game/${data.id}/training`}>Training</Link>
+        <Link component={NavLink} to={`/game/${data.id}/combat`}>Combat</Link>
          | <Link component={NavLink} to={`/`}>Quit</Link>
       </Box>
     </>
@@ -67,7 +67,6 @@ const GameLoader = () => {
     const join = async (id: string) => {
       try
       {
-        console.log("join?")
         await joinGame(id)
       }
       catch (error)
@@ -81,7 +80,6 @@ const GameLoader = () => {
     {
       if (params.id)
       {
-        console.log("join?1")
         join(params.id)
       }
       else
@@ -98,7 +96,7 @@ const GameLoader = () => {
     }
   }, [])
 
-  return (game ? <Game data={game} /> : <div>Joining Room...</div>)
+  return (game ? <Game data={game} /> : <div>Joining Game...</div>)
 }
 
 export default GameLoader

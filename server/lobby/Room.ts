@@ -12,6 +12,7 @@ const randomSeedString = (length: number = 6) => {
 }
 
 const ROOM_START_COUNTDOWN = 3
+const MINIMUM_REQUIRED_PLAYERS = 2
 
 class Room implements IRoom {
   id: string
@@ -160,8 +161,6 @@ class Room implements IRoom {
       // Remove all players from the room
       this.players = []
       this.status = RoomStatus.Closed
-
-      this.events.emit("room-cleanup", this.id)
     }
     else
     {
@@ -215,6 +214,8 @@ class Room implements IRoom {
       {
         const p = new AIPlayer()
         this.joinAI(p)
+
+        result.result = true
         break
       }
     }
@@ -263,28 +264,41 @@ class Room implements IRoom {
     })
   }
 
+  isReady()
+  {
+    return (this.players.length === MINIMUM_REQUIRED_PLAYERS && this.players.every((p) => p.ready))
+  }
+
+  cancelCountdown(status: RoomStatus)
+  {
+    this.status = status
+    // Type cast is required as setInterval returns a NodeJS.Timer...
+    clearInterval(this.countdownTimer as NodeJS.Timeout)
+    this.countdownTimer = undefined
+    this.countdown = 0
+  }
+
   handleReadyStateChanged()
   {
     // If all players are ready, begin the countdown (minimum player count should not be fixed)
-    if (this.players.length === 2 && this.players.every((p) => p.ready))
+    if (this.isReady())
     {
       console.log(`All players are ready in room ${this.id}, begin countdown`)
 
       const doCountdown = () => {
         this.countdown -= 1
 
-        if (this.countdown === 0)
+        if (false === this.isReady())
         {
-          // TODO
+          console.log(`Start countdown cancelled for room ${this.id}`)
+          this.cancelCountdown(RoomStatus.Setup)
+        }
+        else if (0 === this.countdown)
+        {
           console.log(`Start countdown complete for room ${this.id}`)
           // Type cast is required as setInterval returns a NodeJS.Timer...
-          clearInterval(this.countdownTimer as NodeJS.Timeout)
-          this.countdownTimer = undefined
-
+          this.cancelCountdown(RoomStatus.Closed)
           this.events.emit("create-game", { ...this.options }, [ ...this.players ])
-
-          this.status = RoomStatus.Closed
-          this.countdown = 0
         }
 
         this.sendRoomUpdate()
@@ -301,18 +315,15 @@ class Room implements IRoom {
     // Not everyone is ready, cancel the countdown
     else if (this.status === RoomStatus.Starting)
     {
-      this.status = RoomStatus.Setup
-      // Type cast is required as setInterval returns a NodeJS.Timer...
-      clearInterval(this.countdownTimer as NodeJS.Timeout)
-      this.countdownTimer = undefined
-      this.countdown = 0
+      console.log(`Start countdown cancelled for room ${this.id}`)
+      this.cancelCountdown(RoomStatus.Setup)
       this.sendRoomUpdate()
     }
   }
 
   empty(): boolean
   {
-    return this.players.length === 0
+    return this.players.length === 0 || this.players.every((player) => player instanceof AIPlayer)
   }
 }
 

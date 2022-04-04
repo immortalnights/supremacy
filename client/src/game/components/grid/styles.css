@@ -7,7 +7,7 @@ table.grid td {
 	width: 8em;
 	border-width: 1px;
 	border-style: none solid solid none;
-	border-color: purple;
+	border-color: rgb(113, 113, 113);
 	cursor: pointer;
 }
 
@@ -21,4 +21,25 @@ table.grid td.planet.friendly {
 
 table.grid td.planet.enemy {
 	color: red;
+}
+
+.platoon.grid td {
+	border-style: solid;
+}
+
+.platoon.grid td.spacer {
+	width: 2em;
+	border-style: none;
+}
+
+.platoon.grid td {
+	user-select: none;
+}
+
+.platoon.grid .platoon-name {
+	width: 4em;
+}
+
+.platoon.grid .platoon-troops {
+	width: 3em;
 }

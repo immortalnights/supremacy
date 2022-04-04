@@ -41,55 +41,27 @@ const players: ConnectedPlayer[] = []
 const rooms: Room[] = []
 const games: Game<Universe>[] = []
 
-const cleanupRoom = (id: string) => {
-  const index = rooms.findIndex((room) => room.id === id)
-
-  if (index !== -1)
+const cleanupRoom = (room: Room) => {
+  if (room.empty())
   {
-    const room = rooms[index]
-    if (room.empty())
+    const index = rooms.indexOf(room)
+    if (index !== -1)
     {
-      room.events.removeAllListeners()
-
       const removed = rooms.splice(index, 1)[0]
       console.info(`Room ${removed.id} deleted`)
     }
   }
 }
 
-const removePlayerFromRoom = (player: ConnectedPlayer) => {
-  if (player.room)
+const cleanupGame = (game: Game<any>) => {
+  if (game.empty())
   {
-    const room = rooms.find((room) => room.id === player.room?.id)
-
-    if (room)
+    const index = games.indexOf(game)
+    if (index !== -1)
     {
-      room.leave(player)
+      const removed = games.splice(index, 1)[0]
+      console.info(`Game ${removed.id} deleted`)
     }
-    else
-    {
-      console.warn(`Failed to find room ${player.room.id} for player ${player.id}`)
-    }
-
-    player.room = undefined
-  }
-}
-
-const removePlayerFromGame = (player: ConnectedPlayer) => {
-  if (player.game)
-  {
-    const game = games.find((game) => game.id === player.game?.id)
-
-    if (game)
-    {
-      game.leave(player)
-    }
-    else
-    {
-      console.warn(`Failed to find game ${player.game.id} for player ${player.id}`)
-    }
-
-    player.game = undefined
   }
 }
 
@@ -114,10 +86,10 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
 
   // Notify the players of the game, so they can join it
   players.forEach((player) => {
-    console.log(`Notify ${player.id} of new game`)
-
     if (player instanceof ConnectedPlayer)
     {
+      console.log(`Notify ${player.id} of new game`)
+
       player.socket.emit("game-created", {
         id: game.id,
         options: game.options,
@@ -145,8 +117,27 @@ io.on("connection", (socket) => {
   const player = new ConnectedPlayer(socket)
 
   // Listen to Player events
-  // player.events.on("player-create-room", playerCreateRoom)
-  // player.events.on("player-join-room", playerJoinRoom)
+  const handleLeaveRoom = () => {
+    const room = player.room
+    if (room)
+    {
+      player.handleLeaveRoom()
+      // Immediately clean up the room, will prevent the host reconnecting to
+      // their previous room as a player (and the room no longer having a host).
+      cleanupRoom(room)
+    }
+  }
+  const handleLeaveGame = () => {
+    const game = player.game
+    if (game)
+    {
+      player.handleLeaveGame()
+      // Delay the game clean up to allow for reconnection
+      // FIXME apply a timer to the game itself, to handle
+      // multiple reconnections
+      setTimeout(() => cleanupGame(game), 5000)
+    }
+  }
 
   socket.on("request-rooms", () => {
     socket.emit("room-list", rooms.map((room) => room.toJSON()))
@@ -164,7 +155,6 @@ io.on("connection", (socket) => {
     {
       const room = new Room(io, player)
 
-      room.events.once("room-cleanup", cleanupRoom)
       room.events.once("create-game", handleCreateGame)
 
       console.log(`Player ${player.id} created room ${room.id}`)
@@ -181,7 +171,15 @@ io.on("connection", (socket) => {
     console.log(`Player ${player.id} attempting to join room ${id}`)
 
     const room = rooms.find((room) => room.id === id)
-    if (room && room.players.length < room.slots)
+    if (!room)
+    {
+      console.warn(`Room ${id} does not exist`)
+    }
+    else  if (room.players.length === room.slots)
+    {
+      console.warn(`Room ${id} is full`)
+    }
+    else
     {
       room.join(player)
       player.handleJoinRoom(room)
@@ -190,25 +188,33 @@ io.on("connection", (socket) => {
     callback(!!player.room)
   })
 
+  socket.on("player-leave-room", handleLeaveRoom)
+
   socket.on("player-join-game", (id, callback) => {
     console.log(`Player ${player.id} attempting to join game ${id}`)
 
     const game = games.find((game) => game.id === id)
-    if (game && game.canJoin(player))
+    if (!game)
     {
-      game.join(player)
+      console.warn(`Game ${id} does not exist`)
+    }
+    else if (false === game.canJoin(player))
+    {
+      console.warn(`Cannot join game ${id}`)
+    }
+    else
+    {
       player.handleJoinGame(game)
+      game.join(player)
 
       // If the game has all the players, start
       game.start()
     }
-    else
-    {
-      console.warn(`Player ${player.id} cannot join game ${game?.id}`)
-    }
 
     callback(!!player.game)
   })
+
+  socket.on("player-leave-game", handleLeaveGame)
 
   socket.on("connect_error", () => {
     console.log("Connection error", socket.id)
@@ -217,16 +223,17 @@ io.on("connection", (socket) => {
   // Clean up the player on disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id)
-    // Remove the player from any room
-    removePlayerFromRoom(player)
-    removePlayerFromGame(player)
+    // Remove the player from any room or game
+    handleLeaveRoom()
+    handleLeaveGame()
 
     // Remove the player entirely
     const index = players.indexOf(player)
     players.splice(index, 1)
 
-    // Stop listening to the player
+    // Stop listening to the player events
     player.events.removeAllListeners()
+    player.socket.removeAllListeners()
   })
 
   // Remember the player

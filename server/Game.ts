@@ -10,7 +10,7 @@ import AIPlayer from "./AIPlayer"
 
 class Game<T extends IWorld> implements IGame {
   id: string
-  // The players that are supposed to be in this game
+  // The players that are setup the game
   allocatedPlayers: string[]
   players: Player[]
   options: IGameOptions
@@ -54,19 +54,24 @@ class Game<T extends IWorld> implements IGame {
 
   join(player: Player)
   {
-    console.log(`Player ${player.id} joined game ${this.id}`)
+    console.log(`Player ${player.id} joining game ${this.id}`)
 
+    let replacedPlayer: string | undefined
     const allocatedPlayer = this.allocatedPlayers.find((pID) => pID === player.id)
-    // If this isn't an allocated player; identify the missing player and transfer all items to the new player
+    // If this isn't an allocated player; identify the missing player so that
+    // the new player can take ownership
     if (!allocatedPlayer)
     {
-      const missingPlayer = this.allocatedPlayers.find((allocatedPlayerID) => {
+      const index = this.allocatedPlayers.findIndex((allocatedPlayerID) => {
         return !this.players.find((activePlayer) => allocatedPlayerID === activePlayer.id)
       })
 
-      if (missingPlayer)
+      if (index !== -1)
       {
-        this.world.transferOwnership(missingPlayer, player.id)
+        replacedPlayer = this.allocatedPlayers[index]
+        // Replace the player in the allocatedPlayers list to handle future reconnection
+        this.allocatedPlayers.splice(index, 1)
+        this.allocatedPlayers.push(player.id)
       }
     }
 
@@ -90,7 +95,7 @@ class Game<T extends IWorld> implements IGame {
         status: this.status,
       })
 
-      this.world.join(player.id, false)
+      this.world.join(player.id, false, replacedPlayer)
 
       const data = this.world.getStaticData()
       player.socket.emit("game-static-data", data)
@@ -101,22 +106,26 @@ class Game<T extends IWorld> implements IGame {
         name: player.name,
         ready: true,
       })
+      console.log(`Player ${player.id} joined game ${this.id}`)
     }
     else if (player instanceof AIPlayer)
     {
       this.world.join(player.id, true)
+      console.log(`AIPlayer ${player.id} joined game ${this.id}`)
     }
   }
 
   leave(player: Player)
   {
-    console.log(`Player ${player.id} left game ${this.id}`)
-
     const index = this.players.findIndex((p) => p.id === player.id)
+
+    console.assert(index !== -1, `Player ${player.id} is not in game ${this.id}`)
 
     if (index !== -1)
     {
       this.players.splice(index, 1)
+
+      this.world.leave(player.id)
 
       if (player instanceof ConnectedPlayer)
       {
@@ -128,11 +137,13 @@ class Game<T extends IWorld> implements IGame {
       this.io.to(this.id).emit("game-player-left", {
         id: player.id
       })
+      console.log(`Player ${player.id} left game ${this.id}`)
     }
-    else
-    {
-      console.warn(`Player ${player.id} is not in game ${this.id}`)
-    }
+  }
+
+  empty()
+  {
+    return this.players.length === 0 || this.players.every((p) => p instanceof AIPlayer)
   }
 
   handlePlayerAction(player: Player, name: string, data: object, callback: IActionCallback)

@@ -1,4 +1,3 @@
-import crypto from "crypto"
 import Planet from "./Planet"
 import Ship from "./Ship"
 import Platoon from "./Platoon"
@@ -19,16 +18,7 @@ import type { IWorld } from "../serverTypes"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
 
-
-class AI
-{
-  id: string
-
-  constructor()
-  {
-    this.id = crypto.randomUUID()
-  }
-}
+const MAXIMUM_PLAYERS = 2
 
 export default class Universe implements IUniverse, IWorld
 {
@@ -59,39 +49,63 @@ export default class Universe implements IUniverse, IWorld
 
   generate(seed: number)
   {
-    for (let i = 0; i < 6; i++)
+    // Initial planets based on difficulty, 8, 16, 32
+    for (let i = 0; i < 8; i++)
     {
       this.planets.push(new Planet(i))
     }
   }
 
-  join(player: string, ai: boolean)
+  join(player: string, ai: boolean, replacedPlayer?: string)
   {
     let ok = false
-    if (this.players.length < 2) // Maximum players
+    console.assert(this.players.length < MAXIMUM_PLAYERS, `Universe is full!`) // Maximum players
+    this.players.push(player)
+
+    if (ai)
     {
-      this.players.push(player)
+      // TODO
+    }
 
-      if (ai)
-      {
-        // TODO
-      }
-
+    if (!replacedPlayer)
+    {
+      // New players claim a starbase planet
       // Fist player, starts at the top
+      let starbase: Planet | undefined
       if (this.players.length === 1)
       {
-        this.planets[0].claim(player, "Starbase!", true)
-        ok = true
+        starbase = this.planets[0]
       }
       else if (this.players.length === 2)
       {
-        this.planets[this.planets.length - 1].claim(player, "Starbase!", true)
+        starbase = this.planets[this.planets.length - 1]
+      }
+
+      if (starbase)
+      {
+        starbase.claim(player, "Starbase!", true)
+        console.log(`Player ${player} claimed planet ${starbase.id}`)
         ok = true
       }
     }
+    else
+    {
+      this.transferOwnership(replacedPlayer, player)
+      this.players.push(player)
+    }
 
-
+    console.log(`Player ${player} has joined the Universe`, this.players.length)
     return ok
+  }
+
+  leave(player: string)
+  {
+    const index = this.players.indexOf(player)
+    if (index !== -1)
+    {
+      this.players.splice(index, 1)
+      console.log(`Player ${player} has left the Universe`, this.players.length)
+    }
   }
 
   toJSON()
@@ -127,18 +141,18 @@ export default class Universe implements IUniverse, IWorld
         planet.owner = toPlayerID
       }
     })
-    // this.ships.forEach((ship) => {
-    //   if (ship.owner === fromPlayerID)
-    //   {
-    //     ship.owner = toPlayerID
-    //   }
-    // })
-    // this.platoons.forEach((platoon) => {
-    //   if (platoon.owner === fromPlayerID)
-    //   {
-    //     platoon.owner = toPlayerID
-    //   }
-    // })
+    this.ships.forEach((ship) => {
+      if (ship.owner === fromPlayerID)
+      {
+        ship.owner = toPlayerID
+      }
+    })
+    this.platoons.forEach((platoon) => {
+      if (platoon.owner === fromPlayerID)
+      {
+        platoon.owner = toPlayerID
+      }
+    })
 
     console.log(`Transferred items from '${fromPlayerID}' to '${toPlayerID}'`)
   }

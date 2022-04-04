@@ -1,17 +1,20 @@
 import React from "react"
 import Recoil from "recoil"
-import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText } from "@mui/material"
+import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText, Box, Stack } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
-import { SelectedPlanet } from "../../data/General"
-import { Planets as PlanetData } from "../../data/Planets"
+import { SelectedPlanet as SelectedPlanetId } from "../../data/General"
+import { SelectedPlanet } from "../../data/Planets"
+import { Planets as PlanetData, IPlanet } from "../../data/Planets"
 import { Game as GameData } from "../../data/Game"
 import { StarDate } from "../components/StarDate"
+import { Player } from "../../data/Player"
+import { PlanetType } from "../../simulation/types"
 
 
 const PlanetList = () => {
   const game = Recoil.useRecoilValue(GameData)
   const planets = Recoil.useRecoilValue(PlanetData)
-  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanet)
+  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetId)
   const navigate = useNavigate()
 
   const handlePlanetClick = (id: number, nav: boolean = false) => {
@@ -37,6 +40,25 @@ const PlanetList = () => {
   )
 }
 
+const SelectedPlanetInfo = () => {
+  const planet = Recoil.useRecoilValue(SelectedPlanet)
+  const player = Recoil.useRecoilValue(Player)
+
+  return (
+    <div>
+      <Stack direction="column" alignItems="center">
+        <div><StarDate /></div>
+        <div style={{ height: 96, width: 96, backgroundColor: "lightgray", padding: 4 }}>{planet?.type}</div>
+        <div>{planet?.name}</div>
+        <div>
+          <Button disabled={!planet || planet.type !== PlanetType.Lifeless}>Terraform</Button>
+          <Button disabled={!planet || !planet.owner || planet.owner === player.id}>Espionage</Button>
+        </div>
+      </Stack>
+    </div>
+  )
+}
+
 const SolarSystem = () => {
   return (
     <Grid container>
@@ -44,15 +66,7 @@ const SolarSystem = () => {
         <PlanetList />
       </Grid>
       <Grid item xs={4}>
-        <div>
-          <div><StarDate /></div>
-          <div>image</div>
-          <div>display name</div>
-        </div>
-        <div>
-          <Button>Terraform</Button>
-          <Button>Espionage</Button>
-        </div>
+        <SelectedPlanetInfo />
       </Grid>
     </Grid>
   )

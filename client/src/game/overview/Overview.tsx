@@ -1,46 +1,15 @@
 import React from "react"
 import Recoil from "recoil"
 import { IOContext } from "../../data/IOContext"
-import { Box, Button, TextField } from "@mui/material"
+import { Box, Button, Stack, TextField } from "@mui/material"
 import { IPlayer, Player } from "../../data/Player"
 import { SelectedPlanet, IPlanet } from "../../data/Planets"
 import { StarDate } from "../components/StarDate"
 import { useNavigate } from "react-router"
+import HoldButton from "../components/HoldButton"
+import "./styles.css"
+import PlanetGrid from "../components/grid/PlanetGrid"
 
-const HoldButton = ({ onHold, children }: { onHold: (modifier: boolean) => void, children: JSX.Element | string }) => {
-  const intervalRef = React.useRef<number | undefined>(undefined)
-  const didHoldRef = React.useRef<boolean>(false)
-
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    if (didHoldRef.current === false)
-    {
-      onHold(event.ctrlKey)
-      didHoldRef.current = false
-    }
-  }
-
-  const handleMouseDown = (event: React.MouseEvent<HTMLButtonElement>) => {
-    didHoldRef.current = false
-    if (!intervalRef.current)
-    {
-      intervalRef.current = window.setInterval(() => {
-        didHoldRef.current = true
-        onHold(event.ctrlKey)
-      }, 100)
-    }
-  }
-
-  const handleMouseUp = (event: React.MouseEvent<HTMLButtonElement>) => {
-    window.clearInterval(intervalRef.current)
-    intervalRef.current = undefined
-  }
-
-  React.useEffect(() => {
-    return () => window.clearInterval(intervalRef.current)
-  }, [])
-
-  return <Button onClick={handleClick} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}>{children}</Button>
-}
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
   const { action } = React.useContext(IOContext)
@@ -138,7 +107,7 @@ const IconGrid = (props: any) => {
 
   return (
     <div className="icon-grid">
-      <table>
+      <table style={{ width: "100%" }}>
         <tbody>{rows}</tbody>
       </table>
     </div>
@@ -196,10 +165,6 @@ const InlineName = ({ label, value, onCancel, onComplete }: any) => {
   )
 }
 
-const PlanetGrid = (props: any) => {
-  return null
-}
-
 const Message = () => {
   return null
 }
@@ -227,25 +192,24 @@ const PlanetOverview = ({ planet }: { planet: IPlanet }) => {
     })
   }
   const onSelectItem = () => {}
-  const selected = null
 
   return (
-    <div>
-      <div className="flex-columns">
-        <div className="flex flex-rows" style={{margin: 'auto 10px', flex: '0 1 0'}}>
+    <>
+      <Stack direction="row">
+        <div>
           <Button onClick={onStartRename}>Rename</Button>
           <Button onClick={onTransferCredits} disabled={planet?.capital} style={{whiteSpace: 'nowrap'}}>Transfer Credits</Button>
         </div>
         <PlanetDetails planet={planet} />
-      </div>
-      <div className="flex-columns">
+      </Stack>
+      <Stack direction="row">
         <div>
           {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : <Message />}
-          <PlanetGrid selected={planet} player={{id: planet?.owner}} onSelectItem={onSelectItem} />
+          <PlanetGrid onSelectItem={onSelectItem} />
         </div>
         <OverviewSlots planet={planet} />
-      </div>
-    </div>
+      </Stack>
+    </>
   )
 }
 
@@ -268,9 +232,22 @@ const AccessDenied = () => {
 const Overview = () => {
   const player = Recoil.useRecoilValue(Player) as IPlayer
   const planet = Recoil.useRecoilValue(SelectedPlanet) as IPlanet
-  const isOwner = (planet.owner === player.id)
 
-  return isOwner ? (<PlanetOverview planet={planet} />) : (<AccessDenied />)
+  let content
+  if (!planet)
+  {
+    content = (<div>Loading...</div>)
+  }
+  else if (planet.owner !== player.id)
+  {
+    content = (<AccessDenied />)
+  }
+  else
+  {
+    content = (<PlanetOverview planet={planet} />)
+  }
+
+  return content
 }
 
 export default Overview

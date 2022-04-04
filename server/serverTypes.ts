@@ -13,8 +13,6 @@ interface ServerToResourceEvents {
   "player-create-room": (player: IPlayer) => void
   // Player wants to join an existing room
   "player-join-room": (player: IPlayer, id: string) => void
-  // Room is empty; delete it
-  "room-cleanup": (id: string) => void
 }
 
 export type ServerEventEmitter = TypedEmitter<ServerToResourceEvents>
@@ -23,11 +21,11 @@ type UpdateForFn<U> = (id: string) => U
 
 export interface IWorld {
   // Player joining the game
-  join: (player: string, ai: boolean) => boolean
+  join: (player: string, ai: boolean, replacedPlayer?: string) => boolean
+  // Player leaving the game
+  leave: (player: string) => void
   // Get static game data to send to the client after joining
   getStaticData: () => object
-  // Transfer all player assets to another player
-  transferOwnership: (fromPlayerID: string, toPlayerID: string) => void
   // Handle player in-game action
   dispatch: (action: string, player: string, data: object) => { result: boolean, reason: string, data: object }
   // Simulate the game world
