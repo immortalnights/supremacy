@@ -3,6 +3,39 @@ import PropTypes from 'prop-types'
 import Button from '../button'
 import './styles.css'
 
+
+// const UNUSED_InlineName = ({ label, value, onCancel, onComplete }: any) => {
+//   const [ name, setName ] = React.useState(value)
+
+//   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+//     event.preventDefault()
+//     onComplete(name)
+//   }
+
+//   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+//     if (event.key === "Escape")
+//     {
+//       onCancel()
+//     }
+//   }
+
+//   return (
+//     <form onSubmit={handleSubmit}>
+//       <TextField
+//         name="planetname"
+//         id="planetname"
+//         label={label}
+//         variant="standard"
+//         defaultValue={name}
+//         onChange={(event) => setName(event.target.value)}
+//         onKeyDown={handleKeyDown}
+//         onFocus={(event: React.FocusEvent<HTMLInputElement>) => event.target.select()}
+//         autoFocus
+//         autoComplete="off" />
+//     </form>
+//   )
+// }
+
 const InlineName = props => {
 	const onSubmit = event => {
 		event.preventDefault()

@@ -1,11 +1,11 @@
 import React from "react"
 import Recoil from "recoil"
 import { Grid, Stack, Button, Typography } from "@mui/material"
-import { IOContext } from "../../../data/IOContext"
-import { CapitalPlanet, IPlanet } from "../../../data/Planets"
-import { SolarSystem as SolarSystemData, ISolarSystem } from "../../../data/SolarSystem"
-import { Difficulty } from "../../../simulation/types"
-import { StaticShips, IShipList, IShipDetails } from "../../../data/StaticData"
+import { IOContext } from "../../data/IOContext"
+import { CapitalPlanet, IPlanet } from "../../data/Planets"
+import { SolarSystem as SolarSystemData, ISolarSystem } from "../../data/SolarSystem"
+import { Difficulty } from "../../simulation/types"
+import { StaticShips, IShipList, IShipDetails } from "../../data/StaticData"
 
 const ItemDetails = ({ label, value, units = "" }: { label: string, units?: string, value: string | number }) => {
   return (<Typography variant="caption" display="block">{value} {units} : {label}</Typography>)

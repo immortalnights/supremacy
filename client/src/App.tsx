@@ -13,14 +13,14 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
-import DataProvider from "./DataProvider"
+import DataProvider from "./data/DataProvider"
 import ConnectionStatus from "./lobby/ConnectionStatus"
 import { IOContext } from "./data/IOContext"
 import Menu from "./screens/Menu"
-import Setup from "./screens/Setup"
-import Browse from "./screens/Browse"
-import Room from "./screens/Room"
-import Game from "./screens/Game"
+import Setup from "./lobby/Setup"
+import Browse from "./lobby/Browse"
+import Room from "./lobby/Room"
+import Game from "./game"
 import "./App.css"
 
 const theme = createTheme()

@@ -1,10 +1,10 @@
 import React from "react"
 import Recoil from "recoil"
-import { IOContext } from "../../../data/IOContext"
+import { IOContext } from "../../data/IOContext"
 import { Box, Button, TextField } from "@mui/material"
-import { IPlayer, Player } from "../../../data/Player"
-import { SelectedPlanet, IPlanet } from "../../../data/Planets"
-import { StarDate } from "../../../components/StarDate"
+import { IPlayer, Player } from "../../data/Player"
+import { SelectedPlanet, IPlanet } from "../../data/Planets"
+import { StarDate } from "../components/StarDate"
 import { useNavigate } from "react-router"
 
 const HoldButton = ({ onHold, children }: { onHold: (modifier: boolean) => void, children: JSX.Element | string }) => {
