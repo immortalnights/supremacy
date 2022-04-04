@@ -10,6 +10,8 @@
 
 # production
 /build
+/public/supremacy
+/src/simulation
 
 # misc
 .DS_Store
@@ -21,7 +23,3 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# runtime
-*.d.ts
-/saved_games

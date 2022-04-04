@@ -1,0 +1,79 @@
+html {
+  height: 100vh;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+.flex-columns {
+  display: flex;
+}
+
+.flex-columns > * {
+  flex: 1 1 0px;
+}
+
+.flex
+{
+  display: flex;
+}
+
+.flex > * {
+  flex: 1 1 0px;
+}
+
+.flex-columns {
+
+}
+
+.flex-rows {
+  flex-direction: column;
+}
+
+.flex .flex-spacer {
+  flex-basis: 100%;
+}
+
+.space-around {
+  justify-content: space-around;
+}
+
+dl {
+  display: flex;
+  flex-wrap: wrap;
+}
+dt {
+  width: 40%;
+}
+dd {
+  margin-left: auto;
+  width: 60%;
+}
+
+.stacked-buttons {
+  display: flex;
+  flex-direction: column;
+  margin: auto 1em;
+}
+
+button {
+  user-select: none;
+}
+
+button.small {
+  font-size: .75em;
+  line-height: 1em;
+}

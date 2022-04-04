@@ -1,0 +1,158 @@
+{
+	"battlecruiser":
+	{
+		"type": "B-29 Battle Cruiser",
+		"description": "Carries four fully equipped platoons into battle.",
+		"shortName": "Battle",
+		"requiredCrew": 21,
+		"capacity": {
+			"civilians": 4500,
+			"cargo": 600,
+			"fuels": 1000,
+			"platoons": 4
+		},
+		"speed": 1,
+		"range": 2000,
+		"cost": {
+			"credits": 5250,
+			"energy": 366,
+			"minerals": 95
+		},
+		"value": 3850,
+		"harvester": false
+	},
+	"generator":
+	{
+		"type": "Solar-Satellite Generator",
+		"description": "Transmits solar energy to the planet from orbit.",
+		"shortName": "Solar",
+		"requiredCrew": 0,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 0,
+			"fuels": null,
+			"platoons": 0
+		},
+		"speed": 1,
+		"range": null,
+		"cost": {
+			"credits": 975,
+			"energy": 92,
+			"minerals": 7
+		},
+		"value": 13550,
+		"harvester": {
+			"location": "orbit",
+			"resources": {
+				"food": 0,
+				"minerals": 0,
+				"fuels": 0,
+				"energy": 6
+			}
+		}
+	},
+	"atmos":
+	{
+		"type": "Atmosphere Processor",
+		"description": "Generates new living plants from lifeless ones.",
+		"shortName": "Atmos",
+		"requiredCrew": 0,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 0,
+			"fuels": null,
+			"platoons": 0
+		},
+		"speed": 1,
+		"range": null,
+		"cost": {
+			"credits": 26753,
+			"energy": 999,
+			"minerals": 75
+		},
+		"value": 7500,
+		"harvester": false
+	},
+	"carrier":
+	{
+		"type": "Cargo Store / Carrier",
+		"description": "Deep space heavy duty cargo / personnel carrier.",
+		"shortName": "Cargo",
+		"requiredCrew": 11,
+		"capacity": {
+			"civilians": 1850,
+			"cargo": 2250,
+			"fuels": 1250,
+			"platoons": 0
+		},
+		"speed": 1,
+		"range": 3750,
+		"cost": {
+			"credits": 15400,
+			"energy": 465,
+			"minerals": 125
+		},
+		"value": 1000,
+		"harvester": false
+	},
+	"miningstation":
+	{
+		"type": "Core Mining Station",
+		"description": "Generates fuels and minerals when running on surface.",
+		"shortName": "Mining",
+		"requiredCrew": 294,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 950,
+			"fuels": 1400,
+			"platoons": 0
+		},
+		"speed": 1,
+		"range": 4200,
+		"cost": {
+			"credits": 17999,
+			"energy": 875,
+			"minerals": 600
+		},
+		"value": 14750,
+		"harvester": {
+			"location": "surface",
+			"resources": {
+				"food": 0,
+				"minerals": 2000,
+				"fuels": 1000,
+				"energy": -200
+			}
+		}
+	},
+	"horticultural":
+	{
+		"type": "Horticultural Station",
+		"description": "Generates food supplies when running on surface.",
+		"shortName": "Farming",
+		"requiredCrew": 175,
+		"capacity": {
+			"civilians": 0,
+			"cargo": 950,
+			"fuels": 750,
+			"platoons": 0
+		},
+		"speed": 1,
+		"range": 3000,
+		"cost": {
+			"credits": 16995,
+			"energy": 970,
+			"minerals": 540
+		},
+		"value": 13550,
+		"harvester": {
+			"location": "surface",
+			"resources": {
+				"food": 12,
+				"minerals": 0,
+				"fuels": 0,
+				"energy": 0
+			}
+		}
+	}
+}
