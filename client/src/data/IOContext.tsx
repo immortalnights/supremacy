@@ -1,11 +1,12 @@
 import React from "react"
-import { io, Socket } from "socket.io-client"
+import { Socket } from "socket.io-client"
 import { PlayerRoomAction } from "../types"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
 import { useNavigate } from "react-router-dom"
+const io = require("socket.io-client")
 
 // Socket IO definitions
-type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents> | undefined
+type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents>
 
 // Socket connection status
 export type Status = "disconnected" | "connecting" | "connected"
@@ -40,43 +41,45 @@ export type MessageHandler = (action: string, data: any) => void
 
 // Context Provider
 const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: JSX.Element }) => {
-  const [ socket, setSocket ] = React.useState<SocketIO>(undefined)
+  const [ socket, setSocket ] = React.useState<SocketIO | undefined>(undefined)
   const navigate = useNavigate()
 
   console.log("Render IOProvider")
 
   React.useEffect(() => {
     console.log("Creating Socket.IO")
-    const socket: SocketIO = io("http://localhost:3000", {
-      transports: ["websocket"]
-    })
+    const s: SocketIO = io()
 
-    socket.on("connect_error", (err) => {
+    s.on("connect_error", (err) => {
       console.log("connection error", err)
       setSocket(undefined)
     })
-    socket.on("connect", () => {
-      console.log("client connected", socket.id)
-      setSocket(socket)
+    s.on("connect", () => {
+      console.log("client connected", s.id, s.io.engine.transport.name)
+
+      s.io.engine.on("upgrade", () => {
+        console.log("upgraded", s.io.engine.transport.name)
+      });
+
+      setSocket(s)
     })
-    socket.on("disconnect", () => {
+    s.on("disconnect", () => {
       console.log("client disconnected")
       setSocket(undefined)
       handleMessage("disconnect", {})
       navigate("/")
     })
 
-    socket.onAny(handleMessage)
+    s.onAny(handleMessage)
 
-    socket.on("game-created", ({ id }) => {
+    s.on("game-created", ({ id }) => {
       // console.log(`Received game-created for ${id}`)
       navigate(`/game/${id}/`, { replace: true })
     })
 
-    console.log("Init socket", socket.id)
     return () => {
       console.log("Clean up IOProvider")
-      socket.disconnect()
+      s.disconnect()
       setSocket(undefined)
       handleMessage("disconnect", {})
       navigate("/")

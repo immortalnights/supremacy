@@ -9,6 +9,7 @@ import { useNavigate } from "react-router"
 import HoldButton from "../components/HoldButton"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
+import PlanetAuth from "../components/PlanetAuth"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
@@ -165,11 +166,7 @@ const InlineName = ({ label, value, onCancel, onComplete }: any) => {
   )
 }
 
-const Message = () => {
-  return null
-}
-
-const PlanetOverview = ({ planet }: { planet: IPlanet }) => {
+const Overview = ({ planet }: { planet: IPlanet }) => {
   const [ rename, setRename ] = React.useState(false)
   const { action } = React.useContext(IOContext)
 
@@ -204,7 +201,7 @@ const PlanetOverview = ({ planet }: { planet: IPlanet }) => {
       </Stack>
       <Stack direction="row">
         <div>
-          {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : <Message />}
+          {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : null}
           <PlanetGrid onSelectItem={onSelectItem} />
         </div>
         <OverviewSlots planet={planet} />
@@ -213,41 +210,8 @@ const PlanetOverview = ({ planet }: { planet: IPlanet }) => {
   )
 }
 
-const AccessDenied = () => {
-  const navigate = useNavigate()
-
-  React.useEffect(() => {
-    const timer = window.setTimeout(() => {
-      navigate(-1)
-    }, 1000)
-
-    return () => {
-      window.clearTimeout(timer)
-    }
-  }, [])
-
-  return (<Box sx={{ color: "error.main", textAlign: "center", border: "1px solid red", borderRadius: 2, padding: 1, width: 180, margin: "0 auto" }}>Access Denied</Box>)
+const Authed = () => {
+  return (<PlanetAuth view={(planet: IPlanet) => (<Overview planet={planet} />)} />)
 }
 
-const Overview = () => {
-  const player = Recoil.useRecoilValue(Player) as IPlayer
-  const planet = Recoil.useRecoilValue(SelectedPlanet) as IPlanet
-
-  let content
-  if (!planet)
-  {
-    content = (<div>Loading...</div>)
-  }
-  else if (planet.owner !== player.id)
-  {
-    content = (<AccessDenied />)
-  }
-  else
-  {
-    content = (<PlanetOverview planet={planet} />)
-  }
-
-  return content
-}
-
-export default Overview
+export default Authed

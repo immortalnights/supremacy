@@ -10,12 +10,13 @@ import Universe from "./simulation/Universe"
 import AIPlayer from "./AIPlayer"
 
 const app = express()
+const PORT = 3010
 
 const server = http.createServer(app)
 const io = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
-  path: "/socket-io/",
+  allowUpgrades: true,
   cors: {
-    origin: "http://localhost:3000",
+    origin: `http://localhost:3000`,
     methods: ["GET", "POST"]
   }
 })
@@ -34,6 +35,8 @@ router.get("/", (req, res) => {
     ok: false,
   })
 })
+
+app.use(router)
 
 // TODO tidy socket message handling up based on https://socket.io/docs/v4/server-application-structure/
 
@@ -112,9 +115,13 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
 
 // Socket IO
 io.on("connection", (socket) => {
-  console.log("Client connected", socket.id)
+  console.log("Client connected", socket.id, socket.conn.transport.name)
   // Initialize a new Player on a new connection
   const player = new ConnectedPlayer(socket)
+
+  socket.conn.on("upgrade", () => {
+    console.log("Socket upgraded", socket.conn.transport.name)
+  });
 
   // Listen to Player events
   const handleLeaveRoom = () => {
@@ -261,7 +268,6 @@ setInterval(() => {
 
 }, 5000)
 
-let port = 3010
-server.listen(port, () => {
-  console.log(`Server online (${port})...`)
+server.listen(PORT, () => {
+  console.log(`Server online (${PORT})...`)
 })
