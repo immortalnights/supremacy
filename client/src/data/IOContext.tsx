@@ -1,9 +1,8 @@
 import React from "react"
-import { Socket } from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 import { PlayerRoomAction } from "../types"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
 import { useNavigate } from "react-router-dom"
-const io = require("socket.io-client")
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents>
@@ -48,7 +47,9 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
   React.useEffect(() => {
     console.log("Creating Socket.IO")
-    const s: SocketIO = io()
+    const s: SocketIO = io({
+      transports: ["websocket"]
+    })
 
     s.on("connect_error", (err) => {
       console.log("connection error", err)

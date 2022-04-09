@@ -6,11 +6,11 @@ import { IOContext } from "../data/IOContext"
 import { IPlayer } from "../data/Player"
 import SolarSystem from "./solarsystem"
 import Overview from "./overview"
-import Shipyard from "./shipyard"
 import Surface from "./surface"
+import Dock from "./dock"
+import Shipyard from "./shipyard"
 import { Game as GameData, IGame } from "../data/Game"
 import "./game.css"
-
 
 const Game = ({ data }: { data: IGame }) => {
   return (
@@ -23,7 +23,7 @@ const Game = ({ data }: { data: IGame }) => {
         <Routes>
           <Route path="/" element={<SolarSystem />} />
           <Route path="/combat" element="combat" />
-          <Route path="/dock" element="dock" />
+          <Route path="/dock" element={<Dock />} />
           <Route path="/fleet" element="fleet" />
           <Route path="/overview" element={<Overview />} />
           <Route path="/shipyard" element={<Shipyard />} />

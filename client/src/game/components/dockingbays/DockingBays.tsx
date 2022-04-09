@@ -11,7 +11,7 @@ const DockingBays = ({ planet }: { planet: IPlanet }) => {
   }
 
   return (
-    <>
+    <div>
       <Typography variant="caption">Planet</Typography>
       <Typography>{planet.name}</Typography>
       <Typography variant="caption">Docking Bays</Typography>
@@ -20,7 +20,7 @@ const DockingBays = ({ planet }: { planet: IPlanet }) => {
           <li key={index} onClick={(event) => item && handleItemClick(event, item)}>{item ? item.name : "Bay Empty"}</li>
         ))}
       </ol>
-    </>
+    </div>
   )
 }
 
