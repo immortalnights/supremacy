@@ -8,6 +8,7 @@ import SolarSystem from "./solarsystem"
 import Overview from "./overview"
 import Surface from "./surface"
 import Dock from "./dock"
+import Fleet from "./fleet"
 import Shipyard from "./shipyard"
 import { Game as GameData, IGame } from "../data/Game"
 import "./game.css"
@@ -24,7 +25,7 @@ const Game = ({ data }: { data: IGame }) => {
           <Route path="/" element={<SolarSystem />} />
           <Route path="/combat" element="combat" />
           <Route path="/dock" element={<Dock />} />
-          <Route path="/fleet" element="fleet" />
+          <Route path="/fleet" element={<Fleet />} />
           <Route path="/overview" element={<Overview />} />
           <Route path="/shipyard" element={<Shipyard />} />
           <Route path="/surface" element={<Surface />} />
@@ -34,11 +35,12 @@ const Game = ({ data }: { data: IGame }) => {
       </Box>
       <Box
         sx={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          typography: 'body1',
-          '& > :not(style) + :not(style)': {
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: "center",
+          marginBottom: 2,
+          typography: "body1",
+          "& > :not(style) + :not(style)": {
             ml: 2,
           },
         }}
@@ -51,7 +53,7 @@ const Game = ({ data }: { data: IGame }) => {
         <Link component={NavLink} to={`/game/${data.id}/shipyard`}>Shipyard</Link>
         <Link component={NavLink} to={`/game/${data.id}/training`}>Training</Link>
         <Link component={NavLink} to={`/game/${data.id}/combat`}>Combat</Link>
-         | <Link component={NavLink} to={`/`}>Quit</Link>
+        <span style={{ margin: "0 0 0 1rem"}}>|</span><Link component={NavLink} to={`/`}>Quit</Link>
       </Box>
     </>
   )
