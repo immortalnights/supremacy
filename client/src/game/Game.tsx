@@ -10,6 +10,7 @@ import Surface from "./surface"
 import Dock from "./dock"
 import Fleet from "./fleet"
 import Shipyard from "./shipyard"
+import Training from "./training"
 import { Game as GameData, IGame } from "../data/Game"
 import "./game.css"
 
@@ -23,13 +24,13 @@ const Game = ({ data }: { data: IGame }) => {
       }}>
         <Routes>
           <Route path="/" element={<SolarSystem />} />
-          <Route path="/combat" element="combat" />
+          <Route path="/overview" element={<Overview />} />
+          <Route path="/surface" element={<Surface />} />
           <Route path="/dock" element={<Dock />} />
           <Route path="/fleet" element={<Fleet />} />
-          <Route path="/overview" element={<Overview />} />
           <Route path="/shipyard" element={<Shipyard />} />
-          <Route path="/surface" element={<Surface />} />
-          <Route path="/training" element="training" />
+          <Route path="/training" element={<Training />} />
+          <Route path="/combat" element="combat" />
           <Route path="*" element="Game 404" />
         </Routes>
       </Box>
