@@ -1,18 +1,51 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, Grid, Typography } from "@mui/material"
+import { Box, Button, IconButton, Grid, Typography } from "@mui/material"
+import { ArrowDropDown, ArrowDropUp, ArrowLeft, ArrowRight } from "@mui/icons-material"
 import { IPlanet } from "../../simulation/types.d"
 import PlanetAuth from "../components/PlanetAuth"
-import { ArrowDropDown, ArrowDropUp, ArrowLeft, ArrowRight } from "@mui/icons-material"
+import { Suits, Weapons } from "../../data/StaticData"
+
+
+const Equipment2 = ({ items }: { items: any }) => {
+  const [ index, setIndex ] = React.useState(0)
+  const keys = Object.keys(items)
+  const equipment = items[keys[index]] as any
+
+  const handleNextClick = () => {
+    let next = index + 1
+    if (next >= keys.length)
+    {
+      next = 0
+    }
+    setIndex(next)
+  }
+  const handlePrevClick = () => {
+    let prev = index - 1
+    if (prev < 0)
+    {
+      prev = keys.length - 1
+    }
+    setIndex(prev)
+  }
+
+  return (
+    <Box sx={{ margin: "0 1rem" }}>
+      <Typography variant="caption">Cost {equipment.cost} CR</Typography>
+      <div style={{ backgroundColor: "lightgray", height: 180 }}></div>
+      <div>
+        <IconButton size="small" onClick={handlePrevClick}><ArrowLeft /></IconButton>
+        <IconButton size="small" onClick={handleNextClick}><ArrowRight /></IconButton>
+      </div>
+    </Box>
+  )
+}
 
 
 const Training = ({ planet }: { planet: IPlanet }) => {
-  const suit = {
-    cost: 0,
-  }
-  const weapon = {
-    cost: 0,
-  }
+  const [ selectedWeapon, setSelectedWeapon ] = React.useState(0)
+  const suits = Recoil.useRecoilValue(Suits)
+  const weapons = Recoil.useRecoilValue(Weapons)
 
   return (
     <Grid container>
@@ -37,24 +70,12 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         <Typography variant="caption">{planet.population}</Typography>
       </Grid>
       <Grid item xs={3}>
-        <Box sx={{ margin: "0 1rem" }}>
-          <Typography variant="caption">Suit Cost {suit.cost} CR</Typography>
-          <div style={{ backgroundColor: "lightgray", height: 180 }}></div>
-          <div>
-            <ArrowLeft />
-            <ArrowRight />
-          </div>
-        </Box>
+        {/* <Equipment items={suitKeys} selector={suitSelector} /> */}
+        <Equipment2 items={suits} />
       </Grid>
       <Grid item xs={3}>
-        <Box sx={{ margin: "0 1rem" }}>
-          <Typography variant="caption">Cost {weapon.cost} CR</Typography>
-          <div style={{ backgroundColor: "lightgray", height: 180 }}></div>
-          <div>
-            <ArrowLeft />
-            <ArrowRight />
-          </div>
-        </Box>
+        {/* <Equipment items={weaponKeys} selector={weaponSelector} /> */}
+        <Equipment2 items={weapons} />
       </Grid>
       <Grid item xs={6}>
         <div>

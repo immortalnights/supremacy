@@ -137,3 +137,12 @@ export interface IShipList {
   [key: string]: IShipDetails
 }
 
+export interface IEquipment {
+  type: string
+  name: string
+  cost: string
+}
+
+export interface IEquipmentList {
+  [key: string]: IEquipment
+}
