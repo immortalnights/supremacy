@@ -7,14 +7,30 @@ interface GridItem {
   type: string
 }
 
-const Grid = <T extends GridItem,>({ items, selected, onSelectItem, classNamesForItem }: { items: T[], selected: string | number, onSelectItem: (item: T) => void, classNamesForItem?: (item: T) => string }) => {
-  const rows: JSX.Element[] = []
-  for (let rowIndex = 0; rowIndex < 8; rowIndex++)
+interface GridProps<T> {
+  items: T[],
+  selected: string | number,
+  onSelectItem: (item: T) => void,
+  classNamesForItem?: (item: T) => string
+  rows?: number
+  cols?: number
+}
+
+const Grid = <T extends GridItem,>({
+  items,
+  selected,
+  onSelectItem,
+  classNamesForItem,
+  rows = 8,
+  cols = 4
+}: GridProps<T>) => {
+  const rowElements: React.ReactNode[] = []
+  for (let rowIndex = 0; rowIndex < rows; rowIndex++)
   {
-    const row: JSX.Element[] = []
-    for (let colIndex = 0; colIndex < 4; colIndex++)
+    const row: React.ReactNode[] = []
+    for (let colIndex = 0; colIndex < cols; colIndex++)
     {
-      const index = (colIndex * 8) + rowIndex
+      const index = (colIndex * rows) + rowIndex
       let cell
       if (items[index])
       {
@@ -42,12 +58,12 @@ const Grid = <T extends GridItem,>({ items, selected, onSelectItem, classNamesFo
       row.push(cell)
     }
 
-    rows.push(<tr key={rowIndex}>{row}</tr>)
+    rowElements.push(<tr key={rowIndex}>{row}</tr>)
   }
 
   return (
     <table className="grid">
-      <tbody>{rows}</tbody>
+      <tbody>{rowElements}</tbody>
     </table>
   )
 }

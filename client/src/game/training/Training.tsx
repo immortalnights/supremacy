@@ -7,7 +7,7 @@ import PlanetAuth from "../components/PlanetAuth"
 import { Suits, Weapons } from "../../data/StaticData"
 
 
-const Equipment2 = ({ items }: { items: any }) => {
+const Equipment = ({ items }: { items: any }) => {
   const [ index, setIndex ] = React.useState(0)
   const keys = Object.keys(items)
   const equipment = items[keys[index]] as any
@@ -41,7 +41,6 @@ const Equipment2 = ({ items }: { items: any }) => {
   )
 }
 
-
 const Training = ({ planet }: { planet: IPlanet }) => {
   const [ selectedWeapon, setSelectedWeapon ] = React.useState(0)
   const suits = Recoil.useRecoilValue(Suits)
@@ -71,11 +70,11 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       </Grid>
       <Grid item xs={3}>
         {/* <Equipment items={suitKeys} selector={suitSelector} /> */}
-        <Equipment2 items={suits} />
+        <Equipment items={suits} />
       </Grid>
       <Grid item xs={3}>
         {/* <Equipment items={weaponKeys} selector={weaponSelector} /> */}
-        <Equipment2 items={weapons} />
+        <Equipment items={weapons} />
       </Grid>
       <Grid item xs={6}>
         <div>

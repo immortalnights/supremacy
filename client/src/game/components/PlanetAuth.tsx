@@ -3,7 +3,7 @@ import Recoil from "recoil"
 import { Box } from "@mui/material"
 import { useNavigate } from "react-router"
 import { IPlayer, Player } from "../../data/Player"
-import { SelectedPlanet, IPlanet } from "../../data/Planets"
+import { IPlanet, SelectedPlanet } from "../../data/Planets"
 
 
 const AccessDenied = () => {
