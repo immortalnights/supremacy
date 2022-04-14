@@ -66,14 +66,18 @@ const Shipyard = () => {
         <div style={{ width: 120 }}>
           <Typography>Capacity</Typography>
           <ItemDetails label="Crew" value={selectedShip.requiredCrew} />
-          <ItemDetails label="Payload" units="T." value={selectedShip.capacity.cargo} />
-          <ItemDetails label="Fuel" units="T." value={selectedShip.capacity.fuels || "Nuclear"} />
+          {selectedShip.capacity && <ItemDetails label="Payload" units="T." value={selectedShip.capacity.cargo} />}
+          {selectedShip.capacity && selectedShip.capacity.fuels
+            ? <ItemDetails label="Fuel" units="T." value={selectedShip.capacity.fuels} />
+            : <ItemDetails label="Fuel" value="Nuclear" />}
         </div>
         <div style={{ width: 120 }}>
           <Typography>Data</Typography>
           <ItemDetails label="Owned" value={0} />
-          <ItemDetails label="Range" units="KM." value={selectedShip.range || "Infinite"} />
-          {selectedShip.capacity.civilians ? (<ItemDetails label="Seats" value={selectedShip.capacity.civilians} />) : null}
+          {selectedShip.range > 0
+            ? <ItemDetails label="Range" units="KM." value={selectedShip.range} />
+            : <ItemDetails label="Range" value="Infinite" />}
+          {selectedShip.capacity ? (<ItemDetails label="Seats" value={selectedShip.capacity.civilians} />) : null}
         </div>
       </Stack>
     </div>

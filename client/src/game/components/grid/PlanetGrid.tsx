@@ -6,7 +6,6 @@ import { Player } from "../../../data/Player"
 import { PlanetType } from "../../../simulation/types"
 import Grid from "./Grid"
 
-
 const PlanetGrid = ({ onSelectItem }: { onSelectItem: (item: IPlanetBasic) => void }) => {
   const player = Recoil.useRecoilValue(Player)
   const selectedPlanet = Recoil.useRecoilValue(SelectedPlanet)

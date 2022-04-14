@@ -1,13 +1,13 @@
 import crypto from "crypto"
 import plantTypes from "./data/planettypes.json"
-import { IPlanet, IPlanetResources, PlanetType } from "./types"
+import { IPlanet, IPlanetResources, PlanetID, PlanetType } from "./types"
 import { random, randomFloat } from "./utilities"
 
 const PLANET_POPULATION_LIMIT = 30000
 
 export default class Planet implements IPlanet
 {
-  id: number
+  id: PlanetID
   name: string
   owner?: string
   habitable: boolean

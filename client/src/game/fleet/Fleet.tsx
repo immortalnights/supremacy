@@ -3,15 +3,22 @@ import Recoil from "recoil"
 import { Button, Grid } from "@mui/material"
 import { SelectedPlanet, IPlanet } from "../../data/Planets"
 import DockingBays from "../components/dockingbays"
-import PlanetGrid from "../components/grid/PlanetGrid"
+import FleetGrid from "../components/grid/FleetGrid"
 import PlanetAuth from "../components/PlanetAuth"
 import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
+import { IShip } from "../../simulation/types.d"
 
 const Fleet = ({ planet }: { planet: IPlanet }) => {
+  // FIXME remember selected ship on navigation?
+  const [ selectedShip, setSelectedShip ] = React.useState<IShip | undefined>()
 
   const handleSelectPlanet = () => {
+  }
 
+  const handleSelectShip = (item: IShip) => {
+    console.log(item)
+    setSelectedShip(item)
   }
 
   return (
@@ -25,7 +32,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
           <Button>Travel To</Button>
           <Button>Land</Button>
         </div>
-        <ShipDetails />
+        <ShipDetails ship={selectedShip} />
       </Grid>
       <Grid item xs={2}>
         <Button>Abort Travel</Button>
@@ -33,10 +40,10 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
       </Grid>
       <Grid item xs={8}>
         {/* <FleetGrid /> */}
-        <PlanetGrid onSelectItem={handleSelectPlanet} />
+        <FleetGrid selectedItem={selectedShip} onSelectItem={handleSelectShip} />
       </Grid>
       <Grid item xs={4}>
-        <ShipHeading />
+        <ShipHeading ship={selectedShip} />
       </Grid>
     </Grid>
   )

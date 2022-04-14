@@ -1,11 +1,13 @@
+import { cloneDeep } from "lodash"
 import Planet from "./Planet"
 import Ship from "./Ship"
 import Platoon from "./Platoon"
 import {
   PlanetType,
-  IPlanetBasic,
   IUniverse,
+  IPlanetBasic,
   IPlanet,
+  IShipBasic,
   IShip,
   IPlatoon,
   IShipDetails,
@@ -86,6 +88,22 @@ export default class Universe implements IUniverse, IWorld
         starbase.claim(player, "Starbase!", true)
         console.log(`Player ${player} claimed planet ${starbase.id}`)
         ok = true
+
+        // Testing or difficulty levels?
+        // provide a solar and a horticultural to all players
+        // For now, one of every ship is provided...
+        Object.keys(ShipData).forEach((key, index, keys) => {
+          const shipData = ShipData[key as keyof typeof ShipData]
+          const ship = new Ship(
+            this.nextShipId++,
+            shipData.shortName,
+            shipData,
+            player,
+            starbase?.id
+          )
+
+          this.ships.push(ship)
+        })
       }
     }
     else
@@ -382,7 +400,7 @@ export default class Universe implements IUniverse, IWorld
     })
   }
 
-  updateFor(id: string): IUniverse
+  updateFor(player: string): IUniverse
   {
     const universe: IUniverse = {
       // Don't send partial days
@@ -409,7 +427,7 @@ export default class Universe implements IUniverse, IWorld
         // No additional data
         planetData.name = "Lifeless"
       }
-      else if (planet.owner === id)
+      else if (planet.owner === player)
       {
         // Send all data
         planetData = {
@@ -425,11 +443,37 @@ export default class Universe implements IUniverse, IWorld
       universe.planets.push(planetData)
     })
 
+    const findPlanetForShip = (id: number) => {
+      return this.planets.find((p) => p.id === id)
+    }
+
     // TODO ships
+    this.ships.forEach((ship) => {
+      let shipData: IShipBasic | IShip = {
+        id: ship.id,
+        type: ship.type,
+        name: ship.name,
+        owner: ship.owner,
+        location: { ...ship.location },
+      }
+
+      if (ship.owner === player)
+      {
+        // Send all data...
+        shipData = {
+          ...ship
+        }
+      }
+      else
+      {
+        // Send limited data
+      }
+
+      universe.ships.push(shipData)
+    })
 
     // TODO platoons
 
-    // Return
     return universe
   }
 }

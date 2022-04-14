@@ -1,38 +1,62 @@
 import React from "react"
 import Recoil from "recoil"
+import { IShip } from "../../simulation/types.d"
 // import { DateDisplay } from "../../components/date"
 
 const DateDisplay = ({ date }: { date: any }) => {
   return (<div>?</div>)
 }
 
-const ShipHeading = ({}) => {
-  let ship: any
+const ShipHeading = ({ ship }: { ship: IShip | undefined }) => {
   let content
 
-  if (ship && ship.heading)
+  if (!ship)
+  {
+    content = (<div>No selected ship</div>)
+  }
+  else if (!ship.heading)
+  {
+    content = (
+      <>
+        <label>Location</label>
+        <dl>
+          <dt>Ship</dt>
+          <dd>{ship.name}</dd>
+          <dt>Location</dt>
+          {/* // FIXME need planet name */}
+          <dt>{ship.location.planet}</dt>
+          <dt>Position</dt>
+          {/* // FIXME format string */}
+          <dt>{ship.location.position}</dt>
+        </dl>
+      </>
+    )
+  }
+  else
   {
     const heading = ship.heading
     content = (
-      <dl>
-        <dt>Ship</dt>
-        <dd>{ship.name}</dd>
-        <dt>From</dt>
-        <dd>{heading.from.name}</dd>
-        <dt>To</dt>
-        <dd>{heading.to.name}</dd>
-        <dt>EDA</dt>
-        <dd><DateDisplay date={heading.arrival} /></dd>
-        <dt>Fuel</dt>
-        <dd>{heading.fuel}</dd>
-      </dl>
+      <>
+        <label>Heading</label>
+        <dl>
+          <dt>Ship</dt>
+          <dd>{ship.name}</dd>
+          <dt>From</dt>
+          <dd>{heading.from.name}</dd>
+          <dt>To</dt>
+          <dd>{heading.to.name}</dd>
+          <dt>EDA</dt>
+          <dd><DateDisplay date={heading.arrival} /></dd>
+          <dt>Fuel</dt>
+          <dd>{heading.fuels}</dd>
+        </dl>
+      </>
     )
   }
-
+  
   return (
     <div>
-      <label>Heading</label>
-      {content ? content : (<div>No selected ship</div>)}
+      {content}
     </div>
   )
 }

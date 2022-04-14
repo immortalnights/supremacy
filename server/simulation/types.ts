@@ -32,8 +32,12 @@ export enum PlanetType {
   Metropolis = "Metropolis",
 }
 
+export type PlanetID = number
+export type ShipID = number
+export type PlatoonID = number
+
 export interface IPlanetBasic {
-  id: number
+  id: PlanetID
   type: PlanetType
   owner?: string
   name: string
@@ -57,37 +61,65 @@ export interface IPlanet extends IPlanetBasic {
   multipliers: boolean
 }
 
-export interface IShip {
-  id: number
+export interface IShipLocation {
+  planet: PlanetID | undefined
+  position: string
+  x: number
+  y: number
+}
+
+export interface IShipBasic {
+  id: ShipID
+  type: string
   name: string
   owner: string
+  location: IShipLocation
+}
+
+export interface IShipCapacity {
+  civilians: number
+  cargo: number
+  fuels: number
+  platoons: number
+}
+
+export interface IShipHeading {
+  location: PlanetID
+  from: {
+    id: PlanetID
+    name: string
+  }
+  to: {
+    id: PlanetID
+    name: string
+  }
+  arrival: number
+  fuels: number
+}
+
+export interface IShipHarvesting {
+  location: string
+  resources: IResources
+}
+
+// FIXME ship location does not include the planet name, but ship heading to/from does...
+export interface IShip extends IShipBasic {
   crew: number
   value: number
-  location: {
-    planet: number
-    position: string
-  }
   cargo: IResources
   passengers: number
   // Static data
   requiresFuel: boolean
   requiredCrew: number
-  capacity: {
-    civilians: number
-    cargo: number
-    fuels: number
-    platoons: number
-  }
+  capacity: IShipCapacity | null
   speed: number
   range: number
-  harvester: {
-    location: string
-    resources: IResources
-  } | undefined
+  harvester: IShipHarvesting | null
+  heading: IShipHeading | null
 }
 
 export interface IPlatoon {
-  id: number
+  id: PlatoonID
   name: string
 }
 
@@ -104,7 +136,7 @@ export interface ISolarSystem {
 
 export interface IUniverse extends ISolarSystem {
   planets: (IPlanetBasic | IPlanet)[]
-  ships: IShip[]
+  ships: (IShipBasic | IShip)[]
   platoons: IPlatoon[]
 }
 
@@ -113,12 +145,7 @@ export interface IShipDetails {
   description: string
   shortName: string
   requiredCrew: number
-  capacity: {
-    civilians: number
-    cargo: number
-    fuels: number
-    platoons: number
-  }
+  capacity: IShipCapacity | null
   speed: number
   range: number
   cost: {
@@ -127,10 +154,7 @@ export interface IShipDetails {
     energy: number
   }
   value: number
-  harvester: {
-    location: string
-    resources: IResources
-  }
+  harvester: IShipHarvesting | null
 }
 
 export interface IShipList {

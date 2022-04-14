@@ -9,6 +9,7 @@ table.grid td {
 	border-style: none solid solid none;
 	border-color: rgb(113, 113, 113);
 	cursor: pointer;
+	user-select: none;
 }
 
 table.grid td.selected {

@@ -9,7 +9,7 @@ interface GridItem {
 
 interface GridProps<T> {
   items: T[],
-  selected: string | number,
+  selected: string | number | undefined,
   onSelectItem: (item: T) => void,
   classNamesForItem?: (item: T) => string
   rows?: number
@@ -38,7 +38,7 @@ const Grid = <T extends GridItem,>({
 
         const classes: string[] = []
 
-        if (selected && item.id === selected)
+        if (selected !== undefined && item.id === selected)
         {
           classes.push("selected")
         }

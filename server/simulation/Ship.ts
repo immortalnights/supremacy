@@ -1,35 +1,26 @@
-import { IResources, IShip, IShipDetails } from "./types";
+import { IResources, IShip, IShipCapacity, IShipDetails, IShipHarvesting, IShipHeading, IShipLocation, ShipID } from "./types";
 
 export default class Ship implements IShip
 {
-  id: number
+  id: ShipID
+  type: string
   name: string
   owner: string
   crew: number
   value: number
-  location: {
-    planet: number
-    position: string
-  }
+  location: IShipLocation
   cargo: IResources
   passengers: number
   // Static
   requiredCrew: number
   requiresFuel: boolean
-  capacity: {
-    civilians: number
-    cargo: number
-    fuels: number
-    platoons: number
-  }
+  capacity: IShipCapacity | null
   speed: number
   range: number
-  harvester: {
-    location: string
-    resources: IResources
-  } | undefined
+  harvester: IShipHarvesting | null
+  heading: IShipHeading | null
 
-  constructor(id: number, name: string, details: IShipDetails, owner: string, location: number)
+  constructor(id: number, name: string, details: IShipDetails, owner: string, location: number | undefined)
   {
     this.id = id
     this.name = name
@@ -37,7 +28,10 @@ export default class Ship implements IShip
     this.crew = 0
     this.location = {
       planet: location,
-      position: "docking-bay"
+      position: "docking-bay",
+      x: 0,
+      // FIXME
+      y: 0,
     }
     this.cargo = {
       food: 0,
@@ -46,14 +40,16 @@ export default class Ship implements IShip
       energy: 0,
     }
     this.passengers = 0
+    this.heading = null
 
-    this.requiresFuel = details.capacity.fuels !== null
+    this.type = details.type
+    this.requiresFuel = details.capacity !== null && details.capacity.fuels > 0
     this.requiredCrew = details.requiredCrew
-    this.capacity = { ...details.capacity }
+    this.capacity = details.capacity && { ...details.capacity }
     this.speed = details.speed
     this.range = details.range
     this.value = details.value
-    this.harvester = {
+    this.harvester = details.harvester && {
       location: details.harvester.location,
       resources: { ...details.harvester.resources },
     }
