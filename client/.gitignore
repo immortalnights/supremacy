@@ -10,7 +10,7 @@
 
 # production
 /build
-/src/simulation
+/src/simulation/types.d
 
 # misc
 .DS_Store

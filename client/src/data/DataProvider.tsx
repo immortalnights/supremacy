@@ -213,6 +213,25 @@ const handlePartialGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, {
     set(Ships, existingShips)
   }
 
+  if (platoons)
+  {
+    const existingPlatoons = [ ...get(Platoons) ]
+
+    platoons.forEach((platoon) => {
+      const index = existingPlatoons.findIndex((s) => s.id === platoon.id)
+      if (index === -1)
+      {
+        existingPlatoons.push(platoon)
+      }
+      else
+      {
+        existingPlatoons[index] = platoon
+      }
+    })
+
+    set(Platoons, existingPlatoons)
+  }
+
   // TODO rest
 }
 

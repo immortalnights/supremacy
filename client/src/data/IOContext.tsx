@@ -20,7 +20,7 @@ export interface IIOContext {
   roomAction: (name: PlayerRoomAction, data: any) => Promise<void>
   joinGame: (id: string) => Promise<void>
   leaveGame: () => void,
-  action: (name: string, data: any) => Promise<void>
+  action: (name: string, data: object) => Promise<void>
 }
 
 // Connection Context
@@ -33,7 +33,7 @@ export const IOContext = React.createContext<IIOContext>({
   roomAction: (name: PlayerRoomAction, data: any) => Promise.reject(),
   joinGame: () => Promise.reject(),
   leaveGame: () => {},
-  action: (name: string, data: any) => Promise.reject(),
+  action: (name: string, data: object = {}) => Promise.reject(),
 })
 
 export type MessageHandler = (action: string, data: any) => void
@@ -165,7 +165,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       socket?.emit("player-leave-game")
       handleMessage("game-player-kicked", {})
     },
-    action: (name: string, data: any) => {
+    action: (name: string, data: object = {}) => {
       console.assert(socket, "Socket is invalid!")
       return new Promise<void>((resolve, reject) => {
         console.debug(`Sending ${name}`, data)

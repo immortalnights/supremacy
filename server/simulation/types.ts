@@ -4,6 +4,10 @@ export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
   | "purchase-ship"
+  | "platoon-increase-troops"
+  | "platoon-decrease-troops"
+  | "platoon-recruit"
+  | "platoon-dismiss"
 
 export enum Difficulty {
   Easy,
@@ -118,9 +122,33 @@ export interface IShip extends IShipBasic {
   heading: IShipHeading | null
 }
 
-export interface IPlatoon {
+export interface IPlatoonLocation {
+  planet?: PlanetID
+  ship?: ShipID
+}
+
+export enum PlatoonStatus {
+  None,
+  Training,
+  Recruited,
+  Defeated,
+}
+
+export interface IPlatoonBasic {
   id: PlatoonID
   name: string
+  owner: string
+  status: PlatoonStatus
+  location: IPlatoonLocation
+  strength: number
+}
+
+export interface IPlatoon extends IPlatoonBasic {
+  troops: number
+  suit: string
+  equipment: string
+  calibre: number
+  rank: string
 }
 
 export interface IDate {
@@ -137,7 +165,7 @@ export interface ISolarSystem {
 export interface IUniverse extends ISolarSystem {
   planets: (IPlanetBasic | IPlanet)[]
   ships: (IShipBasic | IShip)[]
-  platoons: IPlatoon[]
+  platoons: (IPlatoonBasic | IPlatoon)[]
 }
 
 export interface IShipDetails {

@@ -9,16 +9,19 @@ import {
   IPlanet,
   IShipBasic,
   IShip,
+  IPlatoonBasic,
   IPlatoon,
   IShipDetails,
   DAYS_PER_YEAR,
   IDate,
   Difficulty,
   PlayerGameAction,
+  PlatoonID,
 } from "./types"
 import type { IWorld } from "../serverTypes"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
+import { random } from "./utilities"
 
 const MAXIMUM_PLAYERS = 2
 
@@ -34,6 +37,7 @@ export default class Universe implements IUniverse, IWorld
   platoons: Platoon[]
   finished: boolean
   nextShipId: number
+  nextPlatoonId: number
 
   constructor()
   {
@@ -47,6 +51,7 @@ export default class Universe implements IUniverse, IWorld
     this.platoons = [],
     this.finished = false
     this.nextShipId = 0
+    this.nextPlatoonId = 0
   }
 
   generate(seed: number)
@@ -104,6 +109,20 @@ export default class Universe implements IUniverse, IWorld
 
           this.ships.push(ship)
         })
+
+        // to function how the original game does all 25 platoons (for each player)
+        // must be pre-created otherwise the UI would be attempting a name match on
+        // what platoon the user wants to interact with and those available.
+        // FIXME
+        for (let index = 0; index < 25; index++)
+        {
+          const platoon = new Platoon(this.nextPlatoonId++, `${index + 1}st`, player)
+          platoon.troops = 0
+          platoon.suit = "suit_1"
+          platoon.equipment = "weapon_1"
+          platoon.location.planet = starbase.id
+          this.platoons.push(platoon)
+        }
       }
     }
     else
@@ -370,6 +389,61 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
+      case "platoon-increase-troops":
+      {
+        const body = data as { platoon: PlatoonID, amount: number }
+        if (body.platoon !== undefined && body.amount)
+        {
+          const platoon = this.platoons.find((p) => p.id === body.platoon)
+          if (!platoon)
+          {
+            reason = "Invalid platoon"
+          }
+          else if (platoon.owner !== player)
+          {
+            console.log(body.platoon, platoon.id, platoon.owner, player)
+            reason = "Incorrect platoon owner"
+          }
+          else
+          {
+            platoon.modifyTroops(body.amount)
+            result = true
+            resultData = { world: { platoons: [platoon.toJSON()] } }
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "platoon-decrease-troops":
+      {
+        const body = data as { platoon: PlatoonID, amount: number }
+        if (body.platoon !== undefined && body.amount)
+        {
+          const platoon = this.platoons.find((p) => p.id === body.platoon)
+          if (!platoon)
+          {
+            reason = "Invalid platoon"
+          }
+          else if (platoon.owner !== player)
+          {
+            reason = "Incorrect platoon owner"
+          }
+          else
+          {
+            platoon.modifyTroops(body.amount)
+            result = true
+            resultData = { world: { platoons: [platoon.toJSON()] } }
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       default:
       {
         console.warn(`Unhandled action ${action}`)
@@ -473,6 +547,30 @@ export default class Universe implements IUniverse, IWorld
     })
 
     // TODO platoons
+    this.platoons.forEach((platoon) => {
+      let platoonData: IPlatoonBasic | IPlatoon = {
+        id: platoon.id,
+        name: platoon.name,
+        owner: platoon.owner,
+        location: { ...platoon.location },
+        status: platoon.status,
+        strength: platoon.strength,
+      }
+
+      if (platoon.owner === player)
+      {
+        // Send all data
+        platoonData = {
+          ...platoon
+        }
+      }
+      else
+      {
+        // Send limited data
+      }
+
+      universe.platoons.push(platoonData)
+    })
 
     return universe
   }

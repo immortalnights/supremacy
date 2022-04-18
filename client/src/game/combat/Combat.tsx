@@ -6,6 +6,7 @@ import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/ma
 import DockingBays from "../components/dockingbays"
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
 import { stringify } from "querystring"
+import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
 // import PlatoonGrid from "../components/grid/PlatoonGrid"
 // import "./styles.css"
 
@@ -19,10 +20,7 @@ const PlatoonGridItem = ({ name, troops }: { name?: string, troops?: number }) =
 }
 
 interface PlatoonGridProps {
-  items: {
-    name: string
-    troops: number
-  }[]
+  items: IPlatoonBasic[]
   count: number
   direction: GridDirection
   onSelectItem: () => void
@@ -46,16 +44,13 @@ const PlatoonGrid = ({ items, count, direction, onSelectItem }: PlatoonGridProps
 
 
 const ShipDetails = () => {
+  const platoons = Recoil.useRecoilValue(PlatoonsOnShip({ ship: 0 }))
+
   const ship: { name: string } = {
     name: ""
   }
 
   const handleSelectedItem: any = () => {}
-
-  const platoons: {
-    name: string
-    troops: number
-  }[] = []
 
   return (
     <div>
@@ -68,17 +63,13 @@ const ShipDetails = () => {
 
 
 const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
-  const strength = 0
-  const enemyStrength = 0
-  const remainingTroops = 0
+  const platoons = Recoil.useRecoilValue(PlatoonsOnPlanet({ planet: planet.id }))
+  const strength = Recoil.useRecoilValue(PlanetStrength({ planet: planet.id }))
+  const enemyStrength = Recoil.useRecoilValue(PlanetEnemyStrength({ planet: planet.id }))
+  const remainingTroops = platoons.reduce((val, p, index, arr) => val + (p as IPlatoon).troops, 0)
   const aggression = 25
 
   const handleSelectedItem: any = () => {}
-  
-  const platoons: {
-    name: string
-    troops: number
-  }[] = []
 
   return (
     <Grid container>
@@ -104,14 +95,14 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
             <span>{strength}</span>
           </Typography>
           <Typography component="p" variant="caption" sx={{ display: "flex", margin: "0 1rem"}}>
-            <span>Enemy total strength</span>
-            <span style={{ flexGrow: 1 }}></span>
-            <span>{enemyStrength}</span>
-          </Typography>
-          <Typography component="p" variant="caption" sx={{ display: "flex", margin: "0 1rem"}}>
             <span>Total troops left</span>
             <span style={{ flexGrow: 1 }}></span>
             <span>{remainingTroops}</span>
+          </Typography>
+          <Typography component="p" variant="caption" sx={{ display: "flex", margin: "0 1rem"}}>
+            <span>Enemy total strength</span>
+            <span style={{ flexGrow: 1 }}></span>
+            <span>{enemyStrength}</span>
           </Typography>
           {/* <Typography variant="caption">Scaling factor {scalingFactor}</Typography> */}
 
