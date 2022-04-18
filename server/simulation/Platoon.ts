@@ -1,8 +1,6 @@
 import { IPlatoon, IPlatoonLocation, PlanetID, PlatoonStatus } from "./types";
 import { modifyWithin } from "./utilities";
 
-
-
 export default class Platoon implements IPlatoon
 {
   id: number
@@ -57,7 +55,7 @@ export default class Platoon implements IPlatoon
     }
   }
 
-  recruit(suit: string, equipment: string, planet: PlanetID,)
+  recruit(suit: string, equipment: string, planet: PlanetID)
   {
     this.status = PlatoonStatus.Recruited
     this.strength = 0

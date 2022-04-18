@@ -431,11 +431,48 @@ export default class Universe implements IUniverse, IWorld
           {
             reason = "Incorrect platoon owner"
           }
+          // TODO verify available population and modify
           else
           {
             platoon.modifyTroops(body.amount)
             result = true
             resultData = { world: { platoons: [platoon.toJSON()] } }
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "platoon-recruit":
+      {
+        const body = data as { platoon: PlatoonID }
+        if (body.platoon !== undefined)
+        {
+          const platoon = this.platoons.find((p) => p.id === body.platoon)
+          if (!platoon)
+          {
+            reason = "Invalid platoon"
+          }
+          else if (platoon.owner !== player)
+          {
+            reason = "Incorrect platoon owner"
+          }
+          // TODO verify available credits (of capital) and modify
+          else
+          {
+            const capital = this.planets.find((p) => p.capital === true && p.owner === player)
+            if (!capital)
+            {
+              reason = "Failed to find player capital"
+            }
+            else
+            {
+              platoon.recruit("suit_1", "weapon_1", capital.id)
+              result = true
+              resultData = { world: { platoons: [platoon.toJSON()] } }
+            }
           }
         }
         else

@@ -11,7 +11,7 @@ import { IOContext } from "../../data/IOContext"
 import { Player } from "../../data/Player"
 
 
-const Equipment = ({ items }: { items: any }) => {
+const Equipment = ({ items, canChange }: { items: any, canChange: boolean }) => {
   const [ index, setIndex ] = React.useState(0)
   const keys = Object.keys(items)
   const equipment = items[keys[index]] as any
@@ -38,8 +38,8 @@ const Equipment = ({ items }: { items: any }) => {
       <Typography variant="caption">Cost {equipment.cost} CR</Typography>
       <div style={{ backgroundColor: "lightgray", height: 180 }}></div>
       <div>
-        <IconButton size="small" onClick={handlePrevClick}><ArrowLeft /></IconButton>
-        <IconButton size="small" onClick={handleNextClick}><ArrowRight /></IconButton>
+        <IconButton size="small" disabled={!canChange} onClick={handlePrevClick}><ArrowLeft /></IconButton>
+        <IconButton size="small" disabled={!canChange} onClick={handleNextClick}><ArrowRight /></IconButton>
       </div>
     </Box>
   )
@@ -119,6 +119,7 @@ const Training = ({ planet }: { planet: IPlanet }) => {
 
   const canRecruit = selectedPlatoon?.status === PlatoonStatus.Training
   const canDismiss = selectedPlatoon?.status === PlatoonStatus.Recruited
+  const canModifyTroops = selectedPlatoon?.status !== PlatoonStatus.Recruited
 
   return (
     <Grid container>
@@ -134,8 +135,8 @@ const Training = ({ planet }: { planet: IPlanet }) => {
        <Typography variant="caption">Troops</Typography>
         <Typography variant="caption">{selectedPlatoon?.troops}</Typography>
         <div>
-          <IconButton size="small" onClick={(event) => handleChangePlatoonTroops(event, 1)}><ArrowDropUp /></IconButton>
-          <IconButton size="small" onClick={(event) => handleChangePlatoonTroops(event, -1)}><ArrowDropDown /></IconButton>
+          <IconButton size="small" disabled={!canModifyTroops} onClick={(event) => handleChangePlatoonTroops(event, 1)}><ArrowDropUp /></IconButton>
+          <IconButton size="small" disabled={!canModifyTroops} onClick={(event) => handleChangePlatoonTroops(event, -1)}><ArrowDropDown /></IconButton>
         </div>
       </Grid>
       <Grid item xs={4}>
@@ -144,11 +145,11 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       </Grid>
       <Grid item xs={3}>
         {/* <Equipment items={suitKeys} selector={suitSelector} /> */}
-        <Equipment items={suits} />
+        <Equipment items={suits} canChange={canModifyTroops} />
       </Grid>
       <Grid item xs={3}>
         {/* <Equipment items={weaponKeys} selector={weaponSelector} /> */}
-        <Equipment items={weapons} />
+        <Equipment items={weapons} canChange={canModifyTroops} />
       </Grid>
       <Grid item xs={6}>
         <div>
