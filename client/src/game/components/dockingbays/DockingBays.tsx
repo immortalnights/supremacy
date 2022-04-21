@@ -1,10 +1,12 @@
 import React from "react"
 import Recoil from "recoil"
+import { range } from "../../../data/utilities"
 import { Stack, Typography  } from "@mui/material"
 import { IPlanet, IShip } from "../../../simulation/types.d"
+import { PlayerShipsAtPlanetPosition } from "../../../data/Ships"
 
 const DockingBays = ({ planet }: { planet: IPlanet }) => {
-  const items: (IShip | undefined)[] = new Array(3).fill(undefined)
+  const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "docking-bay" })) as IShip[]
 
   const handleItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, item: IShip) => {
 
@@ -16,9 +18,12 @@ const DockingBays = ({ planet }: { planet: IPlanet }) => {
       <Typography>{planet.name}</Typography>
       <Typography variant="caption">Docking Bays</Typography>
       <ol>
-        {items.map((item, index) => (
-          <li key={index} onClick={(event) => item && handleItemClick(event, item)}>{item ? item.name : "Bay Empty"}</li>
-        ))}
+        {range(3).map((index) => {
+          const ship = ships[index]
+          return (
+            <li key={index} onClick={(event) => ship && handleItemClick(event, ship)}>{ship ? ship.name : "Bay Empty"}</li>
+          )
+        })}
       </ol>
     </div>
   )

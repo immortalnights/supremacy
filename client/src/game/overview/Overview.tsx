@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, Stack, TextField } from "@mui/material"
+import { Box, Button, Stack, TextField, Tabs, Tab, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet, IPlanet } from "../../data/Planets"
 import { StarDate } from "../components/StarDate"
@@ -9,6 +9,7 @@ import HoldButton from "../components/HoldButton"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
 import PlanetAuth from "../components/PlanetAuth"
+import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
@@ -114,20 +115,56 @@ const IconGrid = (props: any) => {
   )
 }
 
-const OverviewSlots = ({ planet }: any) => {
-  const setSlotType = (slot: string) => {}
-  const onSelectItem = () => {}
-  const ships: any[] = []
-  const message = ""
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+const ShipGrid = () => {
+  console.log("rendering grid")
+  return null
+}
+
+const TabPanel = (props: TabPanelProps) => {
+  const { children, value, index, ...other } = props;
 
   return (
-    <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-      <div>
-        <Button onClick={() => setSlotType('orbit')}>Ships in Orbit</Button>
-        <Button onClick={() => setSlotType('surface')}>Ships on the Surface</Button>
-        <Button onClick={() => setSlotType('docked')}>Ships Docked</Button>
-      </div>
-      <div style={{textAlign: 'center'}}>{message}</div>
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <ShipGrid />
+        </Box>
+      )}
+    </div>
+  );
+}
+
+const OverviewSlots = ({ planet }: any) => {
+  const [ tabIndex, setTabIndex ] = React.useState(2)
+  const positions = ["orbit", "surface", "docking-bay"]
+  const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: positions[tabIndex] }))
+  const onSelectItem = () => {}
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue)
+  }
+
+  return (
+    <div style={{ margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={tabIndex} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="In Orbit" />
+          <Tab label="On the Surface" />
+          <Tab label="Docked" />
+        </Tabs>
+      </Box>
       <IconGrid items={ships} onSelectItem={onSelectItem} />
     </div>
   )
@@ -203,6 +240,7 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
           {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : null}
           <PlanetGrid onSelectItem={onSelectItem} />
         </div>
+        {/* <div style={{ flexGrow: 1 }}></div> */}
         <OverviewSlots planet={planet} />
       </Stack>
     </>

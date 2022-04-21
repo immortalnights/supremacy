@@ -1,4 +1,5 @@
 
+export const range = (count: number) => [ ...Array(count).keys() ]
 
 // Filter the given Object by the predicate, returning a new object with the key/value that match the predicate
 export const filterObject = <T, TI>(object: T, predicate: (item: TI) => boolean) => {
