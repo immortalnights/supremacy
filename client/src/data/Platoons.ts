@@ -33,8 +33,7 @@ export const PlatoonsOnPlanet = Recoil.selectorFamily<IPlatoonBasic[], { planet:
 export const PlanetStrength = Recoil.selectorFamily<number, { planet: PlanetID }>({
     key: "planetStrength",
     get: ({ planet }) => ({ get }) => {
-        const player = get(Player)
-        const platoons = get(Platoons).filter((p) => p.status === PlatoonStatus.Recruited && p.location.planet === planet && p.owner === player.id)
+        const platoons = get(PlatoonsOnPlanet({ planet: planet }))
         return sumPlatoonStrengths(platoons)
     }
 })

@@ -1,7 +1,7 @@
 import React from "react"
 import Recoil from "recoil"
 import { IPlayer, Player } from "../../data/Player"
-import { IPlanet, SelectedPlanet } from "../../data/Planets"
+import { SelectedPlanet } from "../../data/Planets"
 import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/material"
 import DockingBays from "../components/dockingbays"
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
@@ -9,6 +9,7 @@ import { stringify } from "querystring"
 import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
 // import PlatoonGrid from "../components/grid/PlatoonGrid"
 // import "./styles.css"
+import type { IPlanet, IShip } from "../../simulation/types.d"
 
 const PlatoonGridItem = ({ name, troops }: { name?: string, troops?: number }) => {
   return (
@@ -71,11 +72,15 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
 
   const handleSelectedItem: any = () => {}
 
+  const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
+
+  }
+
   return (
     <Grid container>
       <Grid item xs={5}>
         <Stack direction="row">
-          <DockingBays planet={planet} />
+          <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
           <ShipDetails />
         </Stack>
         <PlatoonGrid items={platoons} count={24} direction="row" onSelectItem={handleSelectedItem} />

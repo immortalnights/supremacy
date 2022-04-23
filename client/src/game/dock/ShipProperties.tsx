@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { IPlanet, IShip } from "../../simulation/types.d"
+import { IPlanet, IShip, IShipCapacity } from "../../simulation/types.d"
 
 const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => {
   const details: {
@@ -10,11 +10,7 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
     crew?: number
     requiredCrew?: number
     crewText?: string
-    capacity?: {
-      civilians?: number
-      cargo?: number
-      fuel?: string | number
-    }
+    capacity?: IShipCapacity | null
     maxFuel?: number | string
     payload?: number
     value?: number
@@ -23,11 +19,11 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
   if (ship)
   {
     details.name = ship.name
-    details.crew = ship.crew
-    details.requiredCrew = ship.requiredCrew
-    details.capacity = { ...ship.capacity }
+    details.crew = ship.crew || 0
+    details.requiredCrew = ship.requiredCrew || 0
+    details.capacity = ship.capacity ? ship.capacity : null
     // FIXME
-    // details.payload = Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
+    details.payload = 0 // Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
     details.value = ship.value
 
     if (ship.requiredCrew > 0)
@@ -36,26 +32,26 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
     }
     else
     {
-      details.crewText = "remote"
+      details.crewText = "Remote"
     }
 
-    details.maxFuel = details.capacity ? details.capacity.fuel : "Nuclear"
+    details.maxFuel = details.capacity ? (details.capacity.fuels || 0) : "Nuclear"
   }
 
   return (
-    <dl>
+    <dl style={{ flexBasis: "75%" }}>
       <dt>Ship</dt>
       <dd>{details.name}</dd>
       <dt>Civilians</dt>
-      <dd>{details?.civilians?.toFixed(0)}</dd>
+      <dd>{planet.population.toFixed(0)}</dd>
       <dt>Seats</dt>
-      <dd>{details?.capacity?.civilians}</dd>
+      <dd>{details.capacity?.civilians || 0}</dd>
       <dt>Crew</dt>
       <dd>{details.crewText}</dd>
       <dt>Capacity</dt>
-      <dd>{details?.capacity?.cargo}</dd>
+      <dd>{details?.capacity?.cargo || 0}</dd>
       <dt>Max Fuel</dt>
-      <dd>{details.maxFuel}</dd>
+      <dd>{details.maxFuel || 0}</dd>
       <dt>Payload</dt>
       <dd>{details.payload}</dd>
       <dt>Value</dt>

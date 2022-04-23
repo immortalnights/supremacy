@@ -11,6 +11,7 @@ export default class Ship implements IShip
   location: IShipLocation
   cargo: IResources
   passengers: number
+  fuels: number
   // Static
   requiredCrew: number
   requiresFuel: boolean
@@ -39,6 +40,7 @@ export default class Ship implements IShip
       fuels: 0,
       energy: 0,
     }
+    this.fuels = 0
     this.passengers = 0
     this.heading = null
 

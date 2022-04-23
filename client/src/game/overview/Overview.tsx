@@ -10,6 +10,7 @@ import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
 import PlanetAuth from "../components/PlanetAuth"
 import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
+import { PlanetStrength } from "../../data/Platoons"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
@@ -37,6 +38,8 @@ const TaxControls = ({ planet }: { planet: IPlanet }) => {
 }
 
 const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
+  const militaryStrength = Recoil.useRecoilValue(PlanetStrength({ planet: planet.id }))
+
   return (
     <div className="flex-columns" style={{alignItems: 'baseline'}}>
       <dl>
@@ -75,7 +78,7 @@ const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
         </dd>
 
         <dt style={{whiteSpace: 'nowrap'}}>Military Strength</dt>
-        <dd>{0}</dd>
+        <dd>{militaryStrength}</dd>
       </dl>
     </div>
   )
@@ -124,26 +127,6 @@ interface TabPanelProps {
 const ShipGrid = () => {
   console.log("rendering grid")
   return null
-}
-
-const TabPanel = (props: TabPanelProps) => {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          <ShipGrid />
-        </Box>
-      )}
-    </div>
-  );
 }
 
 const OverviewSlots = ({ planet }: any) => {

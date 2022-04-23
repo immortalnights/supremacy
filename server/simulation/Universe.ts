@@ -388,6 +388,41 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
+      case "ship-modify-passengers":
+      case "ship-modify-fuels":
+      case "ship-add-crew":
+      case "ship-empty-cargo":
+      {
+        break
+      }
+      case "ship-decommission":
+      {
+        const body = data as { id: number }
+        if (body.id)
+        {
+          const index = this.ships.findIndex((ship) => ship.id === body.id)
+          if (index >= 0)
+          {
+            const ship = this.ships[index] as Ship
+            const capital = this.planets.find((p) => p.owner === player && p.capital === true) as Planet
+            console.assert(capital, "Failed to find player capital")
+
+            capital.resources.credits += ship.value
+            // ship.status = "decommissioned"
+            this.ships.splice(index, 1)
+            result = true
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       case "platoon-increase-troops":
       {
         const body = data as { platoon: PlatoonID, amount: number }

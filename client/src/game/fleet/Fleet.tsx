@@ -13,6 +13,10 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   // FIXME remember selected ship on navigation?
   const [ selectedShip, setSelectedShip ] = React.useState<IShip | undefined>()
 
+  const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
+    setSelectedShip(ship)
+  }
+
   const handleSelectPlanet = () => {
   }
 
@@ -24,7 +28,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   return (
     <Grid container>
       <Grid item xs={2}>
-        <DockingBays planet={planet} />
+        <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
       </Grid>
       <Grid item xs={8}>
         <div>

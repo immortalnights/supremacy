@@ -4,6 +4,11 @@ export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
   | "purchase-ship"
+  | "ship-modify-passengers"
+  | "ship-modify-fuels"
+  | "ship-add-crew"
+  | "ship-empty-cargo"
+  | "ship-decommission"
   | "platoon-increase-troops"
   | "platoon-decrease-troops"
   | "platoon-recruit"
@@ -112,6 +117,7 @@ export interface IShip extends IShipBasic {
   value: number
   cargo: IResources
   passengers: number
+  fuels: number
   // Static data
   requiresFuel: boolean
   requiredCrew: number
