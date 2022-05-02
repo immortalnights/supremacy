@@ -10,7 +10,14 @@ const DockingBays = ({ planet, onItemClick }: { planet: IPlanet, onItemClick: (e
   const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "docking-bay" })) as IShip[]
 
   const handleItemClick = (event: React.MouseEvent<HTMLLIElement, MouseEvent>, index: number, item: IShip) => {
-    setSelected(index)
+    if (item)
+    {
+      setSelected(index)
+    }
+    else
+    {
+      setSelected(undefined)
+    }
     onItemClick(event, item)
   }
 
@@ -25,7 +32,7 @@ const DockingBays = ({ planet, onItemClick }: { planet: IPlanet, onItemClick: (e
           return (
             <li
               key={index}
-              style={{ "cursor": "pointer", fontWeight: selected === index ? "bold": "normal" }}
+              style={{ "cursor": "pointer", fontWeight: ship && selected === index ? "bold": "normal" }}
               onClick={(event) => ship && handleItemClick(event, index, ship)}>
                 {ship ? ship.name : "Bay Empty"}
             </li>

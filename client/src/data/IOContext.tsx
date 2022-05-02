@@ -1,6 +1,7 @@
 import React from "react"
 import { io, Socket } from "socket.io-client"
 import { PlayerRoomAction } from "../types"
+import { PlayerGameAction } from "../simulation/types"
 import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
 import { useNavigate } from "react-router-dom"
 
@@ -20,7 +21,7 @@ export interface IIOContext {
   roomAction: (name: PlayerRoomAction, data: any) => Promise<void>
   joinGame: (id: string) => Promise<void>
   leaveGame: () => void,
-  action: (name: string, data: object) => Promise<void>
+  action: (name: PlayerGameAction, data: object) => Promise<void>
 }
 
 // Connection Context
@@ -33,7 +34,7 @@ export const IOContext = React.createContext<IIOContext>({
   roomAction: (name: PlayerRoomAction, data: any) => Promise.reject(),
   joinGame: () => Promise.reject(),
   leaveGame: () => {},
-  action: (name: string, data: object = {}) => Promise.reject(),
+  action: (name: PlayerGameAction, data: object = {}) => Promise.reject(),
 })
 
 export type MessageHandler = (action: string, data: any) => void
@@ -165,7 +166,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       socket?.emit("player-leave-game")
       handleMessage("game-player-kicked", {})
     },
-    action: (name: string, data: object = {}) => {
+    action: (name: PlayerGameAction, data: object = {}) => {
       console.assert(socket, "Socket is invalid!")
       return new Promise<void>((resolve, reject) => {
         console.debug(`Sending ${name}`, data)

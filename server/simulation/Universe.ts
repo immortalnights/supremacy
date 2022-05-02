@@ -15,7 +15,9 @@ import {
   IDate,
   Difficulty,
   PlayerGameAction,
+  PlanetID,
   PlatoonID,
+  ShipID,
 } from "./types"
 import type { IWorld } from "../serverTypes"
 import ShipData from "./data/ships.json"
@@ -395,10 +397,40 @@ export default class Universe implements IUniverse, IWorld
       {
         break
       }
+      case "ship-relocate":
+      {
+        const body = data as { id: ShipID, location: PlanetID, position: string }
+        if (body.id !== undefined && body.location !== undefined && body.position)
+        {
+          const index = this.ships.findIndex((ship) => ship.id === body.id)
+          if (index >= 0)
+          {
+            const ship = this.ships[index] as Ship
+            if (ship.relocate(body.location, body.position))
+            {
+              resultData = { world: { ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Failed to relocate ship"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       case "ship-decommission":
       {
         const body = data as { id: number }
-        if (body.id)
+        if (body.id !== undefined)
         {
           const index = this.ships.findIndex((ship) => ship.id === body.id)
           if (index >= 0)
@@ -410,6 +442,8 @@ export default class Universe implements IUniverse, IWorld
             capital.resources.credits += ship.value
             // ship.status = "decommissioned"
             this.ships.splice(index, 1)
+
+            resultData = { world: { planets: [capital.toJSON()] } }
             result = true
           }
           else

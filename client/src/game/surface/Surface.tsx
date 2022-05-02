@@ -1,6 +1,7 @@
 import { Box, FormLabel, Typography, Button, Stack } from "@mui/material"
 import React from "react"
 import Recoil from "recoil"
+import { IOContext } from "../../data/IOContext"
 import { IPlanet, IShip } from "../../simulation/types.d"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/dockingbays/"
@@ -14,43 +15,58 @@ interface IPlanetSlotProps {
 }
 
 const PlanetSlot = ({ ship, onToggleStatus, onClick }: IPlanetSlotProps) => {
-  const empty = true
-  let name = ""
+  let empty = true
+  let canToggleStatus = false
+  let name = "Empty"
   let status = ""
+  let toggleStatus = ""
 
   if (ship)
   {
+    empty = false
     name = ship.name
+    if (ship.harvester != null && ship.harvester.location === "surface")
+    {
+      canToggleStatus = true
+      status = "Not Running"
+      toggleStatus = "activate" // : "deactivate"
+    }
   }
 
-	return (
-		<div style={{ marginTop: 8, padding: 2, border: "1px solid lightgrey" }}>
-			<div>
-				<Button onClick={(event) => onToggleStatus(event, "activate")} disabled={empty}>On</Button>
-				<Button onClick={(event) => onToggleStatus(event, "deactivate")} disabled={empty}>Off</Button>
-			</div>
-			<div onClick={onClick} style={{ cursor: "pointer" }}>
-				<div style={{ height: 64, width: 64, backgroundColor: "lightgray", margin: "auto" }}><img src="" alt="Empty"/></div>
-				<div>{name}</div>
-				<div>{status}</div>
-			</div>
-		</div>
-	)
+  return (
+    <div style={{ marginTop: 8, padding: 2, border: "1px solid lightgrey", flexGrow: "1", flexBasis: "16.6%" }}>
+      <div>
+        <Button sx={{ display: "block", margin: "0 auto" }} onClick={(event) => onToggleStatus(event, toggleStatus)} disabled={!canToggleStatus}>On / Off</Button>
+      </div>
+      <div onClick={onClick} style={{ cursor: "pointer" }}>
+        <div style={{ height: 64, width: 64, backgroundColor: "lightgray", margin: "auto" }}><img src="" alt=""/></div>
+        <Typography textAlign="center" color={empty ? "gray" : "default"}>{name}</Typography>
+        <Typography textAlign="center">{status}</Typography>
+      </div>
+    </div>
+  )
 }
 
 const Surface = ({ planet }: { planet: IPlanet }) => {
   const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "surface" })) as IShip[]
+  const { action } = React.useContext(IOContext)
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-
+    action("ship-relocate", { id: ship.id, location: planet.id, position: "surface" })
   }
 
-  const handleToggleSlot = (event: React.MouseEvent<HTMLButtonElement>, slot: number, state: string) => {
-
+  const handleToggleSlot = (event: React.MouseEvent<HTMLButtonElement>, slot: number, ship: IShip | undefined, state: string) => {
+    if (ship)
+    {
+      action("ship-toggle-surface-status", { id: ship.id, location: planet.id, position: "docking-bay" })
+    }
   }
 
-  const handleClickSlot = (event: React.MouseEvent<HTMLDivElement>, slot: number) => {
-
+  const handleClickSlot = (event: React.MouseEvent<HTMLDivElement>, slot: number, ship: IShip | undefined) => {
+    if (ship)
+    {
+      action("ship-relocate", { id: ship.id, location: planet.id, position: "docking-bay" })
+    }
   }
 
   const slots: React.ReactNode[] = []
@@ -59,8 +75,8 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
     slots.push(<PlanetSlot
       key={slot}
       ship={ship}
-      onToggleStatus={(event, state) => handleToggleSlot(event, slot, state)}
-      onClick={(event) => handleClickSlot(event, slot)}
+      onToggleStatus={(event, state) => handleToggleSlot(event, slot, ship, state)}
+      onClick={(event) => handleClickSlot(event, slot, ship)}
     />)
   })
 
@@ -70,10 +86,10 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
         {/* Image */}
       </div>
       <Stack direction="row" justifyContent="space-around">
-        <Box>
+        <Box flexBasis="20%">
           <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
         </Box>
-        <Stack direction="row">
+        <Stack direction="row" flexGrow="1">
           {slots}
         </Stack>
       </Stack>
