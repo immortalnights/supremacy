@@ -8,7 +8,7 @@ import { SelectedPlanet, IPlanet, CapitalPlanet } from "../../data/Planets"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/dockingbays"
 import ShipProperties from "./ShipProperties"
-import { IShip } from "../../simulation/types.d"
+import { IResources, IShip } from "../../simulation/types.d"
 import "./styles.css"
 
 interface IShipDetailsProps {
@@ -18,6 +18,13 @@ interface IShipDetailsProps {
   onClickAddCrew: (ship: IShip) => void
   onClickEmptyCargo: (ship: IShip) => void
   onClickDecommission: (ship: IShip) => void
+}
+
+const totalCargo = (resources: IResources) => {
+  return Object.keys(resources).reduce((prev, value, index) => {
+    const key = value as keyof IResources
+    return prev + resources[key]
+  }, 0)
 }
 
 const ShipDetails = ({
@@ -45,12 +52,25 @@ const ShipDetails = ({
     onModifyFuels(ship as IShip, -1)
   }
 
-  let canModifyPassengers = ship?.capacity?.civilians || false
-  let canModifyFuels = ship?.capacity?.fuels
-  let canAddCrew = (ship?.requiredCrew || 0) > 0 && ship?.crew === 0
-  // FIXME
+  let canModifyPassengers = false
+  let canModifyFuels = false
+  let canAddCrew = false
   let canEmptyCargo = false
-  let canDecommission = !!ship
+  let canDecommission = false
+
+  if (ship)
+  {
+    if (ship.capacity)
+    {
+      canModifyPassengers = ship.capacity.civilians > 0
+      canModifyFuels = ship.capacity.fuels > 0
+      canEmptyCargo = ship.capacity.cargo > 0 && totalCargo(ship.cargo) > 0
+    }
+
+    canAddCrew = ship.requiredCrew > 0 && ship.crew !== ship.requiredCrew
+    // FIXME only true if something is in the cargo
+    canDecommission = true
+  }
 
   return (
     <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-around" }}>
@@ -187,6 +207,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
     action("ship-modify-fuels", { id: ship.id, amount })
   }
 
+  // FIXME ship properties does not update as the selected ship is cached in this Component state
   const handleClickAddCrew = (ship: IShip) => {
     action("ship-add-crew", { id: ship.id })
   }

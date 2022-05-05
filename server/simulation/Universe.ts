@@ -203,6 +203,22 @@ export default class Universe implements IUniverse, IWorld
 
     console.log(`Handle ${action} from ${player}`)
 
+    const findPlanetIndex = (id: PlanetID): number => this.planets.findIndex((p) => p.id === id)
+    const findPlanet = (id: PlanetID): Planet | undefined => {
+      const index = findPlanetIndex(id)
+      return index >= 0 ? this.planets[index] : undefined
+    }
+    const findShipIndex = (id: ShipID): number => this.ships.findIndex((s) => s.id === id)
+    const findShip = (id: ShipID): Ship | undefined => {
+      const index = findShipIndex(id)
+      return index >= 0 ? this.ships[index] : undefined
+    }
+    const findPlatoonIndex = (id: PlatoonID): number => this.planets.findIndex((p) => p.id === id)
+    const findPlatoon = (id: PlatoonID): Platoon | undefined => {
+      const index = findPlatoonIndex(id)
+      return index >= 0 ? this.platoons[index] : undefined
+    }
+
     switch (action as PlayerGameAction)
     {
       case "rename-planet":
@@ -392,7 +408,48 @@ export default class Universe implements IUniverse, IWorld
       }
       case "ship-modify-passengers":
       case "ship-modify-fuels":
+      {
+        break
+      }
       case "ship-add-crew":
+      {
+        const body = data as { id: ShipID }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              ship.addCrew(planet)
+
+              if (ship.crew === ship.requiredCrew)
+              {
+                resultData = { world: { planets: [planet.toJSON()], ships: [ship.toJSON()] } }
+                result = true
+              }
+              else
+              {
+                reason = "Failed to add crew"
+              }
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       case "ship-empty-cargo":
       {
         break
@@ -626,7 +683,7 @@ export default class Universe implements IUniverse, IWorld
       return this.planets.find((p) => p.id === id)
     }
 
-    // TODO ships
+    // TODO only send ships the player should know about, not all of them
     this.ships.forEach((ship) => {
       let shipData: IShipBasic | IShip = {
         id: ship.id,
@@ -651,7 +708,7 @@ export default class Universe implements IUniverse, IWorld
       universe.ships.push(shipData)
     })
 
-    // TODO platoons
+    // TODO only send platoons the player should know about, not all of them
     this.platoons.forEach((platoon) => {
       let platoonData: IPlatoonBasic | IPlatoon = {
         id: platoon.id,

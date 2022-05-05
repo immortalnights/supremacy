@@ -1,3 +1,4 @@
+import Planet from "./Planet";
 import { IResources, IShip, IShipCapacity, IShipDetails, IShipHarvesting, IShipHeading, IShipLocation, PlanetID, ShipID } from "./types";
 
 export default class Ship implements IShip
@@ -73,6 +74,24 @@ export default class Ship implements IShip
   //   Object.assign(other, this)
   //   return other
   // }
+
+  addCrew(planet: Planet)
+  {
+    console.log(this.requiredCrew, this.crew)
+    if (this.requiredCrew > 0 && this.crew < this.requiredCrew)
+    {
+      // Cannot partially crew a ship
+      const required = this.requiredCrew - this.crew
+      if (planet.population >= required)
+      {
+        planet.population -= required
+        this.crew += required
+      }
+    }
+
+    console.log(this.requiredCrew, this.crew)
+    return this.crew === this.requiredCrew
+  }
 
   relocate(planet: PlanetID, position: string)
   {
