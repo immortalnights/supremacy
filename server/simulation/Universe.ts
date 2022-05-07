@@ -406,9 +406,100 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
+      case "ship-modify-cargo":
+      {
+        const body = data as { id: ShipID, type: string, amount: number }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              ship.modifyCargo(planet, body.type, body.amount)
+
+              resultData = { world: { planets: [planet.toJSON()], ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       case "ship-modify-passengers":
+      {
+        const body = data as { id: ShipID, amount: number }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              ship.modifyPassengers(planet, body.amount)
+
+              resultData = { world: { planets: [planet.toJSON()], ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Invalid ship ID"
+        }
+        break
+      }
       case "ship-modify-fuels":
       {
+        const body = data as { id: ShipID, amount: number }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              ship.refuel(planet, body.amount)
+
+              resultData = { world: { planets: [planet.toJSON()], ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
         break
       }
       case "ship-add-crew":

@@ -20,6 +20,19 @@ interface IShipDetailsProps {
   onClickDecommission: (ship: IShip) => void
 }
 
+const hasCargo = (ship: IShip, type: string) => {
+  return ship.cargo[type as keyof IResources] > 0
+}
+
+const hasResource = (planet: IPlanet, type: string) => {
+  return planet.resources[type as keyof IResources] > 0
+}
+
+const isCargoFull = (ship: IShip) => {
+  const total = totalCargo(ship.cargo)
+  return ship.capacity != null && total === ship.capacity.cargo
+}
+
 const totalCargo = (resources: IResources) => {
   return Object.keys(resources).reduce((prev, value, index) => {
     const key = value as keyof IResources
@@ -118,14 +131,24 @@ const Bars = ({ left, right }: { left: number, right: number }) => {
   )
 }
 
-const Inventory = ({ planet, ship }: { planet: IPlanet, ship: IShip | undefined }) => {
+const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: IShip | undefined, onModifyCargo: (type: string, amount: number) => void }) => {
+  // Remove from ship / add to ship
+  const canRemoveFood = !!ship && hasCargo(ship, "food")
+  const canAddFood = !!ship && hasResource(planet, "food") && !isCargoFull(ship)
+  const canRemoveMinerals = !!ship && hasCargo(ship, "minerals")
+  const canAddMinerals = !!ship && hasResource(planet, "minerals") && !isCargoFull(ship)
+  const canRemoveFuels = !!ship && hasCargo(ship, "fuels")
+  const canAddFuels = !!ship && hasResource(planet, "fuels") && !isCargoFull(ship)
+  const canRemoveEnergy = !!ship && hasCargo(ship, "energy")
+  const canAddEnergy = !!ship && hasResource(planet, "energy") && !isCargoFull(ship)
+
   return (
     <Grid container>
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.food} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IconButton disabled={!canRemoveFood} onClick={() => onModifyCargo("food", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
+          <IconButton disabled={!canAddFood} onClick={() => onModifyCargo("food", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Food</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.food}</Typography>
@@ -134,8 +157,8 @@ const Inventory = ({ planet, ship }: { planet: IPlanet, ship: IShip | undefined 
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.minerals} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IconButton disabled={!canRemoveMinerals} onClick={() => onModifyCargo("minerals", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
+          <IconButton disabled={!canAddMinerals} onClick={() => onModifyCargo("minerals", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Minerals</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.minerals}</Typography>
@@ -144,8 +167,8 @@ const Inventory = ({ planet, ship }: { planet: IPlanet, ship: IShip | undefined 
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.fuels} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IconButton disabled={!canRemoveFuels} onClick={() => onModifyCargo("fuels", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
+          <IconButton disabled={!canAddFuels} onClick={() => onModifyCargo("fuels", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Fuels</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.fuels}</Typography>
@@ -154,8 +177,8 @@ const Inventory = ({ planet, ship }: { planet: IPlanet, ship: IShip | undefined 
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.energy} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IconButton disabled={!canRemoveEnergy} onClick={() => onModifyCargo("energy", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
+          <IconButton disabled={!canAddEnergy} onClick={() => onModifyCargo("energy", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Energy</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.energy}</Typography>
@@ -229,6 +252,10 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
     setConfirmDecommission(false)
   }
 
+  const handleModifyCargo = (type: string, amount: number) => {
+    action("ship-modify-cargo", { id: ship?.id, type, amount })
+  }
+
   return (
     <Grid container>
       <Grid item xs={8}>
@@ -247,7 +274,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
         />
       </Grid>
       <Grid item xs={4}>
-        <Inventory planet={planet} ship={ship} />
+        <Inventory planet={planet} ship={ship} onModifyCargo={handleModifyCargo} />
       </Grid>
     </Grid>
   )

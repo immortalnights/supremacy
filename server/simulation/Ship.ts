@@ -1,3 +1,4 @@
+import e from "express";
 import Planet from "./Planet";
 import { IResources, IShip, IShipCapacity, IShipDetails, IShipHarvesting, IShipHeading, IShipLocation, PlanetID, ShipID } from "./types";
 
@@ -75,6 +76,14 @@ export default class Ship implements IShip
   //   return other
   // }
 
+  totalCargo(): number
+  {
+    return Object.keys(this.cargo).reduce((prev, value, index) => {
+      const key = value as keyof IResources
+      return prev + this.cargo[key]
+    }, 0)
+  }
+
   addCrew(planet: Planet)
   {
     console.log(this.requiredCrew, this.crew)
@@ -91,6 +100,102 @@ export default class Ship implements IShip
 
     console.log(this.requiredCrew, this.crew)
     return this.crew === this.requiredCrew
+  }
+
+  modifyCargo(planet: Planet, type: string, value: number)
+  {
+    const resourceKey = type as keyof IResources
+    const cargoKey = type as keyof IResources
+
+    console.log("*", type, this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey], this.totalCargo(), value)
+    if (this.capacity && this.capacity.cargo > 0)
+    {
+      // Add cargo
+      if (value > 0)
+      {
+        const totalCargo = this.totalCargo()
+        if (totalCargo < this.capacity.cargo)
+        {
+          const change = Math.min(this.capacity.cargo - totalCargo, planet.resources[resourceKey], value)
+          this.cargo[cargoKey] += change
+          planet.resources[resourceKey] -= change
+        }
+      }
+      // Remove cargo
+      else if (value < 0)
+      {
+        if (this.cargo[cargoKey] > 0)
+        {
+          const change = Math.min(this.cargo[cargoKey], Math.abs(value))
+          this.cargo[cargoKey] -= change
+          planet.resources[resourceKey] += change
+        }
+      }
+    }
+    console.log("=", this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey])
+  }
+
+  modifyPassengers(planet: Planet, value: number)
+  {
+    if (this.capacity && this.capacity.civilians > 0)
+    {
+      console.log("*", this.capacity.civilians, this.passengers, planet.population, value)
+      // Add passengers
+      if (value > 0)
+      {
+        if (this.passengers < this.capacity.civilians)
+        {
+          const change = Math.min(this.capacity.civilians - this.passengers, planet.population, value)
+          this.passengers += change
+          planet.population -= change
+        }
+      }
+      // Remove passengers
+      else if (value < 0)
+      {
+        if (this.passengers > 0)
+        {
+          const change = Math.min(this.passengers, Math.abs(value))
+          this.passengers -= change
+          planet.population += change
+        }
+      }
+      console.log("=", this.capacity.civilians, this.passengers, planet.population)
+    }
+  }
+
+  refuel(planet: Planet, value: number)
+  {
+    if (this.capacity && this.capacity.fuels > 0)
+    {
+      console.log("*", this.capacity.fuels, this.fuels, planet.resources.fuels, value)
+      // Add fuels
+      if (value > 0)
+      {
+        if (this.fuels < this.capacity.fuels)
+        {
+          const change = Math.min(this.capacity.fuels - this.fuels, planet.resources.fuels, value)
+          this.fuels += change
+          planet.resources.fuels -= change
+        }
+      }
+      // Remove fuels
+      else if (value < 0)
+      {
+        if (this.fuels > 0)
+        {
+          const change = Math.min(this.fuels, Math.abs(value))
+          this.fuels -= change
+          planet.resources.fuels += change
+        }
+      }
+      console.log("=", this.capacity.fuels, this.fuels, planet.resources.fuels)
+    }
+  }
+
+  emptyCargo(planet: Planet)
+  {
+
   }
 
   relocate(planet: PlanetID, position: string)
