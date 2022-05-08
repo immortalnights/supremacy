@@ -86,7 +86,7 @@ export default class Ship implements IShip
 
   addCrew(planet: Planet)
   {
-    console.log(this.requiredCrew, this.crew)
+    // console.log(this.requiredCrew, this.crew)
     if (this.requiredCrew > 0 && this.crew < this.requiredCrew)
     {
       // Cannot partially crew a ship
@@ -100,6 +100,18 @@ export default class Ship implements IShip
 
     console.log(this.requiredCrew, this.crew)
     return this.crew === this.requiredCrew
+  }
+
+  removeCrew(planet: Planet)
+  {
+    if (this.crew > 0)
+    {
+      const crew = this.crew
+      this.crew = 0
+      planet.population += crew
+    }
+
+    return this.crew === 0
   }
 
   modifyCargo(planet: Planet, type: string, value: number)

@@ -1,6 +1,8 @@
 import React from "react"
 import Recoil from "recoil"
 import { IPlanet, IShip, IShipCapacity } from "../../simulation/types.d"
+import { totalCargo } from "../utilities/ships"
+
 
 const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => {
   const details: {
@@ -23,7 +25,7 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
     details.requiredCrew = ship.requiredCrew || 0
     details.capacity = ship.capacity ? ship.capacity : null
     // FIXME
-    details.payload = 0 // Object.keys(ship.cargo).reduce((mem, key) => (mem + ship.cargo[key]), 0)
+    details.payload = totalCargo(ship.cargo)
     details.value = ship.value
 
     if (ship.requiredCrew > 0)

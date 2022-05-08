@@ -6,12 +6,6 @@ import {
   IconButton,
   Button,
   Typography,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogProps,
-  DialogActions
 } from "@mui/material"
 import {
   ArrowDropUp,
@@ -30,7 +24,9 @@ import { Ship } from "../../data/Ships"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/dockingbays"
 import ShipProperties from "./ShipProperties"
+import DecommissionDialog from "./ConfirmDecommissionDialog"
 import type { ShipID, IShip, IResources } from "../../simulation/types.d"
+import { hasCargo, hasResource, isCargoFull, totalCargo } from "../utilities/ships"
 import "./styles.css"
 
 interface IShipDetailsProps {
@@ -40,26 +36,6 @@ interface IShipDetailsProps {
   onClickAddCrew: (ship: IShip) => void
   onClickEmptyCargo: (ship: IShip) => void
   onClickDecommission: (ship: IShip) => void
-}
-
-const hasCargo = (ship: IShip, type: string) => {
-  return ship.cargo[type as keyof IResources] > 0
-}
-
-const hasResource = (planet: IPlanet, type: string) => {
-  return planet.resources[type as keyof IResources] > 0
-}
-
-const isCargoFull = (ship: IShip) => {
-  const total = totalCargo(ship.cargo)
-  return ship.capacity != null && total === ship.capacity.cargo
-}
-
-const totalCargo = (resources: IResources) => {
-  return Object.keys(resources).reduce((prev, value, index) => {
-    const key = value as keyof IResources
-    return prev + resources[key]
-  }, 0)
 }
 
 const ShipDetails = ({
@@ -210,31 +186,6 @@ const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: ISh
   )
 }
 
-interface ConfirmDecommissionDialogProps {
-  ship: IShip
-  onConfirm: (ship: IShip) => void
-  onCancel: () => void
-}
-
-const ConfirmDecommission = (props: ConfirmDecommissionDialogProps & DialogProps) => {
-  const capital = Recoil.useRecoilValue(CapitalPlanet)
-  const { ship, onConfirm, onCancel, ...dialogProps } = props
-
-  return (
-    <Dialog {...dialogProps}>
-      <DialogTitle>Decommission</DialogTitle>
-      <DialogContent>
-        <DialogContentText textAlign="center">Decommission ship '{ship.name}'?</DialogContentText>
-        {capital && <DialogContentText>{capital.name} will receive {ship.value} credits.</DialogContentText>}
-      </DialogContent>
-      <DialogActions>
-        <Button size="small" onClick={onCancel}>Cancel</Button>
-        <Button size="small" color="error" onClick={() => onConfirm(ship)}>Decommission</Button>
-      </DialogActions>
-    </Dialog>
-  )
-}
-
 export const Dock = ({ planet }: { planet: IPlanet }) => {
   const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
   const [ confirmDecommission, setConfirmDecommission ] = React.useState(false)
@@ -282,7 +233,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
   return (
     <Grid container>
       <Grid item xs={8}>
-        {ship && <ConfirmDecommission ship={ship as IShip} open={confirmDecommission} onConfirm={handleConfirmDecommission} onCancel={handleClose} onClose={handleClose} />}
+        {ship && <DecommissionDialog ship={ship as IShip} open={confirmDecommission} onConfirm={handleConfirmDecommission} onCancel={handleClose} onClose={handleClose} />}
         <Stack direction="row" justifyContent="space-around">
           <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
           <ShipProperties planet={planet} ship={ship} />

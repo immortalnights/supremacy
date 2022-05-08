@@ -608,19 +608,41 @@ export default class Universe implements IUniverse, IWorld
         const body = data as { id: number }
         if (body.id !== undefined)
         {
-          const index = this.ships.findIndex((ship) => ship.id === body.id)
+          const index = findShipIndex(body.id)
           if (index >= 0)
           {
             const ship = this.ships[index] as Ship
-            const capital = this.planets.find((p) => p.owner === player && p.capital === true) as Planet
-            console.assert(capital, "Failed to find player capital")
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              // Can only decommission a ship on a friendly planet
+              if (planet.owner === ship.owner)
+              {
+                const capital = this.planets.find((p) => p.owner === player && p.capital === true) as Planet
+                console.assert(capital, "Failed to find player capital")
 
-            capital.resources.credits += ship.value
-            // ship.status = "decommissioned"
-            this.ships.splice(index, 1)
+                // Remove crew, passengers, fuel and cargo
+                ship.removeCrew(planet)
+                ship.modifyPassengers(planet, -ship.passengers)
+                ship.refuel(planet, -ship.fuels)
+                ship.emptyCargo(planet)
 
-            resultData = { world: { planets: [capital.toJSON()] } }
-            result = true
+                capital.resources.credits += ship.value
+                // ship.status = "decommissioned"
+                this.ships.splice(index, 1)
+
+                resultData = { world: { planets: [capital.toJSON()] } }
+                result = true
+              }
+              else
+              {
+                reason = "Ship is not on a friendly planet"
+              }
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
           }
           else
           {
