@@ -1,14 +1,36 @@
 import React from "react"
 import Recoil from "recoil"
-import { Grid, Stack, IconButton, Button, Typography, Dialog, DialogTitle, DialogContent, DialogContentText, DialogProps, DialogActions } from "@mui/material"
-import { ArrowDropUp, ArrowDropDown, LocalGasStation, Man, Woman, Add, Download, Clear } from "@mui/icons-material"
+import {
+  Grid,
+  Stack,
+  IconButton,
+  Button,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogProps,
+  DialogActions
+} from "@mui/material"
+import {
+  ArrowDropUp,
+  ArrowDropDown,
+  LocalGasStation,
+  Man,
+  Woman,
+  Add,
+  Download,
+  Clear
+} from "@mui/icons-material"
 import { red, green } from "@mui/material/colors"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet, IPlanet, CapitalPlanet } from "../../data/Planets"
+import { Ship } from "../../data/Ships"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/dockingbays"
 import ShipProperties from "./ShipProperties"
-import { IResources, IShip } from "../../simulation/types.d"
+import type { ShipID, IShip, IResources } from "../../simulation/types.d"
 import "./styles.css"
 
 interface IShipDetailsProps {
@@ -214,12 +236,13 @@ const ConfirmDecommission = (props: ConfirmDecommissionDialogProps & DialogProps
 }
 
 export const Dock = ({ planet }: { planet: IPlanet }) => {
-  const [ ship, setShip ] = React.useState<IShip | undefined>()
+  const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
   const [ confirmDecommission, setConfirmDecommission ] = React.useState(false)
+  const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const { action } = React.useContext(IOContext)
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-    setShip(ship)
+    setSelectedShip(ship.id)
   }
 
   const handleModifyPassengers = (ship: IShip, amount: number) => {

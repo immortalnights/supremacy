@@ -543,6 +543,35 @@ export default class Universe implements IUniverse, IWorld
       }
       case "ship-empty-cargo":
       {
+
+        const body = data as { id: ShipID }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.location.position === "docking-bay")
+            {
+              const planet = findPlanet(ship.location.planet!) as Planet
+              ship.emptyCargo(planet)
+
+              resultData = { world: { planets: [planet.toJSON()], ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Ship is not in planet docking bay"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
         break
       }
       case "ship-relocate":
@@ -550,10 +579,9 @@ export default class Universe implements IUniverse, IWorld
         const body = data as { id: ShipID, location: PlanetID, position: string }
         if (body.id !== undefined && body.location !== undefined && body.position)
         {
-          const index = this.ships.findIndex((ship) => ship.id === body.id)
-          if (index >= 0)
+          const ship = findShip(body.id)
+          if (ship)
           {
-            const ship = this.ships[index] as Ship
             if (ship.relocate(body.location, body.position))
             {
               resultData = { world: { ships: [ship.toJSON()] } }

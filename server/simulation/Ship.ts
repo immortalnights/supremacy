@@ -107,7 +107,7 @@ export default class Ship implements IShip
     const resourceKey = type as keyof IResources
     const cargoKey = type as keyof IResources
 
-    console.log("*", type, this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey], this.totalCargo(), value)
+    // console.log("*", type, this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey], this.totalCargo(), value)
     if (this.capacity && this.capacity.cargo > 0)
     {
       // Add cargo
@@ -132,14 +132,14 @@ export default class Ship implements IShip
         }
       }
     }
-    console.log("=", this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey])
+    // console.log("=", this.capacity && this.capacity.cargo, this.cargo[cargoKey], planet.resources[resourceKey])
   }
 
   modifyPassengers(planet: Planet, value: number)
   {
     if (this.capacity && this.capacity.civilians > 0)
     {
-      console.log("*", this.capacity.civilians, this.passengers, planet.population, value)
+      // console.log("*", this.capacity.civilians, this.passengers, planet.population, value)
       // Add passengers
       if (value > 0)
       {
@@ -160,7 +160,7 @@ export default class Ship implements IShip
           planet.population += change
         }
       }
-      console.log("=", this.capacity.civilians, this.passengers, planet.population)
+      // console.log("=", this.capacity.civilians, this.passengers, planet.population)
     }
   }
 
@@ -168,7 +168,7 @@ export default class Ship implements IShip
   {
     if (this.capacity && this.capacity.fuels > 0)
     {
-      console.log("*", this.capacity.fuels, this.fuels, planet.resources.fuels, value)
+      // console.log("*", this.capacity.fuels, this.fuels, planet.resources.fuels, value)
       // Add fuels
       if (value > 0)
       {
@@ -189,13 +189,22 @@ export default class Ship implements IShip
           planet.resources.fuels += change
         }
       }
-      console.log("=", this.capacity.fuels, this.fuels, planet.resources.fuels)
+      // console.log("=", this.capacity.fuels, this.fuels, planet.resources.fuels)
     }
   }
 
   emptyCargo(planet: Planet)
   {
+    // console.log("*", this.cargo, planet.resources, this.totalCargo())
 
+    Object.keys(this.cargo).forEach((item: string) => {
+      const key = item as keyof IResources
+      const amount = this.cargo[key]
+      this.cargo[key] = 0
+      planet.resources[key] += amount
+    })
+
+    // console.log("=", this.cargo, planet.resources)
   }
 
   relocate(planet: PlanetID, position: string)
