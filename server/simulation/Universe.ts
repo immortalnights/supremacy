@@ -406,6 +406,37 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
+      case "ship-rename":
+      {
+        const body = data as { id: ShipID, name: string }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (body.name)
+            {
+              ship.name = body.name
+
+              resultData = { world: { ships: [ship.toJSON()] } }
+              result = true
+            }
+            else
+            {
+              reason = "Invalid name"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
       case "ship-modify-cargo":
       {
         const body = data as { id: ShipID, type: string, amount: number }

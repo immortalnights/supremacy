@@ -1,7 +1,7 @@
 import Recoil from "recoil"
 import { SelectedPlanet as SelectedPlanetID } from "./General"
 import { IPlayer, Player } from "./Player"
-import { IPlanet, IPlanetBasic } from "../simulation/types.d"
+import type { PlanetID, IPlanet, IPlanetBasic } from "../simulation/types.d"
 
 export type { IPlanet, IPlanetBasic }
 
@@ -10,6 +10,24 @@ export const Planets = Recoil.atom<(IPlanetBasic | IPlanet)[]>({
     default: [],
 })
 
+export const PlayerPlanets = Recoil.selector<IPlanet[]>({
+    key: "PlayerPlanets",
+    get: ({ get }) => {
+        const player = get(Player) as IPlayer
+        const planets = get(Planets)
+        return planets.filter((p) => p.owner === player.id) as IPlanet[]
+    }
+})
+
+export const Planet = Recoil.selectorFamily<IPlanet | undefined, PlanetID | undefined>({
+    key: "SelectedPlanet",
+    get: (id: PlanetID | undefined) => ({ get }) => {
+        const planets = get(PlayerPlanets)
+        return planets.find((p) => p.id === id)
+    }
+})
+
+// Used to remember plant selection after navigation
 export const SelectedPlanet = Recoil.selector<IPlanet | undefined>({
     key: "selectedPlanet",
     get: ({ get }) => {

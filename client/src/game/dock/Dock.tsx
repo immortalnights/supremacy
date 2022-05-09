@@ -233,7 +233,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
   return (
     <Grid container>
       <Grid item xs={8}>
-        {ship && <DecommissionDialog ship={ship as IShip} open={confirmDecommission} onConfirm={handleConfirmDecommission} onCancel={handleClose} onClose={handleClose} />}
+        {ship && confirmDecommission && <DecommissionDialog open ship={ship as IShip} onConfirm={handleConfirmDecommission} onCancel={handleClose} onClose={handleClose} />}
         <Stack direction="row" justifyContent="space-around">
           <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
           <ShipProperties planet={planet} ship={ship} />

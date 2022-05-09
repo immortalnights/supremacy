@@ -9,13 +9,12 @@ export const Ships = Recoil.atom<(IShipBasic | IShip)[]>({
     default: [],
 })
 
-
 export const PlayerShips = Recoil.selector<IShip[]>({
     key: "PlayerShips",
     get: ({ get }) => {
         const player = get(Player) as IPlayer
-        const ships = get(Ships) as IShip[]
-        return ships.filter((s) => s.owner === player.id)
+        const ships = get(Ships)
+        return ships.filter((s) => s.owner === player.id) as IShip[]
     }
 })
 

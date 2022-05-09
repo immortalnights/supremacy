@@ -1,5 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
+import { Planet } from "../../data/Planets"
 import { IShip } from "../../simulation/types.d"
 // import { DateDisplay } from "../../components/date"
 
@@ -8,6 +9,7 @@ const DateDisplay = ({ date }: { date: any }) => {
 }
 
 const ShipHeading = ({ ship }: { ship: IShip | undefined }) => {
+  let planet = Recoil.useRecoilValue(Planet(ship ? ship.location.planet : undefined))
   let content
 
   if (!ship)
@@ -24,7 +26,7 @@ const ShipHeading = ({ ship }: { ship: IShip | undefined }) => {
           <dd>{ship.name}</dd>
           <dt>Location</dt>
           {/* // FIXME need planet name */}
-          <dt>{ship.location.planet}</dt>
+          <dt>{planet ? planet.name : "-"}</dt>
           <dt>Position</dt>
           {/* // FIXME format string */}
           <dt>{ship.location.position}</dt>
@@ -53,7 +55,7 @@ const ShipHeading = ({ ship }: { ship: IShip | undefined }) => {
       </>
     )
   }
-  
+
   return (
     <div>
       {content}

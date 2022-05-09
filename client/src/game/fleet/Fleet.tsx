@@ -3,34 +3,48 @@ import Recoil from "recoil"
 import { Button, Grid } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet, IPlanet } from "../../data/Planets"
+import { Ship } from "../../data/Ships"
 import DockingBays from "../components/dockingbays"
 import FleetGrid from "../components/grid/FleetGrid"
 import PlanetAuth from "../components/PlanetAuth"
 import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
-import { IShip } from "../../simulation/types.d"
+import { IShip, ShipID } from "../../simulation/types.d"
+import RenameDialog from "../components/RenameDialog"
 
 const Fleet = ({ planet }: { planet: IPlanet }) => {
-  // FIXME remember selected ship on navigation?
+  const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
+  const [ renameShip, setRenameShip ] = React.useState(false)
+  const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const { action } = React.useContext(IOContext)
-  const [ ship, setShip ] = React.useState<IShip | undefined>()
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-    setShip(ship)
+    setSelectedShip(ship?.id)
   }
 
   const handleSelectPlanet = () => {
   }
 
-  const handleSelectShip = (item: IShip) => {
-    console.log(item)
-    setShip(item)
+  const handleSelectShip = (ship: IShip) => {
+    setSelectedShip(ship.id)
+  }
+
+  const handleAbortTravelClick = () => {
+    action("ship-abort-travel", { id: ship!.id })
+  }
+
+  const handleRenameClick = () => {
+    setRenameShip(true)
+  }
+
+  const handleRenameShip = (name: string) => {
+    action("ship-rename", { id: ship!.id, name })
+    setRenameShip(false)
   }
 
   const handleLaunchClick = () => {
     console.assert(ship, "")
     action("ship-relocate", { id: ship!.id, location: planet.id, position: "orbit" })
-
   }
 
   const handleTravelToClick = () => {
@@ -45,6 +59,8 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   let canLaunch = false
   let canTravel = false
   let canLand = false
+  let canAbortTravel = false
+  let canRename = false
 
   if (ship)
   {
@@ -52,6 +68,8 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     canLaunch = ship.location.position === "docking-bay" && hasCrew && ship.fuels > 0
     canTravel = ship.location.position === "orbit" && hasCrew && ship.fuels > 0
     canLand = ship.location.position === "orbit"
+    canAbortTravel = false
+    canRename = true
   }
 
   return (
@@ -68,8 +86,9 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
         <ShipDetails ship={ship} />
       </Grid>
       <Grid item xs={2}>
-        <Button>Abort Travel</Button>
-        <Button>Rename</Button>
+        {ship && renameShip && <RenameDialog open name={ship.name} onConfirm={handleRenameShip} onCancel={() => setRenameShip(false)} />}
+        <Button disabled={!canAbortTravel} onClick={handleAbortTravelClick}>Abort Travel</Button>
+        <Button disabled={!canRename} onClick={handleRenameClick}>Rename</Button>
       </Grid>
       <Grid item xs={8}>
         {/* <FleetGrid /> */}
