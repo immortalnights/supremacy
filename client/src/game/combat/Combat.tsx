@@ -9,7 +9,8 @@ import { stringify } from "querystring"
 import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
 // import PlatoonGrid from "../components/grid/PlatoonGrid"
 // import "./styles.css"
-import type { IPlanet, IShip } from "../../simulation/types.d"
+import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
+import { Ship } from "../../data/Ships"
 
 const PlatoonGridItem = ({ name, troops }: { name?: string, troops?: number }) => {
   return (
@@ -64,23 +65,25 @@ const ShipDetails = () => {
 
 
 const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
+  const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
   const platoons = Recoil.useRecoilValue(PlatoonsOnPlanet({ planet: planet.id }))
   const strength = Recoil.useRecoilValue(PlanetStrength({ planet: planet.id }))
   const enemyStrength = Recoil.useRecoilValue(PlanetEnemyStrength({ planet: planet.id }))
+  const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const remainingTroops = platoons.reduce((val, p, index, arr) => val + (p as IPlatoon).troops, 0)
   const aggression = 25
 
   const handleSelectedItem: any = () => {}
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-
+    setSelectedShip(ship.id)
   }
 
   return (
     <Grid container>
       <Grid item xs={5}>
         <Stack direction="row">
-          <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
+          <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
           <ShipDetails />
         </Stack>
         <PlatoonGrid items={platoons} count={24} direction="row" onSelectItem={handleSelectedItem} />

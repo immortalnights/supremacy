@@ -75,7 +75,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   return (
     <Grid container>
       <Grid item xs={2}>
-        <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
+        <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
       </Grid>
       <Grid item xs={8}>
         <div>

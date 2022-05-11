@@ -2,10 +2,10 @@ import { Box, FormLabel, Typography, Button, Stack } from "@mui/material"
 import React from "react"
 import Recoil from "recoil"
 import { IOContext } from "../../data/IOContext"
-import { IPlanet, IShip } from "../../simulation/types.d"
+import { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/dockingbays/"
-import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
+import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { range } from "../../data/utilities"
 
 interface IPlanetSlotProps {
@@ -49,6 +49,8 @@ const PlanetSlot = ({ ship, onToggleStatus, onClick }: IPlanetSlotProps) => {
 
 const Surface = ({ planet }: { planet: IPlanet }) => {
   const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "surface" })) as IShip[]
+  const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
+  const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const { action } = React.useContext(IOContext)
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
@@ -87,7 +89,7 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
       </div>
       <Stack direction="row" justifyContent="space-around">
         <Box flexBasis="20%">
-          <DockingBays planet={planet} onItemClick={handleClickDockedShip} />
+          <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
         </Box>
         <Stack direction="row" flexGrow="1">
           {slots}
