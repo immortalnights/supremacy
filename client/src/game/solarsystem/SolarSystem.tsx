@@ -6,7 +6,7 @@ import { SelectedPlanet as SelectedPlanetId } from "../../data/General"
 import { SelectedPlanet } from "../../data/Planets"
 import { Planets as PlanetData, IPlanet } from "../../data/Planets"
 import { Game as GameData } from "../../data/Game"
-import { StarDate } from "../components/StarDate"
+import StarDate from "../components/StarDate"
 import { Player } from "../../data/Player"
 import { PlanetType } from "../../simulation/types"
 

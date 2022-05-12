@@ -2,8 +2,8 @@ import React from "react"
 import Recoil from "recoil"
 import { Box } from "@mui/material"
 import { useNavigate } from "react-router"
-import { IPlayer, Player } from "../../data/Player"
-import { IPlanet, SelectedPlanet } from "../../data/Planets"
+import { IPlayer, Player } from "../../../data/Player"
+import { IPlanet, SelectedPlanet } from "../../../data/Planets"
 
 
 const AccessDenied = () => {

@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { StarDate } from "../components/StarDate"
+import StarDate from "../components/StarDate"
 import { IShip } from "../../simulation/types.d"
 
 
