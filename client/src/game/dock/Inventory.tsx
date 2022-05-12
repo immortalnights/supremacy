@@ -1,16 +1,13 @@
 import React from "react"
 import {
   Grid,
-  IconButton,
   Typography,
 } from "@mui/material"
-import {
-  ArrowDropUp,
-} from "@mui/icons-material"
 import { red, green } from "@mui/material/colors"
 import { IPlanet } from "../../data/Planets"
 import type { IShip } from "../../simulation/types.d"
 import { hasCargo, hasResource, isCargoFull } from "../utilities/ships"
+import IncDecButton from "../components/IncreaseDecreaseButton"
 import "./Inventory.css"
 
 const Bars = ({ left, right }: { left: number, right: number }) => {
@@ -26,6 +23,7 @@ const Bars = ({ left, right }: { left: number, right: number }) => {
     </div>
   )
 }
+
 
 const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: IShip | undefined, onModifyCargo: (type: string, amount: number) => void }) => {
   // Remove from ship / add to ship
@@ -43,8 +41,8 @@ const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: ISh
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.food} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton disabled={!canRemoveFood} onClick={() => onModifyCargo("food", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton disabled={!canAddFood} onClick={() => onModifyCargo("food", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IncDecButton mode="decrease" disabled={!canRemoveFood} onChange={(e, value) => onModifyCargo("food", value)} />
+          <IncDecButton mode="increase" disabled={!canAddFood} onChange={(e, value) => onModifyCargo("food", value)} />
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Food</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.food}</Typography>
@@ -53,8 +51,8 @@ const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: ISh
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.minerals} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton disabled={!canRemoveMinerals} onClick={() => onModifyCargo("minerals", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton disabled={!canAddMinerals} onClick={() => onModifyCargo("minerals", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IncDecButton mode="decrease" disabled={!canRemoveMinerals} onChange={(event, value) => onModifyCargo("minerals", value)} />
+          <IncDecButton mode="increase" disabled={!canAddMinerals} onChange={(event, value) => onModifyCargo("minerals", value)} />
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Minerals</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.minerals}</Typography>
@@ -63,8 +61,8 @@ const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: ISh
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.fuels} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton disabled={!canRemoveFuels} onClick={() => onModifyCargo("fuels", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton disabled={!canAddFuels} onClick={() => onModifyCargo("fuels", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IncDecButton mode="decrease" disabled={!canRemoveFuels} onChange={(event, value) => onModifyCargo("fuels", value)} />
+          <IncDecButton mode="increase" disabled={!canAddFuels} onChange={(event, value) => onModifyCargo("fuels", value)} />
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Fuels</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.fuels}</Typography>
@@ -73,8 +71,8 @@ const Inventory = ({ planet, ship, onModifyCargo }: { planet: IPlanet, ship: ISh
       <Grid item xs={3} sx={{ padding: "0 1rem" }}>
         <Bars left={planet.resources.energy} right={0} />
         <div style={{ display: "flex", justifyContent: "space-around" }}>
-          <IconButton disabled={!canRemoveEnergy} onClick={() => onModifyCargo("energy", -1)}><ArrowDropUp sx={{ color: green[500] }} /></IconButton>
-          <IconButton disabled={!canAddEnergy} onClick={() => onModifyCargo("energy", 1)}><ArrowDropUp sx={{ color: red[500] }} /></IconButton>
+          <IncDecButton mode="decrease" disabled={!canRemoveEnergy} onChange={(event, value) => onModifyCargo("energy", value)} />
+          <IncDecButton mode="increase" disabled={!canAddEnergy} onChange={(event, value) => onModifyCargo("energy", value)} />
         </div>
         <Typography component="div" variant="overline" sx={{ textAlign: "center" }}>Energy</Typography>
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{planet.resources.energy}</Typography>

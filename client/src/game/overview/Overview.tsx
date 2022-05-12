@@ -5,10 +5,10 @@ import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet, IPlanet } from "../../data/Planets"
 import { StarDate } from "../components/StarDate"
 import { useNavigate } from "react-router"
-import HoldButton from "../components/HoldButton"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
 import PlanetAuth from "../components/PlanetAuth"
+import IncDecButton from "../components/IncreaseDecreaseButton"
 import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { PlanetStrength } from "../../data/Platoons"
 
@@ -16,23 +16,17 @@ import { PlanetStrength } from "../../data/Platoons"
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
   const { action } = React.useContext(IOContext)
 
-  const handleIncTax = (modifier: boolean) => {
+  const handleChangeTax = (value: number) => {
     action("planet-modify-tax", {
       planet: planet.id,
-      value: modifier ? 5 : 1,
-    }).catch(() => {})
-  }
-  const handleDecTax = (modifier: boolean) => {
-    action("planet-modify-tax", {
-      planet: planet.id,
-      value: -(modifier ? 5 : 1),
+      value,
     }).catch(() => {})
   }
 
   return (
     <div className="flex flex-rows" style={{ margin: '0 5px 0 0' }}>
-      <HoldButton onHold={handleIncTax}>Inc</HoldButton>
-      <HoldButton onHold={handleDecTax}>Dec</HoldButton>
+      <IncDecButton label="Inc" mode="increase" onChange={(event, value) => handleChangeTax(value)} multiplier={5} />
+      <IncDecButton label="Dec" mode="decrease" onChange={(event, value) => handleChangeTax(value)} multiplier={5} />
     </div>
   )
 }

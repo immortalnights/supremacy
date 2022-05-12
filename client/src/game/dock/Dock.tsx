@@ -17,16 +17,16 @@ import {
   Download,
   Clear
 } from "@mui/icons-material"
-import { red, green } from "@mui/material/colors"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet, IPlanet, CapitalPlanet } from "../../data/Planets"
 import { Ship } from "../../data/Ships"
 import PlanetAuth from "../components/PlanetAuth"
-import DockingBays from "../components/dockingbays"
+import DockingBays from "../components/DockingBays"
+import IncDecButton from "../components/IncreaseDecreaseButton"
 import ShipProperties from "./ShipProperties"
 import DecommissionDialog from "./ConfirmDecommissionDialog"
 import type { ShipID, IShip, IResources } from "../../simulation/types.d"
-import { hasCargo, hasResource, isCargoFull, totalCargo } from "../utilities/ships"
+import { totalCargo } from "../utilities/ships"
 import Inventory from "./Inventory"
 import "./styles.css"
 
@@ -48,20 +48,20 @@ const ShipDetails = ({
   onClickDecommission
 }: IShipDetailsProps) => {
 
-  const handleClickAddPassengers: React.MouseEventHandler = (event) => {
-    onModifyPassengers(ship as IShip, 1)
+  const handleClickAddPassengers = (event: React.MouseEvent, value: number) => {
+    onModifyPassengers(ship as IShip, value)
   }
 
-  const handleClickRemovePassengers: React.MouseEventHandler = (event) => {
-    onModifyPassengers(ship as IShip, -1)
+  const handleClickRemovePassengers = (event: React.MouseEvent, value: number) => {
+    onModifyPassengers(ship as IShip, value)
   }
 
-  const handleClickAddFuels: React.MouseEventHandler = (event) => {
-    onModifyFuels(ship as IShip, 1)
+  const handleClickAddFuels = (event: React.MouseEvent, value: number) => {
+    onModifyFuels(ship as IShip, value)
   }
 
-  const handleClickRemoveFuels: React.MouseEventHandler = (event) => {
-    onModifyFuels(ship as IShip, -1)
+  const handleClickRemoveFuels = (event: React.MouseEvent, value: number) => {
+    onModifyFuels(ship as IShip, value)
   }
 
   let canModifyPassengers = false
@@ -91,8 +91,8 @@ const ShipDetails = ({
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{ship?.passengers || 0}</Typography>
         <Stack direction="row">
           <Stack direction="column">
-            <IconButton size="small" disabled={!canModifyPassengers} onClick={handleClickAddPassengers}><ArrowDropUp /></IconButton>
-            <IconButton size="small" disabled={!canModifyPassengers} onClick={handleClickRemovePassengers}><ArrowDropDown /></IconButton>
+            <IncDecButton mode="increase" disabled={!canModifyPassengers} onChange={handleClickAddPassengers} grayscale />
+            <IncDecButton mode="decrease" disabled={!canModifyPassengers} onChange={handleClickRemovePassengers} grayscale />
           </Stack>
           <div><Man /><Woman /></div>
         </Stack>
@@ -101,8 +101,8 @@ const ShipDetails = ({
         <Typography component="div" variant="caption" sx={{ textAlign: "right" }}>{ship?.fuels || 0}</Typography>
         <Stack direction="row">
           <Stack direction="column">
-            <IconButton size="small" disabled={!canModifyFuels} onClick={handleClickAddFuels}><ArrowDropUp /></IconButton>
-            <IconButton size="small" disabled={!canModifyFuels} onClick={handleClickRemoveFuels}><ArrowDropDown /></IconButton>
+            <IncDecButton mode="increase" disabled={!canModifyFuels} onChange={handleClickAddFuels} grayscale />
+            <IncDecButton mode="decrease" disabled={!canModifyFuels} onChange={handleClickRemoveFuels} grayscale />
           </Stack>
           <div><LocalGasStation /></div>
         </Stack>

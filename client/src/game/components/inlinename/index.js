@@ -1,6 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import Button from '../button'
+import Button from '../../../old/button'
 import './styles.css'
 
 

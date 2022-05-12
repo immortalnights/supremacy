@@ -4,7 +4,7 @@ import Recoil from "recoil"
 import { IOContext } from "../../data/IOContext"
 import { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 import PlanetAuth from "../components/PlanetAuth"
-import DockingBays from "../components/dockingbays/"
+import DockingBays from "../components/DockingBays"
 import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { range } from "../../data/utilities"
 
