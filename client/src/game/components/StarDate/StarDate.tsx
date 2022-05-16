@@ -2,13 +2,16 @@ import React from "react"
 import Recoil from "recoil"
 import { SolarSystem as SolarSystemData, ISolarSystem } from "../../../data/SolarSystem"
 import { formatDate } from "../../../data/General"
+import { IDate } from "../../../simulation/types.d"
 
-const StarDate = () => {
-  const data = Recoil.useRecoilValue(SolarSystemData) as ISolarSystem
-
-  return (
-    <div>{data ? formatDate(data.date) : "-"}</div>
-  )
+export const StarDate = ({ date }: { date: IDate }) => {
+  return (<div>{formatDate(date)}</div>)
 }
 
-export default StarDate
+const CurrentStarDate = () => {
+  const data = Recoil.useRecoilValue(SolarSystemData) as ISolarSystem
+
+  return (data ? <StarDate date={data.date} /> : <span>-</span>)
+}
+
+export default CurrentStarDate

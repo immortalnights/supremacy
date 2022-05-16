@@ -19,10 +19,10 @@ export const PlayerPlanets = Recoil.selector<IPlanet[]>({
     }
 })
 
-export const Planet = Recoil.selectorFamily<IPlanet | undefined, PlanetID | undefined>({
+export const Planet = Recoil.selectorFamily<IPlanetBasic | IPlanet | undefined, PlanetID | undefined>({
     key: "SelectedPlanet",
     get: (id: PlanetID | undefined) => ({ get }) => {
-        const planets = get(PlayerPlanets)
+        const planets = get(Planets) as (IPlanetBasic | IPlanet)[]
         return planets.find((p) => p.id === id)
     }
 })

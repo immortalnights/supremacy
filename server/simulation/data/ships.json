@@ -27,7 +27,12 @@
     "description": "Transmits solar energy to the planet from orbit.",
     "shortName": "Solar",
     "requiredCrew": 0,
-    "capacity": null,
+    "capacity": {
+      "civilians": 0,
+      "cargo": 0,
+      "fuels": 0,
+      "platoons": 0
+    },
     "speed": 1,
     "range": -1,
     "cost": {
@@ -52,7 +57,12 @@
     "description": "Generates new living plants from lifeless ones.",
     "shortName": "Atmos",
     "requiredCrew": 0,
-    "capacity": null,
+    "capacity": {
+      "civilians": 0,
+      "cargo": 0,
+      "fuels": 0,
+      "platoons": 0
+    },
     "speed": 1,
     "range": -1,
     "cost": {

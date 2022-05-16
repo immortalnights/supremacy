@@ -17,7 +17,7 @@ export default class Ship implements IShip
   // Static
   requiredCrew: number
   requiresFuel: boolean
-  capacity: IShipCapacity | null
+  capacity: IShipCapacity
   speed: number
   range: number
   harvester: IShipHarvesting | null
@@ -221,7 +221,7 @@ export default class Ship implements IShip
 
   relocate(planet: PlanetID, position: string)
   {
-    console.log(`Relocate ${this.location.planet}.${this.location.position} => ${planet}.${position}`)
+    console.log(`${this.name} (${this.id}) relocate ${this.location.planet}.${this.location.position} => ${planet}.${position}`)
     let ok = false
     // Cannot relocate to a different planet, must travel
     if (planet === this.location.planet)
@@ -256,6 +256,30 @@ export default class Ship implements IShip
           break
         }
       }
+    }
+
+    return ok
+  }
+
+  canTravel(source: Planet, destination: Planet)
+  {
+    let ok = false
+    if (source.id !== this.location.planet)
+    {
+      console.error("Ship is not at expected source planet")
+    }
+    else if (destination.id === this.location.planet)
+    {
+      ok = true
+    }
+    else if (this.location.position !== "orbit")
+    {
+      console.error("Ship cannot begin travel when not in orbit")
+    }
+    else
+    {
+      ok = true
+      console.log(`${this.name} (${this.id}) travel from ${source.name} (${source.id}) => ${destination.name} (${destination.id})`)
     }
 
     return ok

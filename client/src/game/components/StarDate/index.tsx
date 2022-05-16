@@ -1,1 +1,1 @@
-export { default } from "./StarDate"
+export { default, StarDate } from "./StarDate"

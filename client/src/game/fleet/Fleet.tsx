@@ -1,8 +1,8 @@
 import React from "react"
 import Recoil from "recoil"
-import { Button, Grid } from "@mui/material"
+import { Button, Grid, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
-import { SelectedPlanet, IPlanet } from "../../data/Planets"
+import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
 import { Ship } from "../../data/Ships"
 import DockingBays from "../components/DockingBays"
 import FleetGrid from "../components/grid/FleetGrid"
@@ -11,18 +11,19 @@ import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
 import { IShip, ShipID } from "../../simulation/types.d"
 import RenameDialog from "../components/RenameDialog"
+import PlanetGrid from "../components/grid/PlanetGrid"
+
+type FleetMode = "normal" | "ship-destination"
 
 const Fleet = ({ planet }: { planet: IPlanet }) => {
   const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
   const [ renameShip, setRenameShip ] = React.useState(false)
+  const [ mode, setMode ] = React.useState<FleetMode>("normal")
   const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const { action } = React.useContext(IOContext)
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
     setSelectedShip(ship?.id)
-  }
-
-  const handleSelectPlanet = () => {
   }
 
   const handleSelectShip = (ship: IShip) => {
@@ -37,6 +38,10 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     setRenameShip(true)
   }
 
+  const handleCancelRenameShip = () => {
+    setRenameShip(false)
+  }
+
   const handleRenameShip = (name: string) => {
     action("ship-rename", { id: ship!.id, name })
     setRenameShip(false)
@@ -48,12 +53,21 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   }
 
   const handleTravelToClick = () => {
-
+    setMode("ship-destination")
   }
 
   const handleLandClick = () => {
     console.assert(ship, "")
     action("ship-relocate", { id: ship!.id, location: planet.id, position: "docking-bay" })
+  }
+
+  const handleSelectPlanet = (planet: IPlanetBasic) => {
+    action("ship-travel", { id: ship!.id, location: planet.id })
+    setMode("normal")
+  }
+
+  const handleCancelTravel = () => {
+    setMode("normal")
   }
 
   let canLaunch = false
@@ -64,9 +78,10 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
   if (ship)
   {
-    const hasCrew = (ship.requiredCrew > 0 || ship.crew === ship.requiredCrew)
-    canLaunch = ship.location.position === "docking-bay" && hasCrew && ship.fuels > 0
-    canTravel = ship.location.position === "orbit" && hasCrew && ship.fuels > 0
+    const hasCrew = (ship.requiredCrew === 0 || ship.crew === ship.requiredCrew)
+    const hasFuel = (ship.capacity.fuels === 0 || ship.fuels > 0)
+    canLaunch = ship.location.position === "docking-bay" && hasCrew && hasFuel
+    canTravel = ship.location.position === "orbit" && hasCrew && hasFuel
     canLand = ship.location.position === "orbit"
     canAbortTravel = false
     canRename = true
@@ -86,13 +101,16 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
         <ShipDetails ship={ship} />
       </Grid>
       <Grid item xs={2}>
-        {ship && renameShip && <RenameDialog open name={ship.name} onConfirm={handleRenameShip} onCancel={() => setRenameShip(false)} />}
+        {ship && renameShip && <RenameDialog open name={ship.name} onConfirm={handleRenameShip} onCancel={handleCancelRenameShip} />}
         <Button disabled={!canAbortTravel} onClick={handleAbortTravelClick}>Abort Travel</Button>
         <Button disabled={!canRename} onClick={handleRenameClick}>Rename</Button>
       </Grid>
       <Grid item xs={8}>
-        {/* <FleetGrid /> */}
-        <FleetGrid selectedItem={ship} onSelectItem={handleSelectShip} />
+        {
+          (ship && mode === "ship-destination")
+          ? <><PlanetGrid onSelectItem={handleSelectPlanet} /><Typography textAlign="center">Select destination planet or <Button variant="text" onClick={handleCancelTravel}>Cancel</Button></Typography></>
+          : <FleetGrid selectedItem={ship} onSelectItem={handleSelectShip} />
+        }
       </Grid>
       <Grid item xs={4}>
         <ShipHeading ship={ship} />

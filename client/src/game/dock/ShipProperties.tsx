@@ -12,7 +12,7 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
     crew?: number
     requiredCrew?: number
     crewText?: string
-    capacity?: IShipCapacity | null
+    capacity?: IShipCapacity
     maxFuel?: number | string
     payload?: number
     value?: number
@@ -23,7 +23,7 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
     details.name = ship.name
     details.crew = ship.crew || 0
     details.requiredCrew = ship.requiredCrew || 0
-    details.capacity = ship.capacity ? ship.capacity : null
+    details.capacity = ship.capacity
     // FIXME
     details.payload = totalCargo(ship.cargo)
     details.value = ship.value
@@ -51,7 +51,7 @@ const ShipProperties = ({ planet, ship }: { planet: IPlanet, ship?: IShip }) => 
       <dt>Crew</dt>
       <dd>{details.crewText}</dd>
       <dt>Capacity</dt>
-      <dd>{details?.capacity?.cargo || 0}</dd>
+      <dd>{details.capacity?.cargo || 0}</dd>
       <dt>Max Fuel</dt>
       <dd>{details.maxFuel || 0}</dd>
       <dt>Payload</dt>

@@ -11,8 +11,6 @@ import {
   IPlatoonBasic,
   IPlatoon,
   IShipDetails,
-  DAYS_PER_YEAR,
-  IDate,
   Difficulty,
   PlayerGameAction,
   PlanetID,
@@ -20,6 +18,7 @@ import {
   ShipID,
 } from "./types"
 import type { IWorld } from "../serverTypes"
+import StarDate, { DAYS_PER_YEAR } from "./StarDate"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
 import { random } from "./utilities"
@@ -28,8 +27,8 @@ const MAXIMUM_PLAYERS = 2
 
 export default class Universe implements IUniverse, IWorld
 {
-  date: IDate
-  // FIXME would be better if this was not a member
+  date: StarDate
+  // FIXME would be better if this was not a member (caused by IUniverse)
   yearDuration: number
   difficulty: Difficulty
   players: string[]
@@ -43,7 +42,7 @@ export default class Universe implements IUniverse, IWorld
   constructor()
   {
     console.log("Universe:constructor")
-    this.date = { day: 1, year: 3000 }
+    this.date = new StarDate()
     this.yearDuration = DAYS_PER_YEAR
     this.difficulty = Difficulty.Easy
     this.players = []
@@ -574,7 +573,6 @@ export default class Universe implements IUniverse, IWorld
       }
       case "ship-empty-cargo":
       {
-
         const body = data as { id: ShipID }
         if (body.id !== undefined)
         {
@@ -621,6 +619,67 @@ export default class Universe implements IUniverse, IWorld
             else
             {
               reason = "Failed to relocate ship"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "ship-travel":
+      {
+        const body = data as { id: ShipID, location: PlanetID }
+        if (body.id !== undefined && body.location !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship && ship.location.planet)
+          {
+            const currentPlanet = findPlanet(ship.location.planet)
+            const destinationPlanet = findPlanet(body.location)
+            if (currentPlanet && destinationPlanet)
+            {
+              if (ship.canTravel(currentPlanet, destinationPlanet))
+              {
+                const distance = Math.abs(currentPlanet.location - destinationPlanet.location)
+                const requiredFuels = ship.capacity.fuels > 0 ? 50 * distance : 0
+                if (ship.fuels < requiredFuels)
+                {
+                  reason = "Ship does not have enough fuels"
+                }
+                else
+                {
+                  const departed = this.date.clone().floor()
+                  const arrival = this.date.clone().add(distance).ceil()
+
+                  ship.location.planet = undefined
+                  ship.location.position = "outer-space"
+                  ship.heading = {
+                    location: 0,
+                    from: currentPlanet.id,
+                    to: destinationPlanet.id,
+                    departed,
+                    arrival,
+                    fuels: requiredFuels,
+                  }
+                }
+
+                resultData = { world: { ships: [ship.toJSON()] } }
+                result = true
+              }
+              else
+              {
+                reason = "Failed to begin travel"
+              }
+            }
+            else
+            {
+              reason = "Failed to find current or destination planet"
             }
           }
           else
@@ -792,13 +851,7 @@ export default class Universe implements IUniverse, IWorld
   simulate(delta: number): void
   {
     // console.log("Universe:tick")
-    this.date.day += 1 * delta
-
-    if (this.date.day > this.yearDuration)
-    {
-      this.date.day = 1
-      this.date.year += 1
-    }
+    this.date.inc(delta)
 
     this.planets.forEach((planet) => {
       if (planet.simulate(delta))

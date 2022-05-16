@@ -100,15 +100,10 @@ export interface IShipCapacity {
 
 export interface IShipHeading {
   location: PlanetID
-  from: {
-    id: PlanetID
-    name: string
-  }
-  to: {
-    id: PlanetID
-    name: string
-  }
-  arrival: number
+  from: PlanetID
+  to: PlanetID
+  departed: IDate
+  arrival: IDate
   fuels: number
 }
 
@@ -127,7 +122,7 @@ export interface IShip extends IShipBasic {
   // Static data
   requiresFuel: boolean
   requiredCrew: number
-  capacity: IShipCapacity | null
+  capacity: IShipCapacity
   speed: number
   range: number
   harvester: IShipHarvesting | null
@@ -185,7 +180,7 @@ export interface IShipDetails {
   description: string
   shortName: string
   requiredCrew: number
-  capacity: IShipCapacity | null
+  capacity: IShipCapacity
   speed: number
   range: number
   cost: {

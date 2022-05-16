@@ -45,7 +45,8 @@ export default class Planet implements IPlanet
     this.morale = 0
     this.tax = 0
     this.status = ""
-    this.location = 0
+    // Y position (for now)?
+    this.location = id
     this.resources = {
       credits: 0,
       food: 0,
@@ -130,18 +131,18 @@ export default class Planet implements IPlanet
         this.growth += 0.5
       }
 
-      // only change population every other day
-      const populationGrowth = (this.population / 4) * (this.growth / 100)
-      this.population += populationGrowth
+      // FIXME only change population every other day
+      // const populationGrowth = (this.population / 4) * (this.growth / 100)
+      // this.population += populationGrowth
 
-      if (this.population < 1)
-      {
-        this.population = 0
-      }
-      else if (this.population > PLANET_POPULATION_LIMIT)
-      {
-        this.population = PLANET_POPULATION_LIMIT
-      }
+      // if (this.population < 1)
+      // {
+      //   this.population = 0
+      // }
+      // else if (this.population > PLANET_POPULATION_LIMIT)
+      // {
+      //   this.population = PLANET_POPULATION_LIMIT
+      // }
 
       changed = true
     }
