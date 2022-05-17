@@ -3,6 +3,7 @@ export const DAYS_PER_YEAR = 48
 export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
+  | "planet-terraform"
   | "purchase-ship"
   | "ship-rename"
   | "ship-modify-passengers"

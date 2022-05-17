@@ -218,6 +218,32 @@ export default class Universe implements IUniverse, IWorld
       return index >= 0 ? this.platoons[index] : undefined
     }
 
+    const beginTravel = (ship: Ship, origin: Planet, destination: Planet) => {
+      let ok = false
+      const distance = Math.abs(origin.location - origin.location)
+      const requiredFuels = ship.capacity.fuels > 0 ? 50 * distance : 0
+      if (ship.fuels >= requiredFuels)
+      {
+        const departed = this.date.clone().floor()
+        const arrival = this.date.clone().add(distance).ceil()
+
+        ship.location.planet = undefined
+        ship.location.position = "outer-space"
+        ship.heading = {
+          location: 0,
+          from: origin.id,
+          to: destination.id,
+          departed,
+          arrival,
+          fuels: requiredFuels,
+        }
+
+        ok = true
+      }
+
+      return ok
+    }
+
     switch (action as PlayerGameAction)
     {
       case "rename-planet":
@@ -328,6 +354,62 @@ export default class Universe implements IUniverse, IWorld
         {
           reason = "Action data missing"
         }
+      }
+      case "planet-terraform":
+      {
+        const body = data as { id: PlanetID }
+        if (body.id !== undefined)
+        {
+          const planet = findPlanet(body.id)
+          if (planet)
+          {
+            if (planet.type === PlanetType.Lifeless)
+            {
+              const atmos = this.ships.find((s) => s.owner === player && s.type === "Atmosphere Processor")
+              if (atmos)
+              {
+                const currentPlanet = findPlanet(atmos.location.planet!) as Planet
+
+                // Move the atmos to the planet, begin terraforming once it arrives
+                if (atmos.location.position !== "orbit")
+                {
+                  atmos.relocate(currentPlanet.id, "orbit")
+                }
+
+                // assume it can always travel
+                if (atmos.canTravel(currentPlanet, planet))
+                {
+                  if (beginTravel(atmos, currentPlanet, planet))
+                  {
+                    resultData = { world: { ships: [atmos.toJSON()] } }
+                    result = true
+                  }
+                  else
+                  {
+                    reason = "Failed to begin travel"
+                  }
+                }
+              }
+              else
+              {
+                reason = "Failed to find player Atmos"
+              }
+            }
+            else
+            {
+              reason = "Failed to relocate ship"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
       }
       case "purchase-ship":
       {
@@ -646,31 +728,15 @@ export default class Universe implements IUniverse, IWorld
             {
               if (ship.canTravel(currentPlanet, destinationPlanet))
               {
-                const distance = Math.abs(currentPlanet.location - destinationPlanet.location)
-                const requiredFuels = ship.capacity.fuels > 0 ? 50 * distance : 0
-                if (ship.fuels < requiredFuels)
+                if (beginTravel(ship, currentPlanet, destinationPlanet))
                 {
-                  reason = "Ship does not have enough fuels"
+                  resultData = { world: { ships: [ship.toJSON()] } }
+                  result = true
                 }
                 else
                 {
-                  const departed = this.date.clone().floor()
-                  const arrival = this.date.clone().add(distance).ceil()
-
-                  ship.location.planet = undefined
-                  ship.location.position = "outer-space"
-                  ship.heading = {
-                    location: 0,
-                    from: currentPlanet.id,
-                    to: destinationPlanet.id,
-                    departed,
-                    arrival,
-                    fuels: requiredFuels,
-                  }
+                  reason = "Ship does not have enough fuel"
                 }
-
-                resultData = { world: { ships: [ship.toJSON()] } }
-                result = true
               }
               else
               {

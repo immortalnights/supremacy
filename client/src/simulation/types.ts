@@ -18,6 +18,7 @@ export enum Difficulty {
 export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
+  | "planet-terraform"
   | "purchase-ship"
   | "ship-rename"
   | "ship-modify-passengers"

@@ -230,7 +230,7 @@ export default class Ship implements IShip
       {
         case "surface":
         {
-          if (this.location.position === "docking-bay")
+          if (this.location.position === "docking-bay" || this.location.position === "surface")
           {
             this.location.position = "surface"
             ok = true
@@ -239,7 +239,8 @@ export default class Ship implements IShip
         }
         case "docking-bay":
         {
-          if (this.location.position === "surface" || this.location.position === "orbit")
+          // Can move from any location to the docking bay
+          if (this.location.position === "surface" || this.location.position === "orbit" || this.location.position === "docking-bay")
           {
             this.location.position = "docking-bay"
             ok = true
@@ -248,7 +249,7 @@ export default class Ship implements IShip
         }
         case "orbit":
         {
-          if (this.location.position === "docking-bay")
+          if (this.location.position === "docking-bay" || this.location.position === "orbit")
           {
             this.location.position = "orbit"
             ok = true
