@@ -15,6 +15,8 @@ export enum Difficulty {
   Impossible,
 }
 
+export type ShipTask = "idle" | "traveling" | "harvesting" | "terraforming"
+
 export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
@@ -26,6 +28,7 @@ export type PlayerGameAction = "rename-planet"
   | "ship-modify-cargo"
   | "ship-add-crew"
   | "ship-empty-cargo"
+  | "ship-toggle-harvesting"
   | "ship-relocate"
   | "ship-travel"
   | "ship-abort-travel"

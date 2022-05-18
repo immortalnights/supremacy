@@ -1,6 +1,19 @@
 import e from "express";
 import Planet from "./Planet";
-import { IResources, IShip, IShipCapacity, IShipDetails, IShipHarvesting, IShipHeading, IShipLocation, PlanetID, ShipID } from "./types";
+import {
+  IResources,
+  ShipID,
+  IShip,
+  IShipCapacity,
+  IShipDetails,
+  IShipHarvesting,
+  IShipHeading,
+  IShipLocation,
+  ShipTask,
+  IShipHarvester,
+  IShipTerraformer,
+  PlanetID,
+} from "./types";
 
 export default class Ship implements IShip
 {
@@ -20,8 +33,10 @@ export default class Ship implements IShip
   capacity: IShipCapacity
   speed: number
   range: number
-  harvester: IShipHarvesting | null
-  heading: IShipHeading | null
+  heading?: IShipHeading
+  harvester?: IShipHarvesting
+  task: ShipTask
+  equipment?: IShipHarvester | IShipTerraformer
 
   constructor(id: number, name: string, details: IShipDetails, owner: string, location: number | undefined)
   {
@@ -44,7 +59,7 @@ export default class Ship implements IShip
     }
     this.fuels = 0
     this.passengers = 0
-    this.heading = null
+    this.task = "idle"
 
     this.type = details.type
     this.requiresFuel = details.capacity !== null && details.capacity.fuels > 0
@@ -53,10 +68,10 @@ export default class Ship implements IShip
     this.speed = details.speed
     this.range = details.range
     this.value = details.value
-    this.harvester = details.harvester && {
+    this.harvester = details.harvester ? {
       location: details.harvester.location,
       resources: { ...details.harvester.resources },
-    }
+    } : undefined
   }
 
   load(data: Ship)

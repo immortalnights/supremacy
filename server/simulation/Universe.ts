@@ -228,6 +228,7 @@ export default class Universe implements IUniverse, IWorld
         const departed = this.date.clone().floor()
         const arrival = this.date.clone().add(distance).ceil()
 
+        ship.task = "traveling"
         ship.location.planet = undefined
         ship.location.position = "outer-space"
         ship.heading = {
@@ -243,6 +244,30 @@ export default class Universe implements IUniverse, IWorld
       }
 
       return ok
+    }
+
+    const beginHarvesting = (ship: Ship) => {
+      ship.task = "harvesting"
+      ship.equipment = {
+        multiplier: 1,
+        start: this.date.clone().floor()
+      }
+    }
+
+    const cancelHarvesting = (ship: Ship) => {
+      ship.task = "idle"
+      ship.equipment = undefined
+    }
+
+    const toggleHarvesting = (ship: Ship) => {
+      if (ship.task === "idle")
+      {
+        beginHarvesting(ship)
+      }
+      else
+      {
+        cancelHarvesting(ship)
+      }
     }
 
     switch (action as PlayerGameAction)
@@ -696,6 +721,16 @@ export default class Universe implements IUniverse, IWorld
           {
             if (ship.relocate(body.location, body.position))
             {
+              // If the ship type is a solar; immediately begin harvesting evergy
+              if (ship.harvester && ship.harvester.location === "orbit")
+              {
+                beginHarvesting(ship)
+              }
+              else
+              {
+                cancelHarvesting(ship)
+              }
+
               resultData = { world: { ships: [ship.toJSON()] } }
               result = true
             }
@@ -747,6 +782,51 @@ export default class Universe implements IUniverse, IWorld
             else
             {
               reason = "Failed to find current or destination planet"
+            }
+          }
+          else
+          {
+            reason = "Invalid ship ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "ship-toggle-surface-status":
+      {
+        const body = data as { id: ShipID }
+        if (body.id !== undefined)
+        {
+          const ship = findShip(body.id)
+          if (ship)
+          {
+            if (ship.harvester !== undefined)
+            {
+              if (ship.location.position === "surface")
+              {
+                if (ship.crew > 0)
+                {
+                  toggleHarvesting(ship)
+
+                  resultData = { world: { ships: [ship.toJSON()] } }
+                  result = true
+                }
+                else
+                {
+                  reason = "Ship does not have any crew"
+                }
+              }
+              else
+              {
+                reason = "Ship is in an incorrect position"
+              }
+            }
+            else
+            {
+              reason = "Ship is unable to harvest"
             }
           }
           else

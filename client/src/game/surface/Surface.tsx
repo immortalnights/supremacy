@@ -25,11 +25,19 @@ const PlanetSlot = ({ ship, onToggleStatus, onClick }: IPlanetSlotProps) => {
   {
     empty = false
     name = ship.name
-    if (ship.harvester != null && ship.harvester.location === "surface")
+    if (ship.harvester && ship.harvester.location === "surface")
     {
-      canToggleStatus = true
-      status = "Not Running"
-      toggleStatus = "activate" // : "deactivate"
+      canToggleStatus = ship.crew > 0
+      if (ship.task === "harvesting")
+      {
+        status = "Running"
+        toggleStatus = "activate"
+      }
+      else
+      {
+        status = "Not Running"
+        toggleStatus = "deactivate"
+      }
     }
   }
 

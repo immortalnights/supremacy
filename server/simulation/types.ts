@@ -11,6 +11,7 @@ export type PlayerGameAction = "rename-planet"
   | "ship-modify-cargo"
   | "ship-add-crew"
   | "ship-empty-cargo"
+  | "ship-toggle-harvesting"
   | "ship-relocate"
   | "ship-travel"
   | "ship-abort-travel"
@@ -113,6 +114,19 @@ export interface IShipHarvesting {
   resources: IResources
 }
 
+export interface IShipHarvester {
+  multiplier: number
+  start: IDate
+}
+
+export interface IShipTerraformer {
+  planet: PlanetID
+  start: IDate
+  end: IDate
+}
+
+export type ShipTask = "idle" | "traveling" | "harvesting" | "terraforming"
+
 // FIXME ship location does not include the planet name, but ship heading to/from does...
 export interface IShip extends IShipBasic {
   crew: number
@@ -126,8 +140,10 @@ export interface IShip extends IShipBasic {
   capacity: IShipCapacity
   speed: number
   range: number
-  harvester: IShipHarvesting | null
-  heading: IShipHeading | null
+  heading?: IShipHeading
+  harvester?: IShipHarvesting
+  task: ShipTask
+  equipment?: IShipHarvester | IShipTerraformer
 }
 
 export interface IPlatoonLocation {
