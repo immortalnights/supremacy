@@ -155,14 +155,17 @@ export default class Planet implements IPlanet
     this.terraform(name)
     this.owner = owner
     this.capital = capital
-    this.type = capital ? PlanetType.Metropolis : this.type
-    this.population = random(1000, 2000)
-    this.resources.credits = random(50000, 60000)
-    this.resources.food = random(3000, 5000)
-    this.resources.foodChange = 0
-    this.resources.minerals = random(2000, 5000)
-    this.resources.fuels = random(2000, 5000)
-    this.resources.energy = random(2000, 5000)
+
+    if (capital)
+    {
+      this.type = PlanetType.Metropolis
+      this.population = random(1000, 2000)
+      this.resources.credits = random(50000, 60000)
+      this.resources.food = random(3000, 5000)
+      this.resources.minerals = random(2000, 5000)
+      this.resources.fuels = random(2000, 5000)
+      this.resources.energy = random(2000, 5000)
+    }
   }
 
   terraform(name: string)
@@ -172,17 +175,18 @@ export default class Planet implements IPlanet
     this.name = name
     this.population = 0
     this.habitable = true
+    this.terraforming = false
     this.type = (planetTypeKeys[random(0, planetTypeKeys.length)] as PlanetType)
-    this.population = random(1500, 3000)
+    this.population = 1000
     this.growth = 0
     this.growthChange = 0
     this.morale = 75
     this.tax = 25
     this.resources.credits = 0
-    this.resources.food = random(1000, 3000)
+    this.resources.food = 1000
     this.resources.foodChange = 0
     this.resources.minerals = 20
     this.resources.fuels = 150
-    this.resources.energy = 3
+    this.resources.energy = 35
   }
 }

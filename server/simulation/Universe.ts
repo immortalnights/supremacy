@@ -17,6 +17,7 @@ import {
   PlatoonID,
   ShipID,
   PlatoonStatus,
+  IShipTerraformer,
 } from "./types"
 import type { IWorld } from "../serverTypes"
 import StarDate, { DAYS_PER_YEAR } from "./StarDate"
@@ -1057,6 +1058,61 @@ export default class Universe implements IUniverse, IWorld
       if (planet.simulate(delta))
       {
         // changes.planets.push(planet.id)
+      }
+    })
+
+    this.ships.forEach((ship) => {
+      if (ship.task === "harvesting")
+      {
+        // TODO
+      }
+      else if (ship.task === "traveling")
+      {
+        if (ship.heading)
+        {
+          if (this.date.gt(ship.heading.arrival))
+          {
+            ship.location.planet = ship.heading.to
+            ship.location.position = "orbit"
+            ship.task = "idle"
+            ship.heading = undefined
+
+            const planet = this.planets.find((p) => p.id === ship.location.planet) as Planet
+            console.log(`Ship ${ship.name} (${ship.id}) has arrived at ${planet.name} (${planet.id})`)
+
+            if (ship.type === "Atmosphere Processor" && planet.type === PlanetType.Lifeless && planet.terraforming === false)
+            {
+              const endDate = this.date.clone().floor().add(planet.terraformDuration)
+              ship.location.position = "surface"
+              ship.equipment = {
+                start: this.date.clone(),
+                end: endDate,
+                planetName: "new planet",
+              }
+              ship.task = "terraforming"
+
+              planet.terraforming = true
+              console.log(`Begin terrforming planet ${planet.name}, will complete ${endDate.day}-${endDate.year}`)
+            }
+          }
+        }
+        else
+        {
+          ship.task = "idle"
+        }
+      }
+      else if (ship.task === "terraforming")
+      {
+        const terraformer = ship.equipment as IShipTerraformer
+        if (this.date.gt(terraformer.end))
+        {
+          ship.task = "idle"
+          ship.equipment = undefined
+
+          const planet = this.planets.find((p) => p.id === ship.location.planet) as Planet
+          planet.claim(ship.owner, terraformer.planetName, false)
+          console.log(`Completed terraforming planet ${planet.name} (${planet.id}) by ${ship.owner}`)
+        }
       }
     })
   }

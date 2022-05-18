@@ -21,6 +21,16 @@ class StarDate implements IDate
     return d
   }
 
+  gt(other: IDate): boolean
+  {
+    return this.year > other.year || (this.year === other.year && Math.floor(this.day) > Math.floor(other.day))
+  }
+
+  equ(other: IDate): boolean
+  {
+    return Math.floor(this.day) === Math.floor(other.day) && this.year === other.year
+  }
+
   inc(delta: number)
   {
     this.day += 1 * delta

@@ -120,9 +120,9 @@ export interface IShipHarvester {
 }
 
 export interface IShipTerraformer {
-  planet: PlanetID
   start: IDate
   end: IDate
+  planetName: string
 }
 
 export type ShipTask = "idle" | "traveling" | "harvesting" | "terraforming"
