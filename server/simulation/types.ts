@@ -16,10 +16,10 @@ export type PlayerGameAction = "rename-planet"
   | "ship-abort-travel"
   | "ship-toggle-surface-status"
   | "ship-decommission"
-  | "platoon-increase-troops"
-  | "platoon-decrease-troops"
+  | "platoon-modify"
   | "platoon-recruit"
   | "platoon-dismiss"
+  | "platoon-relocate"
 
 export enum Difficulty {
   Easy,

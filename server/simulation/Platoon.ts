@@ -52,6 +52,10 @@ export default class Platoon implements IPlatoon
       {
         this.status = PlatoonStatus.Training
       }
+      else
+      {
+        this.status = PlatoonStatus.None
+      }
     }
   }
 

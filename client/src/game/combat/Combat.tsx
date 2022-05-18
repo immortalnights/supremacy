@@ -5,16 +5,17 @@ import { SelectedPlanet } from "../../data/Planets"
 import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/material"
 import DockingBays from "../components/DockingBays"
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
-import { stringify } from "querystring"
 import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
 // import PlatoonGrid from "../components/grid/PlatoonGrid"
 // import "./styles.css"
 import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 import { Ship } from "../../data/Ships"
+import { IOContext } from "../../data/IOContext"
 
-const PlatoonGridItem = ({ name, troops }: { name?: string, troops?: number }) => {
+const PlatoonGridItem = ({ name, troops, onClick }: { name?: string, troops?: number, onClick: (event: React.MouseEvent) => void }) => {
+
   return (
-    <Grid item sx={{ margin: "1px 4px", display: "flex", flexDirection: "row", flexBasis: "30%" }}>
+    <Grid item sx={{ margin: "1px 4px", display: "flex", flexDirection: "row", flexBasis: "30%" }} onClick={onClick}>
       <div style={{ border: "1px solid #6b6bf3", minWidth: "3em", minHeight: "1.7rem", margin: "1px", textAlign: "center" }}>{troops}</div>
       <div style={{ border: "1px solid #6b6bf3", minWidth: "2.5em", minHeight: "1.7rem", margin: "1px", textAlign: "center" }}>{name}</div>
     </Grid>
@@ -25,16 +26,15 @@ interface PlatoonGridProps {
   items: IPlatoonBasic[]
   count: number
   direction: GridDirection
-  onSelectItem: () => void
+  onSelectItem: (event: React.MouseEvent, item: IPlatoonBasic) => void
 }
 
 const PlatoonGrid = ({ items, count, direction, onSelectItem }: PlatoonGridProps) => {
-
   const cells: React.ReactNode[] = []
 
   for (let index = 0; index < count; index++)
   {
-    cells.push(<PlatoonGridItem key={index} {...items[index]} />)
+    cells.push(<PlatoonGridItem key={index} {...items[index]} onClick={(event: React.MouseEvent) => items[index] && onSelectItem(event, items[index])} />)
   }
 
   return (
@@ -45,20 +45,14 @@ const PlatoonGrid = ({ items, count, direction, onSelectItem }: PlatoonGridProps
 }
 
 
-const ShipDetails = () => {
-  const platoons = Recoil.useRecoilValue(PlatoonsOnShip({ ship: 0 }))
-
-  const ship: { name: string } = {
-    name: ""
-  }
-
-  const handleSelectedItem: any = () => {}
+const ShipDetails = ({ ship, onClickUnloadPlatoon }: { ship: IShip | undefined, onClickUnloadPlatoon: (event: React.MouseEvent, item: IPlatoonBasic) => void }) => {
+  const platoons = Recoil.useRecoilValue(PlatoonsOnShip({ ship: ship?.id }))
 
   return (
     <div>
       <Typography variant="caption">Ship</Typography>
       <Typography variant="caption">{ship?.name}</Typography>
-      <PlatoonGrid items={platoons} count={4} direction="column" onSelectItem={handleSelectedItem} />
+      <PlatoonGrid items={platoons} count={4} direction="column" onSelectItem={onClickUnloadPlatoon} />
     </div>
   )
 }
@@ -72,11 +66,25 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
   const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const remainingTroops = platoons.reduce((val, p, index, arr) => val + (p as IPlatoon).troops, 0)
   const aggression = 25
+  const { action } = React.useContext(IOContext)
 
-  const handleSelectedItem: any = () => {}
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
     setSelectedShip(ship.id)
+  }
+
+  const handleClickUnloadPlatoon = (event: React.MouseEvent, item: IPlatoonBasic) => {
+    if (ship)
+    {
+      action("platoon-relocate", { id: item.id, direction: "unload", ship: ship.id, planet: planet.id })
+    }
+  }
+
+  const handleClickLoadPlatoon = (event: React.MouseEvent, item: IPlatoonBasic) => {
+    if (ship)
+    {
+      action("platoon-relocate", { id: item.id, direction: "load", ship: ship.id, planet: planet.id })
+    }
   }
 
   return (
@@ -84,9 +92,9 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
       <Grid item xs={5}>
         <Stack direction="row">
           <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
-          <ShipDetails />
+          <ShipDetails ship={ship} onClickUnloadPlatoon={handleClickUnloadPlatoon} />
         </Stack>
-        <PlatoonGrid items={platoons} count={24} direction="row" onSelectItem={handleSelectedItem} />
+        <PlatoonGrid items={platoons} count={24} direction="row" onSelectItem={handleClickLoadPlatoon} />
       </Grid>
       <Grid item xs={2}>
         <div style={{ display: "flex", flexGrow: "1", height: "100%" }}>

@@ -16,6 +16,7 @@ import {
   PlanetID,
   PlatoonID,
   ShipID,
+  PlatoonStatus,
 } from "./types"
 import type { IWorld } from "../serverTypes"
 import StarDate, { DAYS_PER_YEAR } from "./StarDate"
@@ -212,7 +213,7 @@ export default class Universe implements IUniverse, IWorld
       const index = findShipIndex(id)
       return index >= 0 ? this.ships[index] : undefined
     }
-    const findPlatoonIndex = (id: PlatoonID): number => this.planets.findIndex((p) => p.id === id)
+    const findPlatoonIndex = (id: PlatoonID): number => this.platoons.findIndex((p) => p.id === id)
     const findPlatoon = (id: PlatoonID): Platoon | undefined => {
       const index = findPlatoonIndex(id)
       return index >= 0 ? this.platoons[index] : undefined
@@ -811,7 +812,7 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
-      case "platoon-increase-troops":
+      case "platoon-modify":
       {
         const body = data as { platoon: PlatoonID, amount: number }
         if (body.platoon !== undefined && body.amount)
@@ -828,37 +829,23 @@ export default class Universe implements IUniverse, IWorld
           }
           else
           {
-            platoon.modifyTroops(body.amount)
-            result = true
-            resultData = { world: { platoons: [platoon.toJSON()] } }
-          }
-        }
-        else
-        {
-          reason = "Action data missing"
-        }
-        break
-      }
-      case "platoon-decrease-troops":
-      {
-        const body = data as { platoon: PlatoonID, amount: number }
-        if (body.platoon !== undefined && body.amount)
-        {
-          const platoon = this.platoons.find((p) => p.id === body.platoon)
-          if (!platoon)
-          {
-            reason = "Invalid platoon"
-          }
-          else if (platoon.owner !== player)
-          {
-            reason = "Incorrect platoon owner"
-          }
-          // TODO verify available population and modify
-          else
-          {
-            platoon.modifyTroops(body.amount)
-            result = true
-            resultData = { world: { platoons: [platoon.toJSON()] } }
+            const capital = this.planets.find((p) => p.capital === true && p.owner === player)
+            const populationChange = -body.amount
+            if (!capital)
+            {
+              reason = "Failed to find player capital planet"
+            }
+            else if (populationChange > 0 && capital.population < populationChange)
+            {
+              reason = "Insufficient available civilians on planet"
+            }
+            else
+            {
+              capital.population += populationChange
+              platoon.modifyTroops(body.amount)
+              result = true
+              resultData = { world: { planets: [capital.toJSON()], platoons: [platoon.toJSON()] } }
+            }
           }
         }
         else
@@ -891,9 +878,76 @@ export default class Universe implements IUniverse, IWorld
             }
             else
             {
+              // FIXME
               platoon.recruit("suit_1", "weapon_1", capital.id)
               result = true
               resultData = { world: { platoons: [platoon.toJSON()] } }
+            }
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "platoon-dismiss":
+      {
+        break
+      }
+      case "platoon-relocate":
+      {
+        const body = data as { id: PlatoonID, direction: string, ship: ShipID, planet: PlanetID }
+        if (body.id !== undefined && body.ship !== undefined && body.planet !== undefined)
+        {
+          const platoon = findPlatoon(body.id)
+          const ship = findShip(body.ship)
+          const planet = findPlanet(body.planet)
+
+          if (!platoon || platoon.owner !== player || platoon.status !== PlatoonStatus.Recruited)
+          {
+            reason = "Invalid platoon"
+          }
+          else if (!ship || ship.owner !== player || ship.capacity.platoons === 0)
+          {
+            reason = "Invalid ship"
+          }
+          else if (!planet)
+          {
+            reason = "Invalid planet"
+          }
+          else
+          {
+            if (body.direction === "load")
+            {
+              const onboard = this.platoons.filter((p) => p.location.ship === ship.id)
+              if (onboard.length === ship.capacity.platoons)
+              {
+                reason = "Ship is full"
+              }
+              else
+              {
+                platoon.location.ship = ship.id
+                platoon.location.planet = undefined
+
+                result = true
+                resultData = { world: { platoons: [platoon.toJSON()] } }
+              }
+            }
+            if (body.direction === "unload")
+            {
+              if (platoon.location.ship !== ship.id)
+              {
+                reason = "Platoon is not onboard ship"
+              }
+              else
+              {
+                platoon.location.ship = undefined
+                platoon.location.planet = planet.id
+
+                result = true
+                resultData = { world: { platoons: [platoon.toJSON()] } }
+              }
             }
           }
         }

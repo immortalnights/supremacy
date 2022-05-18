@@ -9,9 +9,10 @@ import { Suits, Weapons } from "../../data/StaticData"
 import { PlayerPlatoons } from "../../data/Platoons"
 import { IOContext } from "../../data/IOContext"
 import { Player } from "../../data/Player"
+import IncDecButton from "../components/IncreaseDecreaseButton"
 
 
-const Equipment = ({ items, canChange }: { items: any, canChange: boolean }) => {
+const Equipment = ({ items, canChange, onChange }: { items: any, canChange: boolean, onChange: (key: string) => void }) => {
   const [ index, setIndex ] = React.useState(0)
   const keys = Object.keys(items)
   const equipment = items[keys[index]] as any
@@ -23,6 +24,7 @@ const Equipment = ({ items, canChange }: { items: any, canChange: boolean }) => 
       next = 0
     }
     setIndex(next)
+    onChange(keys[next])
   }
   const handlePrevClick = () => {
     let prev = index - 1
@@ -31,6 +33,7 @@ const Equipment = ({ items, canChange }: { items: any, canChange: boolean }) => 
       prev = keys.length - 1
     }
     setIndex(prev)
+    onChange(keys[prev])
   }
 
   return (
@@ -75,17 +78,27 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       {
         if (selectedPlatoon.troops > 0)
         {
-          action("platoon-decrease-troops", { platoon: selectedPlatoon.id, amount })
+          action("platoon-modify", { platoon: selectedPlatoon.id, amount })
         }
       }
       else
       {
         if (selectedPlatoon.troops < 200)
         {
-          action("platoon-increase-troops", { platoon: selectedPlatoon.id, amount })
+          action("platoon-modify", { platoon: selectedPlatoon.id, amount })
         }
       }
     }
+  }
+
+  const handleChangeSuit = (key: string) => {
+    // FIXME does this need to be a request? recruit could include the equipment ids
+    action("platoon-modify", { platoon: selectedPlatoon?.id, suit: key })
+  }
+
+  const handleChangeWeapon = (key: string) => {
+    // FIXME does this need to be a request? recruit could include the equipment ids
+    action("platoon-modify", { platoon: selectedPlatoon?.id, weapon: key })
   }
 
   const handleRecruitClick = (event: any) => {
@@ -100,7 +113,7 @@ const Training = ({ planet }: { planet: IPlanet }) => {
   if (selectedPlatoon)
   {
     // FIXME show ship or planet name
-    if (selectedPlatoon.status == PlatoonStatus.Recruited)
+    if (selectedPlatoon.status === PlatoonStatus.Recruited)
     {
       if (selectedPlatoon.location.planet !== undefined)
       {
@@ -117,9 +130,20 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     }
   }
 
-  const canRecruit = selectedPlatoon?.status === PlatoonStatus.Training
-  const canDismiss = selectedPlatoon?.status === PlatoonStatus.Recruited
-  const canModifyTroops = selectedPlatoon?.status !== PlatoonStatus.Recruited
+  let canRecruit = false
+  let canDismiss = false
+  let canModify = false
+  let canIncreaseTroops = false
+  let canDecreaseTroops = false
+
+  if (selectedPlatoon)
+  {
+    canRecruit = selectedPlatoon.status === PlatoonStatus.Training // && selectedPlatoon.troops > 200
+    canDismiss = selectedPlatoon.status === PlatoonStatus.Recruited
+    canModify = selectedPlatoon.status !== PlatoonStatus.Recruited
+    canIncreaseTroops = canModify && selectedPlatoon.troops < 200
+    canDecreaseTroops = canModify && selectedPlatoon.troops > 0
+  }
 
   return (
     <Grid container>
@@ -135,8 +159,8 @@ const Training = ({ planet }: { planet: IPlanet }) => {
        <Typography variant="caption">Troops</Typography>
         <Typography variant="caption">{selectedPlatoon?.troops}</Typography>
         <div>
-          <IconButton size="small" disabled={!canModifyTroops} onClick={(event) => handleChangePlatoonTroops(event, 1)}><ArrowDropUp /></IconButton>
-          <IconButton size="small" disabled={!canModifyTroops} onClick={(event) => handleChangePlatoonTroops(event, -1)}><ArrowDropDown /></IconButton>
+          <IncDecButton mode="increase" disabled={!canIncreaseTroops} onChange={handleChangePlatoonTroops} grayscale />
+          <IncDecButton mode="decrease" disabled={!canDecreaseTroops} onChange={handleChangePlatoonTroops} grayscale />
         </div>
       </Grid>
       <Grid item xs={4}>
@@ -144,12 +168,10 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         <Typography variant="caption">{planet.population}</Typography>
       </Grid>
       <Grid item xs={3}>
-        {/* <Equipment items={suitKeys} selector={suitSelector} /> */}
-        <Equipment items={suits} canChange={canModifyTroops} />
+        <Equipment items={suits} canChange={canModify} onChange={handleChangeSuit} />
       </Grid>
       <Grid item xs={3}>
-        {/* <Equipment items={weaponKeys} selector={weaponSelector} /> */}
-        <Equipment items={weapons} canChange={canModifyTroops} />
+        <Equipment items={weapons} canChange={canModify} onChange={handleChangeWeapon} />
       </Grid>
       <Grid item xs={6}>
         <div>

@@ -47,11 +47,11 @@ export const PlanetEnemyStrength = Recoil.selectorFamily<number, { planet: Plane
     }
 })
 
-export const PlatoonsOnShip = Recoil.selectorFamily<IPlatoonBasic[], { ship: ShipID }>({
+export const PlatoonsOnShip = Recoil.selectorFamily<IPlatoonBasic[], { ship: ShipID | undefined }>({
     key: "platoonsOnShip",
     get: ({ ship }) => ({ get }) => {
         const player = get(Player)
         const platoons = get(Platoons)
-        return platoons.filter((p) => p.status === PlatoonStatus.Recruited && p.location.ship === ship && p.owner === player.id)
+        return platoons.filter((p) => p.status === PlatoonStatus.Recruited && (ship && p.location.ship === ship) && p.owner === player.id)
     }
 })
