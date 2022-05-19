@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText, Box, Stack } from "@mui/material"
+import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText, Box, Stack, Typography } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanet as SelectedPlanetId } from "../../data/General"
@@ -10,7 +10,7 @@ import { PlayerShips } from "../../data/Ships"
 import StarDate from "../components/StarDate"
 import { Player } from "../../data/Player"
 import { PlanetType } from "../../simulation/types"
-
+import "./styles.css"
 
 const PlanetList = () => {
   const game = Recoil.useRecoilValue(GameData)
@@ -26,6 +26,7 @@ const PlanetList = () => {
       navigate(`/game/${game?.id}/overview`)
     }
   }
+  //}`--i:${index + 1}
 //<ListItemButton key={planet.id} component={RouterLink} to={`/game/${game?.id}/overview/${planet.id}`}>
   return (
     <List dense sx={{
@@ -35,6 +36,11 @@ const PlanetList = () => {
         <ListItemButton key={planet.id} selected={planet.id === selected} onClick={() => handlePlanetClick(planet.id)} onDoubleClick={() => handlePlanetClick(planet.id, true)}>
           <ListItemAvatar />
           <ListItemText primary={`${planet.name}`} />
+          {planet.terraforming && <Typography component="span" variant="body2" color="text.secondary" className="wavey">
+            {"Terraforming".split("").map((l, index) => (
+              <span key={index} style={{"--i": index + 1} as React.CSSProperties}>{l}</span>
+            ))}
+          </Typography>}
         </ListItemButton>
       ))}
     </List>

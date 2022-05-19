@@ -1137,6 +1137,7 @@ export default class Universe implements IUniverse, IWorld
         name: "",
         radius: planet.radius,
         location: planet.location,
+        terraforming: planet.terraforming,
       }
 
       if (planet.type === PlanetType.Lifeless)

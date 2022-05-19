@@ -59,13 +59,13 @@ export interface IPlanetBasic {
   owner?: string
   name: string
   radius: number
-  location: number // ?
+  location: number // ? x pos
+  terraforming: boolean
 }
 
 export interface IPlanet extends IPlanetBasic {
   habitable: boolean
   population: number
-  terraforming: boolean
   terraformDuration: number
 
   capital: boolean

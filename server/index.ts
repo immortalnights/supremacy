@@ -255,6 +255,7 @@ setInterval(() => {
 }, 250)
 
 // debug output
+/*
 setInterval(() => {
   console.log(`${players.length} players connected, ${rooms.length} rooms, ${games.length} games`)
 
@@ -267,7 +268,7 @@ setInterval(() => {
   })
 
 }, 5000)
-
+*/
 server.listen(PORT, () => {
   console.log(`Server online (${PORT})...`)
 })

@@ -78,3 +78,23 @@
 	white-space: nowrap;
 	margin: auto;
 }
+
+.wavey span {
+  position: relative;
+  display: inline-block;
+	text-transform: uppercase;
+	animation: wavey 1s infinite;
+  animation-delay: calc(.1s * var(--i));
+}
+
+@keyframes wavey {
+  0%,100% {
+    transform: translateY(0)
+  }
+  33% {
+    transform: translateY(-2.5px)
+  }
+	66% {
+		transform: translateY(2.5px)
+	}
+}
