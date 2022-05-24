@@ -1,6 +1,6 @@
 import React from 'react'
 import Recoil from 'recoil'
-import { SelectedPlanet } from "../../../data/General"
+import { SelectedPlanetID } from "../../../data/General"
 import { Planets, IPlanetBasic } from "../../../data/Planets"
 import { Player } from "../../../data/Player"
 import Grid from "./Grid"
@@ -86,7 +86,7 @@ interface PlatoonGridProps {
 
 const PlatoonGrid = ({ onSelectItem, rows, cols }: PlatoonGridProps) => {
   const player = Recoil.useRecoilValue(Player)
-  const selectedPlanet = Recoil.useRecoilValue(SelectedPlanet)
+  const selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
   const platoons: [] = []
 
   const classNamesForItem = (item: PlatoonTemp) => {

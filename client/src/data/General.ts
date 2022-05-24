@@ -1,7 +1,7 @@
 import Recoil from "recoil"
 import { IDate } from "../simulation/types.d"
 
-export const SelectedPlanet = Recoil.atom<number>({
+export const SelectedPlanetID = Recoil.atom<number>({
   key: "selectedPlanetID",
   default: -1
 })

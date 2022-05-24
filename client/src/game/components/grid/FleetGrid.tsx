@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { SelectedPlanet } from "../../../data/General"
+import { SelectedPlanetID } from "../../../data/General"
 import { PlayerShips, IShip } from "../../../data/Ships"
 import { Player } from "../../../data/Player"
 import Grid from "./Grid"
@@ -9,7 +9,7 @@ import Grid from "./Grid"
 
 const FleetGrid = ({ selectedItem, onSelectItem }: { selectedItem: IShip | undefined, onSelectItem: (item: IShip) => void }) => {
   const player = Recoil.useRecoilValue(Player)
-  const selectedPlanet = Recoil.useRecoilValue(SelectedPlanet)
+  const selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
   const ships = Recoil.useRecoilValue(PlayerShips) as IShip[]
 
   const classNamesForItem = (item: IShip) => {

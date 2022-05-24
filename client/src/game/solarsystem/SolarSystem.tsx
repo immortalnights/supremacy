@@ -3,7 +3,7 @@ import Recoil from "recoil"
 import { Button, Grid, List, ListItemButton, ListItemAvatar, ListItemText, Box, Stack, Typography } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
-import { SelectedPlanet as SelectedPlanetId } from "../../data/General"
+import { SelectedPlanetID } from "../../data/General"
 import { SelectedPlanet, Planets as PlanetData, IPlanet } from "../../data/Planets"
 import { Game as GameData } from "../../data/Game"
 import { PlayerShips } from "../../data/Ships"
@@ -15,7 +15,7 @@ import "./styles.css"
 const PlanetList = () => {
   const game = Recoil.useRecoilValue(GameData)
   const planets = Recoil.useRecoilValue(PlanetData)
-  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetId)
+  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetID)
   const navigate = useNavigate()
 
   const handlePlanetClick = (id: number, nav: boolean = false) => {

@@ -3,7 +3,8 @@ import Recoil from "recoil"
 import { Box, Button, Stack, TextField, Tabs, Tab, Typography } from "@mui/material"
 import { useNavigate } from "react-router"
 import { IOContext } from "../../data/IOContext"
-import { SelectedPlanet, IPlanet } from "../../data/Planets"
+import { SelectedPlanetID } from "../../data/General"
+import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
 import StarDate from "../components/StarDate"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
@@ -11,6 +12,7 @@ import PlanetAuth from "../components/PlanetAuth"
 import IncDecButton from "../components/IncreaseDecreaseButton"
 import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { PlanetStrength } from "../../data/Platoons"
+import { Player } from "../../data/Player"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
@@ -181,6 +183,8 @@ const InlineName = ({ label, value, onCancel, onComplete }: any) => {
 
 const Overview = ({ planet }: { planet: IPlanet }) => {
   const [ rename, setRename ] = React.useState(false)
+  const player = Recoil.useRecoilValue(Player)
+  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetID)
   const { action } = React.useContext(IOContext)
 
   const onStartRename = () => {
@@ -201,7 +205,12 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
       planet: planet?.id
     })
   }
-  const onSelectItem = () => {}
+  const onSelectPlanet = (planet: IPlanetBasic) => {
+    if (planet.owner === player.id)
+    {
+      setSelected(planet.id)
+    }
+  }
 
   return (
     <>
@@ -215,7 +224,7 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
       <Stack direction="row">
         <div>
           {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : null}
-          <PlanetGrid onSelectItem={onSelectItem} />
+          <PlanetGrid onSelectItem={onSelectPlanet} />
         </div>
         {/* <div style={{ flexGrow: 1 }}></div> */}
         <OverviewSlots planet={planet} />

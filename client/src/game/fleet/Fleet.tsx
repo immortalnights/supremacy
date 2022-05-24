@@ -2,6 +2,7 @@ import React from "react"
 import Recoil from "recoil"
 import { Button, Grid, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
+import { SelectedPlanetID } from "../../data/General"
 import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
 import { Ship } from "../../data/Ships"
 import DockingBays from "../components/DockingBays"
@@ -17,17 +18,18 @@ type FleetMode = "normal" | "ship-destination"
 
 const Fleet = ({ planet }: { planet: IPlanet }) => {
   const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
+  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetID)
   const [ renameShip, setRenameShip ] = React.useState(false)
   const [ mode, setMode ] = React.useState<FleetMode>("normal")
   const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const { action } = React.useContext(IOContext)
 
-  const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-    setSelectedShip(ship?.id)
+  const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, dockedShip: IShip) => {
+    setSelectedShip(dockedShip.id)
   }
 
-  const handleSelectShip = (ship: IShip) => {
-    setSelectedShip(ship.id)
+  const handleSelectShip = (selectedShip: IShip) => {
+    setSelectedShip(selectedShip.id)
   }
 
   const handleAbortTravelClick = () => {

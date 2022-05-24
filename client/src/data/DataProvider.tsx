@@ -6,7 +6,7 @@ import { Player } from "./Player"
 import { Room, AvailableRooms } from "./Room"
 import { StaticShips, StaticEquipment } from "./StaticData"
 import { Game } from "./Game"
-import { SelectedPlanet } from "./General"
+import { SelectedPlanetID } from "./General"
 import { SolarSystem } from "./SolarSystem"
 import { Planets } from "./Planets"
 import { Ships } from "./Ships"
@@ -112,7 +112,7 @@ const handleGameJoined: TransactionHandler = (data: IGame, { get, set, reset }) 
   reset(Planets)
   reset(Ships)
   reset(Platoons)
-  reset(SelectedPlanet)
+  reset(SelectedPlanetID)
 
   set(Game, data)
 }
@@ -133,7 +133,7 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(Planets)
   reset(Ships)
   reset(Platoons)
-  reset(SelectedPlanet)
+  reset(SelectedPlanetID)
 }
 
 const handleStaticGameData: TransactionHandler = (data: any, { get, set }) => {
@@ -147,7 +147,7 @@ const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, s
   const { planets, ships, platoons, ...solarSystem } = data.world
 
   // FIXME do this somewhere better
-  let selected = get(SelectedPlanet)
+  let selected = get(SelectedPlanetID)
   if (selected === -1)
   {
     const player = get(Player)
@@ -168,7 +168,7 @@ const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, s
       selected = firstOwned?.id || 0
     }
 
-    set(SelectedPlanet, selected)
+    set(SelectedPlanetID, selected)
   }
 
   set(SolarSystem, solarSystem)
@@ -273,7 +273,7 @@ const DataProvider = ({ children }: { children: JSX.Element }) => {
         callback.reset(Room)
         callback.reset(Game)
         callback.reset(SolarSystem)
-        callback.reset(SelectedPlanet)
+        callback.reset(SelectedPlanetID)
       }
       else if (MessageHandlerMap[action])
       {

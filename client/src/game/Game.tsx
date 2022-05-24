@@ -61,7 +61,6 @@ const Game = ({ data }: { data: IGame }) => {
   )
 }
 
-
 const GameLoader = () => {
   const game = Recoil.useRecoilValue(GameData)
   const { joinGame, leaveGame } = React.useContext(IOContext)

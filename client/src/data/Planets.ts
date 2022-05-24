@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { SelectedPlanet as SelectedPlanetID } from "./General"
+import { SelectedPlanetID } from "./General"
 import { IPlayer, Player } from "./Player"
 import type { PlanetID, IPlanet, IPlanetBasic } from "../simulation/types.d"
 
