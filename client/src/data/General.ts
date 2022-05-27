@@ -7,5 +7,5 @@ export const SelectedPlanetID = Recoil.atom<number>({
 })
 
 export const formatDate = ({ day, year }: IDate) => {
-  return `${day} / ${year}`
+  return `${Math.floor(day)} / ${year}`
 }

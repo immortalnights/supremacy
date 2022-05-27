@@ -33,7 +33,7 @@ const Shipyard = () => {
 
   const handleBuyClick = () => {
     console.log("buy", selected)
-    action("purchase-ship", {
+    action("ship-purchase", {
       id: Object.keys(ShipData)[selected]
     })
   }

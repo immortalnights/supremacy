@@ -11,7 +11,10 @@ import { SolarSystem } from "./SolarSystem"
 import { Planets } from "./Planets"
 import { Ships } from "./Ships"
 import { Platoons } from "./Platoons"
+import { EspionageReport } from "./Espionage"
 import type { IUniverse } from "../simulation/types.d"
+
+// TODO reorganize so that Lobby/Room related data is handled separately from the Game
 
 const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInterface_UNSTABLE) => {
   const player = { ...get(Player), id, }
@@ -113,6 +116,7 @@ const handleGameJoined: TransactionHandler = (data: IGame, { get, set, reset }) 
   reset(Ships)
   reset(Platoons)
   reset(SelectedPlanetID)
+  reset(EspionageReport)
 
   set(Game, data)
 }
@@ -134,11 +138,13 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
   reset(Ships)
   reset(Platoons)
   reset(SelectedPlanetID)
+  reset(EspionageReport)
 }
 
 const handleStaticGameData: TransactionHandler = (data: any, { get, set }) => {
   set(StaticShips, data.ships)
   set(StaticEquipment, data.equipment)
+  // set(StaticEspionage, data.espionage)
 }
 
 const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
@@ -178,7 +184,7 @@ const handleGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, s
 }
 
 const handlePartialGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, { get, set }) => {
-  const { planets, ships, platoons, ...solarSystem } = data.world
+  const { planets, ships, platoons, espionage, ...solarSystem } = data.world
 
   if (planets)
   {
@@ -232,6 +238,11 @@ const handlePartialGameUpdate: TransactionHandler = (data: IUpdate<IUniverse>, {
     set(Platoons, existingPlatoons)
   }
 
+  if (espionage)
+  {
+    set(EspionageReport, espionage)
+  }
+
   // TODO rest
 }
 
@@ -274,6 +285,7 @@ const DataProvider = ({ children }: { children: JSX.Element }) => {
         callback.reset(Game)
         callback.reset(SolarSystem)
         callback.reset(SelectedPlanetID)
+        callback.reset(EspionageReport)
       }
       else if (MessageHandlerMap[action])
       {

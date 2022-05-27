@@ -4,7 +4,8 @@ export type PlayerGameAction = "rename-planet"
   | "transfer-credits"
   | "planet-modify-tax"
   | "planet-terraform"
-  | "purchase-ship"
+  | "planet-espionage"
+  | "ship-purchase"
   | "ship-rename"
   | "ship-modify-passengers"
   | "ship-modify-fuels"
@@ -190,6 +191,7 @@ export interface IUniverse extends ISolarSystem {
   planets: (IPlanetBasic | IPlanet)[]
   ships: (IShipBasic | IShip)[]
   platoons: (IPlatoonBasic | IPlatoon)[]
+  espionage?: IEspionageReport
 }
 
 export interface IShipDetails {
@@ -221,4 +223,14 @@ export interface IEquipment {
 
 export interface IEquipmentList {
   [key: string]: IEquipment
+}
+
+export interface IEspionageReport extends Partial<IResources> {
+  date: IDate,
+  planet: {
+    id: PlanetID,
+    name: string,
+  },
+  strength?: number,
+  civilians?: number,
 }

@@ -21,8 +21,10 @@ import {
 } from "./types"
 import type { IWorld } from "../serverTypes"
 import StarDate, { DAYS_PER_YEAR } from "./StarDate"
+import { calculateEspionageMissionCost, generateMissionReport } from "./logic/espionage"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
+import EspionageData from "./data/espionage.json"
 import { random } from "./utilities"
 
 const MAXIMUM_PLAYERS = 2
@@ -429,7 +431,7 @@ export default class Universe implements IUniverse, IWorld
           }
           else
           {
-            reason = "Invalid ship ID"
+            reason = "Invalid planet ID"
           }
         }
         else
@@ -438,7 +440,58 @@ export default class Universe implements IUniverse, IWorld
         }
         break
       }
-      case "purchase-ship":
+      case "planet-espionage":
+      {
+        const body = data as { id: PlanetID, mission: string }
+        if (body.id !== undefined && body.mission)
+        {
+          const planet = findPlanet(body.id)
+          if (planet)
+          {
+            if (planet.habitable && planet.owner !== player)
+            {
+              const capital = this.planets.find((p) => p.capital === true && p.owner === player)
+              if (capital)
+              {
+                const cost = calculateEspionageMissionCost(body.mission)
+                if (capital.resources.credits >= cost)
+                {
+                  const strength = this.platoons.filter((p) => p.location.planet === planet.id).reduce((prev, item) => prev + item.strength, 0)
+
+                  capital.resources.credits -= cost
+                  const report = generateMissionReport(planet, strength, body.mission)
+                  report.date = this.date.clone()
+
+                  resultData = { world: { planets: [capital.toJSON()], espionage: report } }
+                  result = true
+                }
+                else
+                {
+                  reason = "Cannot afford espionage mission"
+                }
+              }
+              else
+              {
+                reason = "Failed to find capital planet of player"
+              }
+            }
+            else
+            {
+              reason = "Cannot perform Espionage on planet"
+            }
+          }
+          else
+          {
+            reason = "Invalid planet ID"
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "ship-purchase":
       {
         const body = data as { id: string }
         if (body.id)

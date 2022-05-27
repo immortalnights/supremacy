@@ -5,7 +5,7 @@ import { formatDate } from "../../../data/General"
 import { IDate } from "../../../simulation/types.d"
 
 export const StarDate = ({ date }: { date: IDate }) => {
-  return (<div>{formatDate(date)}</div>)
+  return (<span>{formatDate(date)}</span>)
 }
 
 const CurrentStarDate = () => {
