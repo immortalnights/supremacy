@@ -13,6 +13,7 @@ import IncDecButton from "../components/IncreaseDecreaseButton"
 import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { PlanetStrength } from "../../data/Platoons"
 import { Player } from "../../data/Player"
+import RenameDialog from "../components/RenameDialog"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
@@ -149,38 +150,6 @@ const OverviewSlots = ({ planet }: any) => {
   )
 }
 
-const InlineName = ({ label, value, onCancel, onComplete }: any) => {
-  const [ name, setName ] = React.useState(value)
-
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    onComplete(name)
-  }
-
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Escape")
-    {
-      onCancel()
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <TextField
-        name="planetname"
-        id="planetname"
-        label={label}
-        variant="standard"
-        defaultValue={name}
-        onChange={(event) => setName(event.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={(event: React.FocusEvent<HTMLInputElement>) => event.target.select()}
-        autoFocus
-        autoComplete="off" />
-    </form>
-  )
-}
-
 const Overview = ({ planet }: { planet: IPlanet }) => {
   const [ rename, setRename ] = React.useState(false)
   const player = Recoil.useRecoilValue(Player)
@@ -191,13 +160,6 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
     setRename(!rename)
   }
   const handleCancelRename = () => {
-    setRename(false)
-  }
-  const handleSetName = (name: string) => {
-    action("rename-planet", {
-      planet: planet?.id,
-      name,
-    })
     setRename(false)
   }
   const onTransferCredits = () => {
@@ -212,8 +174,17 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
     }
   }
 
+  const handleConfirmRename = (newName: string) => {
+    action("rename-planet", {
+      planet: planet!.id,
+      name: newName,
+    })
+    setRename(false)
+  }
+
   return (
     <>
+      {rename && planet && <RenameDialog open name={planet.name} onConfirm={handleConfirmRename} onCancel={handleCancelRename} />}
       <Stack direction="row">
         <div>
           <Button onClick={onStartRename}>Rename</Button>
@@ -223,7 +194,6 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
       </Stack>
       <Stack direction="row">
         <div>
-          {rename ? (<InlineName label="Rename planet" value={planet?.name} onCancel={handleCancelRename} onComplete={handleSetName} />) : null}
           <PlanetGrid onSelectItem={onSelectPlanet} />
         </div>
         {/* <div style={{ flexGrow: 1 }}></div> */}

@@ -80,12 +80,15 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
   if (ship)
   {
-    const hasCrew = (ship.requiredCrew === 0 || ship.crew === ship.requiredCrew)
-    const hasFuel = (ship.capacity.fuels === 0 || ship.fuels > 0)
-    canLaunch = ship.location.position === "docking-bay" && hasCrew && hasFuel
-    canTravel = ship.location.position === "orbit" && hasCrew && hasFuel
-    canLand = ship.location.position === "orbit"
-    canAbortTravel = false
+    if (ship.type !== "Atmosphere Processor")
+    {
+      const hasCrew = (ship.requiredCrew === 0 || ship.crew === ship.requiredCrew)
+      const hasFuel = (ship.capacity.fuels === 0 || ship.fuels > 0)
+      canLaunch = ship.location.position === "docking-bay" && hasCrew && hasFuel
+      canTravel = ship.location.position === "orbit" && hasCrew && hasFuel
+      canLand = ship.location.position === "orbit"
+      canAbortTravel = ship.location.position === "deep-space"
+    }
     canRename = true
   }
 

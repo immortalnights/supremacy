@@ -38,11 +38,13 @@ const PlanetList = () => {
         <ListItemButton key={planet.id} selected={planet.id === selected} onClick={() => handlePlanetClick(planet.id)} onDoubleClick={() => handlePlanetClick(planet.id, true)}>
           <ListItemAvatar />
           <ListItemText primary={`${planet.name}`} />
-          {planet.terraforming && <Typography component="span" variant="body2" color="text.secondary" className="wavey">
-            {"Terraforming".split("").map((l, index) => (
-              <span key={index} style={{"--i": index + 1} as React.CSSProperties}>{l}</span>
-            ))}
-          </Typography>}
+          {planet.terraforming &&
+            <Typography component="span" variant="body2" color="text.secondary" className="wavey">
+              {"Terraforming".split("").map((l, index) => (
+                <span key={index} style={{"--i": index + 1} as React.CSSProperties}>{l}</span>
+              ))}
+            </Typography>
+          }
         </ListItemButton>
       ))}
     </List>

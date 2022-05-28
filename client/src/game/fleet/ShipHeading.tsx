@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material"
 import React from "react"
 import Recoil from "recoil"
 import { Planet } from "../../data/Planets"
@@ -11,12 +12,11 @@ const CurrentLocation = ({ ship }: { ship: IShip }) => {
 
   return (
     <>
-      <label>Location</label>
+      <Typography variant="subtitle1">Location</Typography>
       <dl>
         <dt>Ship</dt>
         <dd>{ship.name}</dd>
         <dt>Location</dt>
-        {/* // FIXME need planet name */}
         <dt>{planet ? planet.name : "-"}</dt>
         <dt>Position</dt>
         {/* // FIXME format string */}

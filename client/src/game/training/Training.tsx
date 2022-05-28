@@ -1,16 +1,19 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, IconButton, Grid, Typography } from "@mui/material"
+import { Box, Button, IconButton, Grid, Typography, Stack } from "@mui/material"
 import { ArrowDropDown, ArrowDropUp, ArrowLeft, ArrowRight } from "@mui/icons-material"
 import { PlatoonStatus } from "../../simulation/types"
 import { IPlanet } from "../../simulation/types.d"
 import PlanetAuth from "../components/PlanetAuth"
 import { Suits, Weapons } from "../../data/StaticData"
-import { PlayerPlatoons } from "../../data/Platoons"
+import { PlayerPlatoons, IPlatoon } from "../../data/Platoons"
 import { IOContext } from "../../data/IOContext"
 import { Player } from "../../data/Player"
 import IncDecButton from "../components/IncreaseDecreaseButton"
 
+const calculateCost = (troops: number, suit: number, weapon: number) => {
+  return troops * (suit + weapon)
+}
 
 const Equipment = ({ items, canChange, onChange }: { items: any, canChange: boolean, onChange: (key: string) => void }) => {
   const [ index, setIndex ] = React.useState(0)
@@ -37,14 +40,87 @@ const Equipment = ({ items, canChange, onChange }: { items: any, canChange: bool
   }
 
   return (
-    <Box sx={{ margin: "0 1rem" }}>
+    <Box sx={{ margin: "0 auto" }}>
       <Typography variant="caption">Cost {equipment.cost} CR</Typography>
-      <div style={{ backgroundColor: "lightgray", height: 180 }}></div>
+      <div style={{ backgroundColor: "lightgray", height: 180, width: 220 }}>{equipment.name}</div>
       <div>
         <IconButton size="small" disabled={!canChange} onClick={handlePrevClick}><ArrowLeft /></IconButton>
         <IconButton size="small" disabled={!canChange} onClick={handleNextClick}><ArrowRight /></IconButton>
       </div>
     </Box>
+  )
+}
+
+const PlatoonDescription = ({ platoon }: { platoon: IPlatoon }) => {
+  const suits = Recoil.useRecoilValue(Suits)
+  const weapons = Recoil.useRecoilValue(Weapons)
+
+  let description: React.ReactElement | null = null
+  switch (platoon.status)
+  {
+    case PlatoonStatus.None:
+    case PlatoonStatus.Defeated:
+    case PlatoonStatus.Training:
+    {
+      const suit = suits[platoon.suit as keyof typeof suits]
+      const weapon = weapons[platoon.equipment as keyof typeof weapons]
+      description = (
+        <>
+          <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption">Cost</Typography></Grid>
+          <Grid item xs={12} md={6} textAlign="center"><Typography variant="body1">{calculateCost(platoon.troops, suit.cost, weapon.cost)} Credits</Typography></Grid>
+        </>
+      )
+      break
+    }
+    case PlatoonStatus.Recruited:
+    {
+      description = (
+        <Grid item md={12} textAlign="center">
+          <Typography variant="body1">Platoon recruited</Typography>
+        </Grid>
+      )
+      break
+    }
+  }
+
+  return description
+}
+
+const PlatoonDetails = ({ platoon, planetCredits, onRecruit, onDismiss }: { platoon: IPlatoon, planetCredits: number, onRecruit: () => void, onDismiss: () => void }) => {
+  const canRecruit = platoon && platoon.status === PlatoonStatus.Training
+  const canDismiss = platoon && platoon.status === PlatoonStatus.Recruited
+
+  return (
+    <Grid container justifyContent="space-between">
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption">Location</Typography></Grid>
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="body1">{platoon.location.planet || platoon.location.ship}</Typography></Grid>
+
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption">Credits</Typography></Grid>
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="body1">{planetCredits}</Typography></Grid>
+
+      <PlatoonDescription platoon={platoon} />
+
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption">Rank</Typography></Grid>
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="body1">{platoon.rank}</Typography></Grid>
+
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="caption">Calibre</Typography></Grid>
+      <Grid item xs={12} md={6} textAlign="center"><Typography variant="body1">{Math.floor(platoon.calibre)}%</Typography></Grid>
+
+      <Grid item xs={12} md={12} textAlign="center">
+        {platoon.status === PlatoonStatus.Training &&
+          <Typography component="span" variant="body2" color="text.secondary" className="wavey">
+            {"Training".split("").map((l, index) => (
+              <span key={index} style={{"--i": index + 1} as React.CSSProperties}>{l}</span>
+            ))}
+          </Typography>
+        || "-"}
+      </Grid>
+
+      <Grid item xs={12} md={12} textAlign="center">
+        <Button disabled={!canRecruit} onClick={onRecruit}>Recruit</Button>
+        <Button disabled={!canDismiss} onClick={onDismiss}>Dismiss</Button>
+      </Grid>
+    </Grid>
   )
 }
 
@@ -101,12 +177,12 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     action("platoon-modify", { platoon: selectedPlatoon?.id, weapon: key })
   }
 
-  const handleRecruitClick = (event: any) => {
-    action("platoon-recruit", { platoon: selectedPlatoon?.id })
+  const handleRecruit = () => {
+    action("platoon-recruit", { platoon: selectedPlatoon!.id })
   }
 
-  const handleDismissClick = (event: any) => {
-    action("platoon-dismiss", {  platoon: selectedPlatoon?.id })
+  const handleDismiss = () => {
+    action("platoon-dismiss", {  platoon: selectedPlatoon!.id })
   }
 
   let location = ""
@@ -130,26 +206,46 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     }
   }
 
-  let canRecruit = false
-  let canDismiss = false
   let canModify = false
   let canIncreaseTroops = false
   let canDecreaseTroops = false
 
+  const details: {
+    location: string
+    planetCredits: number
+    rank: string
+    description: string
+    calibre: number
+    status?: PlatoonStatus
+  } = {
+    location: "",
+    planetCredits: planet.resources.credits,
+    rank: "",
+    description: "",
+    calibre: 0,
+    status: undefined
+  }
+
   if (selectedPlatoon)
   {
-    canRecruit = selectedPlatoon.status === PlatoonStatus.Training // && selectedPlatoon.troops > 200
-    canDismiss = selectedPlatoon.status === PlatoonStatus.Recruited
     canModify = selectedPlatoon.status !== PlatoonStatus.Recruited
     canIncreaseTroops = canModify && selectedPlatoon.troops < 200
     canDecreaseTroops = canModify && selectedPlatoon.troops > 0
+
+    details.location = "-"
+    details.rank = selectedPlatoon.rank
+    details.calibre = selectedPlatoon.calibre
+    details.status = selectedPlatoon.status
+
+
+    details.description = ""
   }
 
   return (
     <Grid container>
       <Grid item xs={4}>
         <Typography variant="caption">Platoon</Typography>
-        <Typography variant="caption">{selectedPlatoon?.name}</Typography>
+        <Typography variant="body1">{selectedPlatoon?.name}</Typography>
         <div>
           <IconButton size="small" onClick={(event) => handleChangePlatoon(event, 1)}><ArrowDropUp /></IconButton>
           <IconButton size="small" onClick={(event) => handleChangePlatoon(event, -1)}><ArrowDropDown /></IconButton>
@@ -157,7 +253,7 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       </Grid>
       <Grid item xs={4}>
        <Typography variant="caption">Troops</Typography>
-        <Typography variant="caption">{selectedPlatoon?.troops}</Typography>
+        <Typography variant="body1">{selectedPlatoon?.troops}</Typography>
         <div>
           <IncDecButton mode="increase" disabled={!canIncreaseTroops} onChange={handleChangePlatoonTroops} grayscale />
           <IncDecButton mode="decrease" disabled={!canDecreaseTroops} onChange={handleChangePlatoonTroops} grayscale />
@@ -165,39 +261,16 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       </Grid>
       <Grid item xs={4}>
         <Typography variant="caption">Civilians</Typography>
-        <Typography variant="caption">{planet.population}</Typography>
+        <Typography variant="body1">{planet.population}</Typography>
       </Grid>
-      <Grid item xs={3}>
-        <Equipment items={suits} canChange={canModify} onChange={handleChangeSuit} />
-      </Grid>
-      <Grid item xs={3}>
-        <Equipment items={weapons} canChange={canModify} onChange={handleChangeWeapon} />
-      </Grid>
-      <Grid item xs={6}>
-        <div>
-          <Typography variant="caption">Location</Typography>
-          <Typography variant="caption">{location}</Typography>
-        </div>
-        <div>
-          <Typography variant="caption">Credits</Typography>
-          <Typography variant="caption">{planet.resources.credits}</Typography>
-        </div>
-        <div>
-          <Typography variant="caption">Rank</Typography>
-          <Typography variant="caption">{selectedPlatoon?.rank}</Typography>
-        </div>
-        <Typography variant="caption">...description...</Typography>
-        <div>
-          <Button disabled={!canRecruit} onClick={handleRecruitClick}>Recruit</Button>
-          <Button disabled={!canDismiss} onClick={handleDismissClick}>Dismiss</Button>
-        </div>
-        <div>
-          <Typography variant="caption">Calibre</Typography>
-          <Typography variant="caption">{selectedPlatoon?.calibre}</Typography>
-        </div>
-        <div>
-          <Typography variant="caption">{selectedPlatoon?.status === PlatoonStatus.Training ? "Training" : ""}</Typography>
-        </div>
+      <Grid item xs={12}>
+        <Grid container direction="row" alignItems="center" justifyContent="space-evenly">
+          <Grid xs={4}><Equipment items={suits} canChange={canModify} onChange={handleChangeSuit} /></Grid>
+          <Grid xs={4}><Equipment items={weapons} canChange={canModify} onChange={handleChangeWeapon} /></Grid>
+          <Grid xs={4}>
+            {selectedPlatoon && <PlatoonDetails platoon={selectedPlatoon} planetCredits={planet.resources.credits} onRecruit={handleRecruit} onDismiss={handleDismiss} />}
+          </Grid>
+        </Grid>
       </Grid>
     </Grid>
   )

@@ -1168,6 +1168,13 @@ export default class Universe implements IUniverse, IWorld
         }
       }
     })
+
+    this.platoons.forEach((platoon) => {
+      if (platoon.status === PlatoonStatus.Training)
+      {
+        platoon.train(delta)
+      }
+    })
   }
 
   updateFor(player: string): IUniverse
@@ -1258,7 +1265,9 @@ export default class Universe implements IUniverse, IWorld
       {
         // Send all data
         platoonData = {
-          ...platoon
+          ...platoon,
+          strength: platoon.strength,
+          rank: platoon.rank,
         }
       }
       else

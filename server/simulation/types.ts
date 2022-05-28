@@ -218,7 +218,7 @@ export interface IShipList {
 export interface IEquipment {
   type: string
   name: string
-  cost: string
+  cost: number
 }
 
 export interface IEquipmentList {

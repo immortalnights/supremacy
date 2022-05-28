@@ -1,43 +1,43 @@
 {
 	"suit_1": {
 		"type": "suit",
-		"name": "",
+		"name": "None",
 		"armour": 0,
 		"cost": 50
 	},
 	"suit_2": {
 		"type": "suit",
-		"name": "",
+		"name": "Rocket Suit",
 		"armour": 1,
 		"cost": 100
 	},
 	"suit_3": {
 		"type": "suit",
-		"name": "",
+		"name": "Warrior Suit",
 		"armour": 2,
 		"cost": 200
 	},
 	"suit_4": {
 		"type": "suit",
-		"name": "",
+		"name": "Energy Shield",
 		"armour": 3,
 		"cost": 295
 	},
 	"weapon_1": {
 		"type": "weapon",
-		"name": "",
+		"name": "Rifle",
 		"damage": 0,
 		"cost": 50
 	},
 	"weapon_2": {
 		"type": "weapon",
-		"name": "",
+		"name": "Flamethrower",
 		"damage": 1,
 		"cost": 120
 	},
 	"weapon_3": {
 		"type": "weapon",
-		"name": "",
+		"name": "Mortar",
 		"damage": 2,
 		"cost": 250
 	}
