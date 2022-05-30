@@ -1,22 +1,8 @@
 import { IPlatoon, IPlatoonLocation, PlanetID, PlatoonStatus } from "./types";
 import { modifyWithin } from "./utilities";
-
-const Ranks = {
-  0: "Cadet",
-  10: "2nd Lieutenant",
-  20: "Captain",
-  30: "Major",
-  40: "Lieutenant Colonel",
-  50: "Colonel",
-  60: "1 Star General",
-  70: "2 Star General",
-  80: "3 Star General",
-  90: "4 Star General",
-  100: "5 Star General",
-}
-
-const MAX_CALIBRE = 100
-const TRAINING_TIME = 120
+import { Ranks, defaultSuit, defaultWeapon, MAX_TROOPS, MAX_CALIBRE, TRAINING_TIME,  } from "./logic/platoons"
+import EquipmentData from "./data/equipment.json"
+import { defaults } from "lodash";
 
 const getRank = (calibre: number) => {
   let key = 0
@@ -47,8 +33,8 @@ export default class Platoon implements IPlatoon
     this.name = name
     this.owner = owner
     this.status = PlatoonStatus.None
-    this.suit = ""
-    this.equipment = ""
+    this.suit = defaultSuit
+    this.equipment = defaultWeapon
     this.troops = 0
     this.location = {
       planet: undefined,
@@ -57,14 +43,21 @@ export default class Platoon implements IPlatoon
     this.calibre = 0
   }
 
-  get rank()
+  get rank(): string
   {
     return getRank(this.calibre)
   }
 
-  get strength()
+  get strength(): number
   {
-    return 0
+    let strength = 0
+    if (this.status === PlatoonStatus.Recruited)
+    {
+      const suit = EquipmentData[this.suit as keyof typeof EquipmentData] as { "armour": number }
+      const weapon = EquipmentData[this.equipment as keyof typeof EquipmentData] as { "damage": number }
+      strength = this.troops + Math.floor((suit.armour + weapon.damage) * this.troops * (this.calibre / 100))
+    }
+    return strength
   }
 
   load(data: Platoon)
@@ -120,11 +113,19 @@ export default class Platoon implements IPlatoon
     }
   }
 
-  recruit(suit: string, equipment: string, planet: PlanetID)
+  recruit(planet: PlanetID)
   {
     this.status = PlatoonStatus.Recruited
-    this.suit = suit
-    this.equipment = equipment
     this.location.planet = planet
+  }
+
+  dismiss()
+  {
+    this.status = PlatoonStatus.None
+    this.suit = defaultSuit
+    this.equipment = defaultWeapon
+    this.location.planet = undefined
+    this.location.ship = undefined
+    this.calibre = 0
   }
 }

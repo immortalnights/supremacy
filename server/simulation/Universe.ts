@@ -22,6 +22,7 @@ import {
 import type { IWorld } from "../serverTypes"
 import StarDate, { DAYS_PER_YEAR } from "./StarDate"
 import { calculateEspionageMissionCost, generateMissionReport } from "./logic/espionage"
+import { defaultSuit, defaultWeapon, calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
 import EspionageData from "./data/espionage.json"
@@ -120,10 +121,7 @@ export default class Universe implements IUniverse, IWorld
         // FIXME
         for (let index = 0; index < 25; index++)
         {
-          const platoon = new Platoon(this.nextPlatoonId++, `${index + 1}st`, player)
-          platoon.troops = 0
-          platoon.suit = "suit_1"
-          platoon.equipment = "weapon_1"
+          const platoon = new Platoon(this.nextPlatoonId++, ordinal(index + 1), player)
           platoon.location.planet = starbase.id
           this.platoons.push(platoon)
         }
@@ -948,35 +946,54 @@ export default class Universe implements IUniverse, IWorld
       }
       case "platoon-modify":
       {
-        const body = data as { platoon: PlatoonID, amount: number }
-        if (body.platoon !== undefined && body.amount)
+        const body = data as { id: PlatoonID, amount?: number, suit?: string, weapon?: string }
+        if (body.id !== undefined)
         {
-          const platoon = this.platoons.find((p) => p.id === body.platoon)
+          const platoon = this.platoons.find((p) => p.id === body.id)
           if (!platoon)
           {
             reason = "Invalid platoon"
           }
           else if (platoon.owner !== player)
           {
-            console.log(body.platoon, platoon.id, platoon.owner, player)
+            console.log(body.id, platoon.id, platoon.owner, player)
             reason = "Incorrect platoon owner"
           }
           else
           {
             const capital = this.planets.find((p) => p.capital === true && p.owner === player)
-            const populationChange = -body.amount
+
             if (!capital)
             {
               reason = "Failed to find player capital planet"
             }
-            else if (populationChange > 0 && capital.population < populationChange)
-            {
-              reason = "Insufficient available civilians on planet"
-            }
             else
             {
-              capital.population += populationChange
-              platoon.modifyTroops(body.amount)
+              if (body.amount !== undefined)
+              {
+                const populationChange = -body.amount
+
+                if (populationChange > 0 && capital.population < populationChange)
+                {
+                  reason = "Insufficient available civilians on planet"
+                }
+                else
+                {
+                  capital.population += populationChange
+                  platoon.modifyTroops(body.amount)
+                }
+              }
+
+              if (body.suit)
+              {
+                platoon.suit = body.suit
+              }
+
+              if (body.weapon)
+              {
+                platoon.equipment = body.weapon
+              }
+
               result = true
               resultData = { world: { planets: [capital.toJSON()], platoons: [platoon.toJSON()] } }
             }
@@ -990,10 +1007,10 @@ export default class Universe implements IUniverse, IWorld
       }
       case "platoon-recruit":
       {
-        const body = data as { platoon: PlatoonID }
-        if (body.platoon !== undefined)
+        const body = data as { id: PlatoonID }
+        if (body.id !== undefined)
         {
-          const platoon = this.platoons.find((p) => p.id === body.platoon)
+          const platoon = this.platoons.find((p) => p.id === body.id)
           if (!platoon)
           {
             reason = "Invalid platoon"
@@ -1002,7 +1019,6 @@ export default class Universe implements IUniverse, IWorld
           {
             reason = "Incorrect platoon owner"
           }
-          // TODO verify available credits (of capital) and modify
           else
           {
             const capital = this.planets.find((p) => p.capital === true && p.owner === player)
@@ -1012,10 +1028,20 @@ export default class Universe implements IUniverse, IWorld
             }
             else
             {
-              // FIXME
-              platoon.recruit("suit_1", "weapon_1", capital.id)
-              result = true
-              resultData = { world: { platoons: [platoon.toJSON()] } }
+              const cost = calculatePlatoonRecruitmentCost(platoon)
+              if (capital.resources.credits < cost)
+              {
+                reason = "Cannot afford platoon equipment"
+              }
+              else
+              {
+                capital.resources.credits -= cost
+
+                platoon.recruit(capital.id)
+
+                result = true
+                resultData = { world: { planets: [capital.toJSON()], platoons: [platoon.toJSON()] } }
+              }
             }
           }
         }
@@ -1027,6 +1053,35 @@ export default class Universe implements IUniverse, IWorld
       }
       case "platoon-dismiss":
       {
+        const body = data as { id: PlatoonID }
+        if (body.id !== undefined)
+        {
+          const platoon = findPlatoon(body.id)
+          if (!platoon)
+          {
+            reason = "Invalid platoon"
+          }
+          else if (platoon.location.planet === undefined)
+          {
+            reason = "Not located on planet"
+          }
+          else
+          {
+            const planet = findPlanet(platoon.location.planet)
+            if (planet)
+            {
+              planet.population += platoon.troops
+              platoon.dismiss()
+
+              result = true
+              resultData = { world: { planets: [planet.toJSON()], platoons: [platoon.toJSON()] } }
+            }
+          }
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
         break
       }
       case "platoon-relocate":
