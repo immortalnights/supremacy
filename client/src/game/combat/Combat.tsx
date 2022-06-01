@@ -57,6 +57,30 @@ const ShipDetails = ({ ship, onClickUnloadPlatoon }: { ship: IShip | undefined, 
   )
 }
 
+interface IAggressionProps {
+  aggression: number
+  onClickIncrease: (event: React.MouseEvent) => void
+  onClickDecrease: (event: React.MouseEvent) => void
+}
+
+const Aggression = ({ aggression, onClickIncrease, onClickDecrease }: IAggressionProps) => {
+  const canIncrease = aggression < 100
+  const canDecrease = aggression < 25
+
+  return (
+    <>
+      <Stack direction="row" alignItems="center" style={{ border: "1px dashed lightgray", borderRadius: 4 }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <IconButton size="small" disabled={!canIncrease} onClick={onClickIncrease}><ArrowDropUp /></IconButton>
+          <IconButton size="small" disabled={!canDecrease} onClick={onClickDecrease}><ArrowDropDown /></IconButton>
+        </div>
+        <div style={{ width: 160, height: 120, backgroundColor: "lightgray", marginRight: 34 }}></div>
+      </Stack>
+      <Typography component="p" variant="caption" textAlign="center">{aggression}%</Typography>
+    </>
+  )
+}
+
 
 const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
   const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
@@ -85,6 +109,14 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
     {
       action("platoon-relocate", { id: item.id, direction: "load", ship: ship.id, planet: planet.id })
     }
+  }
+
+  const handleClickIncreaseAggression = (event: React.MouseEvent) => {
+    action("planet-modify-aggression", { id: planet.id, direction: 1 })
+  }
+
+  const handleClickDecreaseAggression = (event: React.MouseEvent) => {
+    action("planet-modify-aggression", { id: planet.id, direction: -1 })
   }
 
   return (
@@ -122,14 +154,7 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
           </Typography>
           {/* <Typography variant="caption">Scaling factor {scalingFactor}</Typography> */}
 
-          <Stack direction="row" alignItems="center" style={{ border: "1px dashed lightgray", borderRadius: 4 }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <IconButton size="small"><ArrowDropUp /></IconButton>
-              <IconButton size="small"><ArrowDropDown /></IconButton>
-            </div>
-            <div style={{ width: 160, height: 120, backgroundColor: "lightgray", marginRight: 34 }}></div>
-          </Stack>
-          <Typography component="p" variant="caption" textAlign="center">{aggression}%</Typography>
+          <Aggression aggression={aggression} onClickIncrease={handleClickIncreaseAggression} onClickDecrease={handleClickDecreaseAggression}/>
         </div>
       </Grid>
     </Grid>

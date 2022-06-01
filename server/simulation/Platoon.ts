@@ -21,11 +21,11 @@ export default class Platoon implements IPlatoon
   owner: string
   status: PlatoonStatus
   suit: string
-  equipment: string
+  weapon: string
   troops: number
   location: IPlatoonLocation
   calibre: number
-  // rank: string
+  aggression: number
 
   constructor(id: number, name: string, owner: string)
   {
@@ -34,13 +34,15 @@ export default class Platoon implements IPlatoon
     this.owner = owner
     this.status = PlatoonStatus.None
     this.suit = defaultSuit
-    this.equipment = defaultWeapon
+    this.weapon = defaultWeapon
     this.troops = 0
     this.location = {
       planet: undefined,
       ship: undefined,
     }
     this.calibre = 0
+    // modified by the planet the platoon is located on
+    this.aggression = 0
   }
 
   get rank(): string
@@ -50,14 +52,24 @@ export default class Platoon implements IPlatoon
 
   get strength(): number
   {
-    let strength = 0
-    if (this.status === PlatoonStatus.Recruited)
-    {
-      const suit = EquipmentData[this.suit as keyof typeof EquipmentData] as { "armour": number }
-      const weapon = EquipmentData[this.equipment as keyof typeof EquipmentData] as { "damage": number }
-      strength = this.troops + Math.floor((suit.armour + weapon.damage) * this.troops * (this.calibre / 100))
-    }
-    return strength
+    const calibrepc = this.calibre / 100
+    const aggressionpc = this.aggression / 100
+    // console.log(calibrepc, aggressionpc)
+
+    // magic number
+    const BASE_STRENGTH = 277
+
+    // core strength, platoon size percentage (100% = 200) multiplied by calibre percentage of base strength
+    const core = (this.troops / 200) * (BASE_STRENGTH * calibrepc)
+    // equipment, core multiplied by equipment value
+    const equipment = core * (EquipmentData[this.suit as keyof typeof EquipmentData].power + EquipmentData[this.weapon as keyof typeof EquipmentData].power)
+    // aggression, core multiplied by aggression "step"
+    const aggr = core * ((aggressionpc / .25) - 1)
+
+    // truncate to drop any awkward decimals
+    const total = Math.trunc(this.troops + core + equipment + aggr)
+    // console.log(platoon.troops, core, equipment, aggr, total)
+    return total
   }
 
   load(data: Platoon)
@@ -113,17 +125,18 @@ export default class Platoon implements IPlatoon
     }
   }
 
-  recruit(planet: PlanetID)
+  recruit(planet: PlanetID, aggression: number)
   {
     this.status = PlatoonStatus.Recruited
     this.location.planet = planet
+    this.aggression = aggression
   }
 
   dismiss()
   {
     this.status = PlatoonStatus.None
     this.suit = defaultSuit
-    this.equipment = defaultWeapon
+    this.weapon = defaultWeapon
     this.location.planet = undefined
     this.location.ship = undefined
     this.calibre = 0

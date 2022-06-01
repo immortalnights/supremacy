@@ -18,10 +18,11 @@ export enum Difficulty {
 export type ShipTask = "idle" | "traveling" | "harvesting" | "terraforming"
 
 export type PlayerGameAction = "rename-planet"
-  | "transfer-credits"
   | "planet-modify-tax"
   | "planet-terraform"
   | "planet-espionage"
+  | "planet-modify-aggression"
+  | "transfer-credits"
   | "ship-purchase"
   | "ship-rename"
   | "ship-modify-passengers"

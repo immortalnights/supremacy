@@ -14,6 +14,7 @@ export default class Planet implements IPlanet
   type: PlanetType
   radius: number
   population: number
+  aggression: number
   terraforming: boolean
   terraformDuration: number
 
@@ -26,6 +27,7 @@ export default class Planet implements IPlanet
   location: number // ?
   resources: IPlanetResources
   multipliers: boolean
+  playerAggression: { [key: string]: number }
 
   constructor(id: number)
   {
@@ -37,6 +39,8 @@ export default class Planet implements IPlanet
     this.type = PlanetType.Lifeless
     this.radius = random(4000, 25000)
     this.population = 0
+    // Aggression is never set specifically, but is required by the IPlanet interface
+    this.aggression = 0
     this.terraforming = false
     this.terraformDuration = randomFloat(5, 10)
     this.capital = false
@@ -56,6 +60,8 @@ export default class Planet implements IPlanet
       energy: 0
     }
     this.multipliers = false
+    // FIXME may not be the best place for this
+    this.playerAggression = {}
   }
 
   load(data: Planet)
@@ -66,6 +72,16 @@ export default class Planet implements IPlanet
   toJSON()
   {
     return this
+  }
+
+  getPlayerAggression(player: string)
+  {
+    if (!this.playerAggression[player])
+    {
+      this.playerAggression[player] = 25
+    }
+
+    return this.playerAggression[player]
   }
 
   clone()
@@ -82,7 +98,6 @@ export default class Planet implements IPlanet
     {
       if (this.terraforming)
       {
-
         changed = true
       }
     }
@@ -155,6 +170,9 @@ export default class Planet implements IPlanet
     this.terraform(name)
     this.owner = owner
     this.capital = capital
+    this.playerAggression = {
+      [owner]: 25,
+    }
 
     if (capital)
     {

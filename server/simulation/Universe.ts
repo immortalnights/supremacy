@@ -179,6 +179,14 @@ export default class Universe implements IUniverse, IWorld
       {
         planet.owner = toPlayerID
       }
+
+      // Transfer aggression settings
+      const aggression = planet.playerAggression[fromPlayerID]
+      delete planet.playerAggression[fromPlayerID]
+      if (aggression)
+      {
+        planet.playerAggression[toPlayerID] = aggression
+      }
     })
     this.ships.forEach((ship) => {
       if (ship.owner === fromPlayerID)
@@ -301,46 +309,6 @@ export default class Universe implements IUniverse, IWorld
         else
         {
           reason = "Action data missing planet or name"
-        }
-        break
-      }
-      case "transfer-credits":
-      {
-        const body = data as { planet: number }
-        if (body.planet !== undefined)
-        {
-          const sourcePlanet = this.planets.find((p) => p.id === body.planet)
-
-          if (sourcePlanet && sourcePlanet.owner === player)
-          {
-            if (sourcePlanet.capital === false)
-            {
-              const capital = this.planets.find((p) => p.capital === true && p.owner === player)
-              if (capital)
-              {
-                capital.resources.credits += sourcePlanet.resources.credits
-                sourcePlanet.resources.credits = 0
-                result = true
-                resultData = { world: { planets: [sourcePlanet.toJSON()] } }
-              }
-              else
-              {
-                reason = "Failed to capital for player"
-              }
-            }
-            else
-            {
-              reason = "Cannot transfer credits from Capital"
-            }
-          }
-          else
-          {
-            reason = "Invalid planet"
-          }
-        }
-        else
-        {
-          reason = "Action data missing planet"
         }
         break
       }
@@ -486,6 +454,59 @@ export default class Universe implements IUniverse, IWorld
         else
         {
           reason = "Action data missing"
+        }
+        break
+      }
+      case "planet-modify-aggression":
+      {
+        const body = data as { id: string, direction: number }
+        if (body.id !== undefined && body.direction)
+        {
+
+        }
+        else
+        {
+          reason = "Action data missing"
+        }
+        break
+      }
+      case "transfer-credits":
+      {
+        const body = data as { planet: number }
+        if (body.planet !== undefined)
+        {
+          const sourcePlanet = this.planets.find((p) => p.id === body.planet)
+
+          if (sourcePlanet && sourcePlanet.owner === player)
+          {
+            if (sourcePlanet.capital === false)
+            {
+              const capital = this.planets.find((p) => p.capital === true && p.owner === player)
+              if (capital)
+              {
+                capital.resources.credits += sourcePlanet.resources.credits
+                sourcePlanet.resources.credits = 0
+                result = true
+                resultData = { world: { planets: [sourcePlanet.toJSON()] } }
+              }
+              else
+              {
+                reason = "Failed to capital for player"
+              }
+            }
+            else
+            {
+              reason = "Cannot transfer credits from Capital"
+            }
+          }
+          else
+          {
+            reason = "Invalid planet"
+          }
+        }
+        else
+        {
+          reason = "Action data missing planet"
         }
         break
       }
@@ -991,7 +1012,7 @@ export default class Universe implements IUniverse, IWorld
 
               if (body.weapon)
               {
-                platoon.equipment = body.weapon
+                platoon.weapon = body.weapon
               }
 
               result = true
@@ -1037,7 +1058,7 @@ export default class Universe implements IUniverse, IWorld
               {
                 capital.resources.credits -= cost
 
-                platoon.recruit(capital.id)
+                platoon.recruit(capital.id, capital.getPlayerAggression(player));
 
                 result = true
                 resultData = { world: { planets: [capital.toJSON()], platoons: [platoon.toJSON()] } }
@@ -1250,6 +1271,7 @@ export default class Universe implements IUniverse, IWorld
         type: planet.type,
         owner: planet.owner,
         name: "",
+        aggression: 0,
         radius: planet.radius,
         location: planet.location,
         terraforming: planet.terraforming,
@@ -1264,31 +1286,22 @@ export default class Universe implements IUniverse, IWorld
       {
         // Send all data
         planetData = {
-          ...planet
+          ...planet,
+          aggression: planet.getPlayerAggression(player)
         }
       }
       else
       {
         // Send limited data
         planetData.name = "Classified"
+        planetData.aggression = planet.getPlayerAggression(player)
       }
 
       universe.planets.push(planetData)
     })
 
-    const findPlanetForShip = (id: number) => {
-      return this.planets.find((p) => p.id === id)
-    }
-
-    // TODO only send ships the player should know about, not all of them
     this.ships.forEach((ship) => {
-      let shipData: IShipBasic | IShip = {
-        id: ship.id,
-        type: ship.type,
-        name: ship.name,
-        owner: ship.owner,
-        location: { ...ship.location },
-      }
+      let shipData: IShipBasic | IShip | undefined
 
       if (ship.owner === player)
       {
@@ -1299,22 +1312,31 @@ export default class Universe implements IUniverse, IWorld
       }
       else
       {
-        // Send limited data
+        // Only send ship data if it's located at the players planets
+        if (ship.location.planet !== undefined)
+        {
+          const planet = this.planets.find((p) => p.id === ship.location.planet)
+          if (planet && planet.owner === player)
+          {
+            shipData = {
+              id: ship.id,
+              type: ship.type,
+              name: ship.name,
+              owner: ship.owner,
+              location: { ...ship.location },
+            }
+          }
+        }
       }
 
-      universe.ships.push(shipData)
+      if (shipData)
+      {
+        universe.ships.push(shipData)
+      }
     })
 
-    // TODO only send platoons the player should know about, not all of them
     this.platoons.forEach((platoon) => {
-      let platoonData: IPlatoonBasic | IPlatoon = {
-        id: platoon.id,
-        name: platoon.name,
-        owner: platoon.owner,
-        location: { ...platoon.location },
-        status: platoon.status,
-        strength: platoon.strength,
-      }
+      let platoonData: IPlatoonBasic | IPlatoon | undefined
 
       if (platoon.owner === player)
       {
@@ -1327,10 +1349,27 @@ export default class Universe implements IUniverse, IWorld
       }
       else
       {
-        // Send limited data
+        if (platoon.location.planet !== undefined)
+        {
+          const planet = this.planets.find((p) => p.id === platoon.location.planet)
+          if (planet && planet.owner === player)
+          {
+            platoonData = {
+              id: platoon.id,
+              name: platoon.name,
+              owner: platoon.owner,
+              location: { ...platoon.location },
+              status: platoon.status,
+              strength: platoon.strength,
+            }
+          }
+        }
       }
 
-      universe.platoons.push(platoonData)
+      if (platoonData)
+      {
+        universe.platoons.push(platoonData)
+      }
     })
 
     return universe

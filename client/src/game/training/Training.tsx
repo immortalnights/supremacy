@@ -16,7 +16,7 @@ const usePlatoonCost = (platoon: IPlatoon) => {
   const weapons = Recoil.useRecoilValue(Weapons)
 
   const suit = suits[platoon.suit as keyof typeof suits]
-  const weapon = weapons[platoon.equipment as keyof typeof weapons]
+  const weapon = weapons[platoon.weapon as keyof typeof weapons]
   return platoon.troops * (suit.cost + weapon.cost)
 }
 
@@ -216,8 +216,6 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     canModify = selectedPlatoon.status !== PlatoonStatus.Recruited
     canIncreaseTroops = canModify && selectedPlatoon.troops < 200
     canDecreaseTroops = canModify && selectedPlatoon.troops > 0
-
-    console.log(selectedPlatoon.suit, selectedPlatoon.equipment)
   }
 
   return (
@@ -245,7 +243,7 @@ const Training = ({ planet }: { planet: IPlanet }) => {
       <Grid item xs={12}>
         <Grid container direction="row" alignItems="center" justifyContent="space-evenly">
           <Grid xs={4}><Equipment items={suits} selected={selectedPlatoon?.suit || ""} canChange={canModify} onChange={handleChangeSuit} /></Grid>
-          <Grid xs={4}><Equipment items={weapons} selected={selectedPlatoon?.equipment || ""} canChange={canModify} onChange={handleChangeWeapon} /></Grid>
+          <Grid xs={4}><Equipment items={weapons} selected={selectedPlatoon?.weapon || ""} canChange={canModify} onChange={handleChangeWeapon} /></Grid>
           <Grid xs={4}>
             {selectedPlatoon && <PlatoonDetails platoon={selectedPlatoon} planetCredits={planet.resources.credits} onRecruit={handleRecruit} onDismiss={handleDismiss} />}
           </Grid>

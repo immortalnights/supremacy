@@ -1,10 +1,11 @@
 export const DAYS_PER_YEAR = 48
 
 export type PlayerGameAction = "rename-planet"
-  | "transfer-credits"
   | "planet-modify-tax"
   | "planet-terraform"
   | "planet-espionage"
+  | "planet-modify-aggression"
+  | "transfer-credits"
   | "ship-purchase"
   | "ship-rename"
   | "ship-modify-passengers"
@@ -59,6 +60,7 @@ export interface IPlanetBasic {
   type: PlanetType
   owner?: string
   name: string
+  aggression: number
   radius: number
   location: number // ? x pos
   terraforming: boolean
@@ -171,8 +173,9 @@ export interface IPlatoonBasic {
 export interface IPlatoon extends IPlatoonBasic {
   troops: number
   suit: string
-  equipment: string
+  weapon: string
   calibre: number
+  aggression: number
   rank: string
 }
 
@@ -218,6 +221,7 @@ export interface IShipList {
 export interface IEquipment {
   type: string
   name: string
+  power: number
   cost: number
 }
 
