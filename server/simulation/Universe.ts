@@ -125,6 +125,18 @@ export default class Universe implements IUniverse, IWorld
           platoon.location.planet = starbase.id
           this.platoons.push(platoon)
         }
+
+        // For an AI player, initialize a platoon to defend their capital
+        if (ai)
+        {
+          // TODO name matching? Does it matter which platoon this is?
+          const platoon = this.platoons.find((p) => p.owner === player /* && p.name === "1st" */)
+          if (platoon)
+          {
+            platoon.troops = 500
+            platoon.recruit(starbase.id, 25)
+          }
+        }
       }
     }
     else
@@ -368,7 +380,7 @@ export default class Universe implements IUniverse, IWorld
                 // Move the atmos to the planet, begin terraforming once it arrives
                 if (atmos.location.position !== "orbit")
                 {
-                  atmos.relocate(currentPlanet.id, "orbit")
+                  atmos.relocate("orbit")
                 }
 
                 // assume it can always travel
@@ -786,16 +798,16 @@ export default class Universe implements IUniverse, IWorld
       }
       case "ship-relocate":
       {
-        const body = data as { id: ShipID, location: PlanetID, position: string }
-        if (body.id !== undefined && body.location !== undefined && body.position)
+        const body = data as { id: ShipID, position: string }
+        if (body.id !== undefined && body.position)
         {
           const ship = findShip(body.id)
           if (ship)
           {
-            if (ship.relocate(body.location, body.position))
+            if (ship.relocate(body.position))
             {
               // If the ship type is a solar; immediately begin harvesting evergy
-              if (ship.harvester && ship.harvester.location === "orbit")
+              if (ship.harvester && ship.location.position === "orbit")
               {
                 beginHarvesting(ship)
               }
@@ -1107,12 +1119,11 @@ export default class Universe implements IUniverse, IWorld
       }
       case "platoon-relocate":
       {
-        const body = data as { id: PlatoonID, direction: string, ship: ShipID, planet: PlanetID }
-        if (body.id !== undefined && body.ship !== undefined && body.planet !== undefined)
+        const body = data as { id: PlatoonID, direction: string, ship: ShipID }
+        if (body.id !== undefined && body.ship !== undefined)
         {
           const platoon = findPlatoon(body.id)
           const ship = findShip(body.ship)
-          const planet = findPlanet(body.planet)
 
           if (!platoon || platoon.owner !== player || platoon.status !== PlatoonStatus.Recruited)
           {
@@ -1121,10 +1132,6 @@ export default class Universe implements IUniverse, IWorld
           else if (!ship || ship.owner !== player || ship.capacity.platoons === 0)
           {
             reason = "Invalid ship"
-          }
-          else if (!planet)
-          {
-            reason = "Invalid planet"
           }
           else
           {
@@ -1153,7 +1160,7 @@ export default class Universe implements IUniverse, IWorld
               else
               {
                 platoon.location.ship = undefined
-                platoon.location.planet = planet.id
+                platoon.location.planet = ship.location.planet
 
                 result = true
                 resultData = { world: { platoons: [platoon.toJSON()] } }

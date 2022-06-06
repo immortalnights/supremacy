@@ -234,43 +234,40 @@ export default class Ship implements IShip
     // console.log("=", this.cargo, planet.resources)
   }
 
-  relocate(planet: PlanetID, position: string)
+  relocate(position: string)
   {
-    console.log(`${this.name} (${this.id}) relocate ${this.location.planet}.${this.location.position} => ${planet}.${position}`)
+    console.log(`${this.name} (${this.id}) relocate ${this.location.planet}.${this.location.position} => ${this.location.planet}.${position}`)
     let ok = false
-    // Cannot relocate to a different planet, must travel
-    if (planet === this.location.planet)
+
+    switch (position)
     {
-      switch (position)
+      case "surface":
       {
-        case "surface":
+        if (this.location.position === "docking-bay" || this.location.position === "surface")
         {
-          if (this.location.position === "docking-bay" || this.location.position === "surface")
-          {
-            this.location.position = "surface"
-            ok = true
-          }
-          break
+          this.location.position = "surface"
+          ok = true
         }
-        case "docking-bay":
+        break
+      }
+      case "docking-bay":
+      {
+        // Can move from any location to the docking bay
+        if (this.location.position === "surface" || this.location.position === "orbit" || this.location.position === "docking-bay")
         {
-          // Can move from any location to the docking bay
-          if (this.location.position === "surface" || this.location.position === "orbit" || this.location.position === "docking-bay")
-          {
-            this.location.position = "docking-bay"
-            ok = true
-          }
-          break
+          this.location.position = "docking-bay"
+          ok = true
         }
-        case "orbit":
+        break
+      }
+      case "orbit":
+      {
+        if (this.location.position === "docking-bay" || this.location.position === "orbit")
         {
-          if (this.location.position === "docking-bay" || this.location.position === "orbit")
-          {
-            this.location.position = "orbit"
-            ok = true
-          }
-          break
+          this.location.position = "orbit"
+          ok = true
         }
+        break
       }
     }
 

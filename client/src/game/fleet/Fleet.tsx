@@ -51,7 +51,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
   const handleLaunchClick = () => {
     console.assert(ship, "")
-    action("ship-relocate", { id: ship!.id, location: planet.id, position: "orbit" })
+    action("ship-relocate", { id: ship!.id, position: "orbit" })
   }
 
   const handleTravelToClick = () => {
@@ -60,7 +60,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
   const handleLandClick = () => {
     console.assert(ship, "")
-    action("ship-relocate", { id: ship!.id, location: planet.id, position: "docking-bay" })
+    action("ship-relocate", { id: ship!.id, position: "docking-bay" })
   }
 
   const handleSelectPlanet = (planet: IPlanetBasic) => {

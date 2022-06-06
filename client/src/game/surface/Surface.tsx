@@ -62,7 +62,7 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
   const { action } = React.useContext(IOContext)
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
-    action("ship-relocate", { id: ship.id, location: planet.id, position: "surface" })
+    action("ship-relocate", { id: ship.id, position: "surface" })
   }
 
   const handleToggleSlot = (event: React.MouseEvent<HTMLButtonElement>, slot: number, ship: IShip | undefined, state: string) => {
@@ -75,7 +75,7 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
   const handleClickSlot = (event: React.MouseEvent<HTMLDivElement>, slot: number, ship: IShip | undefined) => {
     if (ship)
     {
-      action("ship-relocate", { id: ship.id, location: planet.id, position: "docking-bay" })
+      action("ship-relocate", { id: ship.id, position: "docking-bay" })
     }
   }
 

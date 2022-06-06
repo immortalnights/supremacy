@@ -14,7 +14,7 @@ const Details = ({ ship }: { ship: IShip }) => {
       <dt>Crew</dt>
       <dd>{ship.requiredCrew > 0 ? ship.crew : "-"}</dd>
       <dt>Fuel</dt>
-      <dd>{ship.requiresFuel ? ship.cargo?.fuels : "Nuclear"}</dd>
+      <dd>{ship.requiresFuel ? ship.fuels : "Nuclear"}</dd>
     </>
   )
 }

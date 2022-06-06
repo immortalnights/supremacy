@@ -6,10 +6,9 @@ import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/ma
 import DockingBays from "../components/DockingBays"
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
 import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
-// import PlatoonGrid from "../components/grid/PlatoonGrid"
-// import "./styles.css"
+import PlanetAuth from "../components/PlanetAuth"
 import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
-import { Ship } from "../../data/Ships"
+import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { IOContext } from "../../data/IOContext"
 
 const PlatoonGridItem = ({ name, troops, onClick }: { name?: string, troops?: number, onClick: (event: React.MouseEvent) => void }) => {
@@ -100,14 +99,14 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
   const handleClickUnloadPlatoon = (event: React.MouseEvent, item: IPlatoonBasic) => {
     if (ship)
     {
-      action("platoon-relocate", { id: item.id, direction: "unload", ship: ship.id, planet: planet.id })
+      action("platoon-relocate", { id: item.id, direction: "unload", ship: ship.id, })
     }
   }
 
   const handleClickLoadPlatoon = (event: React.MouseEvent, item: IPlatoonBasic) => {
     if (ship)
     {
-      action("platoon-relocate", { id: item.id, direction: "load", ship: ship.id, planet: planet.id })
+      action("platoon-relocate", { id: item.id, direction: "load", ship: ship.id })
     }
   }
 
@@ -161,13 +160,14 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
   )
 }
 
-// FIXME rename?
-const AuthCombat = () => {
+const Authed = () => {
   const player = Recoil.useRecoilValue(Player) as IPlayer
   const planet = Recoil.useRecoilValue(SelectedPlanet) as IPlanet
+  const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "docking-bay" }))
 
-  // Player can always see Planet, but the view does differ depending on ownership
-  return (<Combat planet={planet} owner={planet.owner === player.id} />)
+  const doCheck = () => planet.owner === player.id || ships.length > 0
+
+  return (<PlanetAuth view={(planet: IPlanet) => (<Combat planet={planet} owner={planet.owner === player.id} />)} check={doCheck} />)
 }
 
-export default AuthCombat
+export default Authed
