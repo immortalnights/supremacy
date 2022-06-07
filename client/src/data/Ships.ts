@@ -26,10 +26,11 @@ export const Ship = Recoil.selectorFamily<IShip | undefined, ShipID | undefined>
     }
 })
 
-export const PlayerShipsAtPlanetPosition = Recoil.selectorFamily<IShip[], { planet: PlanetID, position: string }>({
+export const PlayerShipsAtPlanetPosition = Recoil.selectorFamily<IShip[], { planet: PlanetID | undefined, position: string | string[] }>({
     key: "PlayerShipsAt",
     get: ({ planet, position }) => ({ get }) => {
         const ships = get(PlayerShips) as IShip[]
-        return ships.filter((s) => s.location.planet === planet && s.location.position === position)
+        const positions: string[] = Array.isArray(position) ? position : [position]
+        return ships.filter((s) => planet !== undefined && s.location.planet === planet && positions.includes(s.location.position))
     }
 })

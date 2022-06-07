@@ -6,7 +6,7 @@ import type { PlanetID, IPlanet, IPlanetBasic } from "../simulation/types.d"
 export type { IPlanet, IPlanetBasic }
 
 export const Planets = Recoil.atom<(IPlanetBasic | IPlanet)[]>({
-    key: "planets",
+    key: "Planets",
     default: [],
 })
 
@@ -20,7 +20,7 @@ export const PlayerPlanets = Recoil.selector<IPlanet[]>({
 })
 
 export const Planet = Recoil.selectorFamily<IPlanetBasic | IPlanet | undefined, PlanetID | undefined>({
-    key: "SelectedPlanet",
+    key: "Planet",
     get: (id: PlanetID | undefined) => ({ get }) => {
         const planets = get(Planets) as (IPlanetBasic | IPlanet)[]
         return planets.find((p) => p.id === id)
@@ -29,7 +29,7 @@ export const Planet = Recoil.selectorFamily<IPlanetBasic | IPlanet | undefined, 
 
 // Used to remember plant selection after navigation
 export const SelectedPlanet = Recoil.selector<IPlanet | undefined>({
-    key: "selectedPlanet",
+    key: "SelectedPlanet",
     get: ({ get }) => {
         const id = get(SelectedPlanetID)
         const planets = get(Planets) as IPlanet[]
@@ -37,11 +37,11 @@ export const SelectedPlanet = Recoil.selector<IPlanet | undefined>({
     }
 })
 
-export const CapitalPlanet = Recoil.selector<IPlanet | undefined>({
-    key: "capitalPlanet",
+export const CapitalPlanet = Recoil.selector<IPlanet>({
+    key: "CapitalPlanet",
     get: ({ get }) => {
         const player = get(Player) as IPlayer
         const planets = get(Planets) as IPlanet[]
-        return planets.find((p) => p.owner === player.id && p.capital === true)
+        return planets.find((p) => p.owner === player.id && p.capital === true) as IPlanet
     }
 })

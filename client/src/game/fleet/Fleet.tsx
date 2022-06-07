@@ -3,22 +3,23 @@ import Recoil from "recoil"
 import { Button, Grid, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanetID } from "../../data/General"
+import { IPlayer, Player } from "../../data/Player"
 import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
-import { Ship } from "../../data/Ships"
+import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import DockingBays from "../components/DockingBays"
 import FleetGrid from "../components/grid/FleetGrid"
 import PlanetAuth from "../components/PlanetAuth"
 import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
-import { IShip, ShipID } from "../../simulation/types.d"
 import RenameDialog from "../components/RenameDialog"
 import PlanetGrid from "../components/grid/PlanetGrid"
+import { IShip, ShipID } from "../../simulation/types.d"
 
 type FleetMode = "normal" | "ship-destination"
 
 const Fleet = ({ planet }: { planet: IPlanet }) => {
   const [ selectedShip, setSelectedShip ] = React.useState<ShipID | undefined>()
-  const [ selected, setSelected ] = Recoil.useRecoilState(SelectedPlanetID)
+  const [ selectedPlanet, setSelectedPlanet ] = Recoil.useRecoilState(SelectedPlanetID)
   const [ renameShip, setRenameShip ] = React.useState(false)
   const [ mode, setMode ] = React.useState<FleetMode>("normal")
   const ship = Recoil.useRecoilValue(Ship(selectedShip))
@@ -26,18 +27,29 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, dockedShip: IShip) => {
     setSelectedShip(dockedShip.id)
+    setMode("normal")
   }
 
   const handleSelectShip = (selectedShip: IShip) => {
     setSelectedShip(selectedShip.id)
+    if (selectedShip.location.planet !== undefined)
+    {
+      setSelectedPlanet(selectedShip.location.planet)
+    }
+    else if (selectedShip.heading !== undefined)
+    {
+      setSelectedPlanet(selectedShip.heading.to)
+    }
   }
 
   const handleAbortTravelClick = () => {
     action("ship-abort-travel", { id: ship!.id })
+    setMode("normal")
   }
 
   const handleRenameClick = () => {
     setRenameShip(true)
+    setMode("normal")
   }
 
   const handleCancelRenameShip = () => {
@@ -52,6 +64,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   const handleLaunchClick = () => {
     console.assert(ship, "")
     action("ship-relocate", { id: ship!.id, position: "orbit" })
+    setMode("normal")
   }
 
   const handleTravelToClick = () => {
@@ -61,6 +74,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   const handleLandClick = () => {
     console.assert(ship, "")
     action("ship-relocate", { id: ship!.id, position: "docking-bay" })
+    setMode("normal")
   }
 
   const handleSelectPlanet = (planet: IPlanetBasic) => {
@@ -71,6 +85,13 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   const handleCancelTravel = () => {
     setMode("normal")
   }
+
+  React.useEffect(() => {
+    if (ship && ship.location.planet !== undefined && ship.location.planet !== selectedPlanet)
+    {
+      setSelectedPlanet(ship.location.planet)
+    }
+  }, [ship, selectedPlanet])
 
   let canLaunch = false
   let canTravel = false
@@ -93,39 +114,52 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
   }
 
   return (
-    <Grid container>
-      <Grid item xs={2}>
-        <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
+    <>
+      {ship && renameShip && <RenameDialog open name={ship.name} onConfirm={handleRenameShip} onCancel={handleCancelRenameShip} />}
+      <Grid container>
+        <Grid item xs={2} md={2}>
+          <DockingBays planet={planet} selected={ship?.id} onItemClick={handleClickDockedShip} />
+        </Grid>
+        <Grid item xs={0} md={1} />
+        <Grid item xs={8} md={6}>
+          <div style={{ display: "flex", justifyContent: "space-around" }}>
+            <Button disabled={!canLaunch} onClick={handleLaunchClick}>Launch</Button>
+            <Button disabled={!canTravel} onClick={handleTravelToClick}>Travel To</Button>
+            <Button disabled={!canLand} onClick={handleLandClick}>Land</Button>
+          </div>
+          <ShipDetails ship={ship} />
+        </Grid>
+        <Grid item xs={0} md={1} />
+        <Grid item xs={2} md={2}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <Button disabled={!canAbortTravel} onClick={handleAbortTravelClick}>Abort Travel</Button>
+            <Button disabled={!canRename} onClick={handleRenameClick}>Rename</Button>
+          </div>
+        </Grid>
+        <Grid item xs={0} md={1} />
+        <Grid item xs={8} md={5}>
+          {
+            (ship && mode === "ship-destination")
+            ? <><PlanetGrid onSelectItem={handleSelectPlanet} /><Typography textAlign="center">Select destination planet or <Button variant="text" onClick={handleCancelTravel}>Cancel</Button></Typography></>
+            : <FleetGrid selectedItem={ship} onSelectItem={handleSelectShip} />
+          }
+        </Grid>
+        <Grid item xs={0} md={1} />
+        <Grid item xs={4} md={4}>
+          <ShipHeading ship={ship} />
+        </Grid>
+        <Grid item xs={0} md={1} />
       </Grid>
-      <Grid item xs={8}>
-        <div>
-          <Button disabled={!canLaunch} onClick={handleLaunchClick}>Launch</Button>
-          <Button disabled={!canTravel} onClick={handleTravelToClick}>Travel To</Button>
-          <Button disabled={!canLand} onClick={handleLandClick}>Land</Button>
-        </div>
-        <ShipDetails ship={ship} />
-      </Grid>
-      <Grid item xs={2}>
-        {ship && renameShip && <RenameDialog open name={ship.name} onConfirm={handleRenameShip} onCancel={handleCancelRenameShip} />}
-        <Button disabled={!canAbortTravel} onClick={handleAbortTravelClick}>Abort Travel</Button>
-        <Button disabled={!canRename} onClick={handleRenameClick}>Rename</Button>
-      </Grid>
-      <Grid item xs={8}>
-        {
-          (ship && mode === "ship-destination")
-          ? <><PlanetGrid onSelectItem={handleSelectPlanet} /><Typography textAlign="center">Select destination planet or <Button variant="text" onClick={handleCancelTravel}>Cancel</Button></Typography></>
-          : <FleetGrid selectedItem={ship} onSelectItem={handleSelectShip} />
-        }
-      </Grid>
-      <Grid item xs={4}>
-        <ShipHeading ship={ship} />
-      </Grid>
-    </Grid>
+    </>
   )
 }
 
 const Authed = () => {
-  return (<PlanetAuth view={(planet: IPlanet) => (<Fleet planet={planet} />)} />)
+  // Can see the ships in/around any planet
+  const doCheck = () => true
+
+  // FIXME PlanetAuth used for planet loading state
+  return (<PlanetAuth view={(planet: IPlanet) => (<Fleet planet={planet} />)} check={doCheck} />)
 }
 
 export default Authed

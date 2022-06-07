@@ -28,7 +28,7 @@ const DecommissionDialog = (props: DecommissionDialogProps & DialogProps) => {
       <DialogTitle>Decommission</DialogTitle>
       <DialogContent>
         <DialogContentText textAlign="center">Decommission ship '{ship.name}'?</DialogContentText>
-        {capital && <DialogContentText>{capital.name} will receive {ship.value} credits.</DialogContentText>}
+        <DialogContentText>{capital.name} will receive {ship.value} credits.</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button size="small" onClick={onCancel}>Cancel</Button>

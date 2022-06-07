@@ -2,17 +2,21 @@ import React from "react"
 import Recoil from "recoil"
 import { Box } from "@mui/material"
 import { useNavigate } from "react-router"
+import { SelectedPlanetID } from "../../../data/General"
 import { Game } from "../../../data/Game"
 import { IPlayer, Player } from "../../../data/Player"
-import { IPlanet, SelectedPlanet } from "../../../data/Planets"
+import { IPlanet, SelectedPlanet, CapitalPlanet } from "../../../data/Planets"
 
 
 const AccessDenied = () => {
   const game = Recoil.useRecoilValue(Game)
+  const capital = Recoil.useRecoilValue(CapitalPlanet)
+  const [selectedPlanet, setSelectedPlanet] = Recoil.useRecoilState(SelectedPlanetID)
   const navigate = useNavigate()
 
   React.useEffect(() => {
     const timer = window.setTimeout(() => {
+      setSelectedPlanet(capital.id)
       navigate(`/game/${game!.id}/`)
     }, 1000)
 
@@ -37,7 +41,7 @@ const PlanetAuth = ({ view, check }: PlanetAuthProps) => {
   let content
   if (!planet)
   {
-    content = (<Box sx={{ color: "error.main", textAlign: "center", border: "1px solid red", borderRadius: 2, padding: 1, width: 180, margin: "0 auto" }}>Loading</Box>)
+    content = (<Box sx={{ color: "darkblue", textAlign: "center", border: "1px solid blue", borderRadius: 2, padding: 1, width: 180, margin: "0 auto" }}>Loading</Box>)
   }
   else if (false === hasAccess())
   {

@@ -1,15 +1,15 @@
 import React from "react"
 import Recoil from "recoil"
+import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/material"
+import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
 import { IPlayer, Player } from "../../data/Player"
 import { SelectedPlanet } from "../../data/Planets"
-import { Box, Grid, GridDirection, IconButton, Stack, Typography } from "@mui/material"
-import DockingBays from "../components/DockingBays"
-import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
 import { PlatoonsOnPlanet, PlatoonsOnShip, IPlatoonBasic, IPlatoon, PlanetStrength, PlanetEnemyStrength } from "../../data/Platoons"
-import PlanetAuth from "../components/PlanetAuth"
-import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { IOContext } from "../../data/IOContext"
+import DockingBays from "../components/DockingBays"
+import PlanetAuth from "../components/PlanetAuth"
+import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 
 const PlatoonGridItem = ({ name, troops, onClick }: { name?: string, troops?: number, onClick: (event: React.MouseEvent) => void }) => {
 
@@ -162,10 +162,10 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
 
 const Authed = () => {
   const player = Recoil.useRecoilValue(Player) as IPlayer
-  const planet = Recoil.useRecoilValue(SelectedPlanet) as IPlanet
-  const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet.id, position: "docking-bay" }))
+  const planet = Recoil.useRecoilValue(SelectedPlanet)
+  const ships = Recoil.useRecoilValue(PlayerShipsAtPlanetPosition({ planet: planet?.id, position: "docking-bay" }))
 
-  const doCheck = () => planet.owner === player.id || ships.length > 0
+  const doCheck = () => (planet && planet.owner === player.id) || ships.length > 0
 
   return (<PlanetAuth view={(planet: IPlanet) => (<Combat planet={planet} owner={planet.owner === player.id} />)} check={doCheck} />)
 }
