@@ -841,7 +841,7 @@ export default class Universe implements IUniverse, IWorld
         if (body.id !== undefined && body.location !== undefined)
         {
           const ship = findShip(body.id)
-          if (ship && ship.location.planet)
+          if (ship && ship.location.planet !== undefined)
           {
             const currentPlanet = findPlanet(ship.location.planet)
             const destinationPlanet = findPlanet(body.location)
