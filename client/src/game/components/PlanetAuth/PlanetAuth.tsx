@@ -29,7 +29,7 @@ const AccessDenied = () => {
 }
 
 interface PlanetAuthProps {
-  view: (planet: IPlanet) => JSX.Element
+  view: (planet: IPlanet) => React.ReactElement
   check?: () => boolean
 }
 

@@ -40,18 +40,29 @@ export const IOContext = React.createContext<IIOContext>({
 export type MessageHandler = (action: string, data: any) => void
 
 // Context Provider
-const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: JSX.Element }) => {
+const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: React.ReactElement }) => {
   const [ socket, setSocket ] = React.useState<SocketIO | undefined>(undefined)
   const navigate = useNavigate()
 
   console.log("Render IOProvider")
+
+  const handleDisconnect = (s: SocketIO) => {
+    s.disconnect()
+    setSocket(undefined)
+    // Clean up state
+    handleMessage("disconnect", {})
+    navigate("/")
+  }
 
   React.useEffect(() => {
     console.log("Creating Socket.IO")
     const s: SocketIO = io({
       transports: ["websocket"]
     })
-
+    s.on("disconnect", (reason) => {
+      console.log("Client disconnected", reason)
+      handleDisconnect(s)
+    })
     s.on("connect_error", (err) => {
       console.log("connection error", err)
       setSocket(undefined)
@@ -65,12 +76,6 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
       setSocket(s)
     })
-    s.on("disconnect", () => {
-      console.log("client disconnected")
-      setSocket(undefined)
-      handleMessage("disconnect", {})
-      navigate("/")
-    })
 
     s.onAny(handleMessage)
 
@@ -81,10 +86,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
     return () => {
       console.log("Clean up IOProvider")
-      s.disconnect()
-      setSocket(undefined)
-      handleMessage("disconnect", {})
-      navigate("/")
+      handleDisconnect(s)
     }
   }, [ handleMessage, setSocket ])
 

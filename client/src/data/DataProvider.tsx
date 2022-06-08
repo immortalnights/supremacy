@@ -269,44 +269,44 @@ const MessageHandlerMap: IMessageHandlerMap = {
   "partial-game-update": handlePartialGameUpdate,
 }
 
-
 // Binds the Socket and Recoil data together using RecoilTransaction
-const DataProvider = ({ children }: { children: JSX.Element }) => {
+const SocketToRecoil = ({ children }: { children: React.ReactElement }) => {
+  const handleMessage = Recoil.useRecoilTransaction_UNSTABLE((callback) => (action: string, data: any = {}) => {
+    // console.log("received", action, data)
+
+    if (action === "disconnect")
+    {
+      console.log("Disconnected!")
+      callback.reset(Player)
+      callback.reset(Room)
+      callback.reset(Game)
+      callback.reset(SolarSystem)
+      callback.reset(SelectedPlanetID)
+      callback.reset(EspionageReport)
+    }
+    else if (MessageHandlerMap[action])
+    {
+      MessageHandlerMap[action](data, callback)
+    }
+    else
+    {
+      console.error(`Message '${action}' is not handled in Data Provider`)
+    }
+  })
+
+  return (
+    <IOProvider handleMessage={handleMessage}>
+      {children}
+    </IOProvider>
+  )
+}
+
+const DataProvider = ({ children }: { children: React.ReactElement }) => {
   console.log("Render DataProvider")
-  const SocketToRecoil = () => {
-    const handleMessage = Recoil.useRecoilTransaction_UNSTABLE((callback) => (action: string, data: any = {}) => {
-      // console.log("received", action, data)
-
-      if (action === "disconnect")
-      {
-        console.log("Disconnected!")
-        callback.reset(Player)
-        callback.reset(Room)
-        callback.reset(Game)
-        callback.reset(SolarSystem)
-        callback.reset(SelectedPlanetID)
-        callback.reset(EspionageReport)
-      }
-      else if (MessageHandlerMap[action])
-      {
-        MessageHandlerMap[action](data, callback)
-      }
-      else
-      {
-        console.error(`Message '${action}' is not handled in Data Provider`)
-      }
-    })
-
-    return (
-      <IOProvider handleMessage={handleMessage}>
-        {children}
-      </IOProvider>
-    )
-  }
 
   return (
     <Recoil.RecoilRoot initializeState={() => {}}>
-      <SocketToRecoil />
+      <SocketToRecoil>{children}</SocketToRecoil>
     </Recoil.RecoilRoot>
   )
 }
