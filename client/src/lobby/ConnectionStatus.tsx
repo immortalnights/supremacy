@@ -9,7 +9,7 @@ const ConnectionStatus = () => {
   const { connected } = React.useContext(IOContext)
   const id = Recoil.useRecoilValue(Player)
 
-  return connected() ?
+  return connected ?
     (<LinearProgress variant="determinate" color="inherit" value={0} />) :
     (<LinearProgress color="inherit" />)
 }

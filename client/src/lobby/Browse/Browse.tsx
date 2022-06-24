@@ -21,7 +21,7 @@ const RoomList = ({ rooms }: { rooms: IRoom[] }) => {
 
 const Browse = () => {
   const rooms = Recoil.useRecoilValue(AvailableRooms)
-  const { leaveRoom, leaveGame, requestRooms } = React.useContext(IOContext)
+  const { leaveRoom, leaveGame, subscribe, unsubscribe } = React.useContext(IOContext)
 
   React.useEffect(() => {
     // Leave any room or game the player may be in
@@ -32,22 +32,23 @@ const Browse = () => {
 
   // FIXME should not be polling, but should sub for room updates
   React.useEffect(() => {
-    const interval = window.setInterval(() => {
-      console.log("eh")
-      requestRooms()
-    }, 1000)
-
-    requestRooms()
+    subscribe("rooms")
 
     return () => {
-      window.clearInterval(interval)
+      unsubscribe("rooms")
     }
-  }, [ requestRooms ])
+  }, [])
+
+  const handleClickLeaveBrowser = () => {
+    unsubscribe("rooms")
+  }
 
   return (
     <>
       <Typography component="h2">Available Rooms</Typography>
       {rooms.length === 0 ? <NoRooms /> : <RoomList rooms={rooms} />}
+
+      <Link to="/" component={RouterLink} onClick={handleClickLeaveBrowser}>Leave</Link>
     </>
   )
 }

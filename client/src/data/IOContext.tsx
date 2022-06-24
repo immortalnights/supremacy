@@ -10,26 +10,31 @@ type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents>
 // Socket connection status
 export type Status = "disconnected" | "connecting" | "connected"
 
-// Context interface
-export interface IIOContext {
-  connected: () => boolean
-  requestRooms: () => void
+export interface ILobbyContext {
+  connected: boolean
   createRoom: () => Promise<IRoom>
   joinRoom: (id: string) => Promise<void>
   leaveRoom: () => void
+  subscribe: (key: string) => void
+  unsubscribe: (key: string) => void
   roomAction: (name: PlayerRoomAction, data: object) => Promise<void>
   joinGame: (id: string) => Promise<void>
   leaveGame: () => void,
+}
+
+// Context interface
+export interface IIOContext extends ILobbyContext {
   action: (name: PlayerGameAction, data: object) => Promise<void>
 }
 
 // Connection Context
 export const IOContext = React.createContext<IIOContext>({
-  connected: () => false,
-  requestRooms: () => {},
+  connected: false,
   createRoom: () => Promise.reject(),
   joinRoom: () => Promise.reject(),
   leaveRoom: () => {},
+  subscribe: (key: string) => Promise.reject(),
+  unsubscribe: (key: string) => {},
   roomAction: (name: PlayerRoomAction, data: any) => Promise.reject(),
   joinGame: () => Promise.reject(),
   leaveGame: () => {},
@@ -85,11 +90,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
   }, [ handleMessage ])
 
   const contextValue = {
-    connected: () => !!socket,
-    requestRooms: () => {
-      console.assert(socket, "Socket is invalid!")
-      socket?.emit("request-rooms")
-    },
+    connected: !!socket,
     createRoom: () => {
       console.assert(socket, "Socket is invalid!")
       return new Promise<IRoom>((resolve, reject) => {
@@ -124,6 +125,22 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
       console.assert(socket, "Socket is invalid!")
       socket?.emit("player-leave-room")
       handleMessage("room-leave", {})
+    },
+    subscribe: (key: string) => {
+      console.assert(socket, "Socket is invalid!")
+      return new Promise<void>((resolve, reject) => {
+        socket?.emit("subscribe", key, (ok: boolean) => {
+          if (ok) {
+            resolve()
+          } else {
+            reject()
+          }
+        })
+      })
+    },
+    unsubscribe: (key: string) => {
+      console.assert(socket, "Socket is invalid!")
+      socket?.emit("unsubscribe", key)
     },
     roomAction: (name: string, data: any) => {
       console.assert(socket, "Socket is invalid!")

@@ -68,18 +68,20 @@ export type PlayerRoomAction = "toggle-ready" | "change-name" | "change-room-nam
 // Messages from the client to the Server
 export interface ClientToServerEvents {
   "connect_error": (...args: any[]) => void
-  // Player requested available rooms
-  // FIXME make this subscribe/unsubscribe and send room details on changes rather than a (client) poller
-  "request-rooms": () => void
-  // Player creates a new room (new game), callback if room cannot be created
+  // Player creates a new room (new game), callback true if room is created
   "player-create-room": (callback: (ok: boolean, data?: IRoom) => void) => void
   // Player joins an existing room, callback true if joined otherwise false
   "player-join-room": (id: RoomID, callback: (ok: boolean) => void) => void
+  // Player changes own state
   "player-room-action": (name: PlayerRoomAction, data: any, callback: IActionCallback) => void
   // Player left the room
   "player-leave-room": () => void
   // Host changes game or room options
   "room-set-options": () => void
+  // Player subscribes to data (currently rooms)
+  "subscribe": (key: string, callback: (ok: boolean) => void) => void
+  // Player unsubscribes to data
+  "unsubscribe": (key: string) => void
   // Player joins an existing game, callback true if joined otherwise false
   "player-join-game": (id: GameID, callback: (ok: boolean) => void) => void
   "player-leave-game": () => void
@@ -103,6 +105,7 @@ export interface ServerToClientEvents {
   "room-update": ({ id, options }: { id: RoomID, status: string, options: IGameOptions }) => void
   // Send an update to all players within the room when another player details' have change
   "player-changed": ({ id, name, ready }: { id: PlayerID, name: string, ready: boolean }) => void
+  "subscription-post": ({ key, action, data }: { key: string, action: string, data: object }) => void
   // Notify players of game created by room
   "game-created": (data: IGame) => void
   // Player has joined a game, send details

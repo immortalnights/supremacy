@@ -21,10 +21,52 @@ const handleRegistered = ({ id }: { id: string }, { get, set }: TransactionInter
   set(Player, player)
 }
 
+// Consider reversing the arguments so that received data does not have to be bundled into as single object
+// (callback: TransactionInterface_UNSTABLE, ...args: any[]) => void
 type TransactionHandler = (data: any, callback: TransactionInterface_UNSTABLE) => void
 
-const handleRoomList: TransactionHandler = (data: any, { get, set }) => {
-  set(AvailableRooms, data)
+const handleSubscriptionPost: TransactionHandler = ({ key, action, data }: { key: string, action: string, data: object }, { get, set, reset }) => {
+  console.debug("Subscription Post", key, action, data)
+  switch (key)
+  {
+    case "rooms":
+    {
+      const room = data as IRoom
+
+      switch (action)
+      {
+        case "add":
+        {
+          const rooms = get(AvailableRooms)
+          set(AvailableRooms, [ ...rooms, room ])
+          break
+        }
+        case "remove":
+        {
+          const rooms = get(AvailableRooms)
+          const index = rooms.findIndex((r) => r.id === room.id)
+          if (index !== -1)
+          {
+            const copy = [ ...rooms ]
+            copy.splice(index, 1)
+            set(AvailableRooms, copy)
+          }
+          break
+        }
+        default:
+        {
+          console.error(`Unexpected subscription message ${key} / ${action}`)
+          break
+        }
+      }
+      break
+    }
+    default:
+    {
+      console.error(`Unexpected subscription message ${key} / ${action}`)
+      break
+    }
+  }
 }
 
 const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
@@ -281,7 +323,7 @@ interface IMessageHandlerMap {
 
 const MessageHandlerMap: IMessageHandlerMap = {
   "registered": handleRegistered,
-  "room-list": handleRoomList,
+  "subscription-post": handleSubscriptionPost,
   // FIXME merge joined and player joined?
   "room-joined": handleRoomJoined,
   "room-leave": handleRoomLeave,

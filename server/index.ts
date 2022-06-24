@@ -5,7 +5,7 @@ import Player from "./Player"
 import ConnectedPlayer from "./ConnectedPlayer"
 import Room from "./lobby/Room"
 import Game from "./Game"
-import type { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer } from "./types"
+import type { ServerToClientEvents, ClientToServerEvents, IGameOptions, IPlayer, PlayerID } from "./types"
 import Universe from "./simulation/Universe"
 import AIPlayer from "./AIPlayer"
 
@@ -39,10 +39,98 @@ router.get("/", (req, res) => {
 app.use(router)
 
 // TODO tidy socket message handling up based on https://socket.io/docs/v4/server-application-structure/
+type SubscriptionType = "rooms"
+
+interface Subscription {
+  player: ConnectedPlayer
+  type: SubscriptionType
+}
+
+class SubscriptionManager {
+
+  subscriptions: Subscription[]
+
+  constructor()
+  {
+    this.subscriptions = []
+
+    setInterval(() => {
+      console.debug(`${this.subscriptions.length} Subscriptions`)
+    }, 1000)
+  }
+
+  subscribe(player: ConnectedPlayer, key: SubscriptionType): boolean
+  {
+    console.debug(`Player ${player.id} subscribing to ${key}`)
+    let ok = false
+
+    const type = key as SubscriptionType
+    switch (type)
+    {
+      case "rooms":
+      {
+        this.subscriptions.push({
+          player,
+          type,
+        })
+
+        ok = true
+        break
+      }
+      default:
+      {
+        console.error("Invalid subscription type")
+        break
+      }
+    }
+
+    return ok
+  }
+
+  unsubscribe(player: ConnectedPlayer, key?: SubscriptionType)
+  {
+    console.debug(`Player ${player.id} unsubscribing from ${key}`)
+
+    if (key === undefined)
+    {
+      let index
+      do
+      {
+        index = this.subscriptions.findIndex((item) => item.player === player)
+        if (index !== -1)
+        {
+          this.subscriptions.splice(index, 1)
+        }
+      } while (index !== -1)
+    }
+    else
+    {
+      const index = this.subscriptions.findIndex((item) => item.player.id === player.id && item.type === key)
+      if (index !== -1)
+      {
+        this.subscriptions.splice(index, 1)
+      }
+    }
+  }
+
+  notify(key: SubscriptionType, action: string, data: object)
+  {
+    this.subscriptions.forEach((item) => {
+      if (item.type === key) {
+        item.player.socket.emit(`subscription-post`, {
+          key,
+          action,
+          data,
+        })
+      }
+    })
+  }
+}
 
 const players: ConnectedPlayer[] = []
 const rooms: Room[] = []
 const games: Game<Universe>[] = []
+const subscriptions = new SubscriptionManager()
 
 const DEV_DELAY = true
 const devDelay = (callback: () => void, delay: number) => {
@@ -63,6 +151,8 @@ const cleanupRoom = (room: Room) => {
     {
       const removed = rooms.splice(index, 1)[0]
       console.info(`Room ${removed.id} deleted`)
+
+      subscriptions.notify("rooms", "remove", removed)
     }
   }
   else
@@ -168,8 +258,13 @@ io.on("connection", (socket) => {
     }
   }
 
-  socket.on("request-rooms", () => {
-    socket.emit("room-list", rooms.map((room) => room.toJSON()))
+  socket.on("subscribe", (key, callback) => {
+    const ok = subscriptions.subscribe(player, key as SubscriptionType)
+    callback(ok)
+  })
+
+  socket.on("unsubscribe", (key) => {
+    subscriptions.unsubscribe(player, key as SubscriptionType)
   })
 
   socket.on("player-create-room", (callback) => {
@@ -183,6 +278,9 @@ io.on("connection", (socket) => {
     room.events.once("create-game", handleCreateGame)
 
     rooms.push(room)
+
+    // Notify subscriptions
+    subscriptions.notify("rooms", "add", room)
 
     console.log(`Player ${player.id} created room ${room.id}`)
 
@@ -278,6 +376,8 @@ io.on("connection", (socket) => {
   // Clean up the player on disconnection
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id)
+
+    subscriptions.unsubscribe(player)
     // Remove the player from any room or game
     handleLeaveRoom()
     handleLeaveGame()

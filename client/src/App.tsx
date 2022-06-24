@@ -28,7 +28,7 @@ const Content = () => {
   const { connected } = React.useContext(IOContext)
 
   let content
-  if (connected())
+  if (connected)
   {
     content = (
       <Routes>
