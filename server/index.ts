@@ -54,9 +54,9 @@ class SubscriptionManager {
   {
     this.subscriptions = []
 
-    setInterval(() => {
-      console.debug(`${this.subscriptions.length} Subscriptions`)
-    }, 1000)
+    // setInterval(() => {
+    //   console.debug(`${this.subscriptions.length} Subscriptions`)
+    // }, 1000)
   }
 
   subscribe(player: ConnectedPlayer, key: SubscriptionType): boolean
