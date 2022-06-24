@@ -37,6 +37,21 @@ class Game<T extends IWorld> implements IGame {
     this.events = new EventEmitter() as ServerEventEmitter
   }
 
+  isEmpty()
+  {
+    this.players.length === 0
+  }
+
+  isFull()
+  {
+    return this.players.length === 2
+  }
+
+  canJoin(player: Player): boolean
+  {
+    return true // !!this.allocatedPlayers.find((pID) => pID === player.id)
+  }
+
   start()
   {
     if (this.allocatedPlayers.length === this.players.length)
@@ -45,11 +60,6 @@ class Game<T extends IWorld> implements IGame {
     }
 
     return this.status === GameStatus.Playing
-  }
-
-  canJoin(player: Player): boolean
-  {
-    return this.players.length < 2 // !!this.allocatedPlayers.find((pID) => pID === player.id)
   }
 
   join(player: Player)

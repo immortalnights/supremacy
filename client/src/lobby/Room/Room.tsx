@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { useNavigate, useParams, Link as RouterLink } from "react-router-dom"
+import { useNavigate, useParams, Link as RouterLink, Navigate } from "react-router-dom"
 import {
   Box,
   Button,
@@ -15,9 +15,11 @@ import {
   CircularProgressProps,
 } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
-import { Room as RoomData, IRoom } from "../../data/Room"
+import { IRoom, Room as RoomData } from "../../data/Room"
+import { IGame, Game as GameData } from "../../data/Game"
 import { RoomStatus } from "../../types"
-import { Player as PlayerData, ILocalPlayer } from "../../data/Player"
+import { Player as PlayerData, IPlayer, ILocalPlayer } from "../../data/Player"
+import { RoomID } from "../../types.d"
 
 const CircularProgressWithLabel = (props: CircularProgressProps & { value: number }) => {
   const COUNTDOWN_DURATION = 3
@@ -63,8 +65,8 @@ const Slot = ({ index, id, name, ready }: { index: number, id: string, name: str
   )
 }
 
-const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, isOccupied: boolean, isHost: boolean, isLocal: boolean }) => {
-  console.log(roomID, isOccupied, isLocal, isHost, (isHost && !isLocal))
+const SlotControls = ({ roomID, hasStarted, isOccupied, isHost, isLocal}: { roomID: string, hasStarted: boolean, isOccupied: boolean, isHost: boolean, isLocal: boolean }) => {
+  // console.log("Slot controls for", roomID, isOccupied, isLocal, isHost, (isHost && !isLocal))
   const { roomAction } = React.useContext(IOContext)
 
   const handleClickInvite = () => {
@@ -77,13 +79,14 @@ const SlotControls = ({ roomID, isOccupied, isHost, isLocal}: { roomID: string, 
   }
 
   const handleClickAddAI = () => {
+    console.log("Click add ai")
     roomAction("add-ai-player", {})
   }
 
   return (
     <CardActions sx={{ visibility: isHost && !isLocal ? "block" : "hidden" }}>
       <Button size="small" disabled={isOccupied} onClick={handleClickInvite}>Invite</Button>
-      <Button size="small" disabled={!isOccupied} onClick={handleClickKick}>Kick</Button>
+      <Button size="small" disabled={!hasStarted && !isOccupied} onClick={handleClickKick}>Kick</Button>
       <Button size="small" disabled={isOccupied} onClick={handleClickAddAI}>Add AI</Button>
     </CardActions>
   )
@@ -113,15 +116,14 @@ const ReadyStatus = ({ localPlayer, status, countdown }: { localPlayer: ILocalPl
       )
       break
     }
-    // case RoomStatus.Playing:
+    // case RoomStatus.Closed:
     // {
-    //   content = (<Navigate to="/game/123" replace />)
-    //   break
+    //
     // }
     default:
     {
       // Other status should not be handled here
-      content = (<>Error</>)
+      content = (<>Error (unhandled room status)</>)
       break
     }
   }
@@ -129,7 +131,32 @@ const ReadyStatus = ({ localPlayer, status, countdown }: { localPlayer: ILocalPl
   return content
 }
 
+const Slots = ({ id, players, count, localPlayer, isHost }: { id: RoomID, players: IPlayer[], count: number, localPlayer: ILocalPlayer, isHost: boolean}) => {
+  const slots = players.map((player, index) => (
+    <Box key={player.id}>
+      <Slot index={index + 1} id={player.id} name={player.name} ready={player.ready} />
+      <SlotControls roomID={id} hasStarted={false} isOccupied={true} isLocal={player.id === localPlayer.id} isHost={isHost} />
+    </Box>
+  ))
+
+  if (count - players.length > 0)
+  {
+    for (let index = players.length; index < count; index++)
+    {
+      slots.push(
+        <Box key={index}>
+          <Slot index={index + 1} id="" name="" ready={false} />
+          <SlotControls roomID={id} hasStarted={false} isOccupied={false} isLocal={false} isHost={isHost} />
+        </Box>
+      )
+    }
+  }
+
+  return (<>{slots}</>)
+}
+
 const Room = ({ data }: { data: IRoom }) => {
+  const { leaveRoom } = React.useContext(IOContext)
   const [ seed, setSeed ] = React.useState(data.options.seed)
   const localPlayer = Recoil.useRecoilValue(PlayerData)
 
@@ -139,24 +166,8 @@ const Room = ({ data }: { data: IRoom }) => {
 
   const isHost = data.host === localPlayer.id
 
-  const slots = data.players.map((player, index) => (
-    <Box key={player.id}>
-      <Slot index={index + 1} id={player.id} name={player.name} ready={player.ready} />
-      <SlotControls roomID={data.id} isOccupied={true} isLocal={player.id === localPlayer.id} isHost={isHost} />
-    </Box>
-  ))
-
-  if (data.slots - data.players.length > 0)
-  {
-    for (let index = data.players.length; index < data.slots; index++)
-    {
-      slots.push(
-        <Box key={index}>
-          <Slot index={index + 1} id="" name="" ready={false} />
-          <SlotControls roomID={data.id} isOccupied={false} isLocal={false} isHost={isHost} />
-        </Box>
-      )
-    }
+  const handleClickLeaveRoom = () => {
+    leaveRoom()
   }
 
   return (
@@ -171,11 +182,11 @@ const Room = ({ data }: { data: IRoom }) => {
           </div>
         </Box>
         <Stack direction="row" spacing={2} alignContent="center" alignItems="center" justifyContent="center">
-          {slots}
+          <Slots id={data.id} count={data.slots} players={data.players} localPlayer={localPlayer} isHost={isHost} />
         </Stack>
         <Stack alignContent="center" alignItems="center" justifyContent="center" spacing={2}>
           <ReadyStatus localPlayer={localPlayer} status={data.status} countdown={data.countdown} />
-          <Link to="/" component={RouterLink}>Leave</Link>
+          <Link to="/" component={RouterLink} onClick={handleClickLeaveRoom}>Leave</Link>
         </Stack>
       </Grid>
       <Grid item xs={3} />
@@ -184,45 +195,48 @@ const Room = ({ data }: { data: IRoom }) => {
 }
 
 const RoomLoader = () => {
+  console.debug("Render RoomLoader")
   const room = Recoil.useRecoilValue(RoomData)
-  const { joinRoom, leaveRoom } = React.useContext(IOContext)
+  const game = Recoil.useRecoilValue(GameData)
+  const { joinRoom } = React.useContext(IOContext)
   const navigate = useNavigate()
   const params = useParams()
 
-  React.useEffect(() => {
-    const join = async (id: string) => {
-      try
-      {
-        await joinRoom(id)
-      }
-      catch (error)
-      {
-        console.warn(`Failed to join room ${params.id}`)
-        navigate("/", { replace: true })
-      }
+  const asyncJoinRoom = async (id: string) => {
+    try {
+      console.log("Joining room", id)
+      await joinRoom(id)
+    } catch (err) {
+      console.warn(`Failed to join room ${id}`)
+      navigate("/", { replace: true })
     }
-
-    if (!room)
-    {
-      if (params.id)
-      {
-        join(params.id)
-      }
-      else
-      {
-        navigate("/", { replace: true })
-      }
-    }
-  }, [ room, params ])
+  }
 
   React.useEffect(() => {
-    return () => {
-      console.log("Clean up RoomLoader")
-      leaveRoom()
+    if (params.id) {
+      asyncJoinRoom(params.id)
     }
   }, [])
 
-  return (room ? <Room data={room} /> : <div>Joining Room...</div>)
+  // Navigate to the game when game data is received
+  let content
+  if (game) {
+    content = (<Navigate to={`/game/${game.id}/`} replace />)
+  } else if (room) {
+    if (room.status === RoomStatus.Closed) {
+      content = (<>...</>)
+    } else {
+      content = (<Room data={room} />)
+    }
+  } else {
+    if (params.id) {
+      content = (<>Joining room...</>)
+    } else {
+      content = (<Navigate to="/" replace />)
+    }
+  }
+
+  return content
 }
 
 export default RoomLoader

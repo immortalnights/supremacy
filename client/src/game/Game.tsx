@@ -1,9 +1,8 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Link, Button, Grid } from "@mui/material"
-import { Routes, Route, NavLink, useNavigate, useParams } from "react-router-dom"
+import { Box, Link } from "@mui/material"
+import { Routes, Route, NavLink, Outlet, Navigate } from "react-router-dom"
 import { IOContext } from "../data/IOContext"
-import { IPlayer } from "../data/Player"
 import SolarSystem from "./solarsystem"
 import Overview from "./overview"
 import Surface from "./surface"
@@ -15,7 +14,8 @@ import Combat from "./combat"
 import { Game as GameData, IGame } from "../data/Game"
 import "./game.css"
 
-const Game = ({ data }: { data: IGame }) => {
+
+const Layout = ({ data }: { data: IGame }) => {
   return (
     <>
       <Box sx={{
@@ -23,17 +23,7 @@ const Game = ({ data }: { data: IGame }) => {
         width: "100%",
         padding: "1em",
       }}>
-        <Routes>
-          <Route path="/" element={<SolarSystem />} />
-          <Route path="/overview" element={<Overview />} />
-          <Route path="/surface" element={<Surface />} />
-          <Route path="/dock" element={<Dock />} />
-          <Route path="/fleet" element={<Fleet />} />
-          <Route path="/shipyard" element={<Shipyard />} />
-          <Route path="/training" element={<Training />} />
-          <Route path="/combat" element={<Combat />} />
-          <Route path="*" element="Game 404" />
-        </Routes>
+        <Outlet />
       </Box>
       <Box
         sx={{
@@ -61,46 +51,41 @@ const Game = ({ data }: { data: IGame }) => {
   )
 }
 
+const GameRoutes = ({ ...rest }: { data: IGame }) => {
+  return (
+    <Routes>
+      <Route element={<Layout {...rest} />}>
+        <Route path="/" element={<SolarSystem />} />
+        <Route path="/overview" element={<Overview />} />
+        <Route path="/surface" element={<Surface />} />
+        <Route path="/dock" element={<Dock />} />
+        <Route path="/fleet" element={<Fleet />} />
+        <Route path="/shipyard" element={<Shipyard />} />
+        <Route path="/training" element={<Training />} />
+        <Route path="/combat" element={<Combat />} />
+        <Route path="*" element="Game 404" />
+      </Route>
+    </Routes>
+  )
+}
+
 const GameLoader = () => {
   const game = Recoil.useRecoilValue(GameData)
-  const { joinGame, leaveGame } = React.useContext(IOContext)
-  const navigate = useNavigate()
-  const params = useParams()
+  const { joinGame } = React.useContext(IOContext)
 
   React.useEffect(() => {
-    const join = async (id: string) => {
-      try
-      {
-        await joinGame(id)
-      }
-      catch (error)
-      {
-        console.warn(`Failed to join game ${params.id}`)
-        navigate("/", { replace: true })
-      }
-    }
-
-    if (!game)
-    {
-      if (params.id)
-      {
-        join(params.id)
-      }
-      else
-      {
-        navigate("/", { replace: true })
-      }
-    }
-  }, [ game, params ])
-
-  React.useEffect(() => {
-    return () => {
-      console.log("Clean up GameLoader")
-      leaveGame()
-    }
+    // Join the game (may already have joined) to begin receiving game updates
+    joinGame(game!.id)
   }, [])
 
-  return (game ? <Game data={game} /> : <div>Joining Game...</div>)
+  let content
+  if (game) {
+    content = (<GameRoutes data={game} />)
+  } else {
+    content = (<Navigate to="/" replace />)
+  }
+
+  return content
 }
 
 export default GameLoader

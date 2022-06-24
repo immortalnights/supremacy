@@ -21,8 +21,16 @@ const RoomList = ({ rooms }: { rooms: IRoom[] }) => {
 
 const Browse = () => {
   const rooms = Recoil.useRecoilValue(AvailableRooms)
-  const { requestRooms } = React.useContext(IOContext)
+  const { leaveRoom, leaveGame, requestRooms } = React.useContext(IOContext)
 
+  React.useEffect(() => {
+    // Leave any room or game the player may be in
+    // now that they have returned to the room browser
+    leaveRoom()
+    leaveGame()
+  }, [])
+
+  // FIXME should not be polling, but should sub for room updates
   React.useEffect(() => {
     const interval = window.setInterval(() => {
       console.log("eh")

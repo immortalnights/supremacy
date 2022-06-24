@@ -36,37 +36,58 @@ const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
   set(Room, data)
 }
 
-const handleRoomKickPlayer: TransactionHandler = (data, { reset }) => {
-  // Player has been kicked, push them back to the main menu
+const handleRoomLeave: TransactionHandler = (data: any, { get, set, reset }) => {
+  const player = get(Player)
+
+  set(Player, { ...player, ready: false })
+
   reset(Room)
 }
 
+// FIXME can be optimized/tidied as a room update message
 const handleRoomPlayerJoined: TransactionHandler = (player: IPlayer, { get, set }) => {
-  const room = get(Room) as IRoom
+  const room = get(Room)
+  console.log("new player joined room", room?.id)
 
-  const existingPlayer = room.players.find((p) => p.id === player.id)
-  if (!existingPlayer)
+  if (room)
   {
-    set(Room, { ...room, players: [ ...room.players, player ] })
+    const existingPlayer = room.players.find((p) => p.id === player.id)
+    if (!existingPlayer)
+    {
+      set(Room, { ...room, players: [ ...room.players, player ] })
+    }
   }
 }
 
-const handleRoomPlayerLeft: TransactionHandler = ({ id }: { id: string }, { get, set }) => {
-  const room = get(Room) as IRoom
+// FIXME can be optimized/tidied as a room update message
+const handleRoomPlayerLeft: TransactionHandler = ({ id }: { id: string }, { get, set, reset }) => {
+  const player = get(Player)
+  const room = get(Room)
 
-  const index = room.players.findIndex((p) => p.id === id)
-  if (index !== -1)
+  if (id === player.id)
   {
-    const players = [ ...room.players ]
-    players.splice(index, 1)
-    set(Room, { ...room, players })
+    console.debug("Self left room", room?.id)
+    reset(Room)
+  }
+  else if (room)
+  {
+    console.log(id, "left room", room?.id)
+    const index = room.players.findIndex((p) => p.id === id)
+    if (index !== -1)
+    {
+      const players = [ ...room.players ]
+      players.splice(index, 1)
+      set(Room, { ...room, players })
+    }
   }
 }
 
 interface RoomUpdateArgs { id: string, status: RoomStatus, countdown: number, options: IGameOptions }
 
 const handleRoomUpdate: TransactionHandler = ({ id, status, countdown, options }: RoomUpdateArgs, { get, set }) => {
-  const room = get(Room) as IRoom
+  const room = get(Room)
+
+  console.log("handle room update")
 
   if (room)
   {
@@ -80,35 +101,43 @@ const handleRoomUpdate: TransactionHandler = ({ id, status, countdown, options }
   }
 }
 
+// FIXME can be optimized/tidied as a room update message
 const handlePlayerChanged: TransactionHandler = ({ id, name, ready }: { id: string, name: string, ready: boolean }, { get, set }) => {
-  const room = get(Room) as IRoom
+  const room = get(Room)
   const player = get(Player)
 
-  if (id === player.id)
+  if (room)
   {
-    set(Player, { ...player, name, ready })
+    if (id === player.id)
+    {
+      set(Player, { ...player, name, ready })
+    }
+
+    const index = room.players.findIndex((p) => p.id === id)
+    if (index !== -1)
+    {
+      const players = [ ...room.players ]
+      players[index] = { ...players[index], name, ready }
+      set(Room, { ...room, players })
+    }
   }
 
-  const index = room.players.findIndex((p) => p.id === id)
-  if (index !== -1)
-  {
-    const players = [ ...room.players ]
-    players[index] = { ...players[index], name, ready }
-    set(Room, { ...room, players })
-  }
 }
 
-const handleGameCreated: TransactionHandler = (data: IGame, { get, set }) => {
-  // The create game message is handle in a specific handler
-  // and triggers a navigate to the game screen, where the
-  // the game data is received once the player has joined the
-  // game.
+const handleGameCreated: TransactionHandler = (data: IGame, callback) => {
+  // FIXME dislike how this doesn't have parity with Room creation/joining
+  // but there is no direct user interaction that creates a game that can
+  // handle the response to navigate the user to the game.
+  handleGameJoined(data, callback)
 }
 
 const handleGameJoined: TransactionHandler = (data: IGame, { get, set, reset }) => {
   const player = get(Player)
 
   set(Player, { ...player, ready: false })
+
+  // Reset lobby data
+  reset(Room)
 
   // Reset any lingering game data
   reset(SolarSystem)
@@ -253,11 +282,16 @@ interface IMessageHandlerMap {
 const MessageHandlerMap: IMessageHandlerMap = {
   "registered": handleRegistered,
   "room-list": handleRoomList,
+  // FIXME merge joined and player joined?
   "room-joined": handleRoomJoined,
-  "room-player-kicked": handleRoomKickPlayer,
+  "room-leave": handleRoomLeave,
+  // Another player joined the room
   "room-player-joined": handleRoomPlayerJoined,
+  // Another player left the room
   "room-player-left": handleRoomPlayerLeft,
+  //
   "room-update": handleRoomUpdate,
+  // Replace with room-update?
   "player-changed": handlePlayerChanged,
   "game-created": handleGameCreated,
   "game-joined": handleGameJoined,
@@ -270,7 +304,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
 }
 
 // Binds the Socket and Recoil data together using RecoilTransaction
-const SocketToRecoil = ({ children }: { children: React.ReactElement }) => {
+const SocketToRecoil = ({ children }: { children: React.ReactNode }) => {
   const handleMessage = Recoil.useRecoilTransaction_UNSTABLE((callback) => (action: string, data: any = {}) => {
     // console.log("received", action, data)
 
@@ -301,7 +335,7 @@ const SocketToRecoil = ({ children }: { children: React.ReactElement }) => {
   )
 }
 
-const DataProvider = ({ children }: { children: React.ReactElement }) => {
+const DataProvider = ({ children }: { children: React.ReactNode }) => {
   console.log("Render DataProvider")
 
   return (

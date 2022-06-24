@@ -1,6 +1,10 @@
 
+export type PlayerID = string
+export type RoomID = string
+export type GameID = string
+
 export interface IPlayer {
-  id: string
+  id: PlayerID
   name: string
   ready: boolean
 }
@@ -18,7 +22,7 @@ export interface IGameOptions {
 }
 
 export interface IRoom {
-  id: string
+  id: RoomID
   options: IGameOptions
   host: string
   slots: number
@@ -36,7 +40,7 @@ export enum GameStatus {
 }
 
 export interface IGame {
-  id: string
+  id: GameID
   options: IGameOptions
   players: IPlayer[]
   // date/time of last save
@@ -47,8 +51,7 @@ export interface IGame {
 }
 
 export interface IUpdate<T> {
-  // game ID
-  id: string
+  id: GameID
   // date/time of last save
   saved: number
   // date/time game was created
@@ -69,16 +72,16 @@ export interface ClientToServerEvents {
   // FIXME make this subscribe/unsubscribe and send room details on changes rather than a (client) poller
   "request-rooms": () => void
   // Player creates a new room (new game), callback if room cannot be created
-  "player-create-room": (callback: (ok: boolean) => void) => void
+  "player-create-room": (callback: (ok: boolean, data?: IRoom) => void) => void
   // Player joins an existing room, callback true if joined otherwise false
-  "player-join-room": (id: string, callback: (ok: boolean) => void) => void
+  "player-join-room": (id: RoomID, callback: (ok: boolean) => void) => void
   "player-room-action": (name: PlayerRoomAction, data: any, callback: IActionCallback) => void
   // Player left the room
   "player-leave-room": () => void
   // Host changes game or room options
   "room-set-options": () => void
   // Player joins an existing game, callback true if joined otherwise false
-  "player-join-game": (id: string, callback: (ok: boolean) => void) => void
+  "player-join-game": (id: GameID, callback: (ok: boolean) => void) => void
   "player-leave-game": () => void
   // Generic game play action
   "player-game-action": (name: string, data: object, callback: IActionCallback) => void
@@ -87,31 +90,27 @@ export interface ClientToServerEvents {
 // Messages from the server to the client
 export interface ServerToClientEvents {
   // Send player ID back to newly connected client
-  "registered": ({ id }: { id: string }) => void
+  "registered": ({ id }: { id: PlayerID }) => void
   // Send player available rooms
   "room-list": (data: IRoom[]) => void
   // Send room details to the player that has just joined (or created) a room
   "room-joined": (data: IRoom) => void
   // Send new player details to all players within the room
-  "room-player-joined": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
+  "room-player-joined": ({ id, name, ready }: { id: PlayerID, name: string, ready: boolean }) => void
   // Send leavers details to all other players within the room
-  "room-player-left": ({ id }: { id: string }) => void
-  // Player has been kicked from the room
-  "room-player-kicked": () => void
+  "room-player-left": ({ id }: { id: PlayerID, kicked: boolean }) => void
   // Room updates, settings or start timer
-  "room-update": ({ id, options }: { id: string, status: string, options: IGameOptions }) => void
-  // Send an update to all players within the room when anopther player details change
-  "player-changed": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
-  // Send an update to all players within the room when another players ready state has changed
-  "player-ready-status-changed": ({ id, ready }: { id: string, ready: boolean }) => void
+  "room-update": ({ id, options }: { id: RoomID, status: string, options: IGameOptions }) => void
+  // Send an update to all players within the room when another player details' have change
+  "player-changed": ({ id, name, ready }: { id: PlayerID, name: string, ready: boolean }) => void
   // Notify players of game created by room
   "game-created": (data: IGame) => void
   // Player has joined a game, send details
   "game-joined": (data: IGame) => void
   // New player details to all other players in the game
-  "game-player-joined": ({ id, name, ready }: { id: string, name: string, ready: boolean }) => void
+  "game-player-joined": ({ id, name, ready }: { id: PlayerID, name: string, ready: boolean }) => void
   // Send leavers details to all other players in the game
-  "game-player-kicked": ({ id }: { id: string }) => void
+  "game-player-kicked": ({ id }: { id: PlayerID }) => void
   // Static game data required by the client
   "game-static-data": (data: object) => void
   // Send game update to player

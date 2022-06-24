@@ -44,8 +44,19 @@ const players: ConnectedPlayer[] = []
 const rooms: Room[] = []
 const games: Game<Universe>[] = []
 
+const DEV_DELAY = true
+const devDelay = (callback: () => void, delay: number) => {
+  if (DEV_DELAY) {
+    console.log(`DEV: will send response in ${delay / 1000}s`)
+  }
+
+  setTimeout(() => {
+    callback()
+  }, DEV_DELAY ? delay : 0)
+}
+
 const cleanupRoom = (room: Room) => {
-  if (room.empty())
+  if (room.isEmpty())
   {
     const index = rooms.indexOf(room)
     if (index !== -1)
@@ -53,6 +64,10 @@ const cleanupRoom = (room: Room) => {
       const removed = rooms.splice(index, 1)[0]
       console.info(`Room ${removed.id} deleted`)
     }
+  }
+  else
+  {
+    console.debug(`Room ${room.id} is no longer empty, did not delete`)
   }
 }
 
@@ -65,6 +80,10 @@ const cleanupGame = (game: Game<any>) => {
       const removed = games.splice(index, 1)[0]
       console.info(`Game ${removed.id} deleted`)
     }
+  }
+  else
+  {
+    console.debug(`Game ${game.id} is no longer empty, did not delete`)
   }
 }
 
@@ -91,24 +110,21 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
   players.forEach((player) => {
     if (player instanceof ConnectedPlayer)
     {
-      console.log(`Notify ${player.id} of new game`)
-
-      player.socket.emit("game-created", {
-        id: game.id,
-        options: game.options,
-        saved: game.saved,
-        created: game.created,
-        players: game.allocatedPlayers.map((p) => ({
-          id: player.id,
-          name: player.name,
-          ready: player.ready,
-        })),
-        status: game.status,
-      })
-    }
-    else
-    {
-      // AI Player has already joined
+      devDelay(() => {
+        console.log(`Sending game ${game.id} to ${player.id}`)
+        player.socket.emit("game-created", {
+          id: game.id,
+          options: game.options,
+          saved: game.saved,
+          created: game.created,
+          players: game.allocatedPlayers.map((p) => ({
+            id: player.id,
+            name: player.name,
+            ready: player.ready,
+          })),
+          status: game.status,
+        })
+      }, 1000)
     }
   })
 }
@@ -129,20 +145,26 @@ io.on("connection", (socket) => {
     if (room)
     {
       player.handleLeaveRoom()
-      // Immediately clean up the room, will prevent the host reconnecting to
-      // their previous room as a player (and the room no longer having a host).
-      cleanupRoom(room)
+      // Clean up the room later, if it's still empty
+      setTimeout(() => cleanupRoom(room), 5000)
+    }
+    else
+    {
+      console.debug(`Player ${player.id} is not in a room`)
     }
   }
+
   const handleLeaveGame = () => {
     const game = player.game
     if (game)
     {
       player.handleLeaveGame()
-      // Delay the game clean up to allow for reconnection
-      // FIXME apply a timer to the game itself, to handle
-      // multiple reconnections
+      // Clean up the game later, if it's still empty
       setTimeout(() => cleanupGame(game), 5000)
+    }
+    else
+    {
+      console.debug(`Player ${player.id} is not in a game`)
     }
   }
 
@@ -153,25 +175,22 @@ io.on("connection", (socket) => {
   socket.on("player-create-room", (callback) => {
     if (player.room)
     {
-      // Already in a room, cannot create another
-      // can sometimes be received on reload/hot reload
-      console.log(`Player ${player.id} already in a room ${player.room.id}`)
-      player.room.sendRoomDetailsTo(player)
-    }
-    else
-    {
-      const room = new Room(io, player)
-
-      room.events.once("create-game", handleCreateGame)
-
-      console.log(`Player ${player.id} created room ${room.id}`)
-
-      rooms.push(room)
-
-      player.handleJoinRoom(room)
+      player.handleLeaveRoom()
     }
 
-    callback(!!player.room)
+    const room = new Room(io, player)
+
+    room.events.once("create-game", handleCreateGame)
+
+    rooms.push(room)
+
+    console.log(`Player ${player.id} created room ${room.id}`)
+
+    devDelay(() => {
+      console.log("Sending...", player.id, room.id)
+      // FIXME update callback
+      callback(!!room, room)
+    }, 1000)
   })
 
   socket.on("player-join-room", (id, callback) => {
@@ -180,16 +199,29 @@ io.on("connection", (socket) => {
     const room = rooms.find((room) => room.id === id)
     if (!room)
     {
-      console.warn(`Room ${id} does not exist`)
+      console.warn("Room does not exist")
     }
-    else  if (room.players.length === room.slots)
+    else if (player.room && player.room.id === room.id)
     {
-      console.warn(`Room ${id} is full`)
+      console.debug("Player is already in room")
+      room.sendRoomDetailsTo(player)
+    }
+    else if (false === room.canJoin())
+    {
+      console.warn("Cannot join room")
+    }
+    else if (room.isFull())
+    {
+      console.warn("Room is full")
     }
     else
     {
       room.join(player)
       player.handleJoinRoom(room)
+
+      room.sendRoomDetailsTo(player)
+
+      console.log("Player joined room")
     }
 
     callback(!!player.room)
@@ -203,19 +235,35 @@ io.on("connection", (socket) => {
     const game = games.find((game) => game.id === id)
     if (!game)
     {
-      console.warn(`Game ${id} does not exist`)
+      console.warn(`Game does not exist`)
+    }
+    else if (player.game && player.game.id === game.id)
+    {
+      console.debug("Player is already in game")
+      // TODO Send game details to player
+    }
+    else if (game.isFull())
+    {
+      console.warn("Game is full")
     }
     else if (false === game.canJoin(player))
     {
-      console.warn(`Cannot join game ${id}`)
+      console.warn("Cannot join game")
     }
     else
     {
       player.handleJoinGame(game)
       game.join(player)
 
+      // remove the player from the room they came from
+      if (player.room) {
+        player.handleLeaveRoom
+      }
+
       // If the game has all the players, start
       game.start()
+
+      console.log("Player joined game")
     }
 
     callback(!!player.game)
@@ -255,7 +303,7 @@ setInterval(() => {
 }, 250)
 
 // debug output
-/*
+
 setInterval(() => {
   console.log(`${players.length} players connected, ${rooms.length} rooms, ${games.length} games`)
 
@@ -268,7 +316,7 @@ setInterval(() => {
   })
 
 }, 5000)
-*/
+
 server.listen(PORT, () => {
   console.log(`Server online (${PORT})...`)
 })

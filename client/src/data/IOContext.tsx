@@ -2,8 +2,7 @@ import React from "react"
 import { io, Socket } from "socket.io-client"
 import { PlayerRoomAction } from "../types"
 import { PlayerGameAction } from "../simulation/types"
-import { ServerToClientEvents, ClientToServerEvents } from "../types.d"
-import { useNavigate } from "react-router-dom"
+import { ServerToClientEvents, ClientToServerEvents, IRoom } from "../types.d"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents>
@@ -15,10 +14,10 @@ export type Status = "disconnected" | "connecting" | "connected"
 export interface IIOContext {
   connected: () => boolean
   requestRooms: () => void
-  createRoom: () => Promise<void>
+  createRoom: () => Promise<IRoom>
   joinRoom: (id: string) => Promise<void>
   leaveRoom: () => void
-  roomAction: (name: PlayerRoomAction, data: any) => Promise<void>
+  roomAction: (name: PlayerRoomAction, data: object) => Promise<void>
   joinGame: (id: string) => Promise<void>
   leaveGame: () => void,
   action: (name: PlayerGameAction, data: object) => Promise<void>
@@ -40,18 +39,17 @@ export const IOContext = React.createContext<IIOContext>({
 export type MessageHandler = (action: string, data: any) => void
 
 // Context Provider
-const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: React.ReactElement }) => {
-  const [ socket, setSocket ] = React.useState<SocketIO | undefined>(undefined)
-  const navigate = useNavigate()
+const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler, children: React.ReactNode }) => {
+  const [socket, setSocket] = React.useState<SocketIO | undefined>(undefined)
 
   console.log("Render IOProvider")
 
   const handleDisconnect = (s: SocketIO) => {
-    s.disconnect()
+    // don't disconnect the socket manually as doing so
+    // prevents auto-reconnecting
     setSocket(undefined)
     // Clean up state
     handleMessage("disconnect", {})
-    navigate("/")
   }
 
   React.useEffect(() => {
@@ -79,16 +77,12 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
 
     s.onAny(handleMessage)
 
-    s.on("game-created", ({ id }) => {
-      // console.log(`Received game-created for ${id}`)
-      navigate(`/game/${id}/`, { replace: true })
-    })
-
     return () => {
       console.log("Clean up IOProvider")
+      s.disconnect()
       handleDisconnect(s)
     }
-  }, [ handleMessage, setSocket ])
+  }, [ handleMessage ])
 
   const contextValue = {
     connected: () => !!socket,
@@ -98,11 +92,11 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     },
     createRoom: () => {
       console.assert(socket, "Socket is invalid!")
-      return new Promise<void>((resolve, reject) => {
-        socket?.emit("player-create-room", (ok: boolean) => {
+      return new Promise<IRoom>((resolve, reject) => {
+        socket?.emit("player-create-room", (ok: boolean, data?: IRoom) => {
           if (ok)
           {
-            resolve()
+            resolve(data!)
           }
           else
           {
@@ -129,7 +123,7 @@ const IOProvider = ({ handleMessage, children }: { handleMessage: MessageHandler
     leaveRoom: () => {
       console.assert(socket, "Socket is invalid!")
       socket?.emit("player-leave-room")
-      handleMessage("room-player-kicked", {})
+      handleMessage("room-leave", {})
     },
     roomAction: (name: string, data: any) => {
       console.assert(socket, "Socket is invalid!")
