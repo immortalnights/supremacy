@@ -178,6 +178,8 @@ class Game<T extends IWorld> implements IGame {
         }
 
         this.world.simulate((now - this.lastTick) / 1000)
+
+        // Update the players
         this.players.forEach((player) => {
           const data = this.world.updateFor(player.id) as IUniverse
 

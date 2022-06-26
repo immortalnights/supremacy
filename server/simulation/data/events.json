@@ -1,0 +1,42 @@
+[
+  {
+    "type": "breakthrough",
+    "name": "",
+    "description": "",
+    "repeat": false,
+    "when": 10,
+    "effects": [
+      {
+        "type": "unlock",
+        "ship": "atmos"
+      }
+    ]
+  },
+  {
+    "type": "breakthrough",
+    "name": "",
+    "description": "",
+    "repeat": false,
+    "when": 50,
+    "effects": [
+      {
+        "type": "production-bonus",
+        "ship": "horticultural"
+      }
+    ]
+  },
+  {
+    "type": "disaster",
+    "name": "Cosmic Storm",
+    "description": "",
+    "repeat": true,
+    "frequency": [1, 10],
+    "effects": [
+      {
+        "type": "offline-ships",
+        "position": "surface",
+        "duration": 5
+      }
+    ]
+  }
+]

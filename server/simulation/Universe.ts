@@ -23,12 +23,14 @@ import type { IWorld } from "../serverTypes"
 import StarDate, { DAYS_PER_YEAR } from "./StarDate"
 import { calculateEspionageMissionCost, generateMissionReport } from "./logic/espionage"
 import { defaultSuit, defaultWeapon, calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
+import { UniverseEvent, load as loadUniverseEvents } from "./logic/UniverseEvents"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
 import EspionageData from "./data/espionage.json"
 import { random } from "./utilities"
 
 const MAXIMUM_PLAYERS = 2
+
 
 export default class Universe implements IUniverse, IWorld
 {
@@ -40,6 +42,7 @@ export default class Universe implements IUniverse, IWorld
   planets: Planet[]
   ships: Ship[]
   platoons: Platoon[]
+  events: UniverseEvent[]
   finished: boolean
   nextShipId: number
   nextPlatoonId: number
@@ -53,7 +56,8 @@ export default class Universe implements IUniverse, IWorld
     this.players = []
     this.planets = []
     this.ships = []
-    this.platoons = [],
+    this.platoons = []
+    this.events = loadUniverseEvents(this.date)
     this.finished = false
     this.nextShipId = 0
     this.nextPlatoonId = 0
@@ -1189,6 +1193,17 @@ export default class Universe implements IUniverse, IWorld
   {
     // console.log("Universe:tick")
     this.date.inc(delta)
+
+    // this.events.forEach((event) => {
+    //   if (false === event.completed)
+    //   {
+    //     if (event.next?.gt)
+
+    //     if (Array.isArray(event.stardate))
+    //     {
+    //     }
+    //   }
+    // })
 
     this.planets.forEach((planet) => {
       if (planet.simulate(delta))
