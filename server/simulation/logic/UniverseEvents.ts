@@ -1,6 +1,6 @@
 import AvailableEvents from "../data/events.json"
-import StarDate from "../StarDate"
 import { random } from "../utilities"
+import { StarDate } from "../types"
 
 interface IEventEffect {
   type: string
@@ -24,10 +24,10 @@ export class UniverseEvent implements IUniverseEvent {
   name: string
   description: string
   repeat: boolean
-  when?: number
+  when?: StarDate
   frequency?: number[]
   effects: IEventEffect[]
-  occurred?: StarDate
+  lastOccurred?: StarDate
   completed: boolean
 
   constructor({ type, name, description, repeat, when, frequency, effects }: IUniverseEvent, date: StarDate)
@@ -39,12 +39,12 @@ export class UniverseEvent implements IUniverseEvent {
     this.when = when
     this.frequency = frequency
     this.effects = effects
-    this.occurred = undefined
+    this.lastOccurred = undefined
     this.completed = false
 
     if (this.when === undefined)
     {
-      this.setNextDate(date)
+      // this.setNextDate(date)
     }
   }
 
@@ -58,5 +58,5 @@ export class UniverseEvent implements IUniverseEvent {
 }
 
 export const load = (date: StarDate, data: IUniverseEvent[] = AvailableEvents) => {
-  return data.map((item) => new UniverseEvent(item, date))
+  return data.map((item) => new UniverseEvent(item, date as unknown as StarDate))
 }

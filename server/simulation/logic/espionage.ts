@@ -22,7 +22,7 @@ export const calculateEspionageMissionCost = (mission: string) => {
 
 export const generateMissionReport = (planet: IPlanet, strength: number, mission: string) => {
   const report: IEspionageReport = {
-    date: { day: 0, year: 0 },
+    date: 0,
     planet: {
       id: planet.id,
       name: planet.name,

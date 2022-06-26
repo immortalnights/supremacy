@@ -1,5 +1,3 @@
-export const DAYS_PER_YEAR = 48
-
 export type PlayerGameAction = "rename-planet"
   | "planet-modify-tax"
   | "planet-terraform"
@@ -30,6 +28,8 @@ export enum Difficulty {
   Hard,
   Impossible,
 }
+
+export type StarDate = number
 
 export interface IResources {
   food: number
@@ -107,8 +107,8 @@ export interface IShipHeading {
   location: PlanetID
   from: PlanetID
   to: PlanetID
-  departed: IDate
-  arrival: IDate
+  departed: StarDate
+  arrival: StarDate
   fuels: number
 }
 
@@ -119,12 +119,12 @@ export interface IShipHarvesting {
 
 export interface IShipHarvester {
   multiplier: number
-  start: IDate
+  start: StarDate
 }
 
 export interface IShipTerraformer {
-  start: IDate
-  end: IDate
+  start: StarDate
+  end: StarDate
   planetName: string
 }
 
@@ -179,15 +179,9 @@ export interface IPlatoon extends IPlatoonBasic {
   rank: string
 }
 
-export interface IDate {
-  day: number
-  year: number
-}
-
 export interface ISolarSystem {
   difficulty: Difficulty
-  date: IDate
-  yearDuration: number
+  date: StarDate
 }
 
 export interface IUniverse extends ISolarSystem {
@@ -230,7 +224,7 @@ export interface IEquipmentList {
 }
 
 export interface IEspionageReport extends Partial<IResources> {
-  date: IDate,
+  date: StarDate,
   planet: {
     id: PlanetID,
     name: string,

@@ -2,6 +2,7 @@ import Planet from "./Planet"
 import Ship from "./Ship"
 import Platoon from "./Platoon"
 import {
+  StarDate,
   PlanetType,
   IUniverse,
   IPlanetBasic,
@@ -20,9 +21,8 @@ import {
   IShipTerraformer,
 } from "./types"
 import type { IWorld } from "../serverTypes"
-import StarDate, { DAYS_PER_YEAR } from "./StarDate"
 import { calculateEspionageMissionCost, generateMissionReport } from "./logic/espionage"
-import { defaultSuit, defaultWeapon, calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
+import { calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
 import { UniverseEvent, load as loadUniverseEvents } from "./logic/UniverseEvents"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
@@ -31,12 +31,9 @@ import { random } from "./utilities"
 
 const MAXIMUM_PLAYERS = 2
 
-
 export default class Universe implements IUniverse, IWorld
 {
   date: StarDate
-  // FIXME would be better if this was not a member (caused by IUniverse)
-  yearDuration: number
   difficulty: Difficulty
   players: string[]
   planets: Planet[]
@@ -50,8 +47,7 @@ export default class Universe implements IUniverse, IWorld
   constructor()
   {
     console.log("Universe:constructor")
-    this.date = new StarDate()
-    this.yearDuration = DAYS_PER_YEAR
+    this.date = 1
     this.difficulty = Difficulty.Easy
     this.players = []
     this.planets = []
@@ -246,12 +242,13 @@ export default class Universe implements IUniverse, IWorld
 
     const beginTravel = (ship: Ship, origin: Planet, destination: Planet) => {
       let ok = false
-      const distance = Math.abs(origin.location - origin.location)
+      const distance = Math.abs(origin.location - destination.location)
       const requiredFuels = ship.capacity.fuels > 0 ? 50 * distance : 0
+      console.debug(`Distance from ${origin.location} to ${origin.location} is ${distance} and required ${requiredFuels} fuel`)
       if (ship.fuels >= requiredFuels)
       {
-        const departed = this.date.clone().floor()
-        const arrival = this.date.clone().add(distance).ceil()
+        const departed = this.date
+        const arrival = this.date + distance
 
         ship.task = "traveling"
         ship.location.planet = undefined
@@ -275,7 +272,7 @@ export default class Universe implements IUniverse, IWorld
       ship.task = "harvesting"
       ship.equipment = {
         multiplier: 1,
-        start: this.date.clone().floor()
+        start: this.date
       }
     }
 
@@ -442,7 +439,7 @@ export default class Universe implements IUniverse, IWorld
 
                   capital.resources.credits -= cost
                   const report = generateMissionReport(planet, strength, body.mission)
-                  report.date = this.date.clone()
+                  report.date = this.date
 
                   resultData = { world: { planets: [capital.toJSON()], espionage: report } }
                   result = true
@@ -1192,7 +1189,7 @@ export default class Universe implements IUniverse, IWorld
   simulate(delta: number): void
   {
     // console.log("Universe:tick")
-    this.date.inc(delta)
+    this.date += delta
 
     // this.events.forEach((event) => {
     //   if (false === event.completed)
@@ -1221,7 +1218,7 @@ export default class Universe implements IUniverse, IWorld
       {
         if (ship.heading)
         {
-          if (this.date.gt(ship.heading.arrival))
+          if (this.date > ship.heading.arrival)
           {
             ship.location.planet = ship.heading.to
             ship.location.position = "orbit"
@@ -1233,17 +1230,17 @@ export default class Universe implements IUniverse, IWorld
 
             if (ship.type === "Atmosphere Processor" && planet.type === PlanetType.Lifeless && planet.terraforming === false)
             {
-              const endDate = this.date.clone().floor().add(planet.terraformDuration)
+              const endDate: StarDate = this.date + planet.terraformDuration
               ship.location.position = "surface"
               ship.equipment = {
-                start: this.date.clone(),
+                start: this.date,
                 end: endDate,
                 planetName: "new planet",
               }
               ship.task = "terraforming"
 
               planet.terraforming = true
-              console.log(`Begin terrforming planet ${planet.name}, will complete ${endDate.day}-${endDate.year}`)
+              console.log(`Begin terrforming planet ${planet.name}, will complete ${endDate}`)
             }
           }
         }
@@ -1255,7 +1252,7 @@ export default class Universe implements IUniverse, IWorld
       else if (ship.task === "terraforming")
       {
         const terraformer = ship.equipment as IShipTerraformer
-        if (this.date.gt(terraformer.end))
+        if (this.date > terraformer.end)
         {
           ship.task = "idle"
           ship.equipment = undefined
@@ -1279,8 +1276,7 @@ export default class Universe implements IUniverse, IWorld
   {
     const universe: IUniverse = {
       // Don't send partial days
-      date: { day: Math.floor(this.date.day), year: this.date.year },
-      yearDuration: this.yearDuration, // DAYS_PER_YEAR
+      date: this.date,
       difficulty: this.difficulty,
       planets: [],
       ships: [],
