@@ -1,7 +1,7 @@
 [
   {
     "type": "breakthrough",
-    "name": "",
+    "name": "Terraforming Breakthrough",
     "description": "",
     "repeat": false,
     "when": 10,
@@ -14,7 +14,7 @@
   },
   {
     "type": "breakthrough",
-    "name": "",
+    "name": "Horticultural Breakthrough",
     "description": "",
     "repeat": false,
     "when": 50,

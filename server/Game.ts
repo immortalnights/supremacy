@@ -1,7 +1,6 @@
 import crypto from "crypto"
-import EventEmitter from "events"
 import { Server } from "socket.io"
-import { ServerEventEmitter, IWorld } from "./serverTypes"
+import { IWorld } from "./serverTypes"
 import { IGame, IGameOptions, GameStatus, IPlayer, IUpdate, IActionCallback } from "./types"
 import ConnectedPlayer from "./ConnectedPlayer"
 import Player from "./Player"
@@ -18,7 +17,6 @@ class Game<T extends IWorld> implements IGame {
   created: number
   status: GameStatus
   io: Server
-  events: ServerEventEmitter
   world: T
   lastTick: number
 
@@ -34,7 +32,6 @@ class Game<T extends IWorld> implements IGame {
     this.io = io
     this.world = worldFactory(options)
     this.lastTick = 0
-    this.events = new EventEmitter() as ServerEventEmitter
   }
 
   isEmpty()

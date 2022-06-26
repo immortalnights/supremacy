@@ -1191,16 +1191,24 @@ export default class Universe implements IUniverse, IWorld
     // console.log("Universe:tick")
     this.date += delta
 
-    // this.events.forEach((event) => {
-    //   if (false === event.completed)
-    //   {
-    //     if (event.next?.gt)
+    this.events.forEach((event) => {
+      if (false === event.completed && this.date > event.when!)
+      {
+        event.lastOccurred = this.date
 
-    //     if (Array.isArray(event.stardate))
-    //     {
-    //     }
-    //   }
-    // })
+        this.handleEvent(event)
+
+        if (event.repeat)
+        {
+          event.setNextDate(this.date)
+          console.log(`Event '${event.name}' will occur again on ${event.when}`)
+        }
+        else
+        {
+          event.completed = true
+        }
+      }
+    })
 
     this.planets.forEach((planet) => {
       if (planet.simulate(delta))
@@ -1270,6 +1278,11 @@ export default class Universe implements IUniverse, IWorld
         platoon.train(delta)
       }
     })
+  }
+
+  handleEvent(event: UniverseEvent)
+  {
+
   }
 
   updateFor(player: string): IUniverse

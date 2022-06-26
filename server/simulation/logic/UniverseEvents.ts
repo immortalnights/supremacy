@@ -44,15 +44,17 @@ export class UniverseEvent implements IUniverseEvent {
 
     if (this.when === undefined)
     {
-      // this.setNextDate(date)
+      this.setNextDate(date)
     }
+
+    console.log(`Event '${name}' will occur on ${this.when}`)
   }
 
   setNextDate(date: StarDate)
   {
     if (this.frequency)
     {
-      const when = random(this.frequency[0], this.frequency[1])
+      this.when = date + random(this.frequency[0], this.frequency[1])
     }
   }
 }
