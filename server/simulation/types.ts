@@ -208,6 +208,10 @@ export interface IShipDetails {
   harvester: IShipHarvesting | null
 }
 
+export interface IStaticShipDetails extends IShipDetails {
+  limit: number
+}
+
 export interface IShipList {
   [key: string]: IShipDetails
 }

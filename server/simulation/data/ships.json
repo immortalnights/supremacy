@@ -71,6 +71,7 @@
       "minerals": 75
     },
     "value": 7500,
+    "limit": 1,
     "harvester": null
   },
   "carrier":

@@ -7,11 +7,13 @@ import {
   IUniverse,
   IPlanetBasic,
   IPlanet,
+  IPlanetResources,
   IShipBasic,
   IShip,
   IPlatoonBasic,
   IPlatoon,
   IShipDetails,
+  IStaticShipDetails,
   Difficulty,
   PlayerGameAction,
   PlanetID,
@@ -532,50 +534,50 @@ export default class Universe implements IUniverse, IWorld
           if (capital)
           {
             const staticData = this.getStaticData()
-            const ship = staticData.ships[body.id as keyof typeof staticData.ships] as IShipDetails
+            const ship = staticData.ships[body.id as keyof typeof staticData.ships] as IStaticShipDetails
             if (ship)
             {
-              let bought = false
+              const cost = {
+                credits: 0,
+                minerals: 0,
+                energy: 0,
+              }
+
               switch (this.difficulty)
               {
                 case Difficulty.Impossible:
                 case Difficulty.Hard:
                 {
-                  if (capital.resources.credits >= ship.cost.credits
-                     && capital.resources.minerals >= ship.cost.minerals
-                     && capital.resources.energy >= ship.cost.energy)
-                  {
-                    capital.resources.credits -= ship.cost.credits
-                    capital.resources.minerals -= ship.cost.minerals
-                    capital.resources.energy -= ship.cost.energy
-                    bought = true
-                  }
+                  cost.credits = ship.cost.credits
+                  cost.minerals = ship.cost.minerals
+                  cost.energy = ship.cost.energy
                   break
                 }
                 case Difficulty.Medium:
                 {
-                  if (capital.resources.credits >= ship.cost.credits
-                    && capital.resources.minerals >= ship.cost.minerals)
-                  {
-                    capital.resources.credits -= ship.cost.credits
-                    capital.resources.minerals -= ship.cost.minerals
-                    bought = true
-                  }
+                  cost.credits = ship.cost.credits
+                  cost.minerals = ship.cost.minerals
                   break
                 }
                 case Difficulty.Easy:
                 {
-                  if (capital.resources.credits >= ship.cost.credits)
-                  {
-                    capital.resources.credits -= ship.cost.credits
-                    bought = true
-                  }
+                  cost.credits = ship.cost.credits
                   break
                 }
               }
 
-              if (bought)
+              if (ship.limit !== undefined && this.ships.filter((s) => s.type === ship.type).length >= ship.limit)
               {
+                reason = "Reached limit for ship"
+              }
+              else if (capital.resources.credits >= cost.credits
+                && capital.resources.minerals >= cost.minerals
+                && capital.resources.energy >= cost.energy)
+              {
+                capital.resources.credits -= cost.credits
+                capital.resources.minerals -= cost.minerals
+                capital.resources.energy -= cost.energy
+
                 const newShip = new Ship(this.nextShipId++, "unnamed", ship, player, capital.id)
                 this.ships.push(newShip)
 
