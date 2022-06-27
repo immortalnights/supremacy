@@ -10,6 +10,7 @@ interface IEventEffect {
 }
 
 interface IUniverseEvent {
+  id: string
   type: string
   name: string
   description: string
@@ -20,6 +21,7 @@ interface IUniverseEvent {
 }
 
 export class UniverseEvent implements IUniverseEvent {
+  id: string
   type: string
   name: string
   description: string
@@ -30,8 +32,9 @@ export class UniverseEvent implements IUniverseEvent {
   lastOccurred?: StarDate
   completed: boolean
 
-  constructor({ type, name, description, repeat, when, frequency, effects }: IUniverseEvent, date: StarDate)
+  constructor({ id, type, name, description, repeat, when, frequency, effects }: IUniverseEvent, date: StarDate)
   {
+    this.id = id
     this.type = type
     this.name = name
     this.description = description

@@ -566,7 +566,11 @@ export default class Universe implements IUniverse, IWorld
                 }
               }
 
-              if (ship.limit !== undefined && this.ships.filter((s) => s.type === ship.type).length >= ship.limit)
+              if (ship.type === "Atmosphere Processor" && false === this.events.find((e) => e.id === "terraforming-breakthrough")!.completed)
+              {
+                reason = "Atmosphere Processor is not yet available"
+              }
+              else if (ship.limit !== undefined && this.ships.filter((s) => s.type === ship.type).length >= ship.limit)
               {
                 reason = "Reached limit for ship"
               }
