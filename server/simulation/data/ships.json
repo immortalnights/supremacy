@@ -120,9 +120,9 @@
       "location": "surface",
       "resources": {
         "food": 0,
-        "minerals": 2000,
-        "fuels": 1000,
-        "energy": -200
+        "minerals": 2,
+        "fuels": 7,
+        "energy": -1
       }
     }
   },
@@ -152,7 +152,7 @@
         "food": 12,
         "minerals": 0,
         "fuels": 0,
-        "energy": 0
+        "energy": -1
       }
     }
   }

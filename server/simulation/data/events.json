@@ -3,7 +3,8 @@
     "id": "terraforming-breakthrough",
     "type": "breakthrough",
     "name": "Terraforming Breakthrough",
-    "description": "",
+    "headline": "News Just In",
+    "description": "The Atmosphere Processor is now finished and available",
     "repeat": false,
     "when": 10,
     "effects": [
@@ -17,6 +18,7 @@
     "id": "horticultural-breakthrough",
     "type": "breakthrough",
     "name": "Horticultural Breakthrough",
+    "headline": "",
     "description": "",
     "repeat": false,
     "when": 50,
@@ -28,9 +30,26 @@
     ]
   },
   {
-    "id": "cosmic-storm",
+    "id": "electro-magnetic storm",
     "type": "disaster",
     "name": "Cosmic Storm",
+    "headline": "Warning!",
+    "description": "x>/'HC+ A%F H!uge electro-magnetic storm has swept across the galaxy affecting equipment!",
+    "repeat": true,
+    "frequency": [1, 10],
+    "effects": [
+      {
+        "type": "offline-ships",
+        "position": "surface",
+        "duration": 5
+      }
+    ]
+  },
+  {
+    "id": "??cosmic-storm",
+    "type": "disaster",
+    "name": "Cosmic Storm",
+    "headline": "",
     "description": "",
     "repeat": true,
     "frequency": [1, 10],

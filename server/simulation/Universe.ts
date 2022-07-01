@@ -1223,10 +1223,58 @@ export default class Universe implements IUniverse, IWorld
       }
     })
 
-    this.ships.forEach((ship) => {
-      if (ship.task === "harvesting")
+    // identify multipliers based on events and research
+    const multipliers = {
+      food: 1,
+      minerals: 1,
+      fuels: 1,
+      energy: 1,
+    }
+
+    this.events.find((e) => {
+      switch (e.type)
       {
-        // TODO
+        case "horticultural-breakthrough":
+        {
+          multipliers.food = 2
+          break
+        }
+        default:
+        {
+          break
+        }
+      }
+    })
+
+    const calculateResourceChange = (base: number, multiplier: number) => ((base * multiplier) / 2) * delta
+
+    this.ships.forEach((ship) => {
+      if (ship.task === "harvesting" && ship.harvester)
+      {
+        const planet = this.planets.find((p) => p.id === ship.location.planet)
+        if (planet)
+        {
+          // TODO store the resources it the ship, and transfer them to the planet
+          // every two seconds to provide a smoother flow of resources
+          // TODO do energy first so all ships that can harvest, do.
+          // TODO if the is no power for a ship, put it offline
+          if (ship.harvester.resources.energy < 0)
+          {
+            const energyCost = calculateResourceChange(ship.harvester.resources.energy, 1) // ship.harvester.resources.energy * multipliers.energy / 2) / 1000) * delta,
+            if (planet.resources.energy > energyCost)
+            {
+              planet.resources.energy -= energyCost
+              planet.resources.food += calculateResourceChange(ship.harvester.resources.food, multipliers.food)
+              planet.resources.minerals += calculateResourceChange(ship.harvester.resources.minerals, multipliers.minerals)
+              planet.resources.fuels += calculateResourceChange(ship.harvester.resources.fuels, multipliers.fuels)
+            }
+          }
+          else
+          {
+            console.log(ship.harvester.resources.energy, multipliers.energy, calculateResourceChange(ship.harvester.resources.energy, multipliers.energy), delta)
+            planet.resources.energy += calculateResourceChange(ship.harvester.resources.energy, multipliers.energy)
+          }
+        }
       }
       else if (ship.task === "traveling")
       {
