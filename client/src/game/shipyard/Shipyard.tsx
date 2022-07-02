@@ -5,7 +5,9 @@ import { IOContext } from "../../data/IOContext"
 import { CapitalPlanet, IPlanet } from "../../data/Planets"
 import { SolarSystem as SolarSystemData, ISolarSystem } from "../../data/SolarSystem"
 import { Difficulty } from "../../simulation/types"
-import { StaticShips, IShipList, IShipDetails } from "../../data/StaticData"
+import { StaticShips, IShipList, IStaticShipDetails } from "../../data/StaticData"
+import { NewShipNameDialog } from "../components/NameDialog"
+import { PlayerShips } from "../../data/Ships"
 
 const ItemDetails = ({ label, value, units = "" }: { label: string, units?: string, value: string | number }) => {
   return (<Typography variant="caption" display="block">{value} {units} : {label}</Typography>)
@@ -14,9 +16,11 @@ const ItemDetails = ({ label, value, units = "" }: { label: string, units?: stri
 const Shipyard = () => {
   const ShipData = Recoil.useRecoilValue(StaticShips) as IShipList
   const planet = Recoil.useRecoilValue(CapitalPlanet)
+  const playerShips = Recoil.useRecoilValue(PlayerShips)
   const { difficulty } = Recoil.useRecoilValue(SolarSystemData) as ISolarSystem
   const { action } = React.useContext(IOContext)
-  const [ selected, setSelected ] = React.useState<number>(0)
+  const [ selected, setSelected ] = React.useState(0)
+  const [ purchasing, setPurchasing ] = React.useState(false)
   const selectedShip = ShipData[Object.keys(ShipData)[selected] as keyof typeof ShipData]
 
   const handleNextClick = () => {
@@ -32,14 +36,28 @@ const Shipyard = () => {
   }
 
   const handleBuyClick = () => {
-    console.log("buy", selected)
+    setPurchasing(true)
+  }
+
+  const handleCompletePurchase = (name: string) => {
+    setPurchasing(false)
     action("ship-purchase", {
-      id: Object.keys(ShipData)[selected]
+      id: Object.keys(ShipData)[selected],
+      name,
     })
+  }
+  const handleCancelPurchase = () => setPurchasing(false)
+
+  let defaultName = ""
+  if (purchasing)
+  {
+    const owned = playerShips.filter((s) => s.type === selectedShip.type)
+    defaultName = `${selectedShip.shortName}${owned.length + 1}`
   }
 
   return (
     <div>
+      {purchasing && <NewShipNameDialog open name={defaultName} type={selectedShip.type} onConfirm={handleCompletePurchase} onCancel={handleCancelPurchase} />}
       <div style={{ backgroundColor: "gray", height: 200, margin: "1em" }}>{selectedShip.shortName}</div>
       <Stack direction="row">
         <Button onClick={handlePrevClick}>&lt;&lt;</Button>

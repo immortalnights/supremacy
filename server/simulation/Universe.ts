@@ -12,8 +12,6 @@ import {
   IShip,
   IPlatoonBasic,
   IPlatoon,
-  IShipDetails,
-  IStaticShipDetails,
   Difficulty,
   PlayerGameAction,
   PlanetID,
@@ -22,6 +20,7 @@ import {
   PlatoonStatus,
   IShipTerraformer,
 } from "./types"
+import { IStaticShipDetails } from "./staticTypes"
 import type { IWorld } from "../serverTypes"
 import { calculateEspionageMissionCost, generateMissionReport } from "./logic/espionage"
 import { calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
@@ -104,18 +103,18 @@ export default class Universe implements IUniverse, IWorld
         // Testing or difficulty levels?
         // provide a solar and a horticultural to all players
         // For now, one of every ship is provided...
-        Object.keys(ShipData).forEach((key, index, keys) => {
-          const shipData = ShipData[key as keyof typeof ShipData]
-          const ship = new Ship(
-            this.nextShipId++,
-            shipData.shortName,
-            shipData,
-            player,
-            starbase?.id
-          )
+        // Object.keys(ShipData).forEach((key, index, keys) => {
+        //   const shipData = ShipData[key as keyof typeof ShipData]
+        //   const ship = new Ship(
+        //     this.nextShipId++,
+        //     shipData.shortName,
+        //     shipData,
+        //     player,
+        //     starbase?.id
+        //   )
 
-          this.ships.push(ship)
-        })
+        //   this.ships.push(ship)
+        // })
 
         // to function how the original game does all 25 platoons (for each player)
         // must be pre-created otherwise the UI would be attempting a name match on
@@ -527,7 +526,7 @@ export default class Universe implements IUniverse, IWorld
       }
       case "ship-purchase":
       {
-        const body = data as { id: string }
+        const body = data as { id: string, name: string }
         if (body.id)
         {
           const capital = this.planets.find((p) => p.owner === player && p.capital === true)
@@ -582,7 +581,7 @@ export default class Universe implements IUniverse, IWorld
                 capital.resources.minerals -= cost.minerals
                 capital.resources.energy -= cost.energy
 
-                const newShip = new Ship(this.nextShipId++, "unnamed", ship, player, capital.id)
+                const newShip = new Ship(this.nextShipId++, body.name, ship, player, capital.id)
                 this.ships.push(newShip)
 
                 result = true
@@ -1254,25 +1253,53 @@ export default class Universe implements IUniverse, IWorld
         const planet = this.planets.find((p) => p.id === ship.location.planet)
         if (planet)
         {
-          // TODO store the resources it the ship, and transfer them to the planet
-          // every two seconds to provide a smoother flow of resources
+          const harvester = ship.harvester
           // TODO do energy first so all ships that can harvest, do.
           // TODO if the is no power for a ship, put it offline
-          if (ship.harvester.resources.energy < 0)
+          if (harvester.resources.energy < 0)
           {
-            const energyCost = calculateResourceChange(ship.harvester.resources.energy, 1) // ship.harvester.resources.energy * multipliers.energy / 2) / 1000) * delta,
+            const energyCost = calculateResourceChange(harvester.resources.energy, 1)
             if (planet.resources.energy > energyCost)
             {
+              // Immediately take the required energy
               planet.resources.energy -= energyCost
-              planet.resources.food += calculateResourceChange(ship.harvester.resources.food, multipliers.food)
-              planet.resources.minerals += calculateResourceChange(ship.harvester.resources.minerals, multipliers.minerals)
-              planet.resources.fuels += calculateResourceChange(ship.harvester.resources.fuels, multipliers.fuels)
+              harvester.cargo.food += calculateResourceChange(harvester.resources.food, multipliers.food)
+              harvester.cargo.minerals += calculateResourceChange(harvester.resources.minerals, multipliers.minerals)
+              harvester.cargo.fuels += calculateResourceChange(harvester.resources.fuels, multipliers.fuels)
+            }
+            else
+            {
+              ship.task = "idle"
             }
           }
           else
           {
-            console.log(ship.harvester.resources.energy, multipliers.energy, calculateResourceChange(ship.harvester.resources.energy, multipliers.energy), delta)
-            planet.resources.energy += calculateResourceChange(ship.harvester.resources.energy, multipliers.energy)
+            harvester.cargo.energy += calculateResourceChange(harvester.resources.energy, multipliers.energy)
+          }
+
+          // Transfer when a cycle is complete
+          if (harvester.cargo.food > harvester.resources.food)
+          {
+            planet.resources.food += harvester.resources.food
+            harvester.cargo.food -= harvester.resources.food
+          }
+
+          if (harvester.cargo.minerals > harvester.resources.minerals)
+          {
+            planet.resources.minerals += harvester.resources.minerals
+            harvester.cargo.minerals -= harvester.resources.minerals
+          }
+
+          if (harvester.cargo.fuels > harvester.resources.fuels)
+          {
+            planet.resources.fuels += harvester.resources.fuels
+            harvester.cargo.fuels -= harvester.resources.fuels
+          }
+
+          if (harvester.cargo.energy > harvester.resources.energy)
+          {
+            planet.resources.energy += harvester.resources.energy
+            harvester.cargo.energy -= harvester.resources.energy
           }
         }
       }

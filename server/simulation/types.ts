@@ -1,3 +1,5 @@
+import { IStaticShipHarvesting } from "./staticTypes"
+
 export type PlayerGameAction = "rename-planet"
   | "planet-modify-tax"
   | "planet-terraform"
@@ -88,14 +90,6 @@ export interface IShipLocation {
   y: number
 }
 
-export interface IShipBasic {
-  id: ShipID
-  type: string
-  name: string
-  owner: string
-  location: IShipLocation
-}
-
 export interface IShipCapacity {
   civilians: number
   cargo: number
@@ -112,9 +106,8 @@ export interface IShipHeading {
   fuels: number
 }
 
-export interface IShipHarvesting {
-  location: string
-  resources: IResources
+export interface IShipHarvesting extends IStaticShipHarvesting {
+  cargo: IResources
 }
 
 export interface IShipHarvester {
@@ -129,6 +122,14 @@ export interface IShipTerraformer {
 }
 
 export type ShipTask = "idle" | "traveling" | "harvesting" | "terraforming"
+
+export interface IShipBasic {
+  id: ShipID
+  type: string
+  name: string
+  owner: string
+  location: IShipLocation
+}
 
 // FIXME ship location does not include the planet name, but ship heading to/from does...
 export interface IShip extends IShipBasic {
@@ -189,31 +190,6 @@ export interface IUniverse extends ISolarSystem {
   ships: (IShipBasic | IShip)[]
   platoons: (IPlatoonBasic | IPlatoon)[]
   espionage?: IEspionageReport
-}
-
-export interface IShipDetails {
-  type: string
-  description: string
-  shortName: string
-  requiredCrew: number
-  capacity: IShipCapacity
-  speed: number
-  range: number
-  cost: {
-    credits: number
-    minerals: number
-    energy: number
-  }
-  value: number
-  harvester: IShipHarvesting | null
-}
-
-export interface IStaticShipDetails extends IShipDetails {
-  limit: number
-}
-
-export interface IShipList {
-  [key: string]: IShipDetails
 }
 
 export interface IEquipment {

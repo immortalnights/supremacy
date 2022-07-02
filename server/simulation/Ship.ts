@@ -5,7 +5,6 @@ import {
   ShipID,
   IShip,
   IShipCapacity,
-  IShipDetails,
   IShipHarvesting,
   IShipHeading,
   IShipLocation,
@@ -14,6 +13,7 @@ import {
   IShipTerraformer,
   PlanetID,
 } from "./types";
+import { IStaticShipDetails } from "./staticTypes"
 
 export default class Ship implements IShip
 {
@@ -38,7 +38,8 @@ export default class Ship implements IShip
   task: ShipTask
   equipment?: IShipHarvester | IShipTerraformer
 
-  constructor(id: number, name: string, details: IShipDetails, owner: string, location: number | undefined)
+
+  constructor(id: number, name: string, details: IStaticShipDetails, owner: string, location: number | undefined)
   {
     this.id = id
     this.name = name
@@ -71,6 +72,12 @@ export default class Ship implements IShip
     this.harvester = details.harvester ? {
       location: details.harvester.location,
       resources: { ...details.harvester.resources },
+      cargo: {
+        food: 0,
+        minerals: 0,
+        fuels: 0,
+        energy: 0,
+      },
     } : undefined
   }
 

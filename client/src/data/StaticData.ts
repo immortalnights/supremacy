@@ -1,8 +1,9 @@
 import Recoil from "recoil"
-import { IShipList, IShipDetails, IEquipment, IEquipmentList } from "../simulation/types.d"
+import { IStaticShipDetails, IShipList } from "../simulation/staticTypes.d"
+import { IEquipment, IEquipmentList } from "../simulation/types.d"
 import { filterObject } from "./utilities"
 
-export type { IShipList, IShipDetails }
+export type { IShipList, IStaticShipDetails }
 
 export const StaticShips = Recoil.atom<IShipList>({
     key: "staticShips",

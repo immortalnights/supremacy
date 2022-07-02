@@ -1,25 +1,28 @@
 import React from "react"
-import Recoil from "recoil"
 import {
   Button,
   TextField,
-  Typography,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogProps,
   DialogActions,
-  Input
 } from "@mui/material"
 
-interface RenameDialogProps {
+interface NameDialogProps extends DialogProps {
   name: string
   onConfirm: (name: string) => void
   onCancel: () => void
 }
 
-const RenameDialog = ({ name, onConfirm, onCancel, open = true, ...rest }: RenameDialogProps & DialogProps ) => {
+interface BaseNameDialogProps extends NameDialogProps {
+  title: string
+  current?: string
+  action: string
+}
+
+const NameDialog = ({ title, name, current, action, onConfirm, onCancel, open = true, ...rest }: BaseNameDialogProps) => {
   const [ newName, setNewName ] = React.useState(name)
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -37,9 +40,11 @@ const RenameDialog = ({ name, onConfirm, onCancel, open = true, ...rest }: Renam
     }
   }
 
+  const valid = newName && newName != current
+
   return (
     <Dialog {...rest} open>
-      <DialogTitle>Rename '{name}'</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>
             <form onSubmit={handleSubmit}>
@@ -59,10 +64,20 @@ const RenameDialog = ({ name, onConfirm, onCancel, open = true, ...rest }: Renam
       </DialogContent>
       <DialogActions>
         <Button size="small" onClick={onCancel}>Cancel</Button>
-        <Button size="small" color="success" disabled={!newName} onClick={() => onConfirm(newName)}>Rename</Button>
+        <Button size="small" color="success" disabled={!valid} onClick={() => onConfirm(newName)}>{action}</Button>
       </DialogActions>
     </Dialog>
   )
 }
 
-export default RenameDialog
+export const RenameDialog = ({ name, ...rest }: NameDialogProps) => {
+  const title = `Rename ${name}`
+  const action = "Rename"
+  return (<NameDialog name={name} current={name} title={title} action={action} {...rest} />)
+}
+
+export const NewShipNameDialog = ({ type, name, ...rest }: { type: string } & NameDialogProps) => {
+  const title = `Purchase ${type}`
+  const action = "Purchase"
+  return (<NameDialog name={name} title={title} action={action} {...rest} />)
+}

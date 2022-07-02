@@ -13,7 +13,7 @@ import IncDecButton from "../components/IncreaseDecreaseButton"
 import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { PlanetStrength } from "../../data/Platoons"
 import { Player } from "../../data/Player"
-import RenameDialog from "../components/RenameDialog"
+import { RenameDialog } from "../components/NameDialog"
 
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
