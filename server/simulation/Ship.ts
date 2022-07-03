@@ -72,12 +72,9 @@ export default class Ship implements IShip
     this.harvester = details.harvester ? {
       location: details.harvester.location,
       resources: { ...details.harvester.resources },
-      cargo: {
-        food: 0,
-        minerals: 0,
-        fuels: 0,
-        energy: 0,
-      },
+      // harvested resources are applied every two seconds
+      rate: 2,
+      cooldown: 0,
     } : undefined
   }
 

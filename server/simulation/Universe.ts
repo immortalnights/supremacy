@@ -271,6 +271,7 @@ export default class Universe implements IUniverse, IWorld
 
     const beginHarvesting = (ship: Ship) => {
       ship.task = "harvesting"
+      ship.harvester!.cooldown = ship.harvester!.rate
       ship.equipment = {
         multiplier: 1,
         start: this.date
@@ -1245,61 +1246,43 @@ export default class Universe implements IUniverse, IWorld
       }
     })
 
-    const calculateResourceChange = (base: number, multiplier: number) => ((base * multiplier) / 2) * delta
+    const calculateResourceChange = (base: number, multiplier: number) => ((base * multiplier) / 2)
 
     this.ships.forEach((ship) => {
       if (ship.task === "harvesting" && ship.harvester)
       {
+        // TODO do energy first so all ships that can harvest, do.
         const planet = this.planets.find((p) => p.id === ship.location.planet)
         if (planet)
         {
           const harvester = ship.harvester
-          // TODO do energy first so all ships that can harvest, do.
-          // TODO if the is no power for a ship, put it offline
-          if (harvester.resources.energy < 0)
+
+          harvester.cooldown -= delta
+
+          if (harvester.cooldown < 0)
           {
-            const energyCost = calculateResourceChange(harvester.resources.energy, 1)
-            if (planet.resources.energy > energyCost)
+            harvester.cooldown = harvester.rate
+
+            // Generate energy or use energy
+            if (harvester.resources.energy < 0)
             {
-              // Immediately take the required energy
-              planet.resources.energy -= energyCost
-              harvester.cargo.food += calculateResourceChange(harvester.resources.food, multipliers.food)
-              harvester.cargo.minerals += calculateResourceChange(harvester.resources.minerals, multipliers.minerals)
-              harvester.cargo.fuels += calculateResourceChange(harvester.resources.fuels, multipliers.fuels)
+              if (planet.resources.energy > harvester.resources.energy)
+              {
+                // Immediately take the required energy
+                planet.resources.energy += harvester.resources.energy
+                planet.resources.food += calculateResourceChange(harvester.resources.food, multipliers.food)
+                planet.resources.minerals += calculateResourceChange(harvester.resources.minerals, multipliers.minerals)
+                planet.resources.fuels += calculateResourceChange(harvester.resources.fuels, multipliers.fuels)
+              }
+              else
+              {
+                ship.task = "idle"
+              }
             }
             else
             {
-              ship.task = "idle"
+              planet.resources.energy += calculateResourceChange(harvester.resources.energy, multipliers.energy)
             }
-          }
-          else
-          {
-            harvester.cargo.energy += calculateResourceChange(harvester.resources.energy, multipliers.energy)
-          }
-
-          // Transfer when a cycle is complete
-          if (harvester.cargo.food > harvester.resources.food)
-          {
-            planet.resources.food += harvester.resources.food
-            harvester.cargo.food -= harvester.resources.food
-          }
-
-          if (harvester.cargo.minerals > harvester.resources.minerals)
-          {
-            planet.resources.minerals += harvester.resources.minerals
-            harvester.cargo.minerals -= harvester.resources.minerals
-          }
-
-          if (harvester.cargo.fuels > harvester.resources.fuels)
-          {
-            planet.resources.fuels += harvester.resources.fuels
-            harvester.cargo.fuels -= harvester.resources.fuels
-          }
-
-          if (harvester.cargo.energy > harvester.resources.energy)
-          {
-            planet.resources.energy += harvester.resources.energy
-            harvester.cargo.energy -= harvester.resources.energy
           }
         }
       }

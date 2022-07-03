@@ -107,7 +107,8 @@ export interface IShipHeading {
 }
 
 export interface IShipHarvesting extends IStaticShipHarvesting {
-  cargo: IResources
+  rate: number
+  cooldown: number
 }
 
 export interface IShipHarvester {
