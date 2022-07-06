@@ -96,7 +96,7 @@ export default class Universe implements IUniverse, IWorld
 
       if (starbase)
       {
-        starbase.claim(player, "Starbase!", true)
+        starbase.claim(player, "Starbase!", this.date, true)
         console.log(`Player ${player} claimed planet ${starbase.id}`)
         ok = true
 
@@ -1217,7 +1217,7 @@ export default class Universe implements IUniverse, IWorld
     })
 
     this.planets.forEach((planet) => {
-      if (planet.simulate(delta))
+      if (planet.simulate(delta, this.date))
       {
         // changes.planets.push(planet.id)
       }
@@ -1330,7 +1330,7 @@ export default class Universe implements IUniverse, IWorld
           ship.equipment = undefined
 
           const planet = this.planets.find((p) => p.id === ship.location.planet) as Planet
-          planet.claim(ship.owner, terraformer.planetName, false)
+          planet.claim(ship.owner, terraformer.planetName, this.date, false)
           console.log(`Completed terraforming planet ${planet.name} (${planet.id}) by ${ship.owner}`)
         }
       }

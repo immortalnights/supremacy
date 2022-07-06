@@ -42,7 +42,16 @@ export interface IResources {
 
 export interface IPlanetResources extends IResources {
   credits: number
-  foodChange: number
+}
+
+export interface IPlanetHistory {
+  credits: number[]
+  population: number[]
+  growth: number[]
+  food: number[]
+  minerals: number[]
+  fuels: number[]
+  energy: number[]
 }
 
 export enum PlanetType {
@@ -75,11 +84,11 @@ export interface IPlanet extends IPlanetBasic {
 
   capital: boolean
   growth: number
-  growthChange: number
   morale: number
   tax: number
   status: string
   resources: IPlanetResources
+  history: IPlanetHistory
   multipliers: boolean
 }
 

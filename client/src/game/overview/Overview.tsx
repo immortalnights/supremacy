@@ -34,6 +34,27 @@ const TaxControls = ({ planet }: { planet: IPlanet }) => {
   )
 }
 
+
+const ChangeValue = ({ values }: { values: number[] }) => {
+  const average = Math.abs(values.reduce((prev, val, index) => prev + val)) / values.length
+  const trend = Math.abs(values[values.length - 1]) - average
+  let trendString = ""
+  if (trend === 0)
+  {
+    trendString = "="
+  }
+  else if (trend < 0)
+  {
+    trendString = "-"
+  }
+  else if (trend > 0)
+  {
+    trendString = "+"
+  }
+
+  return (<strong>{trendString}</strong>)
+}
+
 const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
   const militaryStrength = Recoil.useRecoilValue(PlanetStrength({ planet: planet.id }))
 
@@ -50,7 +71,7 @@ const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
         <dd>{planet.resources.credits.toFixed(0)}</dd>
 
         <dt>Food</dt>
-        <dd>{planet.resources.foodChange} {planet.resources.food.toFixed(0)} T.</dd>
+        <dd><ChangeValue values={planet.history.food} /> {planet.resources.food.toFixed(0)} T.</dd>
         <dt>Minerals</dt>
         <dd>{planet.resources.minerals.toFixed(0)} T.</dd>
         <dt>Fuels</dt>
@@ -62,7 +83,7 @@ const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
         <dt>Population</dt>
         <dd>{planet.population.toFixed(0)}</dd>
         <dt>Growth</dt>
-        <dd>{planet.growthChange} {Math.floor(planet.growth)} %</dd>
+        <dd><ChangeValue values={planet.history.growth} /> {Math.floor(planet.growth)} %</dd>
         <dt>Morale</dt>
         <dd>{planet.morale.toFixed(0)} %</dd>
 
