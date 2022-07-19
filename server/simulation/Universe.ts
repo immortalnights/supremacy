@@ -178,10 +178,7 @@ export default class Universe implements IUniverse, IWorld
     Object.assign(this, data)
 
     this.planets = data.planets.map((planet) => {
-      const p = new Planet(0)
-      p.load(planet)
-
-      return p
+      return Planet.load(planet)
     })
   }
 

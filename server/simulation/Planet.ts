@@ -1,7 +1,7 @@
-import crypto from "crypto"
-import plantTypes from "./data/planettypes.json"
-import { IPlanet, IPlanetResources, IPlanetHistory, PlanetID, PlanetType, StarDate } from "./types"
-import { random, randomFloat } from "./utilities"
+import { calculateMorale, calculateGrowth, calculateTax, consumeFood } from "./logic/planet"
+import type { IPlanet, IPlanetResources, IPlanetHistory, PlanetID, StarDate } from "./types"
+import { PlanetType } from "./types"
+import { clamp, random, randomFloat } from "./utilities"
 
 const PLANET_POPULATION_LIMIT = 30000
 const GROWTH_TIME = 1
@@ -119,12 +119,14 @@ export default class Planet implements IPlanet
     this.taxAt = 0
   }
 
-  load(data: Planet)
+  static load(data: IPlanet)
   {
-    Object.assign(this, data)
+    const p = new Planet(0)
+    Object.assign(p, data)
+    return p
   }
 
-  toJSON()
+  toJSON(): IPlanet
   {
     return this
   }
@@ -141,9 +143,7 @@ export default class Planet implements IPlanet
 
   clone()
   {
-    const other = new Planet(0)
-    Object.assign(other, this)
-    return other
+    return Planet.load(this.toJSON())
   }
 
   simulate(delta: number, date: StarDate)
@@ -158,8 +158,6 @@ export default class Planet implements IPlanet
     }
     else
     {
-      let starvation = false
-
       if (this.history.record(delta))
       {
         this.history.add("credits", this.resources.credits)
@@ -175,63 +173,15 @@ export default class Planet implements IPlanet
       {
         this.growthAt = date + GROWTH_TIME
 
-        const targetMorale = 100 - this.tax
-
-        if (starvation)
-        {
-          this.morale = 1
-        }
-        else
-        {
-          // update morale
-        }
-
-        const baseGrowth = -50 * (this.tax / 100)
-        const targetGrowth = 33 * (this.morale / 100)
-
-        // on planet?
-        const growthAdjustment = 0
-
-        const diff = targetGrowth - growthAdjustment
-        if (targetGrowth < growthAdjustment)
-        {
-
-        }
-        else if (targetGrowth > growthAdjustment)
-        {
-
-        }
-
-        this.growth = Math.ceil(baseGrowth + growthAdjustment)
-
-        if (targetGrowth < this.growth)
-        {
-          this.growth -= 0.5
-        }
-        else
-        {
-          this.growth += 0.5
-        }
-
-        const populationGrowth = (this.population / 4) * (this.growth / 100)
-        this.population += populationGrowth
-
-        if (this.population < 1)
-        {
-          this.population = 0
-        }
-        else if (this.population > PLANET_POPULATION_LIMIT)
-        {
-          this.population = PLANET_POPULATION_LIMIT
-        }
+        this.resources.food = consumeFood(this)
+        this.morale = calculateMorale(this)
+        this.growth = calculateGrowth(this)
       }
 
       if (this.taxAt < date)
       {
         this.taxAt = date += TAX_TIME
-
-        const creditsPerPopulation = (0.08 * this.tax)
-        this.resources.credits += this.population * creditsPerPopulation
+        this.resources.credits += calculateTax(this)
       }
 
       changed = true
@@ -268,15 +218,19 @@ export default class Planet implements IPlanet
   {
     const planetTypeKeys = Object.keys(PlanetType)
 
+    // remove "Lifeless"
+    const index = planetTypeKeys.findIndex((t) => t === PlanetType.Lifeless)
+    planetTypeKeys.splice(index, 1)
+
     this.name = name
     this.population = 0
     this.habitable = true
     this.terraforming = false
     this.type = (planetTypeKeys[random(0, planetTypeKeys.length)] as PlanetType)
     this.population = 1000
-    this.growth = 0
     this.morale = 75
     this.tax = 25
+    this.growth = calculateGrowth(this)
     this.resources.credits = 0
     this.resources.food = 1000
     this.resources.minerals = 20
