@@ -1,5 +1,11 @@
 import { IPlanet } from "../types"
 
+export const PLANET_POPULATION_LIMIT = 30000
+
+export const calculatePopulation = ({ population, growth }: IPlanet) => {
+  return Math.min(population + Math.floor(population * (growth / 100)), PLANET_POPULATION_LIMIT)
+}
+
 export const calculateMorale = ({ morale, tax, resources }: IPlanet) => {
   if (resources.food === 0)
   {

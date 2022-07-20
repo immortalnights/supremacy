@@ -1,9 +1,8 @@
-import { calculateMorale, calculateGrowth, calculateTax, consumeFood } from "./logic/planet"
+import { calculateMorale, calculateGrowth, calculateTax, consumeFood, calculatePopulation } from "./logic/planet"
 import type { IPlanet, IPlanetResources, IPlanetHistory, PlanetID, StarDate } from "./types"
 import { PlanetType } from "./types"
 import { clamp, random, randomFloat } from "./utilities"
 
-const PLANET_POPULATION_LIMIT = 30000
 const GROWTH_TIME = 1
 const TAX_TIME = 2
 
@@ -176,11 +175,13 @@ export default class Planet implements IPlanet
         this.resources.food = consumeFood(this)
         this.morale = calculateMorale(this)
         this.growth = calculateGrowth(this)
+        this.population = calculatePopulation(this)
       }
 
       if (this.taxAt < date)
       {
-        this.taxAt = date += TAX_TIME
+        this.taxAt = date + TAX_TIME
+
         this.resources.credits += calculateTax(this)
       }
 

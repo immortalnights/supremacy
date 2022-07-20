@@ -1,5 +1,5 @@
 import Planet from "../Planet"
-import { calculateGrowth, calculateTax, consumeFood } from "../logic/planet"
+import { calculateGrowth, calculatePopulation, calculateTax, consumeFood, PLANET_POPULATION_LIMIT } from "../logic/planet"
 import { IPlanet, PlanetType } from "../types"
 
 const FRAME_RATE = 1 / 60
@@ -192,5 +192,35 @@ test("earn tax", () => {
   tests.forEach((t) => {
     const v = calculateTax(t as unknown as IPlanet)
     expect(v).toBeCloseTo(t.expectedTax)
+  })
+})
+
+test("population change", () => {
+  const tests = [
+    {
+      population: 100,
+      growth: 10,
+      expectedPopulation: 110
+    },
+    {
+      population: 100,
+      growth: -10,
+      expectedPopulation: 90
+    },
+    {
+      population: 100,
+      growth: 0,
+      expectedPopulation: 100
+    },
+    {
+      population: PLANET_POPULATION_LIMIT,
+      growth: 100,
+      expectedPopulation: PLANET_POPULATION_LIMIT
+    },
+  ]
+
+  tests.forEach((t) => {
+    const v = calculatePopulation(t as unknown as IPlanet)
+    expect(v).toBeCloseTo(t.expectedPopulation)
   })
 })
