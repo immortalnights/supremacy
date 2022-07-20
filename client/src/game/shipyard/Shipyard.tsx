@@ -71,9 +71,9 @@ const Shipyard = () => {
       <Stack direction="row" spacing={{ xs: 2 }} justifyContent="space-evenly">
         <div style={{ width: 120 }}>
           <Typography>{planet.name}</Typography>
-          <ItemDetails label="Credits" value={planet.resources.credits || 0} />
-          {difficulty > Difficulty.Easy ? (<ItemDetails label="Minerals" units="T." value={planet.resources.minerals || 0} />) : null}
-          {difficulty > Difficulty.Medium ? (<ItemDetails label="Energy" units="MW." value={planet.resources.energy || 0} />) : null}
+          <ItemDetails label="Credits" value={Math.floor(planet.resources.credits) || 0} />
+          {difficulty > Difficulty.Easy ? (<ItemDetails label="Minerals" units="T." value={Math.floor(planet.resources.minerals) || 0} />) : null}
+          {difficulty > Difficulty.Medium ? (<ItemDetails label="Energy" units="MW." value={Math.floor(planet.resources.energy) || 0} />) : null}
         </div>
         <div style={{ width: 120 }}>
           <Typography>Cost</Typography>
