@@ -1,5 +1,5 @@
 import { Socket } from "socket.io"
-import { ServerToClientEvents, ClientToServerEvents, IPlayer, IGame } from "./types"
+import { ServerToClientEvents, ClientToServerEvents, IPlayer, IGame, GameSpeed } from "./types"
 import TypedEmitter from "typed-emitter"
 
 export type SocketIO = Socket<ClientToServerEvents, ServerToClientEvents>
@@ -29,7 +29,7 @@ export interface IWorld {
   // Handle player in-game action
   dispatch: (action: string, player: string, data: object) => { result: boolean, reason: string, data: object }
   // Simulate the game world
-  simulate: (delta: number) => void
+  simulate: (delta: number, speed: GameSpeed) => void
   // Get the game world data for a specific player
   updateFor: UpdateForFn<unknown>
 }

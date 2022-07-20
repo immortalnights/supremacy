@@ -7,7 +7,6 @@ import {
   IUniverse,
   IPlanetBasic,
   IPlanet,
-  IPlanetResources,
   IShipBasic,
   IShip,
   IPlatoonBasic,
@@ -27,10 +26,42 @@ import { calculatePlatoonRecruitmentCost, ordinal } from "./logic/platoons"
 import { UniverseEvent, load as loadUniverseEvents } from "./logic/UniverseEvents"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
-import EspionageData from "./data/espionage.json"
-import { random } from "./utilities"
+import { GameSpeed } from "../types"
 
 const MAXIMUM_PLAYERS = 2
+
+const speedMultiplier = (speed: GameSpeed): number => {
+  let multiplier
+  switch (speed)
+  {
+    case GameSpeed.Paused:
+    {
+      multiplier = 0
+      break
+    }
+    case GameSpeed.Slow:
+    {
+      multiplier = 8
+      break
+    }
+    case GameSpeed.Normal:
+    {
+      multiplier = 5
+      break
+    }
+    case GameSpeed.Fast:
+    {
+      multiplier = 3
+      break
+    }
+    case GameSpeed.Ultra:
+    {
+      multiplier = 1
+      break
+    }
+  }
+  return multiplier
+}
 
 export default class Universe implements IUniverse, IWorld
 {
@@ -1189,10 +1220,10 @@ export default class Universe implements IUniverse, IWorld
     return { result, reason, data: resultData }
   }
 
-  simulate(delta: number): void
+  simulate(delta: number, speed: GameSpeed): void
   {
     // console.log("Universe:tick")
-    this.date += delta
+    this.date += (delta / speedMultiplier(speed))
 
     this.events.forEach((event) => {
       if (false === event.completed && this.date > event.when!)

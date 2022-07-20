@@ -1,7 +1,7 @@
 import crypto from "crypto"
 import { Server } from "socket.io"
 import { IWorld } from "./serverTypes"
-import { IGame, IGameOptions, GameStatus, IPlayer, IUpdate, IActionCallback } from "./types"
+import { IGame, IGameOptions, GameStatus, IUpdate, IActionCallback, GameSpeed } from "./types"
 import ConnectedPlayer from "./ConnectedPlayer"
 import Player from "./Player"
 import type { IUniverse } from "./simulation/types"
@@ -18,6 +18,7 @@ class Game<T extends IWorld> implements IGame {
   status: GameStatus
   io: Server
   world: T
+  speed: GameSpeed
   lastTick: number
 
   constructor(io: Server, options: IGameOptions, players: Player[], worldFactory: (options: IGameOptions) => T)
@@ -31,6 +32,7 @@ class Game<T extends IWorld> implements IGame {
     this.status = GameStatus.Starting
     this.io = io
     this.world = worldFactory(options)
+    this.speed = GameSpeed.Normal
     this.lastTick = 0
   }
 
@@ -100,6 +102,7 @@ class Game<T extends IWorld> implements IGame {
           ready: true,
         })),
         status: this.status,
+        speed: this.speed,
       })
 
       this.world.join(player.id, false, replacedPlayer)
@@ -174,7 +177,7 @@ class Game<T extends IWorld> implements IGame {
           this.lastTick = now
         }
 
-        this.world.simulate((now - this.lastTick) / 1000)
+        this.world.simulate((now - this.lastTick) / 1000, this.speed)
 
         // Update the players
         this.players.forEach((player) => {

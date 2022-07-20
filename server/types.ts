@@ -39,6 +39,14 @@ export enum GameStatus {
   Closed,
 }
 
+export enum GameSpeed {
+  "Paused",
+  "Slow",
+  "Normal",
+  "Fast",
+  "Ultra",
+}
+
 export interface IGame {
   id: GameID
   options: IGameOptions
@@ -48,6 +56,7 @@ export interface IGame {
   // date/time game was created
   created: number
   status: GameStatus
+  speed: GameSpeed
 }
 
 export interface IUpdate<T> {

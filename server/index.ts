@@ -213,6 +213,7 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
             ready: player.ready,
           })),
           status: game.status,
+          speed: game.speed,
         })
       }, 1000)
     }
