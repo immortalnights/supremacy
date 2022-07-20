@@ -36,7 +36,7 @@ const TaxControls = ({ planet }: { planet: IPlanet }) => {
 
 
 const ChangeValue = ({ values }: { values: number[] }) => {
-  const average = Math.abs(values.reduce((prev, val, index) => prev + val)) / values.length
+  const average = Math.abs(values.reduce((prev, val, index) => prev + val, 0)) / values.length
   const trend = Math.abs(values[values.length - 1]) - average
   let trendString = ""
   if (trend === 0)
