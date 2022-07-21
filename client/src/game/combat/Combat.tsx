@@ -64,7 +64,7 @@ interface IAggressionProps {
 
 const Aggression = ({ aggression, onClickIncrease, onClickDecrease }: IAggressionProps) => {
   const canIncrease = aggression < 100
-  const canDecrease = aggression < 25
+  const canDecrease = aggression > 25
 
   return (
     <>
@@ -75,7 +75,7 @@ const Aggression = ({ aggression, onClickIncrease, onClickDecrease }: IAggressio
         </div>
         <div style={{ width: 160, height: 120, backgroundColor: "lightgray", marginRight: 34 }}></div>
       </Stack>
-      <Typography component="p" variant="caption" textAlign="center">{aggression}%</Typography>
+      <Typography component="p" variant="caption" textAlign="center">Aggression {aggression === 100 ? "MAX" : `${aggression}%`}</Typography>
     </>
   )
 }
@@ -88,9 +88,7 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
   const enemyStrength = Recoil.useRecoilValue(PlanetEnemyStrength({ planet: planet.id }))
   const ship = Recoil.useRecoilValue(Ship(selectedShip))
   const remainingTroops = platoons.reduce((val, p, index, arr) => val + (p as IPlatoon).troops, 0)
-  const aggression = 25
   const { action } = React.useContext(IOContext)
-
 
   const handleClickDockedShip = (event: React.MouseEvent<HTMLLIElement>, ship: IShip) => {
     setSelectedShip(ship.id)
@@ -153,7 +151,7 @@ const Combat = ({ planet, owner }: { planet: IPlanet, owner: boolean }) => {
           </Typography>
           {/* <Typography variant="caption">Scaling factor {scalingFactor}</Typography> */}
 
-          <Aggression aggression={aggression} onClickIncrease={handleClickIncreaseAggression} onClickDecrease={handleClickDecreaseAggression}/>
+          <Aggression aggression={planet.aggression} onClickIncrease={handleClickIncreaseAggression} onClickDecrease={handleClickDecreaseAggression}/>
         </div>
       </Grid>
     </Grid>

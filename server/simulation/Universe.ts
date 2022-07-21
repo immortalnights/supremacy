@@ -519,10 +519,34 @@ export default class Universe implements IUniverse, IWorld
       }
       case "planet-modify-aggression":
       {
-        const body = data as { id: string, direction: number }
+        const body = data as { id: PlanetID, direction: number }
         if (body.id !== undefined && body.direction)
         {
+          const planet = findPlanet(body.id)
+          if (!planet)
+          {
+            reason = "Failed to find planet"
+          }
+          else
+          {
+            const current = planet.playerAggression[player]
+            console.log("aggression for", player, "on", planet.id, current)
+            let change = current
+            if (body.direction === -1 && current > 0)
+            {
+              change = Math.max(current - 25, 0)
+            }
+            else if (body.direction === 1 && current < 100)
+            {
+              change = Math.min(current + 25, 100)
+            }
 
+            planet.playerAggression[player] = change
+            console.log("new aggression for", player, "on", planet.id, change)
+
+            result = true
+            resultData = { world: { planets: [{ ...planet.toJSON(), aggression: change }] } }
+          }
         }
         else
         {
