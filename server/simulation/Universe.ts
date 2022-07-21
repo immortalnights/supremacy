@@ -63,6 +63,23 @@ const speedMultiplier = (speed: GameSpeed): number => {
   return multiplier
 }
 
+const planetLocationFull = (ships: Ship[], planet: PlanetID, position: string) => {
+  const LIMITS = {
+    "surface": 6,
+    "docking-bay": 3
+  }
+
+  let full = false
+  const limit: number | undefined = LIMITS[position as keyof typeof LIMITS]
+  if (limit)
+  {
+    const count = ships.filter((s) => s.location.planet === planet && s.location.position === position).length
+    full = count >= limit
+  }
+
+  return full
+}
+
 export default class Universe implements IUniverse, IWorld
 {
   date: StarDate
@@ -602,9 +619,17 @@ export default class Universe implements IUniverse, IWorld
               {
                 reason = "Reached limit for ship"
               }
-              else if (capital.resources.credits >= cost.credits
-                && capital.resources.minerals >= cost.minerals
-                && capital.resources.energy >= cost.energy)
+              else if (capital.resources.credits < cost.credits
+                && capital.resources.minerals < cost.minerals
+                && capital.resources.energy < cost.energy)
+              {
+                reason = "Cannot afford ship"
+              }
+              else if (planetLocationFull(this.ships, capital.id, "docking-bay"))
+              {
+                reason = "Planet docking bay is full"
+              }
+              else
               {
                 capital.resources.credits -= cost.credits
                 capital.resources.minerals -= cost.minerals
@@ -615,10 +640,6 @@ export default class Universe implements IUniverse, IWorld
 
                 result = true
                 resultData = { world: { planets: [capital.toJSON()], ships: [newShip.toJSON()] } }
-              }
-              else
-              {
-                reason = "Cannot afford ship"
               }
             }
           }
@@ -839,24 +860,32 @@ export default class Universe implements IUniverse, IWorld
           const ship = findShip(body.id)
           if (ship)
           {
-            if (ship.relocate(body.position))
+            if (planetLocationFull(this.ships, ship.location.planet!, body.position))
             {
-              // If the ship type is a solar; immediately begin harvesting evergy
-              if (ship.harvester && ship.location.position === "orbit")
+              reason = `No more ships can be moved to ${body.position}`
+            }
+            else if (false === ship.relocate(body.position))
+            {
+              reason = "Failed to relocate ship"
+            }
+            else
+            {
+              if (ship.harvester)
               {
-                beginHarvesting(ship)
-              }
-              else
-              {
-                cancelHarvesting(ship)
+                // If the ship type is a solar; immediately begin harvesting evergy
+                if (ship.type === "Solar-Satellite Generator" && ship.location.position === "orbit")
+                {
+                  beginHarvesting(ship)
+                }
+                // Otherwise any other harvester should stop when relocated
+                else
+                {
+                  cancelHarvesting(ship)
+                }
               }
 
               resultData = { world: { ships: [ship.toJSON()] } }
               result = true
-            }
-            else
-            {
-              reason = "Failed to relocate ship"
             }
           }
           else
