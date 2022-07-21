@@ -530,7 +530,6 @@ export default class Universe implements IUniverse, IWorld
           else
           {
             const current = planet.playerAggression[player]
-            console.log("aggression for", player, "on", planet.id, current)
             let change = current
             if (body.direction === -1 && current > 0)
             {
@@ -542,7 +541,13 @@ export default class Universe implements IUniverse, IWorld
             }
 
             planet.playerAggression[player] = change
-            console.log("new aggression for", player, "on", planet.id, change)
+
+            this.platoons.forEach((p) => {
+              if (p.location.planet === planet.id && p.owner === player)
+              {
+                p.aggression = change
+              }
+            })
 
             result = true
             resultData = { world: { planets: [{ ...planet.toJSON(), aggression: change }] } }
