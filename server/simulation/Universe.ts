@@ -1239,12 +1239,13 @@ export default class Universe implements IUniverse, IWorld
               {
                 platoon.location.ship = ship.id
                 platoon.location.planet = undefined
+                platoon.aggression = 0
 
                 result = true
                 resultData = { world: { platoons: [platoon.toJSON()] } }
               }
             }
-            if (body.direction === "unload")
+            else if (body.direction === "unload")
             {
               if (platoon.location.ship !== ship.id)
               {
@@ -1252,8 +1253,12 @@ export default class Universe implements IUniverse, IWorld
               }
               else
               {
+                const planet = findPlanet(ship.location.planet!) as Planet
+
                 platoon.location.ship = undefined
                 platoon.location.planet = ship.location.planet
+
+                platoon.aggression = planet.getPlayerAggression(player)
 
                 result = true
                 resultData = { world: { platoons: [platoon.toJSON()] } }

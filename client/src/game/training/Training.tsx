@@ -97,7 +97,7 @@ const PlatoonDetails = ({ platoon, planetCredits, onRecruit, onDismiss }: { plat
       <Grid item xs={12} md={6}><Typography variant="body1">{platoon.location.planet || platoon.location.ship}</Typography></Grid>
 
       <Grid item xs={12} md={6}><Typography variant="caption">Credits</Typography></Grid>
-      <Grid item xs={12} md={6}><Typography variant="body1">{planetCredits}</Typography></Grid>
+      <Grid item xs={12} md={6}><Typography variant="body1">{Math.floor(planetCredits)}</Typography></Grid>
 
       <PlatoonDescription platoon={platoon} />
 

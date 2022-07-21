@@ -12,7 +12,6 @@ import PlanetAuth from "../components/PlanetAuth"
 import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
 
 const PlatoonGridItem = ({ name, troops, onClick }: { name?: string, troops?: number, onClick: (event: React.MouseEvent) => void }) => {
-
   return (
     <Grid item sx={{ margin: "1px 4px", display: "flex", flexDirection: "row", flexBasis: "30%" }} onClick={onClick}>
       <div style={{ border: "1px solid #6b6bf3", minWidth: "3em", minHeight: "1.7rem", margin: "1px", textAlign: "center" }}>{troops}</div>
@@ -29,7 +28,7 @@ interface PlatoonGridProps {
 }
 
 const PlatoonGrid = ({ items, count, direction, onSelectItem }: PlatoonGridProps) => {
-  const cells: React.ReactNode[] = []
+  const cells: React.ReactElement[] = []
 
   for (let index = 0; index < count; index++)
   {
@@ -37,7 +36,7 @@ const PlatoonGrid = ({ items, count, direction, onSelectItem }: PlatoonGridProps
   }
 
   return (
-    <Grid container direction={direction} sx={{  }}>
+    <Grid container direction={direction}>
       {cells}
     </Grid>
   )

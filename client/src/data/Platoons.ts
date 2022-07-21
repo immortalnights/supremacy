@@ -52,6 +52,6 @@ export const PlatoonsOnShip = Recoil.selectorFamily<IPlatoonBasic[], { ship: Shi
     get: ({ ship }) => ({ get }) => {
         const player = get(Player)
         const platoons = get(Platoons)
-        return platoons.filter((p) => p.status === PlatoonStatus.Recruited && (ship && p.location.ship === ship) && p.owner === player.id)
+        return platoons.filter((p) => p.status === PlatoonStatus.Recruited && (ship !== undefined && p.location.ship === ship) && p.owner === player.id)
     }
 })
