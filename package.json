@@ -2,7 +2,7 @@
   "name": "supremacy",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "dev-client": "cd client && npm start",
     "dev-server-types-client": "cd server && npx tsc \"types.ts\" --outdir \"../client/src\" --declaration --emitDeclarationOnly --watch",
