@@ -1,3 +1,13 @@
 {
-  "jest.jestCommandLine": "npx jest --config .\\server\\jest.config.js --watch --color"
+  "editor.tabSize": 4,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bower_components": true,
+    "**/*.code-search": true,
+    "**/dist": true
+  }
 }
