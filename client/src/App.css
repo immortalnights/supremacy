@@ -1,37 +1,34 @@
-
-
-
 #xroot > div {
-	min-height: 600px;
+    min-height: 600px;
 }
 
 nav {
-	text-align: center;
-	margin: 1em 0 0;
-	border-top: 1px solid darkgray;
+    text-align: center;
+    margin: 1em 0 0;
+    border-top: 1px solid darkgray;
 }
 nav a {
-	margin: .125em;
-	padding: .25em .5em;
+    margin: 0.125em;
+    padding: 0.25em 0.5em;
 }
 
 .content {
-	display: flex;
-	flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-menu {
-	margin: auto;
-	display: flex;
-	flex-direction: column;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-menu > div {
-	margin: 10px 5px;
-	display: flex;
-	flex-direction: column;
+    margin: 10px 5px;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-menu button {
-	flex: 1;
+    flex: 1;
 }

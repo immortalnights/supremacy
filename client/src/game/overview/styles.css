@@ -1,15 +1,15 @@
 .icon-grid {
-	margin: auto 0;
+    margin: auto 0;
 }
 .icon-grid table {
-	border-collapse: collapse;
+    border-collapse: collapse;
 }
 .icon-grid td {
-	width: 96px;
-	height: 64px;
-	border: 1px solid darkgray;
-	text-align: center;
+    width: 96px;
+    height: 64px;
+    border: 1px solid darkgray;
+    text-align: center;
 }
 .icon-grid .empty {
-	color: lightgray;
+    color: lightgray;
 }
