@@ -5,10 +5,24 @@
   "author": "Andrew K",
   "license": "MIT",
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "prettier": "^3.1.0",
     "typescript": "^5.3.3"
   },
   "scripts": {
+    "dev": "concurrently --handle-input -c \"auto\" -n client,server \"npm:dev:client\" \"npm:dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "build": "concurrently -c \"auto\" \"npm:build:client\" \"npm:build:server\"",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && npm run build",
+    "tsc:check": "tsc",
+    "test": "concurrently -c \"auto\" \"npm:test:client\" \"npm:test:server\"",
+    "test:client": "cd client && npm run test",
+    "test:server": "cd server && npm run test",
+    "test:watch": "concurrently -c \"auto\" \"npm:test:client\" \"npm:test:server\"",
+    "test:watch:client": "cd client && npm run test --watch",
+    "test:watch:server": "cd server && npm run test --watch",
     "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './**/*.json'",
     "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './**/*.json'"
   }
