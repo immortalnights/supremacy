@@ -1,28 +1,3 @@
 {
-    "compilerOptions": {
-        "target": "ESNext",
-        "lib": ["ES2023", "DOM", "DOM.Iterable"],
-        "useDefineForClassFields": true,
-        "module": "ESNext",
-        "skipLibCheck": true,
-        "paths": {
-            "@/*": ["./src/*"]
-        },
-
-        /* Bundler mode */
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "resolveJsonModule": true,
-        "isolatedModules": true,
-        "noEmit": true,
-        "jsx": "react-jsx",
-        "forceConsistentCasingInFileNames": true,
-
-        /* Linting */
-        "strict": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noFallthroughCasesInSwitch": true
-    },
-    "include": ["src"]
+    "extends": "./tsconfig.client.json"
 }
