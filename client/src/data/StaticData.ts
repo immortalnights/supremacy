@@ -19,14 +19,20 @@ export const Suits = Recoil.selector<IEquipmentList>({
     key: "SuitSelector",
     get: ({ get }) => {
         const equipment = get(StaticEquipment)
-        return filterObject<IEquipmentList, IEquipment>(equipment, (item) => item.type === "suit")
-    }
+        return filterObject<IEquipmentList, IEquipment>(
+            equipment,
+            (item) => item.type === "suit"
+        )
+    },
 })
 
 export const Weapons = Recoil.selector<IEquipmentList>({
     key: "WeaponSelector",
     get: ({ get }) => {
         const equipment = get(StaticEquipment)
-        return filterObject<IEquipmentList, IEquipment>(equipment, (item) => item.type === "weapon")
-    }
+        return filterObject<IEquipmentList, IEquipment>(
+            equipment,
+            (item) => item.type === "weapon"
+        )
+    },
 })

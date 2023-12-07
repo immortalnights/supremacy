@@ -1,46 +1,45 @@
-
 table.grid tr {
-	height: 1.5em;
+    height: 1.5em;
 }
 
 table.grid td {
-	width: 8em;
-	border-width: 1px;
-	border-style: none solid solid none;
-	border-color: rgb(113, 113, 113);
-	cursor: pointer;
-	user-select: none;
+    width: 8em;
+    border-width: 1px;
+    border-style: none solid solid none;
+    border-color: rgb(113, 113, 113);
+    cursor: pointer;
+    user-select: none;
 }
 
 table.grid td.selected {
-	font-weight: 600;
+    font-weight: 600;
 }
 
 table.grid td.planet.friendly {
-	color: green;
+    color: green;
 }
 
 table.grid td.planet.enemy {
-	color: red;
+    color: red;
 }
 
 .platoon.grid td {
-	border-style: solid;
+    border-style: solid;
 }
 
 .platoon.grid td.spacer {
-	width: 2em;
-	border-style: none;
+    width: 2em;
+    border-style: none;
 }
 
 .platoon.grid td {
-	user-select: none;
+    user-select: none;
 }
 
 .platoon.grid .platoon-name {
-	width: 4em;
+    width: 4em;
 }
 
 .platoon.grid .platoon-troops {
-	width: 3em;
+    width: 3em;
 }

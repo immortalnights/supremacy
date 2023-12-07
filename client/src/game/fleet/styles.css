@@ -1,8 +1,7 @@
-
 .bay {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .bay.selected {
-	font-weight: 600;
+    font-weight: 600;
 }

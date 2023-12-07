@@ -1,14 +1,14 @@
 {
-  "resources": {
-    "name": "Resources",
-    "credits": 1000
-  },
-  "population": {
-    "name": "Population",
-    "credits": 1520
-  },
-  "warstatus": {
-    "name": "War Status",
-    "credits": 2200
-  }
+    "resources": {
+        "name": "Resources",
+        "credits": 1000
+    },
+    "population": {
+        "name": "Population",
+        "credits": 1520
+    },
+    "warstatus": {
+        "name": "War Status",
+        "credits": 2200
+    }
 }

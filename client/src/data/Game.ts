@@ -4,6 +4,6 @@ import { IGame } from "../types.d"
 export type { IGame }
 
 export const Game = Recoil.atom<IGame | undefined>({
-    key: 'game',
+    key: "game",
     default: undefined,
 })

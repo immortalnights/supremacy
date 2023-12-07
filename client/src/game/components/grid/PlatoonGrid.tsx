@@ -1,5 +1,5 @@
-import React from 'react'
-import Recoil from 'recoil'
+import React from "react"
+import Recoil from "recoil"
 import { SelectedPlanetID } from "../../../data/General"
 import { Planets, IPlanetBasic } from "../../../data/Planets"
 import { Player } from "../../../data/Player"
@@ -72,28 +72,39 @@ import Grid from "./Grid"
 // }
 
 interface PlatoonTemp {
-  id: number
-  name: string
-  type: ""
-  owner: string
+    id: number
+    name: string
+    type: ""
+    owner: string
 }
 
 interface PlatoonGridProps {
-  onSelectItem: (item: PlatoonTemp) => void
-  rows: number
-  cols: number
+    onSelectItem: (item: PlatoonTemp) => void
+    rows: number
+    cols: number
 }
 
 const PlatoonGrid = ({ onSelectItem, rows, cols }: PlatoonGridProps) => {
-  const player = Recoil.useRecoilValue(Player)
-  const selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
-  const platoons: [] = []
+    const player = Recoil.useRecoilValue(Player)
+    const selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
+    const platoons: [] = []
 
-  const classNamesForItem = (item: PlatoonTemp) => {
-    return (item && item.owner === player.id) ? 'planet friendly' : 'planet enemy'
-  }
+    const classNamesForItem = (item: PlatoonTemp) => {
+        return item && item.owner === player.id
+            ? "planet friendly"
+            : "planet enemy"
+    }
 
-  return (<Grid<PlatoonTemp> rows={rows} cols={cols} items={platoons} selected={selectedPlanet} onSelectItem={onSelectItem} classNamesForItem={classNamesForItem} />)
+    return (
+        <Grid<PlatoonTemp>
+            rows={rows}
+            cols={cols}
+            items={platoons}
+            selected={selectedPlanet}
+            onSelectItem={onSelectItem}
+            classNamesForItem={classNamesForItem}
+        />
+    )
 }
 
 export default PlatoonGrid
