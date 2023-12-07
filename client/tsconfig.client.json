@@ -1,10 +1,8 @@
 {
     "compilerOptions": {
-        // "target": "ESNext",
-        // "lib": ["ES2023", "DOM", "DOM.Iterable"],
+        "lib": ["ESNext", "DOM", "DOM.Iterable"],
         // "useDefineForClassFields": true,
         // "module": "ESNext",
-        // "skipLibCheck": true,
         // "paths": {
         //     "@/*": ["./src/*"]
         // },
@@ -13,11 +11,10 @@
         // "allowImportingTsExtensions": true,
         // "resolveJsonModule": true,
         // "isolatedModules": true,
-        // "noEmit": true,
+        "noEmit": true,
+        "allowJs": false,
         "jsx": "react-jsx"
-        // "forceConsistentCasingInFileNames": true,
         // /* Linting */
-        // "strict": true,
         // "noUnusedLocals": true,
         // "noUnusedParameters": true,
         // "noFallthroughCasesInSwitch": true
