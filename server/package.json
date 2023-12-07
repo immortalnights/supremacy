@@ -1,7 +1,9 @@
 {
-  "name": "supremacy",
-  "version": "1.0.0",
-  "description": "",
+  "name": "supremacy-server",
+  "version": "0.2.0",
+  "author": "Andrew K",
+  "license": "MIT",
+  "private": true,
   "main": "index.ts",
   "scripts": {
     "dev-client": "cd ../client && npm start",
@@ -13,8 +15,6 @@
     "start-dev": "concurrently \"npm:dev-*\"",
     "test-server": "jest"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/jest": "^29.5.11",
