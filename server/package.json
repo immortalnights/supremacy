@@ -4,10 +4,10 @@
     "author": "Andrew K",
     "license": "MIT",
     "private": true,
-    "main": "index.ts",
+    "main": "./src/index.ts",
     "scripts": {
-        "dev": "npx nodemon ./index.ts",
-        "build": "tsx .",
+        "dev": "npx nodemon ./src/index.ts",
+        "build": "tsx ./src",
         "test": "jest",
         "test:watch": "jest --watch"
     },
