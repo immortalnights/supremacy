@@ -2,7 +2,11 @@ import React from "react"
 import { io, Socket } from "socket.io-client"
 import { PlayerRoomAction } from "../types"
 import { PlayerGameAction } from "../simulation/types"
-import { ServerToClientEvents, ClientToServerEvents, IRoom } from "../types.d"
+import {
+    ServerToClientEvents,
+    ClientToServerEvents,
+    IRoom,
+} from "@server/types"
 
 // Socket IO definitions
 type SocketIO = Socket<ServerToClientEvents, ClientToServerEvents>

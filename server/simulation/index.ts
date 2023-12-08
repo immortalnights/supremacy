@@ -15,7 +15,7 @@ export const simulate = () => {
         const now = Date.now()
 
         for (const [key, uni] of Object.entries(cache)) {
-            uni.simulate(now - time)
+            uni.simulate(now - time, "normal")
 
             if (false === uni.finished) {
                 fs.writeFileSync(
