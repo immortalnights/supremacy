@@ -43,7 +43,7 @@ class Game<T extends IWorld> implements IGame {
         this.status = GameStatus.Starting
         this.io = io
         this.world = worldFactory(options)
-        this.speed = GameSpeed.Normal
+        this.speed = "normal"
         this.lastTick = 0
     }
 

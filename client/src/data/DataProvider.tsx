@@ -8,7 +8,7 @@ import {
     IGameOptions,
     IGame,
     IUpdate,
-} from "../types.d"
+} from "@server/types"
 import { Player } from "./Player"
 import { Room, AvailableRooms } from "./Room"
 import { StaticShips, StaticEquipment } from "./StaticData"

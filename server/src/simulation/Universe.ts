@@ -32,30 +32,30 @@ import {
 } from "./logic/UniverseEvents"
 import ShipData from "./data/ships.json"
 import EquipmentData from "./data/equipment.json"
-import { GameSpeed } from "../types"
+import type { GameSpeed } from "../types"
 
 const MAXIMUM_PLAYERS = 2
 
 const speedMultiplier = (speed: GameSpeed): number => {
     let multiplier
     switch (speed) {
-        case GameSpeed.Paused: {
+        case "paused": {
             multiplier = 0
             break
         }
-        case GameSpeed.Slow: {
+        case "slow": {
             multiplier = 8
             break
         }
-        case GameSpeed.Normal: {
+        case "normal": {
             multiplier = 5
             break
         }
-        case GameSpeed.Fast: {
+        case "fast": {
             multiplier = 3
             break
         }
-        case GameSpeed.Ultra: {
+        case "ultra": {
             multiplier = 1
             break
         }
@@ -87,6 +87,7 @@ const planetLocationFull = (
 }
 
 export default class Universe implements IUniverse, IWorld {
+    id: string
     date: StarDate
     difficulty: Difficulty
     players: string[]
@@ -97,9 +98,11 @@ export default class Universe implements IUniverse, IWorld {
     finished: boolean
     nextShipId: number
     nextPlatoonId: number
+    saved: number
 
     constructor() {
         console.log("Universe:constructor")
+        this.id = ""
         this.date = 1
         this.difficulty = Difficulty.Easy
         this.players = []
@@ -110,6 +113,7 @@ export default class Universe implements IUniverse, IWorld {
         this.finished = false
         this.nextShipId = 0
         this.nextPlatoonId = 0
+        this.saved = 0
     }
 
     generate(seed: number) {
@@ -1220,7 +1224,7 @@ export default class Universe implements IUniverse, IWorld {
         return { result, reason, data: resultData }
     }
 
-    simulate(delta: number, speed: GameSpeed): void {
+    simulate(delta: number, speed: GameSpeed = "normal"): void {
         // console.log("Universe:tick")
         this.date += delta / speedMultiplier(speed)
 

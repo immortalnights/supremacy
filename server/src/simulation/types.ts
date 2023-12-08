@@ -223,3 +223,5 @@ export interface IEspionageReport extends Partial<IResources> {
     strength?: number
     civilians?: number
 }
+
+export interface IChanges {}

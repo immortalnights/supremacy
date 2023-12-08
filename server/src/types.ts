@@ -38,13 +38,8 @@ export enum GameStatus {
     Closed,
 }
 
-export enum GameSpeed {
-    "Paused",
-    "Slow",
-    "Normal",
-    "Fast",
-    "Ultra",
-}
+const gameSpeeds = ["paused", "slow", "normal", "fast", "ultra"] as const
+export type GameSpeed = (typeof gameSpeeds)[number]
 
 export interface IGame {
     id: GameID

@@ -1,6 +1,5 @@
 import Recoil from "recoil"
-import { IPlayer } from "../types.d"
-
+import { IPlayer } from "@server/types"
 export type { IPlayer }
 
 export interface ILocalPlayer extends IPlayer {

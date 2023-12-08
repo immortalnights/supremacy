@@ -33,7 +33,7 @@ const simulate = () => {
 
         post({
             type: "UPDATE",
-            changes: changes,
+            changes: undefined,
             data: uni,
         })
     }, 1000 / FPS)
