@@ -4,7 +4,7 @@
         // "useDefineForClassFields": true,
         // "module": "ESNext",
         "paths": {
-            "@server/*": ["../server/*"]
+            "@server/*": ["../server/src/*"]
         },
         // /* Bundler mode */
         // "moduleResolution": "bundler",
