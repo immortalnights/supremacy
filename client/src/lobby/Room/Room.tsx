@@ -24,7 +24,7 @@ import { IRoom, Room as RoomData } from "../../data/Room"
 import { IGame, Game as GameData } from "../../data/Game"
 import { RoomStatus } from "../../types"
 import { Player as PlayerData, IPlayer, ILocalPlayer } from "../../data/Player"
-import { RoomID } from "../../types.d"
+import { RoomID } from "@server/types"
 
 const CircularProgressWithLabel = (
     props: CircularProgressProps & { value: number }

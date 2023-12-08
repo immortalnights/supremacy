@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { IGame } from "../types.d"
+import { IGame } from "@server/types"
 
 export type { IGame }
 

@@ -3,7 +3,7 @@ import Recoil from "recoil"
 import { Button, CircularProgress, Stack } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
-import { IRoom } from "../../types.d"
+import { IRoom } from "@server/types"
 
 const LoadingButton = ({
     onClick,
