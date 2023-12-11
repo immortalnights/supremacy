@@ -1,0 +1,23 @@
+name: 🏗️ Build
+
+on:
+    push:
+        branches: ["main"]
+    pull_request:
+    workflow_dispatch:
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Set up Node
+              uses: actions/setup-node@v4
+
+            - name: Install Dependencies
+              run: npm ci
+
+            - name: Formatting
+              run: npm run build
