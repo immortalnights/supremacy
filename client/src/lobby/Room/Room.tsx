@@ -21,7 +21,7 @@ import {
 } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { IRoom, Room as RoomData } from "../../data/Room"
-import { IGame, Game as GameData } from "../../data/Game"
+import { Game as GameData } from "../../data/Game"
 import { RoomStatus } from "../../types"
 import { Player as PlayerData, IPlayer, ILocalPlayer } from "../../data/Player"
 import { RoomID } from "@server/types"

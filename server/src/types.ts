@@ -75,7 +75,7 @@ export type PlayerRoomAction =
 
 // Messages from the client to the Server
 export interface ClientToServerEvents {
-    connect_error: (...args: any[]) => void
+    connect_error: (...args: unknown[]) => void
     // Player creates a new room (new game), callback true if room is created
     "player-create-room": (
         callback: (ok: boolean, data?: IRoom) => void
@@ -85,7 +85,7 @@ export interface ClientToServerEvents {
     // Player changes own state
     "player-room-action": (
         name: PlayerRoomAction,
-        data: any,
+        data: unknown,
         callback: IActionCallback
     ) => void
     // Player left the room

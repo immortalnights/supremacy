@@ -13,7 +13,7 @@ import type {
     StarDate,
 } from "./types"
 import { PlanetType } from "./types"
-import { clamp, random, randomFloat } from "./utilities"
+import { random, randomFloat } from "./utilities"
 
 const GROWTH_TIME = 1
 const TAX_TIME = 2

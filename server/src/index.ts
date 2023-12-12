@@ -9,8 +9,6 @@ import type {
     ServerToClientEvents,
     ClientToServerEvents,
     IGameOptions,
-    IPlayer,
-    PlayerID,
 } from "./types"
 import Universe from "./simulation/Universe"
 import AIPlayer from "./AIPlayer"
@@ -174,7 +172,7 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
         io,
         options,
         players,
-        (opts: IGameOptions) => {
+        (_opts: IGameOptions) => {
             const u = new Universe()
             u.generate(0) // (opts.seed)
 
@@ -201,7 +199,7 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
                     options: game.options,
                     saved: game.saved,
                     created: game.created,
-                    players: game.allocatedPlayers.map((p) => ({
+                    players: game.allocatedPlayers.map(() => ({
                         id: player.id,
                         name: player.name,
                         ready: player.ready,

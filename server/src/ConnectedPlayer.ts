@@ -25,7 +25,7 @@ export default class ConnectedPlayer extends Player {
         this.ready = false
         this.room = room
 
-        this.socket.on("player-room-action", this.handleRoomAction)
+        this.socket.on("player-room-action", this.handleRoomAction.bind(this))
     }
 
     handleRoomAction(
@@ -75,10 +75,10 @@ export default class ConnectedPlayer extends Player {
         this.socket.off("player-room-action", this.handleRoomAction)
     }
 
-    handleJoinGame(game: Game<any>) {
+    handleJoinGame(game: Game<unknown>) {
         this.game = game
 
-        this.socket.on("player-game-action", this.handleGameAction)
+        this.socket.on("player-game-action", this.handleGameAction.bind(this))
     }
 
     handleGameAction(name: string, data: object, callback: IActionCallback) {
@@ -95,6 +95,6 @@ export default class ConnectedPlayer extends Player {
             this.ready = false
         }
 
-        this.socket.off("player-game-action", this.handleGameAction)
+        this.socket.off("player-game-action", this.handleGameAction.bind(this))
     }
 }

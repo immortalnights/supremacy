@@ -4,12 +4,10 @@ import {
     Ranks,
     defaultSuit,
     defaultWeapon,
-    MAX_TROOPS,
     MAX_CALIBRE,
     TRAINING_TIME,
 } from "./logic/platoons"
 import EquipmentData from "./data/equipment.json"
-import { defaults } from "lodash"
 
 const getRank = (calibre: number) => {
     let key = 0

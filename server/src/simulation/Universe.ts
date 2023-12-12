@@ -116,7 +116,7 @@ export default class Universe implements IUniverse, IWorld {
         this.saved = 0
     }
 
-    generate(seed: number) {
+    generate(_seed: number) {
         // Initial planets based on difficulty, 8, 16, 32
         for (let i = 0; i < 8; i++) {
             this.planets.push(new Planet(i))
@@ -402,6 +402,7 @@ export default class Universe implements IUniverse, IWorld {
                 } else {
                     reason = "Action data missing"
                 }
+                break
             }
             case "planet-terraform": {
                 const body = data as { id: PlanetID }
@@ -976,7 +977,7 @@ export default class Universe implements IUniverse, IWorld {
                 if (body.id !== undefined) {
                     const index = findShipIndex(body.id)
                     if (index >= 0) {
-                        const ship = this.ships[index] as Ship
+                        const ship = this.ships[index]
                         if (ship.location.position === "docking-bay") {
                             const planet = findPlanet(
                                 ship.location.planet!
@@ -1391,7 +1392,7 @@ export default class Universe implements IUniverse, IWorld {
         })
     }
 
-    handleEvent(event: UniverseEvent) {}
+    handleEvent(_event: UniverseEvent) {}
 
     updateFor(player: string): IUniverse {
         const universe: IUniverse = {

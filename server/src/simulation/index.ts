@@ -1,5 +1,4 @@
 import Universe from "./Universe"
-import Planet from "./Planet"
 import fs from "fs"
 // import { IChanges } from "./types.ts"
 
@@ -14,7 +13,7 @@ export const simulate = () => {
     simulateTimeout = setInterval(() => {
         const now = Date.now()
 
-        for (const [key, uni] of Object.entries(cache)) {
+        for (const [_key, uni] of Object.entries(cache)) {
             uni.simulate(now - time, "normal")
 
             if (false === uni.finished) {
@@ -36,7 +35,7 @@ export const shutdown = () => {
     clearInterval(simulateTimeout as NodeJS.Timeout)
 }
 
-export const createUniverse = (options: {}) => {
+export const createUniverse = (_options: {}) => {
     const universe = new Universe()
     universe.generate(0)
     cache[universe.id] = universe

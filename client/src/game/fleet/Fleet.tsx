@@ -13,7 +13,7 @@ import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
 import { RenameDialog } from "../components/NameDialog"
 import PlanetGrid from "../components/grid/PlanetGrid"
-import { IShip, ShipID } from "../../simulation/types.d"
+import { IShip, ShipID } from "@server/simulation/types"
 
 type FleetMode = "normal" | "ship-destination"
 

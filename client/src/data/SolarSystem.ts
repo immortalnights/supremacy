@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { ISolarSystem } from "../simulation/types.d"
+import { ISolarSystem } from "@server/simulation/types"
 
 export type { ISolarSystem }
 

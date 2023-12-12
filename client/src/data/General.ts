@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { StarDate } from "../simulation/types.d"
+import { StarDate } from "@server/simulation/types"
 
 const DAYS_PER_YEAR = 48
 

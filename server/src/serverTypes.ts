@@ -3,7 +3,6 @@ import {
     ServerToClientEvents,
     ClientToServerEvents,
     IPlayer,
-    IGame,
     GameSpeed,
 } from "./types"
 import TypedEmitter from "typed-emitter"

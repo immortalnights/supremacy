@@ -1,4 +1,3 @@
-import e from "express"
 import Planet from "./Planet"
 import {
     IResources,
@@ -11,7 +10,6 @@ import {
     ShipTask,
     IShipHarvester,
     IShipTerraformer,
-    PlanetID,
 } from "./types"
 import { IStaticShipDetails } from "./staticTypes"
 
@@ -100,7 +98,7 @@ export default class Ship implements IShip {
     // }
 
     totalCargo(): number {
-        return Object.keys(this.cargo).reduce((prev, value, index) => {
+        return Object.keys(this.cargo).reduce((prev, value) => {
             const key = value as keyof IResources
             return prev + this.cargo[key]
         }, 0)

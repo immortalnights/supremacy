@@ -1,6 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, IconButton, Grid, Typography, Stack } from "@mui/material"
+import { Box, Button, IconButton, Grid, Typography } from "@mui/material"
 import {
     ArrowDropDown,
     ArrowDropUp,
@@ -8,12 +8,11 @@ import {
     ArrowRight,
 } from "@mui/icons-material"
 import { PlatoonStatus } from "../../simulation/types"
-import { IEquipment, IEquipmentList, IPlanet } from "../../simulation/types.d"
+import { IEquipmentList, IPlanet } from "@server/simulation/types"
 import PlanetAuth from "../components/PlanetAuth"
 import { Suits, Weapons } from "../../data/StaticData"
 import { PlayerPlatoons, IPlatoon } from "../../data/Platoons"
 import { IOContext } from "../../data/IOContext"
-import { Player } from "../../data/Player"
 import IncDecButton from "../components/IncreaseDecreaseButton"
 
 const usePlatoonCost = (platoon: IPlatoon) => {
@@ -212,7 +211,6 @@ const PlatoonDetails = ({
 }
 
 const Training = ({ planet }: { planet: IPlanet }) => {
-    const player = Recoil.useRecoilValue(Player)
     const platoons = Recoil.useRecoilValue(PlayerPlatoons)
     const [platoonIndex, setPlatoonIndex] = React.useState(0)
     const selectedPlatoon = platoons.at(platoonIndex)
@@ -220,7 +218,10 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     const weapons = Recoil.useRecoilValue(Weapons)
     const { action } = React.useContext(IOContext)
 
-    const handleChangePlatoon = (event: any, direction: number) => {
+    const handleChangePlatoon = (
+        _event: React.MouseEvent,
+        direction: number
+    ) => {
         let nextIndex = platoonIndex + direction
         if (nextIndex < 0) {
             nextIndex = platoons.length - 1
@@ -231,7 +232,10 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         setPlatoonIndex(nextIndex)
     }
 
-    const handleChangePlatoonTroops = (event: any, amount: number) => {
+    const handleChangePlatoonTroops = (
+        _event: React.MouseEvent,
+        amount: number
+    ) => {
         if (selectedPlatoon) {
             if (amount < 0) {
                 if (selectedPlatoon.troops > 0) {
@@ -245,22 +249,22 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         }
     }
 
-    const handleChangeSuit = (key: string) => {
+    const handleChangeSuit = async (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
+        await action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
     }
 
-    const handleChangeWeapon = (key: string) => {
+    const handleChangeWeapon = async (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
+        await action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
     }
 
-    const handleRecruit = () => {
-        action("platoon-recruit", { id: selectedPlatoon!.id })
+    const handleRecruit = async () => {
+        await action("platoon-recruit", { id: selectedPlatoon!.id })
     }
 
-    const handleDismiss = () => {
-        action("platoon-dismiss", { id: selectedPlatoon!.id })
+    const handleDismiss = async () => {
+        await action("platoon-dismiss", { id: selectedPlatoon!.id })
     }
 
     let location = ""

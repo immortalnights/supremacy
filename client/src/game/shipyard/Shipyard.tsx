@@ -1,8 +1,8 @@
 import React from "react"
 import Recoil from "recoil"
-import { Grid, Stack, Button, Typography } from "@mui/material"
+import { Stack, Button, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
-import { CapitalPlanet, IPlanet } from "../../data/Planets"
+import { CapitalPlanet } from "../../data/Planets"
 import {
     SolarSystem as SolarSystemData,
     ISolarSystem,

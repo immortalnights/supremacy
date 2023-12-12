@@ -1,20 +1,16 @@
 import React from "react"
-import Recoil from "recoil"
 import {
     Button,
-    Typography,
     Dialog,
     DialogTitle,
     DialogContent,
-    DialogContentText,
     DialogProps,
     DialogActions,
     List,
-    ListItem,
     ListItemText,
     ListItemButton,
 } from "@mui/material"
-import { IPlanetBasic } from "../../../simulation/types.d"
+import { IPlanetBasic } from "@server/simulation/types"
 
 interface IDialogProps {
     planet: IPlanetBasic

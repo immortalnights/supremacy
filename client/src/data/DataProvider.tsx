@@ -19,28 +19,29 @@ import { Planets } from "./Planets"
 import { Ships } from "./Ships"
 import { Platoons } from "./Platoons"
 import { EspionageReport } from "./Espionage"
-import type { IUniverse } from "../simulation/types.d"
+import type { IUniverse } from "@server/simulation/types"
 
 // TODO reorganize so that Lobby/Room related data is handled separately from the Game
-
-const handleRegistered = (
-    { id }: { id: string },
-    { get, set }: TransactionInterface_UNSTABLE
-) => {
-    const player = { ...get(Player), id }
-    set(Player, player)
-}
 
 // Consider reversing the arguments so that received data does not have to be bundled into as single object
 // (callback: TransactionInterface_UNSTABLE, ...args: any[]) => void
 type TransactionHandler = (
-    data: any,
+    data: {
+        key: string
+        action: string
+        data: object
+    },
     callback: TransactionInterface_UNSTABLE
 ) => void
 
+const handleRegistered: TransactionHandler = ({ data }, { get, set }) => {
+    const player = { ...get(Player), data }
+    set(Player, player)
+}
+
 const handleSubscriptionPost: TransactionHandler = (
     { key, action, data }: { key: string; action: string; data: object },
-    { get, set, reset }
+    { get, set }
 ) => {
     console.debug("Subscription Post", key, action, data)
     switch (key) {
@@ -79,17 +80,17 @@ const handleSubscriptionPost: TransactionHandler = (
     }
 }
 
-const handleRoomJoined: TransactionHandler = (data: IRoom, { get, set }) => {
+const handleRoomJoined: TransactionHandler = ({ data }, { get, set }) => {
     const player = get(Player)
 
     set(Player, { ...player, ready: false })
 
     // Set the room data
-    set(Room, data)
+    set(Room, data as IRoom)
 }
 
 const handleRoomLeave: TransactionHandler = (
-    data: any,
+    data: unknown,
     { get, set, reset }
 ) => {
     const player = get(Player)
@@ -101,27 +102,34 @@ const handleRoomLeave: TransactionHandler = (
 
 // FIXME can be optimized/tidied as a room update message
 const handleRoomPlayerJoined: TransactionHandler = (
-    player: IPlayer,
+    { data: player },
     { get, set }
 ) => {
     const room = get(Room)
     console.log("new player joined room", room?.id)
 
     if (room) {
-        const existingPlayer = room.players.find((p) => p.id === player.id)
+        const existingPlayer = room.players.find(
+            (p) => p.id === (player as IPlayer).id
+        )
         if (!existingPlayer) {
-            set(Room, { ...room, players: [...room.players, player] })
+            set(Room, {
+                ...room,
+                players: [...room.players, player as IPlayer],
+            })
         }
     }
 }
 
 // FIXME can be optimized/tidied as a room update message
 const handleRoomPlayerLeft: TransactionHandler = (
-    { id }: { id: string },
+    { data },
     { get, set, reset }
 ) => {
     const player = get(Player)
     const room = get(Room)
+
+    const id = data as unknown as string
 
     if (id === player.id) {
         console.debug("Self left room", room?.id)
@@ -144,11 +152,9 @@ interface RoomUpdateArgs {
     options: IGameOptions
 }
 
-const handleRoomUpdate: TransactionHandler = (
-    { id, status, countdown, options }: RoomUpdateArgs,
-    { get, set }
-) => {
+const handleRoomUpdate: TransactionHandler = ({ data }, { get, set }) => {
     const room = get(Room)
+    const { id, status, countdown, options } = data as RoomUpdateArgs
 
     console.log("handle room update")
 
@@ -165,12 +171,14 @@ const handleRoomUpdate: TransactionHandler = (
 }
 
 // FIXME can be optimized/tidied as a room update message
-const handlePlayerChanged: TransactionHandler = (
-    { id, name, ready }: { id: string; name: string; ready: boolean },
-    { get, set }
-) => {
+const handlePlayerChanged: TransactionHandler = ({ data }, { get, set }) => {
     const room = get(Room)
     const player = get(Player)
+    const { id, name, ready } = data as {
+        id: string
+        name: string
+        ready: boolean
+    }
 
     if (room) {
         if (id === player.id) {
@@ -186,15 +194,15 @@ const handlePlayerChanged: TransactionHandler = (
     }
 }
 
-const handleGameCreated: TransactionHandler = (data: IGame, callback) => {
+const handleGameCreated: TransactionHandler = (data, callbacks) => {
     // FIXME dislike how this doesn't have parity with Room creation/joining
     // but there is no direct user interaction that creates a game that can
     // handle the response to navigate the user to the game.
-    handleGameJoined(data, callback)
+    handleGameJoined(data, callbacks)
 }
 
 const handleGameJoined: TransactionHandler = (
-    data: IGame,
+    { data },
     { get, set, reset }
 ) => {
     const player = get(Player)
@@ -212,22 +220,24 @@ const handleGameJoined: TransactionHandler = (
     reset(SelectedPlanetID)
     reset(EspionageReport)
 
-    set(Game, data)
+    set(Game, data as IGame)
 }
 
-const handleGamePlayerJoined: TransactionHandler = (
-    player: IPlayer,
-    { get, set }
-) => {
+const handleGamePlayerJoined: TransactionHandler = ({ data }, { get, set }) => {
     const game = get(Game) as IGame
 
-    const existingPlayer = game.players.find((p) => p.id === player.id)
+    const existingPlayer = game.players.find(
+        (p) => p.id === (data as IPlayer).id
+    )
     if (!existingPlayer) {
-        set(Game, { ...game, players: [...game.players, player] })
+        set(Game, { ...game, players: [...game.players, data as IPlayer] })
     }
 }
 
-const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
+const handleGamePlayerKicked: TransactionHandler = (
+    { data: _data },
+    { reset }
+) => {
     reset(Game)
     reset(SolarSystem)
     reset(Planets)
@@ -237,19 +247,18 @@ const handleGamePlayerKicked: TransactionHandler = ({}: {}, { reset }) => {
     reset(EspionageReport)
 }
 
-const handleStaticGameData: TransactionHandler = (data: any, { get, set }) => {
+const handleStaticGameData: TransactionHandler = ({ data }, { get, set }) => {
     set(StaticShips, data.ships)
     set(StaticEquipment, data.equipment)
     // set(StaticEspionage, data.espionage)
 }
 
-const handleGameUpdate: TransactionHandler = (
-    data: IUpdate<IUniverse>,
-    { get, set }
-) => {
+const handleGameUpdate: TransactionHandler = ({ data }, { get, set }) => {
     // Apply the game data to the different atoms;
 
-    const { planets, ships, platoons, ...solarSystem } = data.world
+    const { planets, ships, platoons, ...solarSystem } = (
+        data as IUpdate<IUniverse>
+    ).world
 
     // FIXME do this somewhere better
     let selected = get(SelectedPlanetID)
@@ -283,10 +292,12 @@ const handleGameUpdate: TransactionHandler = (
 }
 
 const handlePartialGameUpdate: TransactionHandler = (
-    data: IUpdate<IUniverse>,
+    { data },
     { get, set }
 ) => {
-    const { planets, ships, platoons, espionage, ...solarSystem } = data.world
+    const { planets, ships, platoons, espionage, ...solarSystem } = (
+        data as IUpdate<IUniverse>
+    ).world
 
     if (planets) {
         // Copy the main planets array

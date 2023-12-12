@@ -37,12 +37,12 @@ export const IOContext = React.createContext<IIOContext>({
     createRoom: () => Promise.reject(),
     joinRoom: () => Promise.reject(),
     leaveRoom: () => {},
-    subscribe: (key: string) => Promise.reject(),
-    unsubscribe: (key: string) => {},
-    roomAction: (name: PlayerRoomAction, data: any) => Promise.reject(),
+    subscribe: (_key: string) => Promise.reject(),
+    unsubscribe: (_key: string) => {},
+    roomAction: (_name: PlayerRoomAction, _data: any) => Promise.reject(),
     joinGame: () => Promise.reject(),
     leaveGame: () => {},
-    action: (name: PlayerGameAction, data: object = {}) => Promise.reject(),
+    action: (_name: PlayerGameAction, _data: object = {}) => Promise.reject(),
 })
 
 export type MessageHandler = (action: string, data: any) => void

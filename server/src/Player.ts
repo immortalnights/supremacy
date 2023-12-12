@@ -8,7 +8,7 @@ export default class Player implements IPlayer {
     name: string
     ready: boolean
     room?: Room
-    game?: Game<any>
+    game?: Game<never>
 
     constructor() {
         this.id = crypto.randomUUID()

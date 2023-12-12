@@ -1,4 +1,4 @@
-import type { IPlanet, IShip, IResources } from "../../simulation/types.d"
+import type { IPlanet, IShip, IResources } from "@server/simulation/types"
 
 export const hasCargo = (ship: IShip, type: string) => {
     return ship.cargo[type as keyof IResources] > 0

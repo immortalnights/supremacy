@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { IShip, IShipBasic, PlanetID, ShipID } from "../simulation/types.d"
+import { IShip, IShipBasic, PlanetID, ShipID } from "@server/simulation/types"
 import { IPlayer, Player } from "./Player"
 
 export type { IShip, IShipBasic }

@@ -1,7 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
 import {
-    Box,
     Grid,
     GridDirection,
     IconButton,
@@ -23,7 +22,7 @@ import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { IOContext } from "../../data/IOContext"
 import DockingBays from "../components/DockingBays"
 import PlanetAuth from "../components/PlanetAuth"
-import type { IPlanet, IShip, ShipID } from "../../simulation/types.d"
+import type { IPlanet, IShip, ShipID } from "@server/simulation/types"
 
 const PlatoonGridItem = ({
     name,
@@ -181,7 +180,13 @@ const Aggression = ({
     )
 }
 
-const Combat = ({ planet, owner }: { planet: IPlanet; owner: boolean }) => {
+const Combat = ({
+    planet,
+    owner: _owner,
+}: {
+    planet: IPlanet
+    owner: boolean
+}) => {
     const [selectedShip, setSelectedShip] = React.useState<ShipID | undefined>()
     const platoons = Recoil.useRecoilValue(
         PlatoonsOnPlanet({ planet: planet.id })
@@ -194,24 +199,24 @@ const Combat = ({ planet, owner }: { planet: IPlanet; owner: boolean }) => {
     )
     const ship = Recoil.useRecoilValue(Ship(selectedShip))
     const remainingTroops = platoons.reduce(
-        (val, p, index, arr) => val + (p as IPlatoon).troops,
+        (val, p) => val + (p as IPlatoon).troops,
         0
     )
     const { action } = React.useContext(IOContext)
 
     const handleClickDockedShip = (
-        event: React.MouseEvent<HTMLLIElement>,
+        _event: React.MouseEvent<HTMLLIElement>,
         ship: IShip
     ) => {
         setSelectedShip(ship.id)
     }
 
-    const handleClickUnloadPlatoon = (
-        event: React.MouseEvent,
+    const handleClickUnloadPlatoon = async (
+        _event: React.MouseEvent,
         item: IPlatoonBasic
     ) => {
         if (ship) {
-            action("platoon-relocate", {
+            await action("platoon-relocate", {
                 id: item.id,
                 direction: "unload",
                 ship: ship.id,
@@ -219,12 +224,12 @@ const Combat = ({ planet, owner }: { planet: IPlanet; owner: boolean }) => {
         }
     }
 
-    const handleClickLoadPlatoon = (
-        event: React.MouseEvent,
+    const handleClickLoadPlatoon = async (
+        _event: React.MouseEvent,
         item: IPlatoonBasic
     ) => {
         if (ship) {
-            action("platoon-relocate", {
+            await action("platoon-relocate", {
                 id: item.id,
                 direction: "load",
                 ship: ship.id,
@@ -232,12 +237,18 @@ const Combat = ({ planet, owner }: { planet: IPlanet; owner: boolean }) => {
         }
     }
 
-    const handleClickIncreaseAggression = (event: React.MouseEvent) => {
-        action("planet-modify-aggression", { id: planet.id, direction: 1 })
+    const handleClickIncreaseAggression = async (_event: React.MouseEvent) => {
+        await action("planet-modify-aggression", {
+            id: planet.id,
+            direction: 1,
+        })
     }
 
-    const handleClickDecreaseAggression = (event: React.MouseEvent) => {
-        action("planet-modify-aggression", { id: planet.id, direction: -1 })
+    const handleClickDecreaseAggression = async (_event: React.MouseEvent) => {
+        await action("planet-modify-aggression", {
+            id: planet.id,
+            direction: -1,
+        })
     }
 
     return (

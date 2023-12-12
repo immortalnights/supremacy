@@ -5,13 +5,13 @@ import {
     IPlatoon,
     IPlatoonBasic,
     ShipID,
-} from "../simulation/types.d"
+} from "@server/simulation/types"
 import { Player } from "./Player"
 
 export type { IPlatoon, IPlatoonBasic }
 
 const sumPlatoonStrengths = (platoons: IPlatoonBasic[]) =>
-    platoons.reduce((value, p, index, arr) => value + p.strength, 0)
+    platoons.reduce((value, p) => value + p.strength, 0)
 
 export const Platoons = Recoil.atom<(IPlatoon | IPlatoonBasic)[]>({
     key: "platoons",
