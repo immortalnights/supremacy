@@ -8,11 +8,7 @@ import {
     ISolarSystem,
 } from "../../data/SolarSystem"
 import { Difficulty } from "../../simulation/types"
-import {
-    StaticShips,
-    IShipList,
-    IStaticShipDetails,
-} from "../../data/StaticData"
+import { StaticShips, IShipList } from "../../data/StaticData"
 import { NewShipNameDialog } from "../components/NameDialog"
 import { PlayerShips } from "../../data/Ships"
 

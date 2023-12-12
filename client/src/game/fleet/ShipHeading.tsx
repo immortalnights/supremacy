@@ -1,5 +1,4 @@
 import { Typography } from "@mui/material"
-import React from "react"
 import Recoil from "recoil"
 import { Planet } from "../../data/Planets"
 import { IShip, IShipHeading } from "@server/simulation/types"

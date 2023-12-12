@@ -1,9 +1,7 @@
 import React from "react"
 import Recoil from "recoil"
-import { Grid, Stack, IconButton, Button, Typography } from "@mui/material"
+import { Grid, Stack, Button, Typography } from "@mui/material"
 import {
-    ArrowDropUp,
-    ArrowDropDown,
     LocalGasStation,
     Man,
     Woman,
@@ -12,7 +10,7 @@ import {
     Clear,
 } from "@mui/icons-material"
 import { IOContext } from "../../data/IOContext"
-import { SelectedPlanet, IPlanet, CapitalPlanet } from "../../data/Planets"
+import { IPlanet } from "../../data/Planets"
 import { Ship } from "../../data/Ships"
 import PlanetAuth from "../components/PlanetAuth"
 import DockingBays from "../components/DockingBays"
