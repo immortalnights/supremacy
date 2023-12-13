@@ -1,9 +1,7 @@
 import React from "react"
-import Recoil from "recoil"
 import { Button, CircularProgress, Stack } from "@mui/material"
 import { Link as RouterLink, useNavigate } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
-import { IRoom } from "@server/types"
 
 const LoadingButton = ({
     onClick,
@@ -33,21 +31,21 @@ const Menu = () => {
     React.useEffect(() => {
         // Leave any room or game the player may be in
         // now that they have returned to the main menu
-        leaveRoom()
-        leaveGame()
-    }, [])
+        void leaveRoom()
+        void leaveGame()
+    }, [leaveRoom, leaveGame])
 
-    const handleClickNewGame = async () => {
-        try {
-            const room: IRoom = await createRoom()
-            // setRoom(room)
-            navigate(`/room/${room.id}`)
-        } catch (err) {
-            console.error("Failed to create room", err)
-        }
+    const handleClickNewGame = () => {
+        createRoom().then(
+            (room) => {
+                // setRoom(room)
+                navigate(`/room/${room.id}`)
+            },
+            (err) => {
+                console.error("Failed to create room", err)
+            }
+        )
     }
-
-    const startingNewGame = false
 
     return (
         <Stack>

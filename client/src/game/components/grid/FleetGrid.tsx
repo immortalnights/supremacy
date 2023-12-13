@@ -14,11 +14,11 @@ const FleetGrid = ({
     selectedItem: IShip | undefined
     onSelectItem: (item: IShip) => void
 }) => {
-    const player = Recoil.useRecoilValue(Player)
-    const selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
-    const ships = Recoil.useRecoilValue(PlayerShips) as IShip[]
+    const _player = Recoil.useRecoilValue(Player)
+    const _selectedPlanet = Recoil.useRecoilValue(SelectedPlanetID)
+    const ships = Recoil.useRecoilValue(PlayerShips)
 
-    const classNamesForItem = (item: IShip) => {
+    const classNamesForItem = (_item: IShip) => {
         return ""
     }
 

@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { IRoom, RoomStatus } from "@server/types"
+import { IRoom } from "@server/types"
 
 export type { IRoom }
 

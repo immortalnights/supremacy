@@ -1,13 +1,13 @@
-function wrapPromise(promise: Promise<any>) {
+function wrapPromise(promise: Promise<unknown>) {
     let status = "pending"
-    let response: any
+    let response: unknown
 
     const suspender = promise.then(
-        (res: any) => {
+        (res: unknown) => {
             status = "success"
             response = res
         },
-        (err: any) => {
+        (err: unknown) => {
             status = "error"
             response = err
         }

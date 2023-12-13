@@ -1,5 +1,5 @@
 import Recoil from "recoil"
-import { IShip, IShipBasic, PlanetID, ShipID } from "../simulation/types.d"
+import { IShip, IShipBasic, PlanetID, ShipID } from "@server/simulation/types"
 import { IPlayer, Player } from "./Player"
 
 export type { IShip, IShipBasic }
@@ -39,7 +39,7 @@ export const PlayerShipsAtPlanetPosition = Recoil.selectorFamily<
     get:
         ({ planet, position }) =>
         ({ get }) => {
-            const ships = get(PlayerShips) as IShip[]
+            const ships = get(PlayerShips)
             const positions: string[] = Array.isArray(position)
                 ? position
                 : [position]

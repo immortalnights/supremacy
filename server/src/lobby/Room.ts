@@ -2,13 +2,7 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { Server } from "socket.io"
 import { ServerEventEmitter } from "../serverTypes"
-import {
-    IRoom,
-    RoomStatus,
-    IGameOptions,
-    IActionCallback,
-    IPlayer,
-} from "../types"
+import { IRoom, RoomStatus, IGameOptions, IActionCallback } from "../types"
 import Player from "../Player"
 import ConnectedPlayer from "../ConnectedPlayer"
 import AIPlayer from "../AIPlayer"
@@ -43,9 +37,10 @@ class Room implements IRoom {
         this.status = RoomStatus.Setup
         this.io = io
         this.events = new EventEmitter() as ServerEventEmitter
-        ;(this.countdown = 10), (this.countdownTimer = undefined)
+        this.countdown = 10
+        this.countdownTimer = undefined
 
-        this.join(host)
+        this.join(host).catch(() => {})
     }
 
     isEmpty(): boolean {
@@ -89,12 +84,12 @@ class Room implements IRoom {
         }
     }
 
-    join(player: ConnectedPlayer): void {
+    async join(player: ConnectedPlayer) {
         if (player.room) {
             console.log(
                 `Player ${player.id} is already in room ${player.room?.id}`
             )
-        } else if (!!this.players.find((p) => p.id === player.id)) {
+        } else if (this.players.find((p) => p.id === player.id)) {
             console.log(
                 `Player ${player.id} is already in this room ${this.id}`
             )
@@ -103,7 +98,7 @@ class Room implements IRoom {
             this.players.push(player)
 
             // Join the socket room
-            player.socket.join(this.id)
+            await player.socket.join(this.id)
 
             // Promote the new player to host, if a host does not exist
             if (this.host === "") {
@@ -163,9 +158,9 @@ class Room implements IRoom {
         })
     }
 
-    leave(player: ConnectedPlayer): void {
+    async leave(player: ConnectedPlayer) {
         // Remove the player from the socket room
-        player.socket.leave(this.id)
+        await player.socket.leave(this.id)
 
         console.log(`A player has left the room ${this.id}`)
 
@@ -205,9 +200,9 @@ class Room implements IRoom {
     }
 
     handlePlayerAction(
-        player: Player,
+        _player: Player,
         name: string,
-        data: any,
+        _data: unknown,
         callback: IActionCallback
     ): void {
         const result = {

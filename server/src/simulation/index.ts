@@ -1,5 +1,4 @@
 import Universe from "./Universe"
-import Planet from "./Planet"
 import fs from "fs"
 // import { IChanges } from "./types.ts"
 
@@ -14,7 +13,7 @@ export const simulate = () => {
     simulateTimeout = setInterval(() => {
         const now = Date.now()
 
-        for (const [key, uni] of Object.entries(cache)) {
+        for (const [_key, uni] of Object.entries(cache)) {
             uni.simulate(now - time, "normal")
 
             if (false === uni.finished) {
@@ -36,7 +35,7 @@ export const shutdown = () => {
     clearInterval(simulateTimeout as NodeJS.Timeout)
 }
 
-export const createUniverse = (options: {}) => {
+export const createUniverse = (_options: object) => {
     const universe = new Universe()
     universe.generate(0)
     cache[universe.id] = universe
@@ -53,7 +52,7 @@ export const findUniverse = (id: string): Universe | undefined => {
             const data = fs.readFileSync(saveFilePath, { encoding: "utf8" })
 
             const universe = new Universe()
-            universe.load(JSON.parse(data))
+            universe.load(JSON.parse(data) as object)
             console.log(`Loaded Universe ${universe.id}...`)
             cache[id] = universe
         }

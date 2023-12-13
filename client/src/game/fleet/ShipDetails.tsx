@@ -1,8 +1,6 @@
-import React from "react"
-import Recoil from "recoil"
 import { Grid } from "@mui/material"
 import StarDate from "../components/StarDate"
-import { IShip } from "../../simulation/types.d"
+import { IShip } from "@server/simulation/types"
 
 const Details = ({ ship }: { ship: IShip }) => {
     return (

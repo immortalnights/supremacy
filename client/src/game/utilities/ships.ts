@@ -1,4 +1,4 @@
-import type { IPlanet, IShip, IResources } from "../../simulation/types.d"
+import type { IPlanet, IShip, IResources } from "@server/simulation/types"
 
 export const hasCargo = (ship: IShip, type: string) => {
     return ship.cargo[type as keyof IResources] > 0
@@ -14,7 +14,7 @@ export const isCargoFull = (ship: IShip) => {
 }
 
 export const totalCargo = (resources: IResources) => {
-    return Object.keys(resources).reduce((prev, value, index) => {
+    return Object.keys(resources).reduce((prev, value) => {
         const key = value as keyof IResources
         return prev + resources[key]
     }, 0)

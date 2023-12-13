@@ -1,6 +1,4 @@
-import React from "react"
-import Recoil from "recoil"
-import { IPlanet, IShip, IShipCapacity } from "../../simulation/types.d"
+import { IPlanet, IShip, IShipCapacity } from "@server/simulation/types"
 import { totalCargo } from "../utilities/ships"
 
 const ShipProperties = ({

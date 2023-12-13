@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import Recoil from "recoil"
 import {
     useNavigate,
@@ -21,8 +21,8 @@ import {
 } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { IRoom, Room as RoomData } from "../../data/Room"
-import { IGame, Game as GameData } from "../../data/Game"
-import { RoomStatus } from "../../types"
+import { Game as GameData } from "../../data/Game"
+import { RoomStatus } from "@server/types"
 import { Player as PlayerData, IPlayer, ILocalPlayer } from "../../data/Player"
 import { RoomID } from "@server/types"
 
@@ -112,7 +112,9 @@ const SlotControls = ({
 
     const handleClickInvite = () => {
         // FIXME to use proper Location
-        navigator.clipboard.writeText(`http://localhost:3000/room/${roomID}`)
+        void navigator.clipboard.writeText(
+            `http://localhost:3000/room/${roomID}`
+        )
     }
 
     const handleClickKick = () => {
@@ -121,7 +123,7 @@ const SlotControls = ({
 
     const handleClickAddAI = () => {
         console.log("Click add ai")
-        roomAction("add-ai-player", {})
+        void roomAction("add-ai-player", {})
     }
 
     return (
@@ -165,7 +167,7 @@ const ReadyStatus = ({
     const { roomAction } = React.useContext(IOContext)
 
     const handleReadyClick = () => {
-        roomAction("toggle-ready", {})
+        void roomAction("toggle-ready", {})
     }
 
     let content
@@ -271,7 +273,7 @@ const Room = ({ data }: { data: IRoom }) => {
     const isHost = data.host === localPlayer.id
 
     const handleClickLeaveRoom = () => {
-        leaveRoom()
+        void leaveRoom()
     }
 
     return (
@@ -343,21 +345,22 @@ const RoomLoader = () => {
     const navigate = useNavigate()
     const params = useParams()
 
-    const asyncJoinRoom = async (id: string) => {
-        try {
+    const asyncJoinRoom = useCallback(
+        (id: string) => {
             console.log("Joining room", id)
-            await joinRoom(id)
-        } catch (err) {
-            console.warn(`Failed to join room ${id}`)
-            navigate("/", { replace: true })
-        }
-    }
+            joinRoom(id).catch((err) => {
+                console.warn(`Failed to join room ${id}: ${err}`)
+                navigate("/", { replace: true })
+            })
+        },
+        [joinRoom, navigate]
+    )
 
     React.useEffect(() => {
         if (params.id) {
             asyncJoinRoom(params.id)
         }
-    }, [])
+    }, [asyncJoinRoom, params.id])
 
     // Navigate to the game when game data is received
     let content

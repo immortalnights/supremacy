@@ -1,6 +1,6 @@
 import Recoil from "recoil"
-import { IStaticShipDetails, IShipList } from "../simulation/staticTypes.d"
-import { IEquipment, IEquipmentList } from "../simulation/types.d"
+import { IStaticShipDetails, IShipList } from "@server/simulation/staticTypes"
+import { IEquipment, IEquipmentList } from "@server/simulation/types"
 import { filterObject } from "./utilities"
 
 export type { IShipList, IStaticShipDetails }

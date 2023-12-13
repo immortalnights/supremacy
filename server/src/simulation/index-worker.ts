@@ -9,7 +9,7 @@ let simulateTimeout: NodeJS.Timeout | number | undefined
 interface IMessage {
     type: string
     changes?: IChanges
-    data: any
+    data: unknown
 }
 
 const post = (msg: IMessage) => {
@@ -28,7 +28,7 @@ const simulate = () => {
     simulateTimeout = setInterval(() => {
         const now = Date.now()
         const uni = universe as Universe
-        const changes = uni.simulate(now - time)
+        uni.simulate(now - time)
         time = now
 
         post({
@@ -95,9 +95,9 @@ const dispatch = (msg: IMessage) => {
 }
 
 if (global.onmessage) {
-    global.onmessage = (e) => dispatch(e.data)
+    global.onmessage = (e) => dispatch(e.data as IMessage)
 } else {
-    parentPort?.on("message", (message) => dispatch(message))
+    parentPort?.on("message", (message) => dispatch(message as IMessage))
 }
 
 export default simulate

@@ -51,11 +51,11 @@ export const ordinal = (i: number): string => {
     i = Math.abs(i)
     let suffix = "th"
 
-    let cent = i % 100
+    const cent = i % 100
     if (cent >= 10 && cent <= 20) {
         suffix = "th"
     } else {
-        let dec = i % 10
+        const dec = i % 10
         if (dec === 1) {
             suffix = "st"
         } else if (dec === 2) {

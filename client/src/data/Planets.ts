@@ -1,7 +1,8 @@
 import Recoil from "recoil"
 import { SelectedPlanetID } from "./General"
 import { IPlayer, Player } from "./Player"
-import type { PlanetID, IPlanet, IPlanetBasic } from "../simulation/types.d"
+import type { PlanetID, IPlanet, IPlanetBasic } from "@server/simulation/types"
+import { throwError } from "./utilities"
 
 export type { IPlanet, IPlanetBasic }
 
@@ -27,7 +28,7 @@ export const Planet = Recoil.selectorFamily<
     get:
         (id: PlanetID | undefined) =>
         ({ get }) => {
-            const planets = get(Planets) as (IPlanetBasic | IPlanet)[]
+            const planets = get(Planets)
             return planets.find((p) => p.id === id)
         },
 })
@@ -47,8 +48,9 @@ export const CapitalPlanet = Recoil.selector<IPlanet>({
     get: ({ get }) => {
         const player = get(Player) as IPlayer
         const planets = get(Planets) as IPlanet[]
-        return planets.find(
-            (p) => p.owner === player.id && p.capital === true
-        ) as IPlanet
+        return (
+            planets.find((p) => p.owner === player.id && p.capital === true) ??
+            throwError(`Failed to find capital planet for player ${player.id}`)
+        )
     },
 })

@@ -48,7 +48,7 @@ const Grid = <T extends GridItem>({
                         key={index}
                         title={item.name + " (" + item.type + ")"}
                         className={classes.join(" ")}
-                        onClick={(e) => onSelectItem(item)}
+                        onClick={() => onSelectItem(item)}
                     >
                         {item.name}
                     </td>

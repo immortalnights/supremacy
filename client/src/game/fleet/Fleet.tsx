@@ -3,9 +3,8 @@ import Recoil from "recoil"
 import { Button, Grid, Typography } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanetID } from "../../data/General"
-import { IPlayer, Player } from "../../data/Player"
-import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
-import { Ship, PlayerShipsAtPlanetPosition } from "../../data/Ships"
+import { IPlanet, IPlanetBasic } from "../../data/Planets"
+import { Ship } from "../../data/Ships"
 import DockingBays from "../components/DockingBays"
 import FleetGrid from "../components/grid/FleetGrid"
 import PlanetAuth from "../components/PlanetAuth"
@@ -13,7 +12,7 @@ import ShipDetails from "./ShipDetails"
 import ShipHeading from "./ShipHeading"
 import { RenameDialog } from "../components/NameDialog"
 import PlanetGrid from "../components/grid/PlanetGrid"
-import { IShip, ShipID } from "../../simulation/types.d"
+import { IShip, ShipID } from "@server/simulation/types"
 
 type FleetMode = "normal" | "ship-destination"
 
@@ -44,7 +43,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleAbortTravelClick = () => {
-        action("ship-abort-travel", { id: ship!.id })
+        void action("ship-abort-travel", { id: ship!.id })
         setMode("normal")
     }
 
@@ -58,13 +57,13 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleRenameShip = (name: string) => {
-        action("ship-rename", { id: ship!.id, name })
+        void action("ship-rename", { id: ship!.id, name })
         setRenameShip(false)
     }
 
     const handleLaunchClick = () => {
         console.assert(ship, "")
-        action("ship-relocate", { id: ship!.id, position: "orbit" })
+        void action("ship-relocate", { id: ship!.id, position: "orbit" })
         setMode("normal")
     }
 
@@ -74,12 +73,12 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
     const handleLandClick = () => {
         console.assert(ship, "")
-        action("ship-relocate", { id: ship!.id, position: "docking-bay" })
+        void action("ship-relocate", { id: ship!.id, position: "docking-bay" })
         setMode("normal")
     }
 
     const handleSelectPlanet = (planet: IPlanetBasic) => {
-        action("ship-travel", { id: ship!.id, location: planet.id })
+        void action("ship-travel", { id: ship!.id, location: planet.id })
         setMode("normal")
     }
 
@@ -95,7 +94,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
         ) {
             setSelectedPlanet(ship.location.planet)
         }
-    }, [ship, selectedPlanet])
+    }, [ship, selectedPlanet, setSelectedPlanet])
 
     let canLaunch = false
     let canTravel = false

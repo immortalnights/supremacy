@@ -3,18 +3,14 @@ import {
     ServerToClientEvents,
     ClientToServerEvents,
     IPlayer,
-    IGame,
     GameSpeed,
 } from "./types"
-import TypedEmitter from "typed-emitter"
+import TypedEmitter, { EventMap } from "typed-emitter"
 
 export type SocketIO = Socket<ClientToServerEvents, ServerToClientEvents>
 
 // Events to or from Player, Room, etc
-interface ServerToResourceEvents {
-    // Required by TypedEmitter.EventMap
-    [index: string]: (...args: any[]) => void
-
+interface ServerToResourceEvents extends EventMap {
     // Player wants to create a new room
     "player-create-room": (player: IPlayer) => void
     // Player wants to join an existing room

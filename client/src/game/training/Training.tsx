@@ -1,19 +1,18 @@
 import React from "react"
 import Recoil from "recoil"
-import { Box, Button, IconButton, Grid, Typography, Stack } from "@mui/material"
+import { Box, Button, IconButton, Grid, Typography } from "@mui/material"
 import {
     ArrowDropDown,
     ArrowDropUp,
     ArrowLeft,
     ArrowRight,
 } from "@mui/icons-material"
-import { PlatoonStatus } from "../../simulation/types"
-import { IEquipment, IEquipmentList, IPlanet } from "../../simulation/types.d"
+import { PlatoonStatus } from "@server/simulation/types"
+import { IEquipmentList, IPlanet } from "@server/simulation/types"
 import PlanetAuth from "../components/PlanetAuth"
 import { Suits, Weapons } from "../../data/StaticData"
 import { PlayerPlatoons, IPlatoon } from "../../data/Platoons"
 import { IOContext } from "../../data/IOContext"
-import { Player } from "../../data/Player"
 import IncDecButton from "../components/IncreaseDecreaseButton"
 
 const usePlatoonCost = (platoon: IPlatoon) => {
@@ -212,7 +211,6 @@ const PlatoonDetails = ({
 }
 
 const Training = ({ planet }: { planet: IPlanet }) => {
-    const player = Recoil.useRecoilValue(Player)
     const platoons = Recoil.useRecoilValue(PlayerPlatoons)
     const [platoonIndex, setPlatoonIndex] = React.useState(0)
     const selectedPlatoon = platoons.at(platoonIndex)
@@ -220,7 +218,10 @@ const Training = ({ planet }: { planet: IPlanet }) => {
     const weapons = Recoil.useRecoilValue(Weapons)
     const { action } = React.useContext(IOContext)
 
-    const handleChangePlatoon = (event: any, direction: number) => {
+    const handleChangePlatoon = (
+        _event: React.MouseEvent,
+        direction: number
+    ) => {
         let nextIndex = platoonIndex + direction
         if (nextIndex < 0) {
             nextIndex = platoons.length - 1
@@ -231,15 +232,24 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         setPlatoonIndex(nextIndex)
     }
 
-    const handleChangePlatoonTroops = (event: any, amount: number) => {
+    const handleChangePlatoonTroops = (
+        _event: React.MouseEvent,
+        amount: number
+    ) => {
         if (selectedPlatoon) {
             if (amount < 0) {
                 if (selectedPlatoon.troops > 0) {
-                    action("platoon-modify", { id: selectedPlatoon.id, amount })
+                    void action("platoon-modify", {
+                        id: selectedPlatoon.id,
+                        amount,
+                    })
                 }
             } else {
                 if (selectedPlatoon.troops < 200) {
-                    action("platoon-modify", { id: selectedPlatoon.id, amount })
+                    void action("platoon-modify", {
+                        id: selectedPlatoon.id,
+                        amount,
+                    })
                 }
             }
         }
@@ -247,23 +257,23 @@ const Training = ({ planet }: { planet: IPlanet }) => {
 
     const handleChangeSuit = (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
+        void action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
     }
 
     const handleChangeWeapon = (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
+        void action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
     }
 
     const handleRecruit = () => {
-        action("platoon-recruit", { id: selectedPlatoon!.id })
+        void action("platoon-recruit", { id: selectedPlatoon!.id })
     }
 
     const handleDismiss = () => {
-        action("platoon-dismiss", { id: selectedPlatoon!.id })
+        void action("platoon-dismiss", { id: selectedPlatoon!.id })
     }
 
-    let location = ""
+    let location
     if (selectedPlatoon) {
         // FIXME show ship or planet name
         if (selectedPlatoon.status === PlatoonStatus.Recruited) {
@@ -276,6 +286,9 @@ const Training = ({ planet }: { planet: IPlanet }) => {
             location = "??"
         }
     }
+
+    // FIXME why is location not used
+    void location
 
     let canModify = false
     let canIncreaseTroops = false

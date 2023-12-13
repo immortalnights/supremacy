@@ -2,7 +2,7 @@ import React from "react"
 import Recoil from "recoil"
 import { Typography } from "@mui/material"
 import { range } from "../../../data/utilities"
-import { IPlanet, ShipID, IShip } from "../../../simulation/types.d"
+import { IPlanet, ShipID, IShip } from "@server/simulation/types"
 import { PlayerShipsAtPlanetPosition } from "../../../data/Ships"
 
 interface DockingBaysProps {
@@ -17,7 +17,7 @@ const DockingBays = ({ planet, selected, onItemClick }: DockingBaysProps) => {
             planet: planet.id,
             position: "docking-bay",
         })
-    ) as IShip[]
+    )
 
     const handleItemClick = (
         event: React.MouseEvent<HTMLLIElement, MouseEvent>,

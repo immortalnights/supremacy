@@ -13,7 +13,7 @@ import type {
     StarDate,
 } from "./types"
 import { PlanetType } from "./types"
-import { clamp, random, randomFloat } from "./utilities"
+import { random, randomFloat } from "./utilities"
 
 const GROWTH_TIME = 1
 const TAX_TIME = 2
@@ -210,19 +210,16 @@ export default class Planet implements IPlanet {
     }
 
     terraform(name: string) {
-        const planetTypeKeys = Object.keys(PlanetType)
-
         // remove "Lifeless"
-        const index = planetTypeKeys.findIndex((t) => t === PlanetType.Lifeless)
-        planetTypeKeys.splice(index, 1)
+        const values = Object.values(PlanetType).filter(
+            (v) => v === PlanetType.Lifeless
+        )
 
         this.name = name
         this.population = 0
         this.habitable = true
         this.terraforming = false
-        this.type = planetTypeKeys[
-            random(0, planetTypeKeys.length)
-        ] as PlanetType
+        this.type = values[random(0, values.length)]
         this.population = 1000
         this.morale = 75
         this.tax = 25

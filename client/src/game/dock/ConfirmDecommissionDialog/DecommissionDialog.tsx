@@ -1,8 +1,6 @@
-import React from "react"
 import Recoil from "recoil"
 import {
     Button,
-    Typography,
     Dialog,
     DialogTitle,
     DialogContent,
@@ -11,7 +9,7 @@ import {
     DialogActions,
 } from "@mui/material"
 import { CapitalPlanet } from "../../../data/Planets"
-import type { IShip } from "../../../simulation/types.d"
+import type { IShip } from "@server/simulation/types"
 
 interface DecommissionDialogProps {
     ship: IShip

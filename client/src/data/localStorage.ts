@@ -7,7 +7,7 @@ export const useLocalStorageValue = (
     let value: string | object | null = localStorage.getItem(key)
 
     if (value && deserialize) {
-        value = JSON.parse(value)
+        value = JSON.parse(value) as object
     }
 
     return value
@@ -15,16 +15,17 @@ export const useLocalStorageValue = (
 
 export const useLocalStorage = (
     key: string,
-    defaultValue?: any,
+    defaultValue?: unknown,
     deserialize = false
-): [string | object | null, (value: any) => void] => {
-    const setLocalStorageValue = (value: any) => {
-        const isString: boolean =
-            typeof value === "string" || value instanceof String
-        localStorage.setItem(key, isString ? value : JSON.stringify(value))
+): [string | object | null, (value: unknown) => void] => {
+    const setLocalStorageValue = (value: unknown) => {
+        localStorage.setItem(
+            key,
+            value instanceof String ? (value as string) : JSON.stringify(value)
+        )
     }
 
-    const set = React.useCallback(setLocalStorageValue, [])
+    const set = React.useCallback(setLocalStorageValue, [key])
 
     if (defaultValue) {
         setLocalStorageValue(defaultValue)
@@ -33,7 +34,7 @@ export const useLocalStorage = (
     let currentValue: string | object | null = localStorage.getItem(key)
 
     if (currentValue && deserialize) {
-        currentValue = JSON.parse(currentValue)
+        currentValue = JSON.parse(currentValue) as object
     }
 
     return [currentValue, set]

@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { Button, IconButton } from "@mui/material"
 import { ArrowDropUp, ArrowDropDown } from "@mui/icons-material"
 import { red, green } from "@mui/material/colors"
@@ -47,12 +47,12 @@ const IncreaseDecreaseButton = ({
         onChange(event, change)
     }
 
-    const cancel = () => {
+    const cancel = useCallback(() => {
         window.clearInterval(timer)
         setTimer(undefined)
-    }
+    }, [timer, setTimer])
 
-    const handleClick = (event: React.MouseEvent) => {}
+    const handleClick = (_event: React.MouseEvent) => {}
 
     const handleMouseDown = (event: React.MouseEvent) => {
         fire(event, event.ctrlKey, event.altKey)
@@ -63,19 +63,19 @@ const IncreaseDecreaseButton = ({
         setTimer(t)
     }
 
-    const handleMouseUp = (event: React.MouseEvent) => {
+    const handleMouseUp = (_event: React.MouseEvent) => {
         cancel()
     }
 
-    const handleMouseBlur = (event: React.FocusEvent) => {
+    const handleMouseBlur = (_event: React.FocusEvent) => {
         cancel()
     }
 
-    const handleMouseLeave = (event: React.MouseEvent) => {
+    const handleMouseLeave = (_event: React.MouseEvent) => {
         cancel()
     }
 
-    React.useEffect(() => cancel(), [setTimer])
+    React.useEffect(() => cancel(), [cancel])
 
     const props = {
         disabled,

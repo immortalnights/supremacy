@@ -5,7 +5,7 @@ export const calculateEspionageMissionCost = (mission: string) => {
     let cost = 0
 
     if (mission === "everything") {
-        for (const [key, item] of Object.entries(EspionageData)) {
+        for (const [_key, item] of Object.entries(EspionageData)) {
             cost += item.credits
         }
     } else {

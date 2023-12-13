@@ -95,8 +95,8 @@ const GameLoader = () => {
 
     React.useEffect(() => {
         // Join the game (may already have joined) to begin receiving game updates
-        joinGame(game!.id)
-    }, [])
+        void joinGame(game!.id)
+    }, [game, joinGame])
 
     let content
     if (game) {

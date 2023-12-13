@@ -7,25 +7,23 @@ import {
     ListItemButton,
     ListItemAvatar,
     ListItemText,
-    Box,
     Stack,
     Typography,
 } from "@mui/material"
-import { Link as RouterLink, useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 import { IOContext } from "../../data/IOContext"
 import {
     SelectedPlanet,
     Planets as PlanetData,
-    IPlanet,
     IPlanetBasic,
 } from "../../data/Planets"
-import { PlanetType } from "../../simulation/types"
+import { PlanetType } from "@server/simulation/types"
 import { SelectedPlanetID } from "../../data/General"
 import { Game as GameData } from "../../data/Game"
 import { EspionageReport as EspionageReportData } from "../../data/Espionage"
 import { PlayerShips } from "../../data/Ships"
 import { Player } from "../../data/Player"
-import CurrentStarDate, { StarDate } from "../components/StarDate"
+import { CurrentStarDate, StarDate } from "../components/StarDate"
 import EspionageDialog from "./EspionageDialog"
 import "./styles.css"
 
@@ -111,8 +109,11 @@ const SelectedPlanetInfo = () => {
         terraformReason = "Atmosphere Processor is busy"
     }
 
+    // FIXME use terraformReason
+    void terraformReason
+
     const handleClickTerraform = () => {
-        action("planet-terraform", { id: planet!.id })
+        void action("planet-terraform", { id: planet!.id })
     }
 
     const handleClickEspionage = () => {
@@ -123,7 +124,7 @@ const SelectedPlanetInfo = () => {
         planet: IPlanetBasic,
         mission: string
     ) => {
-        action("planet-espionage", { id: planet.id, mission })
+        void action("planet-espionage", { id: planet.id, mission })
         setEspionage(false)
     }
 

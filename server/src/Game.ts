@@ -55,7 +55,7 @@ class Game<T extends IWorld> implements IGame {
         return this.players.length === 2
     }
 
-    canJoin(player: Player): boolean {
+    canJoin(_player: Player): boolean {
         return true // !!this.allocatedPlayers.find((pID) => pID === player.id)
     }
 
@@ -67,7 +67,7 @@ class Game<T extends IWorld> implements IGame {
         return this.status === GameStatus.Playing
     }
 
-    join(player: Player) {
+    async join(player: Player) {
         console.log(`Player ${player.id} joining game ${this.id}`)
 
         let replacedPlayer: string | undefined
@@ -97,7 +97,7 @@ class Game<T extends IWorld> implements IGame {
 
         if (player instanceof ConnectedPlayer) {
             // Join the socket room
-            player.socket.join(this.id)
+            await player.socket.join(this.id)
 
             player.socket.emit("game-joined", {
                 id: this.id,
@@ -131,7 +131,7 @@ class Game<T extends IWorld> implements IGame {
         }
     }
 
-    leave(player: Player) {
+    async leave(player: Player) {
         const index = this.players.findIndex((p) => p.id === player.id)
 
         console.assert(
@@ -146,7 +146,7 @@ class Game<T extends IWorld> implements IGame {
 
             if (player instanceof ConnectedPlayer) {
                 // Leave the socket room
-                player.socket.leave(this.id)
+                await player.socket.leave(this.id)
             }
 
             // Other player left, broadcast to everyone
