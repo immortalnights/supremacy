@@ -45,7 +45,10 @@ export const IOContext = React.createContext<IIOContext>({
     action: (_name: PlayerGameAction, _data: object = {}) => Promise.reject(),
 })
 
-export type MessageHandler = (action: string, data: object) => void
+export type MessageHandler = (
+    action: string,
+    data: { key: string; action: string; data: object }
+) => void
 
 // Context Provider
 const IOProvider = ({
@@ -65,7 +68,7 @@ const IOProvider = ({
             // prevents auto-reconnecting
             setSocket(undefined)
             // Clean up state
-            handleMessage("disconnect", {})
+            handleMessage("disconnect", { key: "", action: "", data: {} })
         },
         [handleMessage]
     )
@@ -134,7 +137,7 @@ const IOProvider = ({
         leaveRoom: async () => {
             console.assert(socket, "Socket is invalid!")
             await socket?.emitWithAck("player-leave-room")
-            handleMessage("room-leave", {})
+            handleMessage("room-leave", { key: "", action: "", data: {} })
         },
         subscribe: (key: string) => {
             console.assert(socket, "Socket is invalid!")
@@ -177,7 +180,11 @@ const IOProvider = ({
             // console.log("Socket id", socket?.id)
             console.assert(socket, "Socket is invalid!")
             await socket?.emitWithAck("player-leave-game")
-            handleMessage("game-player-kicked", {})
+            handleMessage("game-player-kicked", {
+                key: "",
+                action: "",
+                data: {},
+            })
         },
         action: (name: PlayerGameAction, data: object = {}) => {
             console.assert(socket, "Socket is invalid!")
@@ -189,7 +196,11 @@ const IOProvider = ({
                     data,
                     (ok: boolean, reason: string, data: object) => {
                         if (ok) {
-                            handleMessage("partial-game-update", data)
+                            handleMessage("partial-game-update", {
+                                key: "",
+                                action: "",
+                                data,
+                            })
                             resolve()
                         } else {
                             reject(reason)

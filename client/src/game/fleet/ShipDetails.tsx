@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material"
-import StarDate from "../components/StarDate"
+import { CurrentStarDate } from "../components/StarDate"
 import { IShip } from "@server/simulation/types"
 
 const Details = ({ ship }: { ship: IShip }) => {
@@ -40,7 +40,7 @@ const ShipDetails = ({ ship }: { ship: IShip | undefined }) => {
                 Date
             </Grid>
             <Grid item xs={12} md={6}>
-                <StarDate />
+                <CurrentStarDate />
             </Grid>
             {ship ? <Details ship={ship} /> : null}
         </Grid>
