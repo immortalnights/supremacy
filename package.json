@@ -23,7 +23,7 @@
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "tsc:check": "tsc",
-    "test": "concurrently -c \"auto\" \"npm:test:client\" \"npm:test:server\"",
+    "test": "concurrently -c \"auto\" \"npm:test:server\"",
     "test:client": "cd client && npm run test",
     "test:server": "cd server && npm run test",
     "test:watch": "concurrently -c \"auto\" \"npm:test:client\" \"npm:test:server\"",

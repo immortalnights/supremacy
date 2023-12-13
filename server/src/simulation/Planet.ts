@@ -212,8 +212,10 @@ export default class Planet implements IPlanet {
     terraform(name: string) {
         // remove "Lifeless"
         const values = Object.values(PlanetType).filter(
-            (v) => v === PlanetType.Lifeless
+            (v) => v !== PlanetType.Lifeless
         )
+
+        console.debug(values)
 
         this.name = name
         this.population = 0
