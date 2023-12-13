@@ -19,7 +19,7 @@
     "install": "concurrently -c \"auto\" \"npm:install:client\" \"npm:install:server\"",
     "install:client": "cd client && npm ci",
     "install:server": "cd server && npm ci",
-    "build": "concurrently -c \"auto\" \"npm:build:client\" \"npm:build:server\"",
+    "build": "concurrently -c \"auto\" \"npm:build:client\"",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
     "tsc:check": "tsc",
@@ -30,8 +30,8 @@
     "test:watch:client": "cd client && npm run test --watch",
     "test:watch:server": "cd server && npm run test --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './**/*.json'",
-    "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './**/*.json'"
+    "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
+    "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.14.0",
