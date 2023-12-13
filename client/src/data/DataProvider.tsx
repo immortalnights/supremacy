@@ -11,7 +11,7 @@ import {
 } from "@server/types"
 import { Player } from "./Player"
 import { Room, AvailableRooms } from "./Room"
-import { StaticShips, StaticEquipment } from "./StaticData"
+import { StaticShips, StaticEquipment, IShipList } from "./StaticData"
 import { Game } from "./Game"
 import { SelectedPlanetID } from "./General"
 import { SolarSystem } from "./SolarSystem"
@@ -19,18 +19,21 @@ import { Planets } from "./Planets"
 import { Ships } from "./Ships"
 import { Platoons } from "./Platoons"
 import { EspionageReport } from "./Espionage"
-import type { IUniverse } from "@server/simulation/types"
+import type { IEquipmentList, IUniverse } from "@server/simulation/types"
 
 // TODO reorganize so that Lobby/Room related data is handled separately from the Game
 
 // Consider reversing the arguments so that received data does not have to be bundled into as single object
 // (callback: TransactionInterface_UNSTABLE, ...args: any[]) => void
+
+type MessageData = {
+    key: string
+    action: string
+    data: object
+}
+
 type TransactionHandler = (
-    data: {
-        key: string
-        action: string
-        data: object
-    },
+    data: MessageData,
     callback: TransactionInterface_UNSTABLE
 ) => void
 
@@ -248,8 +251,13 @@ const handleGamePlayerKicked: TransactionHandler = (
 }
 
 const handleStaticGameData: TransactionHandler = ({ data }, { set }) => {
-    set(StaticShips, data.ships)
-    set(StaticEquipment, data.equipment)
+    if ("ships" in data) {
+        set(StaticShips, data.ships as IShipList)
+    }
+
+    if ("equipment" in data) {
+        set(StaticEquipment, data.equipment as IEquipmentList)
+    }
     // set(StaticEspionage, data.espionage)
 }
 
@@ -383,26 +391,25 @@ const MessageHandlerMap: IMessageHandlerMap = {
 // Binds the Socket and Recoil data together using RecoilTransaction
 const SocketToRecoil = ({ children }: { children: React.ReactNode }) => {
     const handleMessage = Recoil.useRecoilTransaction_UNSTABLE(
-        (callback) =>
-            (action: string, data: object = {}) => {
-                // console.log("received", action, data)
+        (callback) => (action: string, data: MessageData) => {
+            // console.log("received", action, data)
 
-                if (action === "disconnect") {
-                    console.log("Disconnected!")
-                    callback.reset(Player)
-                    callback.reset(Room)
-                    callback.reset(Game)
-                    callback.reset(SolarSystem)
-                    callback.reset(SelectedPlanetID)
-                    callback.reset(EspionageReport)
-                } else if (MessageHandlerMap[action]) {
-                    MessageHandlerMap[action](data, callback)
-                } else {
-                    console.error(
-                        `Message '${action}' is not handled in Data Provider`
-                    )
-                }
+            if (action === "disconnect") {
+                console.log("Disconnected!")
+                callback.reset(Player)
+                callback.reset(Room)
+                callback.reset(Game)
+                callback.reset(SolarSystem)
+                callback.reset(SelectedPlanetID)
+                callback.reset(EspionageReport)
+            } else if (MessageHandlerMap[action]) {
+                MessageHandlerMap[action](data, callback)
+            } else {
+                console.error(
+                    `Message '${action}' is not handled in Data Provider`
+                )
             }
+        }
     )
 
     return <IOProvider handleMessage={handleMessage}>{children}</IOProvider>

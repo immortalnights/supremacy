@@ -19,5 +19,5 @@ jobs:
             - name: Install Dependencies
               run: npm ci
 
-            - name: Formatting
+            - name: Build
               run: npm run build

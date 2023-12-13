@@ -4,7 +4,7 @@ import { Box, Button, Stack, Tabs, Tab } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanetID } from "../../data/General"
 import { IPlanet, IPlanetBasic } from "../../data/Planets"
-import StarDate from "../components/StarDate"
+import { CurrentStarDate } from "../components/StarDate"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
 import PlanetAuth from "../components/PlanetAuth"
@@ -71,7 +71,7 @@ const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
                 <dd>{planet.name || planet.id}</dd>
                 <dt>Date</dt>
                 <dd>
-                    <StarDate />
+                    <CurrentStarDate />
                 </dd>
                 <dt>Status</dt>
                 <dd>{planet.status}</dd>
