@@ -211,12 +211,12 @@ const Combat = ({
         setSelectedShip(ship.id)
     }
 
-    const handleClickUnloadPlatoon = async (
+    const handleClickUnloadPlatoon = (
         _event: React.MouseEvent,
         item: IPlatoonBasic
     ) => {
         if (ship) {
-            await action("platoon-relocate", {
+            void action("platoon-relocate", {
                 id: item.id,
                 direction: "unload",
                 ship: ship.id,
@@ -224,12 +224,12 @@ const Combat = ({
         }
     }
 
-    const handleClickLoadPlatoon = async (
+    const handleClickLoadPlatoon = (
         _event: React.MouseEvent,
         item: IPlatoonBasic
     ) => {
         if (ship) {
-            await action("platoon-relocate", {
+            void action("platoon-relocate", {
                 id: item.id,
                 direction: "load",
                 ship: ship.id,
@@ -237,15 +237,15 @@ const Combat = ({
         }
     }
 
-    const handleClickIncreaseAggression = async (_event: React.MouseEvent) => {
-        await action("planet-modify-aggression", {
+    const handleClickIncreaseAggression = (_event: React.MouseEvent) => {
+        void action("planet-modify-aggression", {
             id: planet.id,
             direction: 1,
         })
     }
 
-    const handleClickDecreaseAggression = async (_event: React.MouseEvent) => {
-        await action("planet-modify-aggression", {
+    const handleClickDecreaseAggression = (_event: React.MouseEvent) => {
+        void action("planet-modify-aggression", {
             id: planet.id,
             direction: -1,
         })

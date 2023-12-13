@@ -10,7 +10,7 @@ import { IPlanet, SelectedPlanet, CapitalPlanet } from "../../../data/Planets"
 const AccessDenied = () => {
     const game = Recoil.useRecoilValue(Game)
     const capital = Recoil.useRecoilValue(CapitalPlanet)
-    const [selectedPlanet, setSelectedPlanet] =
+    const [_selectedPlanet, setSelectedPlanet] =
         Recoil.useRecoilState(SelectedPlanetID)
     const navigate = useNavigate()
 
@@ -23,7 +23,7 @@ const AccessDenied = () => {
         return () => {
             window.clearTimeout(timer)
         }
-    }, [])
+    }, [capital, game, navigate, setSelectedPlanet])
 
     return (
         <Box

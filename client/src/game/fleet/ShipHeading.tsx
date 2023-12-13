@@ -25,7 +25,7 @@ const CurrentLocation = ({ ship }: { ship: IShip }) => {
 }
 
 const Heading = ({ ship }: { ship: IShip }) => {
-    const heading = ship!.heading as IShipHeading
+    const heading = ship.heading as IShipHeading
     const source = Recoil.useRecoilValue(Planet(heading.from))
     const destination = Recoil.useRecoilValue(Planet(heading.to))
 
@@ -62,7 +62,7 @@ const ShipHeading = ({ ship }: { ship: IShip | undefined }) => {
     } else if (!ship.heading) {
         content = <CurrentLocation ship={ship} />
     } else {
-        const heading = ship.heading
+        // const heading = ship.heading
         content = <Heading ship={ship} />
     }
 

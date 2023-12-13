@@ -95,9 +95,9 @@ const dispatch = (msg: IMessage) => {
 }
 
 if (global.onmessage) {
-    global.onmessage = (e) => dispatch(e.data)
+    global.onmessage = (e) => dispatch(e.data as IMessage)
 } else {
-    parentPort?.on("message", (message) => dispatch(message))
+    parentPort?.on("message", (message) => dispatch(message as IMessage))
 }
 
 export default simulate

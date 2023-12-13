@@ -29,7 +29,6 @@ const NameDialog = ({
     action,
     onConfirm,
     onCancel,
-    open = true,
     ...rest
 }: BaseNameDialogProps) => {
     const [newName, setNewName] = React.useState(name)

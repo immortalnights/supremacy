@@ -14,7 +14,7 @@ export const isCargoFull = (ship: IShip) => {
 }
 
 export const totalCargo = (resources: IResources) => {
-    return Object.keys(resources).reduce((prev, value, index) => {
+    return Object.keys(resources).reduce((prev, value) => {
         const key = value as keyof IResources
         return prev + resources[key]
     }, 0)

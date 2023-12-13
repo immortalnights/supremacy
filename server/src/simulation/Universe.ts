@@ -226,12 +226,14 @@ export default class Universe implements IUniverse, IWorld {
         }
     }
 
-    load(data: Universe) {
+    load(data: object) {
         Object.assign(this, data)
 
-        this.planets = data.planets.map((planet) => {
-            return Planet.load(planet)
-        })
+        if ("planets" in data && Array.isArray(data.planets)) {
+            this.planets = data.planets.map((planet) => {
+                return Planet.load(planet as IPlanet)
+            })
+        }
     }
 
     transferOwnership(fromPlayerID: string, toPlayerID: string) {

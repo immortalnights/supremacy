@@ -32,21 +32,21 @@ const Browse = () => {
     React.useEffect(() => {
         // Leave any room or game the player may be in
         // now that they have returned to the room browser
-        leaveRoom()
-        leaveGame()
-    }, [])
+        void leaveRoom()
+        void leaveGame()
+    }, [leaveRoom, leaveGame])
 
     // FIXME should not be polling, but should sub for room updates
     React.useEffect(() => {
-        subscribe("rooms")
+        void subscribe("rooms")
 
         return () => {
-            unsubscribe("rooms")
+            void unsubscribe("rooms")
         }
-    }, [])
+    }, [subscribe, unsubscribe])
 
     const handleClickLeaveBrowser = () => {
-        unsubscribe("rooms")
+        void unsubscribe("rooms")
     }
 
     return (

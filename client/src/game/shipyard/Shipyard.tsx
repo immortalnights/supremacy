@@ -7,8 +7,8 @@ import {
     SolarSystem as SolarSystemData,
     ISolarSystem,
 } from "../../data/SolarSystem"
-import { Difficulty } from "../../simulation/types"
-import { StaticShips, IShipList } from "../../data/StaticData"
+import { Difficulty } from "@server/simulation/types"
+import { StaticShips } from "../../data/StaticData"
 import { NewShipNameDialog } from "../components/NameDialog"
 import { PlayerShips } from "../../data/Ships"
 
@@ -29,7 +29,7 @@ const ItemDetails = ({
 }
 
 const Shipyard = () => {
-    const ShipData = Recoil.useRecoilValue(StaticShips) as IShipList
+    const ShipData = Recoil.useRecoilValue(StaticShips)
     const planet = Recoil.useRecoilValue(CapitalPlanet)
     const playerShips = Recoil.useRecoilValue(PlayerShips)
     const { difficulty } = Recoil.useRecoilValue(
@@ -59,7 +59,7 @@ const Shipyard = () => {
 
     const handleCompletePurchase = (name: string) => {
         setPurchasing(false)
-        action("ship-purchase", {
+        void action("ship-purchase", {
             id: Object.keys(ShipData)[selected],
             name,
         })

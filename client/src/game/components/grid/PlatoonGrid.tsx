@@ -1,7 +1,6 @@
 import React from "react"
 import Recoil from "recoil"
 import { SelectedPlanetID } from "../../../data/General"
-import { Planets, IPlanetBasic } from "../../../data/Planets"
 import { Player } from "../../../data/Player"
 import Grid from "./Grid"
 

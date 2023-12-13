@@ -43,7 +43,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleAbortTravelClick = () => {
-        action("ship-abort-travel", { id: ship!.id })
+        void action("ship-abort-travel", { id: ship!.id })
         setMode("normal")
     }
 
@@ -57,13 +57,13 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleRenameShip = (name: string) => {
-        action("ship-rename", { id: ship!.id, name })
+        void action("ship-rename", { id: ship!.id, name })
         setRenameShip(false)
     }
 
     const handleLaunchClick = () => {
         console.assert(ship, "")
-        action("ship-relocate", { id: ship!.id, position: "orbit" })
+        void action("ship-relocate", { id: ship!.id, position: "orbit" })
         setMode("normal")
     }
 
@@ -73,12 +73,12 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
 
     const handleLandClick = () => {
         console.assert(ship, "")
-        action("ship-relocate", { id: ship!.id, position: "docking-bay" })
+        void action("ship-relocate", { id: ship!.id, position: "docking-bay" })
         setMode("normal")
     }
 
     const handleSelectPlanet = (planet: IPlanetBasic) => {
-        action("ship-travel", { id: ship!.id, location: planet.id })
+        void action("ship-travel", { id: ship!.id, location: planet.id })
         setMode("normal")
     }
 
@@ -94,7 +94,7 @@ const Fleet = ({ planet }: { planet: IPlanet }) => {
         ) {
             setSelectedPlanet(ship.location.planet)
         }
-    }, [ship, selectedPlanet])
+    }, [ship, selectedPlanet, setSelectedPlanet])
 
     let canLaunch = false
     let canTravel = false

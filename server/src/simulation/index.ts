@@ -35,7 +35,7 @@ export const shutdown = () => {
     clearInterval(simulateTimeout as NodeJS.Timeout)
 }
 
-export const createUniverse = (_options: {}) => {
+export const createUniverse = (_options: object) => {
     const universe = new Universe()
     universe.generate(0)
     cache[universe.id] = universe
@@ -52,7 +52,7 @@ export const findUniverse = (id: string): Universe | undefined => {
             const data = fs.readFileSync(saveFilePath, { encoding: "utf8" })
 
             const universe = new Universe()
-            universe.load(JSON.parse(data))
+            universe.load(JSON.parse(data) as object)
             console.log(`Loaded Universe ${universe.id}...`)
             cache[id] = universe
         }

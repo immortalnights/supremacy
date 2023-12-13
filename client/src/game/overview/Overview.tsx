@@ -1,18 +1,9 @@
 import React from "react"
 import Recoil from "recoil"
-import {
-    Box,
-    Button,
-    Stack,
-    TextField,
-    Tabs,
-    Tab,
-    Typography,
-} from "@mui/material"
-import { useNavigate } from "react-router"
+import { Box, Button, Stack, Tabs, Tab } from "@mui/material"
 import { IOContext } from "../../data/IOContext"
 import { SelectedPlanetID } from "../../data/General"
-import { SelectedPlanet, IPlanet, IPlanetBasic } from "../../data/Planets"
+import { IPlanet, IPlanetBasic } from "../../data/Planets"
 import StarDate from "../components/StarDate"
 import "./styles.css"
 import PlanetGrid from "../components/grid/PlanetGrid"
@@ -22,6 +13,7 @@ import { PlayerShipsAtPlanetPosition } from "../../data/Ships"
 import { PlanetStrength } from "../../data/Platoons"
 import { Player } from "../../data/Player"
 import { RenameDialog } from "../components/NameDialog"
+import { IShip } from "@server/simulation/types"
 
 const TaxControls = ({ planet }: { planet: IPlanet }) => {
     const { action } = React.useContext(IOContext)
@@ -53,8 +45,7 @@ const TaxControls = ({ planet }: { planet: IPlanet }) => {
 
 const ChangeValue = ({ values }: { values: number[] }) => {
     const average =
-        Math.abs(values.reduce((prev, val, index) => prev + val, 0)) /
-        values.length
+        Math.abs(values.reduce((prev, val) => prev + val, 0)) / values.length
     const trend = Math.abs(values[values.length - 1]) - average
     let trendString = ""
     if (trend === 0) {
@@ -132,20 +123,26 @@ const PlanetDetails = ({ planet }: { planet: IPlanet }) => {
     )
 }
 
-const IconGrid = (props: any) => {
+const IconGrid = ({
+    items,
+    onSelectItem,
+}: {
+    items: IShip[]
+    onSelectItem: (selected: IShip) => void
+}) => {
     const rows = []
     for (let rowIndex = 0; rowIndex < 2; rowIndex++) {
         const row = []
         for (let colIndex = 0; colIndex < 3; colIndex++) {
             const index = colIndex + rowIndex * 3
             let cell
-            if (props.items[index]) {
-                const item = props.items[index]
+            if (items[index]) {
+                const item = items[index]
                 cell = (
                     <td
                         key={index}
                         title={item.name + " (" + item.type + ")"}
-                        onClick={(e) => props.onSelectItem(item)}
+                        onClick={() => onSelectItem(item)}
                     >
                         {item.name}
                     </td>
@@ -173,18 +170,7 @@ const IconGrid = (props: any) => {
     )
 }
 
-interface TabPanelProps {
-    children?: React.ReactNode
-    index: number
-    value: number
-}
-
-const ShipGrid = () => {
-    console.log("rendering grid")
-    return null
-}
-
-const OverviewSlots = ({ planet }: any) => {
+const OverviewSlots = ({ planet }: { planet: IPlanet }) => {
     const [tabIndex, setTabIndex] = React.useState(2)
     const positions = ["orbit", "surface", "docking-bay"]
     const ships = Recoil.useRecoilValue(
@@ -195,7 +181,7 @@ const OverviewSlots = ({ planet }: any) => {
     )
     const onSelectItem = () => {}
 
-    const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleChange = (_event: React.SyntheticEvent, newValue: number) => {
         setTabIndex(newValue)
     }
 
@@ -227,20 +213,23 @@ const OverviewSlots = ({ planet }: any) => {
 const Overview = ({ planet }: { planet: IPlanet }) => {
     const [rename, setRename] = React.useState(false)
     const player = Recoil.useRecoilValue(Player)
-    const [selected, setSelected] = Recoil.useRecoilState(SelectedPlanetID)
+    const [_selected, setSelected] = Recoil.useRecoilState(SelectedPlanetID)
     const { action } = React.useContext(IOContext)
 
     const onStartRename = () => {
         setRename(!rename)
     }
+
     const handleCancelRename = () => {
         setRename(false)
     }
+
     const onTransferCredits = () => {
-        action("transfer-credits", {
+        void action("transfer-credits", {
             planet: planet?.id,
         })
     }
+
     const onSelectPlanet = (planet: IPlanetBasic) => {
         if (planet.owner === player.id) {
             setSelected(planet.id)
@@ -248,8 +237,8 @@ const Overview = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleConfirmRename = (newName: string) => {
-        action("rename-planet", {
-            planet: planet!.id,
+        void action("rename-planet", {
+            planet: planet.id,
             name: newName,
         })
         setRename(false)

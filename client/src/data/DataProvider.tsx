@@ -247,7 +247,7 @@ const handleGamePlayerKicked: TransactionHandler = (
     reset(EspionageReport)
 }
 
-const handleStaticGameData: TransactionHandler = ({ data }, { get, set }) => {
+const handleStaticGameData: TransactionHandler = ({ data }, { set }) => {
     set(StaticShips, data.ships)
     set(StaticEquipment, data.equipment)
     // set(StaticEspionage, data.espionage)
@@ -298,6 +298,9 @@ const handlePartialGameUpdate: TransactionHandler = (
     const { planets, ships, platoons, espionage, ...solarSystem } = (
         data as IUpdate<IUniverse>
     ).world
+
+    // FIXME why is solarsystem not used
+    void solarSystem
 
     if (planets) {
         // Copy the main planets array
@@ -381,7 +384,7 @@ const MessageHandlerMap: IMessageHandlerMap = {
 const SocketToRecoil = ({ children }: { children: React.ReactNode }) => {
     const handleMessage = Recoil.useRecoilTransaction_UNSTABLE(
         (callback) =>
-            (action: string, data: any = {}) => {
+            (action: string, data: object = {}) => {
                 // console.log("received", action, data)
 
                 if (action === "disconnect") {

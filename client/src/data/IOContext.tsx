@@ -1,7 +1,7 @@
-import React from "react"
+import React, { useCallback } from "react"
 import { io, Socket } from "socket.io-client"
-import { PlayerRoomAction } from "../types"
-import { PlayerGameAction } from "../simulation/types"
+import { PlayerRoomAction } from "@server/types"
+import { PlayerGameAction } from "@server/simulation/types"
 import {
     ServerToClientEvents,
     ClientToServerEvents,
@@ -18,12 +18,12 @@ export interface ILobbyContext {
     connected: boolean
     createRoom: () => Promise<IRoom>
     joinRoom: (id: string) => Promise<void>
-    leaveRoom: () => void
-    subscribe: (key: string) => void
-    unsubscribe: (key: string) => void
+    leaveRoom: () => Promise<void>
+    subscribe: (key: string) => Promise<void>
+    unsubscribe: (key: string) => Promise<void>
     roomAction: (name: PlayerRoomAction, data: object) => Promise<void>
     joinGame: (id: string) => Promise<void>
-    leaveGame: () => void
+    leaveGame: () => Promise<void>
 }
 
 // Context interface
@@ -36,16 +36,16 @@ export const IOContext = React.createContext<IIOContext>({
     connected: false,
     createRoom: () => Promise.reject(),
     joinRoom: () => Promise.reject(),
-    leaveRoom: () => {},
+    leaveRoom: () => Promise.reject(),
     subscribe: (_key: string) => Promise.reject(),
-    unsubscribe: (_key: string) => {},
-    roomAction: (_name: PlayerRoomAction, _data: any) => Promise.reject(),
+    unsubscribe: (_key: string) => Promise.reject(),
+    roomAction: (_name: PlayerRoomAction, _data: object) => Promise.reject(),
     joinGame: () => Promise.reject(),
-    leaveGame: () => {},
+    leaveGame: () => Promise.reject(),
     action: (_name: PlayerGameAction, _data: object = {}) => Promise.reject(),
 })
 
-export type MessageHandler = (action: string, data: any) => void
+export type MessageHandler = (action: string, data: object) => void
 
 // Context Provider
 const IOProvider = ({
@@ -59,13 +59,16 @@ const IOProvider = ({
 
     console.log("Render IOProvider")
 
-    const handleDisconnect = (s: SocketIO) => {
-        // don't disconnect the socket manually as doing so
-        // prevents auto-reconnecting
-        setSocket(undefined)
-        // Clean up state
-        handleMessage("disconnect", {})
-    }
+    const handleDisconnect = useCallback(
+        (_s: SocketIO) => {
+            // don't disconnect the socket manually as doing so
+            // prevents auto-reconnecting
+            setSocket(undefined)
+            // Clean up state
+            handleMessage("disconnect", {})
+        },
+        [handleMessage]
+    )
 
     React.useEffect(() => {
         console.log("Creating Socket.IO")
@@ -97,7 +100,7 @@ const IOProvider = ({
             s.disconnect()
             handleDisconnect(s)
         }
-    }, [handleMessage])
+    }, [handleMessage, handleDisconnect])
 
     const contextValue = {
         connected: !!socket,
@@ -128,9 +131,9 @@ const IOProvider = ({
                 })
             })
         },
-        leaveRoom: () => {
+        leaveRoom: async () => {
             console.assert(socket, "Socket is invalid!")
-            socket?.emit("player-leave-room")
+            await socket?.emitWithAck("player-leave-room")
             handleMessage("room-leave", {})
         },
         subscribe: (key: string) => {
@@ -145,27 +148,18 @@ const IOProvider = ({
                 })
             })
         },
-        unsubscribe: (key: string) => {
+        unsubscribe: async (_key: string) => {
             console.assert(socket, "Socket is invalid!")
-            socket?.emit("unsubscribe", key)
+            await socket?.emitWithAck("unsubscribe")
         },
-        roomAction: (name: string, data: any) => {
+        roomAction: async (name: string, data: object) => {
             console.assert(socket, "Socket is invalid!")
-            return new Promise<void>((resolve, reject) => {
-                socket?.emit(
-                    "player-room-action",
-                    name as PlayerRoomAction,
-                    data,
-                    (ok: boolean, reason: string, data: object) => {
-                        if (ok) {
-                            // handleRoomUpdate()?
-                            resolve()
-                        } else {
-                            reject(reason)
-                        }
-                    }
-                )
-            })
+
+            await socket?.emitWithAck(
+                "player-room-action",
+                name as PlayerRoomAction,
+                data
+            )
         },
         joinGame: (id: string) => {
             console.assert(socket, "Socket is invalid!")
@@ -179,10 +173,10 @@ const IOProvider = ({
                 })
             })
         },
-        leaveGame: () => {
+        leaveGame: async () => {
             // console.log("Socket id", socket?.id)
             console.assert(socket, "Socket is invalid!")
-            socket?.emit("player-leave-game")
+            await socket?.emitWithAck("player-leave-game")
             handleMessage("game-player-kicked", {})
         },
         action: (name: PlayerGameAction, data: object = {}) => {

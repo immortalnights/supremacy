@@ -195,28 +195,28 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleModifyPassengers = (ship: IShip, amount: number) => {
-        action("ship-modify-passengers", { id: ship.id, amount })
+        void action("ship-modify-passengers", { id: ship.id, amount })
     }
 
     const handleModifyFuels = (ship: IShip, amount: number) => {
-        action("ship-modify-fuels", { id: ship.id, amount })
+        void action("ship-modify-fuels", { id: ship.id, amount })
     }
 
     // FIXME ship properties does not update as the selected ship is cached in this Component state
     const handleClickAddCrew = (ship: IShip) => {
-        action("ship-add-crew", { id: ship.id })
+        void action("ship-add-crew", { id: ship.id })
     }
 
     const handleClickEmptyCargo = (ship: IShip) => {
-        action("ship-empty-cargo", { id: ship.id })
+        void action("ship-empty-cargo", { id: ship.id })
     }
 
-    const handleClickDecommission = (ship: IShip) => {
+    const handleClickDecommission = (_ship: IShip) => {
         setConfirmDecommission(true)
     }
 
     const handleConfirmDecommission = (ship: IShip) => {
-        action("ship-decommission", { id: ship.id })
+        void action("ship-decommission", { id: ship.id })
         setConfirmDecommission(false)
         setSelectedShip(undefined)
     }
@@ -226,7 +226,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
     }
 
     const handleModifyCargo = (type: string, amount: number) => {
-        action("ship-modify-cargo", { id: ship?.id, type, amount })
+        void action("ship-modify-cargo", { id: ship?.id, type, amount })
     }
 
     return (
@@ -235,7 +235,7 @@ export const Dock = ({ planet }: { planet: IPlanet }) => {
                 {ship && confirmDecommission && (
                     <DecommissionDialog
                         open
-                        ship={ship as IShip}
+                        ship={ship}
                         onConfirm={handleConfirmDecommission}
                         onCancel={handleClose}
                         onClose={handleClose}

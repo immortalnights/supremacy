@@ -202,7 +202,7 @@ class Room implements IRoom {
     handlePlayerAction(
         _player: Player,
         name: string,
-        _data: any,
+        _data: unknown,
         callback: IActionCallback
     ): void {
         const result = {

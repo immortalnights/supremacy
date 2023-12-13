@@ -17,7 +17,7 @@ const DockingBays = ({ planet, selected, onItemClick }: DockingBaysProps) => {
             planet: planet.id,
             position: "docking-bay",
         })
-    ) as IShip[]
+    )
 
     const handleItemClick = (
         event: React.MouseEvent<HTMLLIElement, MouseEvent>,

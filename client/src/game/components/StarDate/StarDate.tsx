@@ -1,4 +1,3 @@
-import React from "react"
 import Recoil from "recoil"
 import {
     SolarSystem as SolarSystemData,

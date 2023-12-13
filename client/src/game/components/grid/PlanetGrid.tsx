@@ -3,7 +3,7 @@ import Recoil from "recoil"
 import { SelectedPlanetID } from "../../../data/General"
 import { Planets, IPlanetBasic } from "../../../data/Planets"
 import { Player } from "../../../data/Player"
-import { PlanetType } from "../../../simulation/types"
+import { PlanetType } from "@server/simulation/types"
 import Grid from "./Grid"
 
 const PlanetGrid = ({

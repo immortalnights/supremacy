@@ -39,7 +39,7 @@ export const PlayerShipsAtPlanetPosition = Recoil.selectorFamily<
     get:
         ({ planet, position }) =>
         ({ get }) => {
-            const ships = get(PlayerShips) as IShip[]
+            const ships = get(PlayerShips)
             const positions: string[] = Array.isArray(position)
                 ? position
                 : [position]

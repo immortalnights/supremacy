@@ -7,7 +7,7 @@ import {
     ArrowLeft,
     ArrowRight,
 } from "@mui/icons-material"
-import { PlatoonStatus } from "../../simulation/types"
+import { PlatoonStatus } from "@server/simulation/types"
 import { IEquipmentList, IPlanet } from "@server/simulation/types"
 import PlanetAuth from "../components/PlanetAuth"
 import { Suits, Weapons } from "../../data/StaticData"
@@ -239,35 +239,41 @@ const Training = ({ planet }: { planet: IPlanet }) => {
         if (selectedPlatoon) {
             if (amount < 0) {
                 if (selectedPlatoon.troops > 0) {
-                    action("platoon-modify", { id: selectedPlatoon.id, amount })
+                    void action("platoon-modify", {
+                        id: selectedPlatoon.id,
+                        amount,
+                    })
                 }
             } else {
                 if (selectedPlatoon.troops < 200) {
-                    action("platoon-modify", { id: selectedPlatoon.id, amount })
+                    void action("platoon-modify", {
+                        id: selectedPlatoon.id,
+                        amount,
+                    })
                 }
             }
         }
     }
 
-    const handleChangeSuit = async (key: string) => {
+    const handleChangeSuit = (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        await action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
+        void action("platoon-modify", { id: selectedPlatoon?.id, suit: key })
     }
 
-    const handleChangeWeapon = async (key: string) => {
+    const handleChangeWeapon = (key: string) => {
         // FIXME does this need to be a request? recruit could include the equipment ids
-        await action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
+        void action("platoon-modify", { id: selectedPlatoon?.id, weapon: key })
     }
 
-    const handleRecruit = async () => {
-        await action("platoon-recruit", { id: selectedPlatoon!.id })
+    const handleRecruit = () => {
+        void action("platoon-recruit", { id: selectedPlatoon!.id })
     }
 
-    const handleDismiss = async () => {
-        await action("platoon-dismiss", { id: selectedPlatoon!.id })
+    const handleDismiss = () => {
+        void action("platoon-dismiss", { id: selectedPlatoon!.id })
     }
 
-    let location = ""
+    let location
     if (selectedPlatoon) {
         // FIXME show ship or planet name
         if (selectedPlatoon.status === PlatoonStatus.Recruited) {
@@ -280,6 +286,9 @@ const Training = ({ planet }: { planet: IPlanet }) => {
             location = "??"
         }
     }
+
+    // FIXME why is location not used
+    void location
 
     let canModify = false
     let canIncreaseTroops = false

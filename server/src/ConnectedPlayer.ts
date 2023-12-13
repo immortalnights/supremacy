@@ -30,7 +30,7 @@ export default class ConnectedPlayer extends Player {
 
     handleRoomAction(
         name: PlayerRoomAction,
-        data: any,
+        data: unknown,
         callback: IActionCallback
     ) {
         console.debug(`Received player ${this.id} action ${name}`)
@@ -67,12 +67,12 @@ export default class ConnectedPlayer extends Player {
     handleLeaveRoom() {
         if (this.room) {
             console.log(`Player ${this.id} leaving room ${this.room.id}`)
-            this.room.leave(this)
+            void this.room.leave(this)
             this.room = undefined
             this.ready = false
         }
 
-        this.socket.off("player-room-action", this.handleRoomAction)
+        this.socket.off("player-room-action", this.handleRoomAction.bind(this))
     }
 
     handleJoinGame(game: Game<unknown>) {
@@ -90,7 +90,7 @@ export default class ConnectedPlayer extends Player {
     handleLeaveGame() {
         if (this.game) {
             console.log(`Player ${this.id} leaving game ${this.game.id}`)
-            this.game.leave(this)
+            void this.game.leave(this)
             this.game = undefined
             this.ready = false
         }

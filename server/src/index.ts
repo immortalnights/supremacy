@@ -154,7 +154,7 @@ const cleanupRoom = (room: Room) => {
     }
 }
 
-const cleanupGame = (game: Game<any>) => {
+const cleanupGame = (game: Game<unknown>) => {
     if (game.empty()) {
         const index = games.indexOf(game)
         if (index !== -1) {
@@ -185,7 +185,7 @@ const handleCreateGame = (options: IGameOptions, players: Player[]) => {
     // Join any AI players
     players.forEach((player) => {
         if (player instanceof AIPlayer) {
-            game.join(player)
+            void game.join(player)
         }
     })
 
@@ -291,15 +291,21 @@ io.on("connection", (socket) => {
         } else if (room.isFull()) {
             console.warn("Room is full")
         } else {
-            room.join(player)
-            player.handleJoinRoom(room)
+            room.join(player).then(
+                () => {
+                    player.handleJoinRoom(room)
 
-            room.sendRoomDetailsTo(player)
+                    room.sendRoomDetailsTo(player)
 
-            console.log("Player joined room")
+                    console.log("Player joined room")
+
+                    callback(true)
+                },
+                () => {
+                    callback(false)
+                }
+            )
         }
-
-        callback(!!player.room)
     })
 
     socket.on("player-leave-room", handleLeaveRoom)
@@ -319,11 +325,11 @@ io.on("connection", (socket) => {
             console.warn("Cannot join game")
         } else {
             player.handleJoinGame(game)
-            game.join(player)
+            void game.join(player)
 
             // remove the player from the room they came from
             if (player.room) {
-                player.handleLeaveRoom
+                player.handleLeaveRoom()
             }
 
             // If the game has all the players, start

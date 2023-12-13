@@ -84,26 +84,26 @@ const PlanetSlot = ({ ship, onToggleStatus, onClick }: IPlanetSlotProps) => {
 const Surface = ({ planet }: { planet: IPlanet }) => {
     const ships = Recoil.useRecoilValue(
         PlayerShipsAtPlanetPosition({ planet: planet.id, position: "surface" })
-    ) as IShip[]
-    const [selectedShip, setSelectedShip] = React.useState<ShipID | undefined>()
+    )
+    const [selectedShip] = React.useState<ShipID | undefined>()
     const ship = Recoil.useRecoilValue(Ship(selectedShip))
     const { action } = React.useContext(IOContext)
 
     const handleClickDockedShip = (
-        event: React.MouseEvent<HTMLLIElement>,
+        _event: React.MouseEvent<HTMLLIElement>,
         ship: IShip
     ) => {
-        action("ship-relocate", { id: ship.id, position: "surface" })
+        void action("ship-relocate", { id: ship.id, position: "surface" })
     }
 
     const handleToggleSlot = (
-        event: React.MouseEvent<HTMLButtonElement>,
-        slot: number,
+        _event: React.MouseEvent<HTMLButtonElement>,
+        _slot: number,
         ship: IShip | undefined,
-        state: string
+        _state: string
     ) => {
         if (ship) {
-            action("ship-toggle-surface-status", {
+            void action("ship-toggle-surface-status", {
                 id: ship.id,
                 location: planet.id,
                 position: "docking-bay",
@@ -117,7 +117,10 @@ const Surface = ({ planet }: { planet: IPlanet }) => {
         ship: IShip | undefined
     ) => {
         if (ship) {
-            action("ship-relocate", { id: ship.id, position: "docking-bay" })
+            void action("ship-relocate", {
+                id: ship.id,
+                position: "docking-bay",
+            })
         }
     }
 

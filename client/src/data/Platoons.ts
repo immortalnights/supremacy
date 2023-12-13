@@ -1,10 +1,10 @@
 import Recoil from "recoil"
-import { PlatoonStatus } from "../simulation/types"
 import {
     PlanetID,
     IPlatoon,
     IPlatoonBasic,
     ShipID,
+    PlatoonStatus,
 } from "@server/simulation/types"
 import { Player } from "./Player"
 
