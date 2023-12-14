@@ -2,7 +2,13 @@ import crypto from "crypto"
 import EventEmitter from "events"
 import { Server } from "socket.io"
 import { ServerEventEmitter } from "../serverTypes"
-import { IRoom, RoomStatus, IGameOptions, IActionCallback } from "../types"
+import {
+    IRoom,
+    RoomStatus,
+    IGameOptions,
+    IActionCallback,
+    RoomID,
+} from "../types"
 import Player from "../Player"
 import ConnectedPlayer from "../ConnectedPlayer"
 import AIPlayer from "../AIPlayer"
@@ -15,7 +21,7 @@ const ROOM_START_COUNTDOWN = 3
 const MINIMUM_REQUIRED_PLAYERS = 2
 
 class Room implements IRoom {
-    id: string
+    id: RoomID
     options: IGameOptions
     host: string
     slots: number
