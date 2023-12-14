@@ -24,5 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 
 # runtime
-*.d.ts
 /saved_games

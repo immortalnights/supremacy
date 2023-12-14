@@ -22,16 +22,19 @@
     "build": "concurrently -c \"auto\" \"npm:build:client\"",
     "build:client": "cd client && npm run build",
     "build:server": "cd server && npm run build",
-    "tsc:check": "tsc",
     "test": "concurrently -c \"auto\" \"npm:test:server\"",
     "test:client": "cd client && npm run test",
     "test:server": "cd server && npm run test",
     "test:watch": "concurrently -c \"auto\" \"npm:test:watch:client\" \"npm:test:watch:server\"",
     "test:watch:client": "cd client && npm run test -- --watch",
     "test:watch:server": "cd server && npm run test -- --watch",
+    "check-all": "npm run lint && npm run format:check && npm run tsc:check",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
-    "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'"
+    "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
+    "tsc:check": "concurrently -c \"auto\" \"npm:tsc:check:client\" \"npm:tsc:check:server\"",
+    "tsc:check:client": "cd client && tsc",
+    "tsc:check:server": "cd server && tsc"
   },
   "dependencies": {
     "@typescript-eslint/eslint-plugin": "^6.14.0",
