@@ -154,7 +154,7 @@ const cleanupRoom = (room: Room) => {
     }
 }
 
-const cleanupGame = (game: Game<unknown>) => {
+const cleanupGame = (game: Game<Universe>) => {
     if (game.empty()) {
         const index = games.indexOf(game)
         if (index !== -1) {
@@ -251,6 +251,7 @@ io.on("connection", (socket) => {
     })
 
     socket.on("unsubscribe", (key) => {
+        console.log("socket.on", key)
         subscriptions.unsubscribe(player, key as SubscriptionType)
     })
 
