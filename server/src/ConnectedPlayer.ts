@@ -4,6 +4,7 @@ import { IActionCallback, PlayerRoomAction } from "./types"
 import Player from "./Player"
 import Room from "./lobby/Room"
 import Game from "./Game"
+import Universe from "./simulation/Universe"
 
 export default class ConnectedPlayer extends Player {
     socket: SocketIO
@@ -75,7 +76,7 @@ export default class ConnectedPlayer extends Player {
         this.socket.off("player-room-action", this.handleRoomAction.bind(this))
     }
 
-    handleJoinGame(game: Game<unknown>) {
+    handleJoinGame(game: Game<Universe>) {
         this.game = game
 
         this.socket.on("player-game-action", this.handleGameAction.bind(this))

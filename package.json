@@ -26,9 +26,9 @@
     "test": "concurrently -c \"auto\" \"npm:test:server\"",
     "test:client": "cd client && npm run test",
     "test:server": "cd server && npm run test",
-    "test:watch": "concurrently -c \"auto\" \"npm:test:client\" \"npm:test:server\"",
-    "test:watch:client": "cd client && npm run test --watch",
-    "test:watch:server": "cd server && npm run test --watch",
+    "test:watch": "concurrently -c \"auto\" \"npm:test:watch:client\" \"npm:test:watch:server\"",
+    "test:watch:client": "cd client && npm run test -- --watch",
+    "test:watch:server": "cd server && npm run test -- --watch",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
     "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'"
