@@ -35,16 +35,17 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
     useEffect(() => {
         const newSocket = new WebSocket(`ws://${window.location.host}/ws`)
-        setSocket(newSocket)
 
         newSocket.addEventListener("open", () => {
             console.log("onopen")
+            setSocket(newSocket)
         })
         newSocket.addEventListener("message", () => {
             console.log("onmessage")
         })
         newSocket.addEventListener("close", () => {
             console.log("onclose")
+            setSocket(null)
         })
 
         return () => {
