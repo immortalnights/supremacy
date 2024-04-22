@@ -1,43 +1,28 @@
 {
   "name": "supremacy",
-  "version": "0.2.0",
-  "description": "JavaScript version of the 1990 classic, Supremacy (aka Overlord) using React and Recoil.",
-  "author": "Andrew K",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "eslint": "^8.55.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.5",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.3"
-  },
+  "private": true,
+  "version": "0.5.0",
+  "type": "module",
   "scripts": {
-    "dev": "concurrently --handle-input -c \"auto\" -n client,server \"npm:dev:client\" \"npm:dev:server\"",
-    "dev:client": "cd client && npm run dev",
-    "dev:server": "cd server && npm run dev",
-    "install": "concurrently -c \"auto\" \"npm:install:client\" \"npm:install:server\"",
-    "install:client": "cd client && npm ci",
-    "install:server": "cd server && npm ci",
-    "build": "concurrently -c \"auto\" \"npm:build:client\"",
-    "build:client": "cd client && npm run build",
-    "build:server": "cd server && npm run build",
-    "test": "concurrently -c \"auto\" \"npm:test:server\"",
-    "test:client": "cd client && npm run test",
-    "test:server": "cd server && npm run test",
-    "test:watch": "concurrently -c \"auto\" \"npm:test:watch:client\" \"npm:test:watch:server\"",
-    "test:watch:client": "cd client && npm run test -- --watch",
-    "test:watch:server": "cd server && npm run test -- --watch",
-    "check-all": "npm run lint && npm run format:check && npm run tsc:check",
+    "dev": "vite",
+    "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "format:check": "prettier --list-different './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
-    "format:fix": "prettier --write './{client,server}/**/*.{js,ts,tsx}' './{client,server}/*.json'",
-    "tsc:check": "concurrently -c \"auto\" \"npm:tsc:check:client\" \"npm:tsc:check:server\"",
-    "tsc:check:client": "cd client && tsc",
-    "tsc:check:server": "cd server && tsc"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.14.0",
-    "@typescript-eslint/parser": "^6.14.0"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
   }
 }

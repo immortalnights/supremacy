@@ -12,5 +12,5 @@
     },
     "eslint.enable": true,
     "eslint.options": {},
-    "eslint.workingDirectories": ["./client", "./server"]
+    "eslint.workingDirectories": ["./src"]
 }
