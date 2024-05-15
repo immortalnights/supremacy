@@ -1,0 +1,47 @@
+.solar-system {
+    background-color: black;
+    width: 260px;
+    height: 260px;
+    position: relative;
+    margin: 50px auto;
+    border: 2px solid #ccc;
+    /* border-radius: 50%; */
+    overflow: hidden;
+}
+
+.solar-system .planet {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 3px;
+    height: 3px;
+    background-color: white;
+    border-radius: 50%;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+    animation-direction: normal;
+    animation-name: planet;
+    animation-duration: var(--orbit-speed);
+}
+
+.solar-system:hover .planet {
+    animation-play-state: paused;
+}
+
+@keyframes planet {
+    0%,
+    100% {
+        transform: translateX(var(--orbit-distance));
+        opacity: 0.7;
+    }
+    25% {
+        opacity: 1;
+    }
+    50% {
+        transform: translateX(calc(var(--orbit-distance) * -1));
+        opacity: 0.7;
+    }
+    75% {
+        opacity: 0.4;
+    }
+}
