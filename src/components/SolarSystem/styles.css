@@ -1,11 +1,11 @@
 .solar-system {
     background-color: black;
-    width: 260px;
+    width: 280px;
     height: 260px;
     position: relative;
     margin: 50px auto;
-    border: 2px solid #ccc;
-    /* border-radius: 50%; */
+    border: 2px solid #6b6b6b;
+    border-radius: 50%;
     overflow: hidden;
 }
 

@@ -16,8 +16,7 @@ function placeItems(height: number, count: number) {
         availableSpace / (actualCount - 2 + 1),
     )
 
-    // Initialize an array to store the positions of all items
-    let positions = []
+    const positions = []
 
     // Place the top item
     positions.push(topSpacing)
@@ -28,7 +27,7 @@ function placeItems(height: number, count: number) {
     // Place additional items
     let currentPos = topSpacing + actualSpacing
     for (let i = 0; i < actualCount - 2; i++) {
-        let realPos = Math.max(
+        const realPos = Math.max(
             currentPos +
                 Math.random() * (actualSpacing - 3) -
                 actualSpacing / 2,
@@ -44,7 +43,7 @@ function placeItems(height: number, count: number) {
     return positions
 }
 
-export default ({ planets = 8 }: { planets: number }) => {
+export default function SolarSystem({ planets = 8 }: { planets: number }) {
     const positions = placeItems(260, planets)
     const amplitude = 80
     const frequency = (1 * Math.PI) / planets
@@ -53,11 +52,12 @@ export default ({ planets = 8 }: { planets: number }) => {
         <div className="solar-system">
             {positions.map((position, index) => (
                 <div
+                    key={`planet${index}`}
                     className="planet"
                     style={
                         {
                             top: `${position}px`,
-                            "animation-delay": `-${Math.round(Math.random() * 100)}s`,
+                            animationDelay: `-${Math.round(Math.random() * 100)}s`,
                             "--orbit-speed": `${Math.round(Math.random() * 12 + 2)}s`,
                             "--orbit-distance": `${Math.round(Math.sin(index * frequency) * amplitude + 20 * Math.random())}px`,
                         } as React.CSSProperties
