@@ -4,6 +4,7 @@ import fleetIcon from "/images/fleet.png"
 import MiniMap from "../../components/SolarSystem"
 import { useAtomValue } from "jotai"
 import { planetsAtom } from "../store"
+import { Link } from "react-router-dom"
 
 export default function SolarSystem() {
     const planets = useAtomValue(planetsAtom)
@@ -15,15 +16,15 @@ export default function SolarSystem() {
                 <MiniMap planets={planets.length} />
             </div>
             <div>
-                <a href="/Game/Overview">
+                <Link to="Overview" relative="path">
                     <img src={overviewIcon} />
-                </a>
-                <a href="/Game/Shipyard">
+                </Link>
+                <Link to="Shipyard" relative="path">
                     <img src={shipyardIcon} />
-                </a>
-                <a href="/Game/Fleet">
+                </Link>
+                <Link to="Fleet" relative="path">
                     <img src={fleetIcon} />
-                </a>
+                </Link>
             </div>
         </div>
     )
