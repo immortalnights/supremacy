@@ -1,7 +1,8 @@
 import { useActionData } from "react-router-dom"
-import { store, planetsAtom, type Planet, fleetsAtom } from "./Game/store"
+import { store, planetsAtom, fleetsAtom } from "./Game/store"
 import { GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
+import { Planet } from "./Game/entities"
 
 export default function SetupGame() {
     const settings = useActionData() as GameSettings

@@ -1,23 +1,9 @@
 import { createStore } from "jotai"
 import { atomWithStorage, createJSONStorage } from "jotai/utils"
+import type { Planet, Ship, Platoon } from "./entities"
 
 interface Data {
     planets: Planet[]
-}
-
-export interface Planet {
-    id: string
-    name: string
-}
-
-export interface Ship {
-    id: string
-    name: string
-}
-
-export interface Platoon {
-    id: string
-    name: string
 }
 
 export const store = createStore()

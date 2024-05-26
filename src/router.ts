@@ -3,8 +3,9 @@ import Menu from "./Menu"
 import CreateGame from "./CreateGame"
 import GameRoot from "./GameRoot"
 import { Overview, SolarSystem } from "./Game"
-import { type GameSettings, isDifficulty } from "./Game/types"
+import { type GameSettings } from "./Game/types"
 import SetupGame from "./SetupGame"
+import { isDifficulty } from "./Game/utilities"
 
 export const router = createBrowserRouter([
     {
