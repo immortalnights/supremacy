@@ -7,7 +7,7 @@ export default function Button({
 }: {
     children: ReactNode
     onClick: () => void
-    style: React.CSSProperties | undefined
+    style?: React.CSSProperties
 }) {
     return (
         <button
