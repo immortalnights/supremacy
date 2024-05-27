@@ -1,6 +1,7 @@
 import { Ship } from "../../Game/entities"
 import { shipInLocation } from "../../Game/utilities"
 import Button from "../Button"
+import ShipIcon from "../ShipIcon"
 
 function Location({
     ship,
@@ -41,19 +42,7 @@ function Location({
                 <Button onClick={handleDisable}>Off</Button>
             </div>
             <Button onClick={handleClick} style={{}}>
-                <div
-                    style={{
-                        marginTop: 2,
-                        border: "1px solid gray",
-                        width: 96,
-                        height: 64,
-                        display: "flex",
-                        flexWrap: "wrap",
-                        placeContent: "center",
-                    }}
-                >
-                    IMAGE
-                </div>
+                <ShipIcon ship={ship} />
                 <div
                     style={{
                         marginTop: 5,
