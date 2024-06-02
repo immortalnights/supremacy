@@ -18,7 +18,7 @@ export interface Ship {
     id: string
     name: string
     owner: string
-    class: ""
+    class: "atmos" | "battle" | "cargo" | "farming" | "mining" | "solar"
     crew: number
     fuel: number
     location: {
