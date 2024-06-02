@@ -1,6 +1,8 @@
 import { Planet } from "../../Game/entities"
 import Button from "../Button"
 import Date from "../Date"
+import taxUpIcon from "/images/tax_up.png"
+import taxDownIcon from "/images/tax_down.png"
 import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
 
 function TaxRate({
@@ -24,9 +26,28 @@ function TaxRate({
         >
             <MetadataValue label={label} value={value} postfix="%" />
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                <div style={{ width: "min-content" }}>
-                    <Button onClick={onIncrease}>UP</Button>
-                    <Button onClick={onDecrease}>DOWN</Button>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: "min-content",
+                    }}
+                >
+                    <Button
+                        onClick={onIncrease}
+                        style={{
+                            border: "2px solid gold",
+                            borderRight: "none",
+                        }}
+                    >
+                        <img src={taxUpIcon} />
+                    </Button>
+                    <Button
+                        onClick={onDecrease}
+                        style={{ border: "2px solid gold" }}
+                    >
+                        <img src={taxDownIcon} />
+                    </Button>
                 </div>
                 <MetadataLabel label={label} />
             </div>
