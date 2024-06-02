@@ -22,6 +22,7 @@ export const Default: Story = {
             {
                 id: "zero",
                 name: "zero",
+                class: "battle",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -44,6 +45,7 @@ export const Complete: Story = {
             {
                 id: "zero",
                 name: "zero",
+                class: "battle",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -55,6 +57,7 @@ export const Complete: Story = {
             {
                 id: "one",
                 name: "one",
+                class: "farming",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -66,6 +69,7 @@ export const Complete: Story = {
             {
                 id: "two",
                 name: "two",
+                class: "mining",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -77,6 +81,7 @@ export const Complete: Story = {
             {
                 id: "three",
                 name: "three",
+                class: "solar",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -88,6 +93,7 @@ export const Complete: Story = {
             {
                 id: "four",
                 name: "four",
+                class: "atmos",
                 owner: "local",
                 location: {
                     planet: 31,
@@ -99,6 +105,7 @@ export const Complete: Story = {
             {
                 id: "five",
                 name: "five",
+                class: "cargo",
                 owner: "local",
                 location: {
                     planet: 31,

@@ -16,12 +16,12 @@ function Item({
     }
 
     return (
-        <div style={{ display: "flex", flexDirection: "column" }}>
-            <Button onClick={handleClick}>
-                <ShipIcon ship={ship} />
-                <div style={{ height: "1em" }}>{ship?.name}</div>
-            </Button>
-        </div>
+        <Button onClick={handleClick}>
+            <ShipIcon ship={ship} />
+            <span style={{ display: "block", height: "1em" }}>
+                {ship?.name}
+            </span>
+        </Button>
     )
 }
 
@@ -54,5 +54,9 @@ export default function ShipLocationGrid({
         ]
     }
 
-    return <div style={{ columnCount: 3 }}>{items}</div>
+    return (
+        <div style={{ columnCount: 3, columnGap: 0, maxWidth: 80 * 3 }}>
+            {items}
+        </div>
+    )
 }
