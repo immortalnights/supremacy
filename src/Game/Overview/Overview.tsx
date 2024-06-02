@@ -1,7 +1,7 @@
 import Button from "../../components/Button"
 import Navigation from "../../components/Navigation"
 import PlanetDetails from "../../components/PlanetDetails"
-import PlanetList from "../../components/PlanetList"
+import PlanetGrid from "../../components/PlanetGrid"
 import ShipLocationGrid from "../../components/ShipLocationGrid"
 import renameIcon from "/images/rename.png"
 import transferIcon from "/images/transfer.png"
@@ -49,7 +49,7 @@ export default function Overview() {
                             items={["combat", "fleet", "cargo"]}
                             direction="column"
                         />
-                        <PlanetList planets={[]} />
+                        <PlanetGrid planets={[]} />
                     </div>
                 </div>
                 <div>

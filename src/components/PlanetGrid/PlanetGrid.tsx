@@ -1,7 +1,7 @@
 import type { Planet } from "../../Game/entities"
 import Button from "../Button"
 
-export default function PlanetList({
+export default function PlanetGrid({
     planets,
     onClick,
 }: {

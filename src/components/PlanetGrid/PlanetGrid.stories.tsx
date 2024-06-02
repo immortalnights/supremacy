@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { fn } from "@storybook/test"
-import PlanetList from "."
+import PlanetGrid from "."
 
 const meta = {
-    title: "Components/Planet List",
-    component: PlanetList,
+    title: "Components/Planet Grid",
+    component: PlanetGrid,
     parameters: {
         layout: "centered",
     },
     args: {
         onClick: fn(),
     },
-} satisfies Meta<typeof PlanetList>
+} satisfies Meta<typeof PlanetGrid>
 
 export default meta
 type Story = StoryObj<typeof meta>
