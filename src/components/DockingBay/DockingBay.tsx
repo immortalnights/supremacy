@@ -41,7 +41,7 @@ export default function DockingBays({
     onClick: (ship: Ship) => void
 }) {
     return (
-        <div>
+        <div style={{ userSelect: "none" }}>
             <div>Planet</div>
             <div style={{ display: "flex" }}>
                 : <div>{planet.name}</div>
