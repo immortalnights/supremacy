@@ -1,33 +1,28 @@
 import { Ship } from "../../Game/entities"
 import emptyIcon from "/images/empty.png"
-import farmIcon from "/images/farming.png"
+import atmosIcon from "/images/atmos_icon.png"
+import battleIcon from "/images/battle_icon.png"
+import cargoIcon from "/images/cargo_icon.png"
+import farmingIcon from "/images/farming_icon.png"
+import miningIcon from "/images/mining_icon.png"
+import solarIcon from "/images/solar_icon.png"
 
-const iconMap = {
-    empty: emptyIcon,
-    farming: farmIcon,
+const iconMap: { [Key in Ship["class"]]: string } = {
+    atmos: atmosIcon,
+    battle: battleIcon,
+    cargo: cargoIcon,
+    farming: farmingIcon,
+    mining: miningIcon,
+    solar: solarIcon,
 }
 
 export default function ShipIcon({ ship }: { ship?: Ship }) {
     let img = emptyIcon
     if (ship) {
-        img = iconMap.farming
+        img = iconMap[ship.class]
+    } else {
+        img = emptyIcon
     }
 
-    return (
-        <div
-            style={{
-                marginTop: 2,
-                border: "1px solid lightgray",
-                width: 77,
-                height: 53,
-                display: "flex",
-                flexWrap: "wrap",
-                placeContent: "center",
-                background: "black",
-                padding: 0,
-            }}
-        >
-            <img src={img} />
-        </div>
-    )
+    return <img style={{}} src={img} />
 }
