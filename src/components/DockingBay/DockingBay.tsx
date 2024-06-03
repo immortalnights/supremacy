@@ -31,7 +31,7 @@ function Bay({
     )
 }
 
-export default function DockingBays({
+export default function DockingBay({
     planet,
     ships,
     onClick,
