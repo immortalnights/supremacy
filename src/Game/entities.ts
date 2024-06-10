@@ -19,8 +19,13 @@ export interface Ship {
     name: string
     owner: string
     class: "atmos" | "battle" | "cargo" | "farming" | "mining" | "solar"
+    requiredCrew: number
     crew: number
+    maxFuel: number
     fuel: number
+    passengers: number
+    passengerLimit: number
+    cargoCapacity: number
     location: {
         planet?: Planet["id"]
         position: "landed" | "docked" | "orbit" | "outer-space"
@@ -28,6 +33,7 @@ export interface Ship {
         index?: number
     }
     active: boolean
+    value: number
 }
 
 export interface Platoon {
