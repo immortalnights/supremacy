@@ -40,4 +40,10 @@ export interface Platoon {
     id: string
     name: string
     owner: string
+    size: number
+    location: {
+        planet?: Planet["id"]
+        ship?: Ship["id"]
+        index?: number
+    }
 }
