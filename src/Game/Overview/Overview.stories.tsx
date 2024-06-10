@@ -4,13 +4,6 @@ import Overview from "."
 const meta = {
     title: "Screens/Overview",
     component: Overview,
-    decorators: [
-        (Story) => (
-            <div style={{ background: "darkgray" }}>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         layout: "centered",
     },
