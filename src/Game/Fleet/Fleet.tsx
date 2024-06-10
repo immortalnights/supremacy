@@ -8,6 +8,7 @@ import Button from "../../components/Button"
 import ShipDetails from "../../components/ShipDetails"
 import ShipHeading from "../../components/ShipHeading"
 import Navigation from "../../components/Navigation"
+import EntityGrid from "../../components/EntityGrid"
 
 export default function Fleet() {
     const planet = {
@@ -53,7 +54,7 @@ export default function Fleet() {
                     items={["combat", "shipyard", "cargo"]}
                     direction="column"
                 />
-                {/* <ShipGrid /> */}
+                <EntityGrid entities={[]} />
                 <ShipHeading />
                 <Navigation
                     items={["surface", "overview", "training"]}
