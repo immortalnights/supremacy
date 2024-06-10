@@ -5,13 +5,6 @@ import Surface from "."
 const meta = {
     title: "Screens/Surface",
     component: Surface,
-    decorators: [
-        (Story) => (
-            <div style={{ background: "darkgray" }}>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         layout: "centered",
     },

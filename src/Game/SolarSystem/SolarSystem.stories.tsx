@@ -4,13 +4,6 @@ import SolarSystem from "."
 const meta = {
     title: "Screens/SolarSystem",
     component: SolarSystem,
-    decorators: [
-        (Story) => (
-            <div style={{ background: "darkgray" }}>
-                <Story />
-            </div>
-        ),
-    ],
     parameters: {
         layout: "centered",
     },

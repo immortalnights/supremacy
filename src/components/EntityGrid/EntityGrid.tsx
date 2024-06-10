@@ -99,11 +99,11 @@ function EntityRow<T extends Entity>({
 
 export default function EntityGrid<T extends Entity>({
     entities,
-    useTeamColors,
+    useTeamColors = false,
     onClick,
 }: {
     entities: T[]
-    useTeamColors: boolean
+    useTeamColors?: boolean
     onClick: (planet: T) => void
 }) {
     const rows = 8
