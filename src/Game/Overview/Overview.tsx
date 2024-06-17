@@ -20,31 +20,19 @@ import {
 } from "react"
 
 function RenamePlanet({
-    onComplete,
+    defaultName,
+    onRename,
     onCancel,
 }: {
-    onComplete: () => void
+    defaultName: string | undefined
+    onRename: ({ name }: { name: string }) => void
     onCancel: () => void
 }) {
-    const selectedPlanet = useAtomValue(selectedPlanetAtom)
-    const setPlanets = useSetAtom(planetsAtom)
-    const [name, setName] = useState(selectedPlanet?.name)
+    const [name, setName] = useState(defaultName ?? "")
 
-    const handleRenamePlanet = (ev: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault()
-
-        setPlanets((state) => {
-            const cpy = [...state]
-
-            const index = cpy.findIndex((p) => p.id === selectedPlanet?.id)
-            if (index !== -1) {
-                cpy[index] = { ...cpy[index], name }
-            }
-
-            return cpy
-        })
-
-        onComplete()
+        onRename({ name })
     }
 
     const handleChange = (ev: ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +40,8 @@ function RenamePlanet({
     }
 
     const handleKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
-        if (ev.key === "esc") {
+        console.log(ev.key)
+        if (ev.key === "Escape") {
             onCancel()
         }
     }
@@ -64,7 +53,7 @@ function RenamePlanet({
 
     return (
         <div>
-            <form onSubmit={handleRenamePlanet}>
+            <form onSubmit={handleSubmit}>
                 <input
                     type="text"
                     name="name"
@@ -83,7 +72,7 @@ function RenamePlanet({
 }
 
 export default function Overview() {
-    const planets = useAtomValue(planetsAtom)
+    const [planets, setPlanets] = useAtom(planetsAtom)
     const [isRenamingPlanet, setIsRenamingPlanet] = useState(false)
     const [selectedPlanet, setSelectedPlanet] = useAtom(selectedPlanetAtom)
     const filteredPlanets = planets.filter((planet) => !!planet.name)
@@ -92,6 +81,21 @@ export default function Overview() {
         if (selectedPlanet?.owner === "local") {
             setIsRenamingPlanet(true)
         }
+    }
+
+    const handleRenamePlanet = ({ name }: { name: string }) => {
+        setPlanets((state) => {
+            const cpy = [...state]
+
+            const index = cpy.findIndex((p) => p.id === selectedPlanet?.id)
+            if (index !== -1) {
+                cpy[index] = { ...cpy[index], name }
+            }
+
+            return cpy
+        })
+
+        setIsRenamingPlanet(false)
     }
 
     const handleEndRenamePlanet = () => {
@@ -127,7 +131,8 @@ export default function Overview() {
                 <div>
                     {isRenamingPlanet ? (
                         <RenamePlanet
-                            onComplete={handleEndRenamePlanet}
+                            defaultName={selectedPlanet?.name ?? ""}
+                            onRename={handleRenamePlanet}
                             onCancel={handleEndRenamePlanet}
                         />
                     ) : (
