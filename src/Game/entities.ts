@@ -1,17 +1,18 @@
 export interface Planet {
-    id: string | number
+    id: string
+    gridIndex: number
     name: string
     owner?: string
-    credits: number
-    food: number
-    minerals: number
-    fuels: number
-    energy: number
-    population: number
-    growth: number
-    moral: number
-    tax: number
-    strength: number
+    capital?: boolean
+    credits?: number
+    food?: number
+    minerals?: number
+    fuels?: number
+    energy?: number
+    population?: number
+    growth?: number
+    moral?: number
+    tax?: number
 }
 
 export interface Ship {
