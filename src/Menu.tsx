@@ -6,7 +6,7 @@ const Menu = () => {
     return (
         <div>
             <button disabled>Continue</button>
-            <button onClick={() => navigate("/Setup")}>New Game</button>
+            <button onClick={() => navigate("/Create")}>New Game</button>
             <button>Multiplayer</button>
         </div>
     )
