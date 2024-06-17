@@ -20,12 +20,12 @@ export const planetsAtom = atomWithStorage<Planet[]>("planets", [], storage)
 export const selectedPlanetAtom = atom<
     Planet | undefined | Promise<Planet | undefined>
 >((get) => {
-    const val = get(planetsAtom)
+    const planets = get(planetsAtom)
     let result
-    if (val instanceof Promise) {
-        result = val.then((planets) => findCapital(planets, "local"))
+    if (planets instanceof Promise) {
+        result = planets.then((planets) => findCapital(planets, "local"))
     } else {
-        result = findCapital(val, "local")
+        result = findCapital(planets, "local")
     }
 
     return result
