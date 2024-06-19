@@ -16,6 +16,7 @@ export const store = createStore()
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const storage = createJSONStorage(() => sessionStorage) as any
 
+export const dateAtom = atomWithStorage<number>("date", 0, storage)
 export const planetsAtom = atomWithStorage<Planet[]>("planets", [], storage)
 export const selectedPlanetAtom = atom<
     Planet | undefined | Promise<Planet | undefined>
@@ -30,5 +31,5 @@ export const selectedPlanetAtom = atom<
 
     return result
 })
-export const fleetsAtom = atomWithStorage<Ship[]>("ships", [], storage)
+export const shipsAtom = atomWithStorage<Ship[]>("ships", [], storage)
 export const platoonsAtom = atomWithStorage<Platoon[]>("ships", [], storage)
