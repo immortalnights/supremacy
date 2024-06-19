@@ -1,5 +1,5 @@
 import { useActionData } from "react-router-dom"
-import { store, planetsAtom, fleetsAtom } from "./Game/store"
+import { store, planetsAtom, shipsAtom, platoonsAtom } from "./Game/store"
 import { GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
 import { Planet } from "./Game/entities"
@@ -60,7 +60,8 @@ export default function SetupGame() {
     }
 
     store.set(planetsAtom, defaultPlanets)
-    store.set(fleetsAtom, [])
+    store.set(shipsAtom, [])
+    store.set(platoonsAtom, [])
 
     return <Navigate to="/Game/SolarSystem" replace />
 }
