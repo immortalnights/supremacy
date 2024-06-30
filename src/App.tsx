@@ -1,14 +1,26 @@
 import { RouterProvider } from "react-router-dom"
-import { WebSocketConnectionState, WebSocketProvider } from "webrtc-lobby-lib"
+import {
+    ManagerProvider,
+    PeerConnectionProvider,
+    WebSocketConnectionState,
+    WebSocketProvider,
+} from "webrtc-lobby-lib"
 import { router } from "./router"
 import "./App.css"
+import { StrictMode } from "react"
 
 function App() {
     return (
-        <WebSocketProvider>
-            <RouterProvider router={router} />
-            <WebSocketConnectionState />
-        </WebSocketProvider>
+        <StrictMode>
+            <WebSocketProvider>
+                <PeerConnectionProvider>
+                    <ManagerProvider>
+                        <RouterProvider router={router} />
+                        <WebSocketConnectionState />
+                    </ManagerProvider>
+                </PeerConnectionProvider>
+            </WebSocketProvider>
+        </StrictMode>
     )
 }
 

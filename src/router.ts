@@ -15,6 +15,8 @@ import {
 import { type GameSettings } from "./Game/types"
 import SetupGame from "./SetupGame"
 import { isDifficulty } from "./Game/utilities"
+import Lobby from "./Lobby"
+import GameRoom from "./GameRoom"
 
 export const router = createBrowserRouter([
     {
@@ -26,6 +28,16 @@ export const router = createBrowserRouter([
         Component: CreateGame,
     },
     {
+        path: "Lobby/*",
+        Component: Lobby,
+        // children: [
+        //     {
+        //         path: "Room/:room",
+        //         Component: GameRoom,
+        //     },
+        // ],
+    },
+    {
         path: "Game/*",
         action: () => true,
         Component: GameRoot,
@@ -33,7 +45,6 @@ export const router = createBrowserRouter([
             {
                 path: "Setup",
                 action: async ({ request }): Promise<GameSettings> => {
-                    console.log("ACTION")
                     const data = await request.formData()
 
                     const difficulty = data.get("difficulty")?.toString()

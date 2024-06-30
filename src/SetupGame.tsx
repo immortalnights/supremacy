@@ -1,13 +1,23 @@
 import { useActionData } from "react-router-dom"
-import { store, planetsAtom, shipsAtom, platoonsAtom } from "./Game/store"
+import {
+    store,
+    stateAtom,
+    dateAtom,
+    planetsAtom,
+    shipsAtom,
+    platoonsAtom,
+} from "./Game/store"
 import { GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
 import { Planet } from "./Game/entities"
 
 export default function SetupGame() {
     const settings = useActionData() as GameSettings
-
     console.log(settings)
+
+    // This is a poor check, but it works until the mp system is improved
+    const isMultiplayer = !settings?.difficulty
+    const difficulty = settings?.difficulty ?? "easy"
 
     const planetsForDifficulty: { [K in Difficulty]: number } = {
         easy: 8,
@@ -17,7 +27,7 @@ export default function SetupGame() {
     }
 
     const defaultPlanets = Array.from<unknown, Planet>(
-        { length: planetsForDifficulty[settings.difficulty] },
+        { length: planetsForDifficulty[difficulty] },
         (_, index) => ({
             id: String(index),
             name: "",
@@ -28,8 +38,8 @@ export default function SetupGame() {
     // EnemyBase (single player)
     defaultPlanets[0] = {
         ...defaultPlanets[0],
-        name: "EnemyBase",
-        owner: "cpu",
+        name: isMultiplayer ? "Player2" : "EnemyBase",
+        owner: isMultiplayer ? "remote" : "cpu",
         capital: true,
         credits: 1000,
         food: 1000,
@@ -45,7 +55,7 @@ export default function SetupGame() {
     const lastPlanet = defaultPlanets[defaultPlanets.length - 1]
     defaultPlanets[defaultPlanets.length - 1] = {
         ...lastPlanet,
-        name: "Homebase!",
+        name: isMultiplayer ? "Player1" : "Homebase!",
         owner: "local",
         capital: true,
         credits: 1000,
@@ -59,6 +69,8 @@ export default function SetupGame() {
         tax: 10,
     }
 
+    store.set(stateAtom, "playing")
+    store.set(dateAtom, 0)
     store.set(planetsAtom, defaultPlanets)
     store.set(shipsAtom, [])
     store.set(platoonsAtom, [])
