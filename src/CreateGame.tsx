@@ -2,8 +2,8 @@ import { Form } from "react-router-dom"
 
 export default function CreateGame() {
     return (
-        <div>
-            <Form method="post" action="/Game/Setup">
+        <Form method="post" action="/Game/Setup">
+            <div>
                 <input type="hidden" name="players" value={1} />
                 <select name="difficulty">
                     <option value="easy">Easy</option>
@@ -13,7 +13,7 @@ export default function CreateGame() {
                 </select>
                 <div>TODO</div>
                 <button type="submit">Start</button>
-            </Form>
-        </div>
+            </div>
+        </Form>
     )
 }
