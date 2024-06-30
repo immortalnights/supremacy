@@ -8,7 +8,7 @@ import transferIcon from "/images/transfer.png"
 import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai"
 import { planetsAtom, selectedPlanetAtom } from "../store"
 import { Planet } from "../entities"
 import {
@@ -18,17 +18,17 @@ import {
     useState,
     ChangeEvent,
 } from "react"
+import { useRenamePlanet } from "../../commands"
 
 function RenamePlanet({
-    defaultName,
     onRename,
     onCancel,
 }: {
-    defaultName: string | undefined
     onRename: ({ name }: { name: string }) => void
     onCancel: () => void
 }) {
-    const [name, setName] = useState(defaultName ?? "")
+    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    const [name, setName] = useState(selectedPlanet?.name ?? "")
 
     const handleSubmit = (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault()
@@ -40,7 +40,6 @@ function RenamePlanet({
     }
 
     const handleKeyDown = (ev: KeyboardEvent<HTMLInputElement>) => {
-        console.log(ev.key)
         if (ev.key === "Escape") {
             onCancel()
         }
@@ -70,68 +69,79 @@ function RenamePlanet({
         </div>
     )
 }
-
-export default function Overview() {
-    const [planets, setPlanets] = useAtom(planetsAtom)
-    const [isRenamingPlanet, setIsRenamingPlanet] = useState(false)
-    const [selectedPlanet, setSelectedPlanet] = useAtom(selectedPlanetAtom)
-    const filteredPlanets = planets.filter((planet) => !!planet.name)
+function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
+    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    // const transfer = useTransferCredits()
 
     const handleStartRenamePlanet = () => {
         if (selectedPlanet?.owner === "local") {
-            setIsRenamingPlanet(true)
+            onRename(selectedPlanet)
         }
     }
-
-    const handleRenamePlanet = ({ name }: { name: string }) => {
-        setPlanets((state) => {
-            const cpy = [...state]
-
-            const index = cpy.findIndex((p) => p.id === selectedPlanet?.id)
-            if (index !== -1) {
-                cpy[index] = { ...cpy[index], name }
-            }
-
-            return cpy
-        })
-
-        setIsRenamingPlanet(false)
-    }
-
-    const handleEndRenamePlanet = () => {
-        setIsRenamingPlanet(false)
-    }
-
     const handleTransferToCapital = () => {
         if (!selectedPlanet?.capital) {
-            // TODO
-        }
-    }
-
-    const handleSelectPlanet = (planet: Planet) => {
-        if (planet.owner === "local") {
-            setSelectedPlanet(planet)
+            // transfer(selectedPlanet)
         }
     }
 
     return (
-        <div>
-            <div style={{ display: "flex" }}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Button onClick={handleStartRenamePlanet}>
-                        <img src={renameIcon} />
-                    </Button>
-                    <Button onClick={handleTransferToCapital}>
-                        <img src={transferIcon} />
-                    </Button>
-                </div>
-                {selectedPlanet && <PlanetDetails planet={selectedPlanet} />}
+        <div style={{ display: "flex" }}>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+                <Button onClick={handleStartRenamePlanet}>
+                    <img src={renameIcon} />
+                </Button>
+                <Button onClick={handleTransferToCapital}>
+                    <img src={transferIcon} />
+                </Button>
             </div>
+            <PlanetDetails />
+        </div>
+    )
+}
+
+function PlanetGrid() {
+    const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
+    const planets = useAtomValue(planetsAtom)
+    const filteredPlanets = planets.filter((planet) => !!planet.name)
+
+    const handleSelectPlanet = (planet: Planet) => {
+        // if (planet.owner === "local") {
+        setSelectedPlanet(planet)
+        // }
+    }
+
+    return (
+        <EntityGrid
+            entities={filteredPlanets}
+            useTeamColors
+            onClick={handleSelectPlanet}
+        />
+    )
+}
+
+export default function Overview() {
+    const store = useStore()
+    const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(
+        undefined,
+    )
+    const rename = useRenamePlanet()
+
+    const handleRenamePlanet = ({ name }: { name: string }) => {
+        rename(store.get(selectedPlanetAtom), name)
+        setRenamingPlanet(undefined)
+    }
+
+    const handleEndRenamePlanet = () => {
+        setRenamingPlanet(undefined)
+    }
+
+    return (
+        <div>
+            <SelectedPlanet onRename={(planet) => setRenamingPlanet(planet)} />
             <div style={{ display: "flex", flexDirection: "row" }}>
                 <div>
-                    {isRenamingPlanet ? (
+                    {renamePlanet ? (
                         <RenamePlanet
-                            defaultName={selectedPlanet?.name ?? ""}
                             onRename={handleRenamePlanet}
                             onCancel={handleEndRenamePlanet}
                         />
@@ -145,11 +155,7 @@ export default function Overview() {
                             items={["combat", "fleet", "cargo"]}
                             direction="column"
                         />
-                        <EntityGrid
-                            entities={filteredPlanets}
-                            useTeamColors
-                            onClick={handleSelectPlanet}
-                        />
+                        <PlanetGrid />
                     </div>
                 </div>
                 <div>
