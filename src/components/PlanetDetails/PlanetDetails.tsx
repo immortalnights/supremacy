@@ -4,6 +4,8 @@ import Date from "../Date"
 import taxUpIcon from "/images/tax_up.png"
 import taxDownIcon from "/images/tax_down.png"
 import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
+import { selectedPlanetAtom } from "../../Game/store"
+import { useAtomValue } from "jotai"
 
 function TaxRate({
     value,
@@ -55,7 +57,9 @@ function TaxRate({
     )
 }
 
-export default function PlanetDetails({ planet }: { planet: Planet }) {
+export default function PlanetDetails() {
+    const planet = useAtomValue(selectedPlanetAtom)
+
     let populationGrowth
     if (planet.population) {
         let growthModifier
