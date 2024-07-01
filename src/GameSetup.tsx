@@ -6,14 +6,16 @@ import {
     planetsAtom,
     shipsAtom,
     platoonsAtom,
+    settingsAtom,
 } from "./Game/store"
 import { GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
 import { Planet, Platoon, Ship } from "./Game/entities"
 import { useManager, usePeerConnection } from "webrtc-lobby-lib"
-import { PlayerRecord, throwError } from "game-signaling-server/client"
+import { PlayerRecord } from "game-signaling-server/client"
 import { useHydrateAtoms } from "jotai/utils"
-import { ReactNode, useEffect, useMemo, useState } from "react"
+import { ReactNode, useCallback, useEffect, useMemo, useState } from "react"
+import { useAtomValue } from "jotai"
 
 interface GameData {
     id: string
@@ -98,28 +100,6 @@ const loadSavedGame = ({ id }: GameSettings): GameData | undefined => {
     return data as GameData
 }
 
-const HydrateGameStateAtoms = ({
-    data,
-    children,
-}: {
-    data: GameData
-    // initialValues: Parameters<typeof useHydrateAtoms>[0]
-    children?: ReactNode
-}) => {
-    console.log("hydrate with", data)
-    // Transform game data into hydration data
-    const initialValues = [
-        [stateAtom, "playing"],
-        [dateAtom, 0],
-        [planetsAtom, data.planets],
-        [shipsAtom, [] as Ship[]],
-        [platoonsAtom, [] as Platoon[]],
-    ] as const
-
-    useHydrateAtoms(initialValues)
-    return children
-}
-
 const initializeGameData = (
     settings: GameSettings,
     hostPlayer: PlayerRecord,
@@ -181,6 +161,15 @@ export default function GameSetup() {
     const { state: mpState, player, room, game } = useManager()
     const isMultiplayer = !settings
     const [state, setState] = useState<SetupState>(getInitialState(player))
+    const hydrateAtoms = useCallback((data: GameData) => {
+        store.set(settingsAtom, { id: data.id })
+        store.set(stateAtom, "playing")
+        store.set(dateAtom, 0)
+        store.set(planetsAtom, data.planets)
+        store.set(shipsAtom, [] as Ship[])
+        store.set(platoonsAtom, [] as Platoon[])
+    }, [])
+    const gameSettings = useAtomValue(settingsAtom)
 
     const otherPlayer = useMemo(
         () =>
@@ -189,8 +178,6 @@ export default function GameSetup() {
     )
     // room.players.find((p) => p.id !== player.id) ??
     // throwError("Failed to find other player")
-
-    const [data, setData] = useState<GameData | undefined>()
     console.log(state, mpState, settings, room, game)
 
     // hacky, but currently the only way to know
@@ -211,7 +198,7 @@ export default function GameSetup() {
             peerMessageHandler = (peer, { name, body }) => {
                 console.debug("received", name, body)
                 if (name === "initial-game-data") {
-                    setData(body as GameData)
+                    hydrateAtoms(body as GameData)
                     send("initialize-synchronization-complete", {})
                 } else if (name === "game-start") {
                     setState("ready")
@@ -224,7 +211,7 @@ export default function GameSetup() {
         return () => {
             unsubscribe(peerMessageHandler)
         }
-    }, [player, send, subscribe, unsubscribe])
+    }, [hydrateAtoms, player, send, subscribe, unsubscribe])
 
     useEffect(() => {
         console.debug("Creation effect", [
@@ -241,7 +228,7 @@ export default function GameSetup() {
                 setState("error")
             } else {
                 if (player?.host) {
-                    setData(data)
+                    hydrateAtoms(data)
                     send("initial-game-data", data)
                     setState("waiting")
                 } else {
@@ -251,19 +238,13 @@ export default function GameSetup() {
         } else {
             // Nothing
         }
-    }, [state, settings, player, otherPlayer, send])
+    }, [hydrateAtoms, state, settings, player, otherPlayer, send])
 
-    const redirect = data && (
-        <Navigate to={`/Game/${data.id}/SolarSystem`} replace />
+    const redirect = gameSettings && (
+        <Navigate to={`/Game/${gameSettings.id}/SolarSystem`} replace />
     )
 
-    let content
-    if (data) {
-        content = <HydrateGameStateAtoms data={data} />
-    } else {
-        content = <div>Loading...</div>
-    }
-
+    let content = <div>Loading...</div>
     if (state === "ready") {
         content = redirect
     }
