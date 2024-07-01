@@ -13,10 +13,11 @@ import {
     Training,
 } from "./Game"
 import { type GameSettings } from "./Game/types"
-import SetupGame from "./SetupGame"
+import GameSetup from "./GameSetup"
 import { isDifficulty } from "./Game/utilities"
 import Lobby from "./Lobby"
 import GameRoom from "./GameRoom"
+import { GameSimulation } from "./GameSimulation"
 
 export const router = createBrowserRouter([
     {
@@ -50,45 +51,62 @@ export const router = createBrowserRouter([
                     const difficulty = data.get("difficulty")?.toString()
 
                     return {
-                        players: Number(data.get("players")?.toString() ?? 1),
+                        id: undefined,
+                        host: true,
+                        multiplayer:
+                            Number(data.get("players")?.toString() ?? 1) > 1,
                         difficulty: isDifficulty(difficulty)
                             ? difficulty
                             : "easy",
+                        player1: {
+                            id: "local",
+                            name: "Local Player",
+                        },
+                        player2: {
+                            id: "cpu",
+                            name: "AI Player",
+                        },
                     }
                 },
-                Component: SetupGame,
+                Component: GameSetup,
             },
             {
-                path: "SolarSystem",
-                Component: SolarSystem,
-            },
-            {
-                path: "Overview",
-                Component: Overview,
-            },
-            {
-                path: "Shipyard",
-                Component: Shipyard,
-            },
-            {
-                path: "Fleet",
-                Component: Fleet,
-            },
-            {
-                path: "Combat",
-                Component: Combat,
-            },
-            {
-                path: "Cargo",
-                Component: Cargo,
-            },
-            {
-                path: "Surface",
-                Component: Surface,
-            },
-            {
-                path: "Training",
-                Component: Training,
+                path: ":id",
+                Component: GameSimulation,
+                children: [
+                    {
+                        path: "SolarSystem",
+                        Component: SolarSystem,
+                    },
+                    {
+                        path: "Overview",
+                        Component: Overview,
+                    },
+                    {
+                        path: "Shipyard",
+                        Component: Shipyard,
+                    },
+                    {
+                        path: "Fleet",
+                        Component: Fleet,
+                    },
+                    {
+                        path: "Combat",
+                        Component: Combat,
+                    },
+                    {
+                        path: "Cargo",
+                        Component: Cargo,
+                    },
+                    {
+                        path: "Surface",
+                        Component: Surface,
+                    },
+                    {
+                        path: "Training",
+                        Component: Training,
+                    },
+                ],
             },
         ],
     },

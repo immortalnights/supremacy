@@ -1,21 +1,11 @@
-import { WritableAtom, atom, createStore } from "jotai"
-import { atomWithStorage, createJSONStorage } from "jotai/utils"
+import { atom, createStore } from "jotai"
 import type { Planet, Ship, Platoon } from "./entities"
-
-interface Data {
-    planets: Planet[]
-}
 
 export const store = createStore()
 
-// The storage is not type safe, there might be a better way to do this to make
-// it safe.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const storage = createJSONStorage(() => sessionStorage) as any
-
 export const stateAtom = atom<"setup" | "playing" | "paused">("setup")
-export const dateAtom = atomWithStorage<number>("date", 0, storage)
-export const planetsAtom = atomWithStorage<Planet[]>("planets", [], storage)
+export const dateAtom = atom<number>(0)
+export const planetsAtom = atom<Planet[]>([])
 const userSelectedPlanetIdAtom = atom<string | undefined>(undefined)
 export const selectedPlanetAtom = atom<
     Planet | undefined | Promise<Planet | undefined>
@@ -42,5 +32,5 @@ export const selectedPlanetAtom = atom<
         set(userSelectedPlanetIdAtom, planet.id)
     },
 )
-export const shipsAtom = atomWithStorage<Ship[]>("ships", [], storage)
-export const platoonsAtom = atomWithStorage<Platoon[]>("ships", [], storage)
+export const shipsAtom = atom<Ship[]>([])
+export const platoonsAtom = atom<Platoon[]>([])

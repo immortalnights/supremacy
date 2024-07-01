@@ -10,7 +10,14 @@ export default function Lobby() {
         if (state === "in-game") {
             navigate("/Game/Setup", {})
         }
-    }, [state])
+    }, [state, navigate])
 
-    return state === "lobby" ? <RTCLobby></RTCLobby> : "Connecting..."
+    return (
+        <div>
+            {state === "lobby" ? <RTCLobby></RTCLobby> : "Connecting..."}
+            <button type="button" onClick={() => navigate("/")}>
+                Cancel
+            </button>
+        </div>
+    )
 }

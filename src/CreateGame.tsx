@@ -1,6 +1,10 @@
-import { Form } from "react-router-dom"
+import { Form, useNavigate } from "react-router-dom"
+
+// TODO Two player cards, on CPU or Remote player. No "lobby", etc.
 
 export default function CreateGame() {
+    const navigate = useNavigate()
+
     return (
         <Form method="post" action="/Game/Setup">
             <div>
@@ -12,6 +16,9 @@ export default function CreateGame() {
                     <option value="impossible">Impossible</option>
                 </select>
                 <div>TODO</div>
+                <button type="button" onClick={() => navigate("/")}>
+                    Cancel
+                </button>
                 <button type="submit">Start</button>
             </div>
         </Form>

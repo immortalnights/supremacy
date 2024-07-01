@@ -40,8 +40,8 @@ export default function Navigation({
             component = (
                 <Link
                     key={item}
-                    to={`/Game/${details.to}`}
-                    relative="path"
+                    to={`../${details.to}`}
+                    relative="route"
                     style={{ height: 34 }}
                 >
                     <img alt={item} src={details.icon} style={{ height: 34 }} />
