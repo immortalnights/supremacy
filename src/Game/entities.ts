@@ -2,7 +2,7 @@ export interface Planet {
     id: string
     gridIndex: number
     name: string
-    owner?: string
+    owner: string | undefined
     capital?: boolean
     credits?: number
     food?: number

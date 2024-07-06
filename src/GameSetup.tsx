@@ -1,25 +1,29 @@
 import { useActionData } from "react-router-dom"
 import {
     store,
+    sessionAtom,
     stateAtom,
     dateAtom,
     planetsAtom,
     shipsAtom,
     platoonsAtom,
-    settingsAtom,
 } from "./Game/store"
-import { GameSettings, type Difficulty } from "./Game/types"
+import { GameSession, GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
 import { Planet, Platoon, Ship } from "./Game/entities"
 import { useManager, usePeerConnection } from "webrtc-lobby-lib"
 import { PlayerRecord } from "game-signaling-server/client"
 import { useHydrateAtoms } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo, useState } from "react"
-import { useAtomValue } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
 
 interface GameData {
     id: string
+    name: string
+    multiplayer: boolean
     planets: Planet[]
+    ships: Ship[]
+    platoons: Platoon[]
 }
 
 const setupNewGame = ({
@@ -78,7 +82,14 @@ const setupNewGame = ({
         tax: 10,
     }
 
-    return { id: crypto.randomUUID(), planets: defaultPlanets }
+    return {
+        id: "unknown",
+        name: "unnamed",
+        multiplayer,
+        planets: defaultPlanets,
+        ships: [],
+        platoons: [],
+    }
 }
 
 const loadSavedGame = ({ id }: GameSettings): GameData | undefined => {
@@ -101,76 +112,52 @@ const loadSavedGame = ({ id }: GameSettings): GameData | undefined => {
 }
 
 const initializeGameData = (
-    settings: GameSettings,
-    hostPlayer: PlayerRecord,
-    remotePlayer: PlayerRecord,
+    settings: GameSettings | undefined,
+    session: GameSession,
 ): GameData | undefined => {
     let data
 
     // FIXME: Navigation from the Lobby does not submit any data
     if (settings && !settings.multiplayer) {
-        if (settings.host) {
-            if (settings.id) {
-                // Host, load game
-                data = loadSavedGame(settings)
-            } else {
-                // Host, setup game
-                data = setupNewGame(settings)
-            }
+        if (settings.id) {
+            // Host, load game
+            data = loadSavedGame(settings)
         } else {
-        }
-    } else if (hostPlayer && remotePlayer) {
-        if (hostPlayer.host) {
-            // if (settings.id) {
-            //     // Host, load game
-            //     data = loadSavedGame(settings)
-            // } else {
             // Host, setup game
-            data = setupNewGame({
-                id: undefined,
-                multiplayer: true,
-                host: true,
-                difficulty: "easy",
-                player1: { id: hostPlayer.id, name: hostPlayer.name },
-                player2: { id: remotePlayer.id, name: remotePlayer.name },
-            })
-            // }
-        } else {
+            data = setupNewGame(settings)
         }
+    } else {
+        data = setupNewGame(session)
     }
 
     return data
 }
 
-type SetupState = "creating" | "waiting" | "ready" | "error"
-
-const getInitialState = (player?: PlayerRecord): SetupState => {
-    let state
-    if (!player || player.host) {
-        state = "creating" as const
-    } else {
-        state = "waiting" as const
-    }
-
-    return state
-}
+type SetupState =
+    | "initializing"
+    | "synchronizing"
+    | "creating"
+    | "waiting"
+    | "ready"
+    | "error"
 
 export default function GameSetup() {
     const settings = useActionData() as GameSettings | undefined
-    const { send, subscribe, unsubscribe, connections } = usePeerConnection()
-    const { state: mpState, player, room, game } = useManager()
     const isMultiplayer = !settings
-    const [state, setState] = useState<SetupState>(getInitialState(player))
+    const { send, subscribe, unsubscribe } = usePeerConnection()
+    const { state: mpState, player: localPlayer, room, game } = useManager()
+    const [state, setState] = useState<SetupState>("initializing")
     const hydrateAtoms = useCallback((data: GameData) => {
-        store.set(settingsAtom, { id: data.id })
         store.set(stateAtom, "playing")
         store.set(dateAtom, 0)
         store.set(planetsAtom, data.planets)
         store.set(shipsAtom, [] as Ship[])
         store.set(platoonsAtom, [] as Platoon[])
     }, [])
-    const gameSettings = useAtomValue(settingsAtom)
+    // FIXME writable because multiplayer manager data is incomplete...
+    const [session, setSession] = useAtom(sessionAtom)
 
+    // FIXME is invalid at the moment
     const otherPlayer = useMemo(
         () =>
             isMultiplayer ? { id: "remote", name: "Remote Player" } : undefined,
@@ -182,23 +169,58 @@ export default function GameSetup() {
 
     // hacky, but currently the only way to know
 
+    // Message handler effect
     useEffect(() => {
-        console.debug("Received effect", [player, send, subscribe, unsubscribe])
+        console.debug("Message handler effect", [
+            localPlayer,
+            send,
+            subscribe,
+            unsubscribe,
+        ])
 
         let peerMessageHandler
 
-        if (player?.host) {
+        if (localPlayer?.host) {
             peerMessageHandler = (peer, { name, body }) => {
-                if (name === "initialize-synchronization-complete") {
+                console.debug("Player (host) received", name, body)
+                // FIXME session synchronization compensates for the lack of information within
+                // the multiplayer manager context
+                if (name === "session-synchronization") {
+                    setSession({
+                        id: game,
+                        difficulty: "easy",
+                        multiplayer: true,
+                        host: localPlayer?.host,
+                        localPlayer: localPlayer.id,
+                        player1: { id: localPlayer.id, name: localPlayer.name },
+                        player2: body.player2,
+                    })
+                    setState("creating")
+                } else if (name === "initialize-synchronization-complete") {
                     send("game-start", {})
                     setState("ready")
                 }
             }
         } else {
             peerMessageHandler = (peer, { name, body }) => {
-                console.debug("received", name, body)
-                if (name === "initial-game-data") {
+                console.debug("Player (not host) received", name, body)
+                if (name === "session-synchronization") {
+                    setSession({
+                        id: game,
+                        difficulty: body.difficulty,
+                        multiplayer: true,
+                        host: localPlayer?.host,
+                        localPlayer: localPlayer?.id,
+                        player1: body.player1,
+                        player2: {
+                            id: localPlayer?.id,
+                            name: localPlayer?.name,
+                        },
+                    })
+                    setState("waiting")
+                } else if (name === "initial-game-data") {
                     hydrateAtoms(body as GameData)
+                    // FIXME send player2 id to server, but it should know it!
                     send("initialize-synchronization-complete", {})
                 } else if (name === "game-start") {
                     setState("ready")
@@ -211,23 +233,49 @@ export default function GameSetup() {
         return () => {
             unsubscribe(peerMessageHandler)
         }
-    }, [hydrateAtoms, player, send, subscribe, unsubscribe])
+    }, [
+        hydrateAtoms,
+        game,
+        localPlayer,
+        setSession,
+        send,
+        subscribe,
+        unsubscribe,
+    ])
 
+    // Setup effect
     useEffect(() => {
         console.debug("Creation effect", [
             state,
             settings,
-            player,
+            localPlayer,
             otherPlayer,
             send,
         ])
-        if (state === "creating") {
-            const data = initializeGameData(settings, player, otherPlayer)
+        if (state === "initializing") {
+            setTimeout(() => {
+                setState("synchronizing")
+            }, 500)
+        } else if (state === "synchronizing") {
+            let data
+            if (localPlayer?.host) {
+                data = {
+                    player1: { id: localPlayer.id, name: localPlayer.name },
+                }
+            } else {
+                data = {
+                    player2: { id: localPlayer.id, name: localPlayer.name },
+                }
+            }
+
+            send("session-synchronization", data)
+        } else if (state === "creating") {
+            const data = initializeGameData(settings, session)
 
             if (!data) {
                 setState("error")
             } else {
-                if (player?.host) {
+                if (localPlayer?.host) {
                     hydrateAtoms(data)
                     send("initial-game-data", data)
                     setState("waiting")
@@ -238,10 +286,19 @@ export default function GameSetup() {
         } else {
             // Nothing
         }
-    }, [hydrateAtoms, state, settings, player, otherPlayer, send])
+    }, [
+        hydrateAtoms,
+        state,
+        game,
+        settings,
+        session,
+        localPlayer,
+        otherPlayer,
+        send,
+    ])
 
-    const redirect = gameSettings && (
-        <Navigate to={`/Game/${gameSettings.id}/SolarSystem`} replace />
+    const redirect = session && (
+        <Navigate to={`/Game/${session.id}/SolarSystem`} replace />
     )
 
     let content = <div>Loading...</div>

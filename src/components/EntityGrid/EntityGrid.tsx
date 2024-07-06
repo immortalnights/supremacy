@@ -1,7 +1,12 @@
 import { ReactNode } from "react"
 import Button from "../Button"
 
-type Entity = { id: string; name: string; owner: string; gridIndex: number }
+type Entity = {
+    id: string
+    name: string
+    owner: string | undefined
+    gridIndex: number
+}
 
 function Cell({
     color = "#715fc3",
@@ -27,11 +32,11 @@ function Cell({
 
 function EntityCell<T extends Entity>({
     entity,
-    useTeamColors,
+    localPlayer,
     onClick,
 }: {
     entity: T
-    useTeamColors: boolean
+    localPlayer?: string
     onClick: (planet: T) => void
 }) {
     const handleClick = () => {
@@ -41,8 +46,8 @@ function EntityCell<T extends Entity>({
     }
 
     let color
-    if (entity && useTeamColors) {
-        if (entity.owner === "local") {
+    if (entity && localPlayer) {
+        if (entity.owner === localPlayer) {
             color = "green"
         } else {
             color = "red"
@@ -60,13 +65,13 @@ function EntityRow<T extends Entity>({
     row,
     columns,
     entities,
-    useTeamColors,
+    localPlayer,
     onClick,
 }: {
     row: number
     columns: number
     entities: T[]
-    useTeamColors: boolean
+    localPlayer?: string
     onClick: (planet: T) => void
 }) {
     return (
@@ -86,8 +91,8 @@ function EntityRow<T extends Entity>({
                         <EntityCell
                             key={`cell-${row}-${col}`}
                             entity={entity}
+                            localPlayer={localPlayer}
                             onClick={onClick}
-                            useTeamColors={useTeamColors}
                         />
                     ) : (
                         <Cell key={`cell-${row}-${col}`} />
@@ -99,11 +104,11 @@ function EntityRow<T extends Entity>({
 
 export default function EntityGrid<T extends Entity>({
     entities,
-    useTeamColors = false,
+    localPlayer,
     onClick,
 }: {
     entities: T[]
-    useTeamColors?: boolean
+    localPlayer?: string
     onClick: (planet: T) => void
 }) {
     const rows = 8
@@ -120,7 +125,7 @@ export default function EntityGrid<T extends Entity>({
                             row={row}
                             columns={columns}
                             entities={entities}
-                            useTeamColors={useTeamColors}
+                            localPlayer={localPlayer}
                             onClick={onClick}
                         />
                     ))}

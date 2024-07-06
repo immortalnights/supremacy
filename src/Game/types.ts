@@ -9,9 +9,14 @@ export interface PlayerInfo {
 
 export interface GameSettings {
     id: string | undefined
-    host: boolean
     difficulty: Difficulty
     multiplayer: boolean
     player1: PlayerInfo
     player2: PlayerInfo
+}
+
+export interface GameSession extends GameSettings {
+    id: string
+    host: boolean
+    localPlayer: string
 }

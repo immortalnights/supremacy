@@ -1,7 +1,15 @@
-import { Getter, Setter } from "jotai"
+import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
-import { ReactNode, createContext, useCallback, useMemo } from "react"
-import { planetsAtom } from "./Game/store"
+import {
+    ReactNode,
+    createContext,
+    useCallback,
+    useEffect,
+    useMemo,
+} from "react"
+import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
+import { usePeerConnection } from "webrtc-lobby-lib"
+import { Planet } from "./Game/entities"
 
 export const CommandContext = createContext<{
     exec: (command: string, data: object) => void
@@ -11,30 +19,101 @@ export const CommandContext = createContext<{
     },
 })
 
+// FIXME move somewhere better
+const applyRenamePlanet = (
+    planets: Planet[],
+    planet: string,
+    newName: string,
+) => {
+    const cpy = [...planets]
+
+    const index = cpy.findIndex((p) => p.id === planet)
+    if (index !== -1) {
+        const originalPlanet = cpy[index]
+        console.log(
+            `Renaming planet '${originalPlanet.name}' (${originalPlanet.id}) to '${newName}'`,
+        )
+        cpy[index] = { ...originalPlanet, name: newName }
+    }
+
+    return cpy
+}
+
+// FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
+    const { send, subscribe, unsubscribe } = usePeerConnection()
+    const { host } = useAtomValue(sessionAtom)
+
     const exec = useAtomCallback(
         useCallback(
             (get: Getter, set: Setter, command: string, data: object) => {
                 console.log("exec", command, data)
 
                 const originalPlanets = get(planetsAtom)
+                let modifiedPlanets = originalPlanets
+                const originalShips = get(shipsAtom)
+                let modifiedShips = originalPlanets
+                const originalPlatoons = get(platoonsAtom)
+                let modifiedPlatoons = originalPlatoons
 
-                const cpy = [...originalPlanets]
+                if (command === "rename-planet") {
+                    // Apply the change locally
 
-                const index = cpy.findIndex((p) => p.id === data.planet)
-                if (index !== -1) {
-                    const originalPlanet = cpy[index]
-                    console.log(
-                        `Renaming planet '${originalPlanet.name}' (${originalPlanet.id}) to '${data.newName}'`,
+                    modifiedPlanets = applyRenamePlanet(
+                        originalPlanets,
+                        data.planet,
+                        data.newName,
                     )
-                    cpy[index] = { ...originalPlanet, name: data.newName }
+
+                    set(planetsAtom, modifiedPlanets)
+                } else {
+                    console.error("Unknown command")
                 }
 
-                set(planetsAtom, cpy)
+                if (host) {
+                    console.log("host send update-world")
+                    send("update-world", {
+                        planets: modifiedPlanets,
+                        ships: modifiedShips,
+                        platoons: modifiedPlatoons,
+                    })
+                } else {
+                    console.log("none-host send player-action")
+                    send("player-action", {
+                        command,
+                        data,
+                    })
+                }
             },
-            [],
+            [host, send],
         ),
     )
+
+    const update = useAtomCallback(
+        useCallback((get: Getter, set: Setter, data: object) => {
+            set(planetsAtom, data.planets)
+            set(shipsAtom, data.ships)
+            set(platoonsAtom, data.platoons)
+        }, []),
+    )
+
+    useEffect(() => {
+        const peerMessageHandler = (peer, { name, body }) => {
+            console.log(`${host ? "Host" : "Player"} received`, name, body)
+            // Action from none host player
+            if (name === "player-action") {
+                exec(body.command, body.data)
+            } else if (name === "update-world") {
+                update(body)
+            }
+        }
+
+        subscribe(peerMessageHandler)
+
+        return () => {
+            unsubscribe(peerMessageHandler)
+        }
+    }, [exec, update, send, subscribe, unsubscribe])
 
     const value = useMemo(
         () => ({

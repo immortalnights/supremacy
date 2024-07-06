@@ -9,7 +9,7 @@ import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
 import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai"
-import { planetsAtom, selectedPlanetAtom } from "../store"
+import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
 import { Planet } from "../entities"
 import {
     FormEvent,
@@ -69,12 +69,14 @@ function RenamePlanet({
         </div>
     )
 }
+
 function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const selectedPlanet = useAtomValue(selectedPlanetAtom)
     // const transfer = useTransferCredits()
 
     const handleStartRenamePlanet = () => {
-        if (selectedPlanet?.owner === "local") {
+        if (selectedPlanet?.owner === localPlayer) {
             onRename(selectedPlanet)
         }
     }
@@ -100,6 +102,7 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 }
 
 function PlanetGrid() {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
     const planets = useAtomValue(planetsAtom)
     const filteredPlanets = planets.filter((planet) => !!planet.name)
@@ -113,21 +116,22 @@ function PlanetGrid() {
     return (
         <EntityGrid
             entities={filteredPlanets}
-            useTeamColors
+            localPlayer={localPlayer}
             onClick={handleSelectPlanet}
         />
     )
 }
 
 export default function Overview() {
-    const store = useStore()
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(
         undefined,
     )
     const rename = useRenamePlanet()
 
     const handleRenamePlanet = ({ name }: { name: string }) => {
-        rename(store.get(selectedPlanetAtom), name)
+        if (renamePlanet) {
+            rename(renamePlanet, name)
+        }
         setRenamingPlanet(undefined)
     }
 
