@@ -2,7 +2,7 @@ import { useActionData } from "react-router-dom"
 import {
     store,
     sessionAtom,
-    stateAtom,
+    simulationSpeedAtom,
     dateAtom,
     planetsAtom,
     shipsAtom,
@@ -12,10 +12,8 @@ import { GameSession, GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
 import { Planet, Platoon, Ship } from "./Game/entities"
 import { useManager, usePeerConnection } from "webrtc-lobby-lib"
-import { PlayerRecord } from "game-signaling-server/client"
-import { useHydrateAtoms } from "jotai/utils"
-import { ReactNode, useCallback, useEffect, useMemo, useState } from "react"
-import { useAtom, useAtomValue } from "jotai"
+import { useCallback, useEffect, useMemo, useState } from "react"
+import { useAtom } from "jotai"
 
 interface GameData {
     id: string
@@ -148,7 +146,7 @@ export default function GameSetup() {
     const { state: mpState, player: localPlayer, room, game } = useManager()
     const [state, setState] = useState<SetupState>("initializing")
     const hydrateAtoms = useCallback((data: GameData) => {
-        store.set(stateAtom, "playing")
+        // store.set(simulationSpeedAtom, "normal")
         store.set(dateAtom, 0)
         store.set(planetsAtom, data.planets)
         store.set(shipsAtom, [] as Ship[])

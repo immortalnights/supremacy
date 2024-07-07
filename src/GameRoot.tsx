@@ -1,23 +1,7 @@
-import { Getter, Provider, Setter, useSetAtom, useStore } from "jotai"
+import { Provider } from "jotai"
 import { Link, Outlet } from "react-router-dom"
-import {
-    dateAtom,
-    planetsAtom,
-    platoonsAtom,
-    shipsAtom,
-    stateAtom,
-    store,
-} from "./Game/store"
-import {
-    ReactNode,
-    Suspense,
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-} from "react"
-import { Planet, Ship, Platoon } from "./Game/entities"
-import { useAtomCallback } from "jotai/utils"
+import { store } from "./Game/store"
+import { Suspense } from "react"
 
 // const game_speed = {
 //     slow: 2500,
@@ -92,30 +76,11 @@ import { useAtomCallback } from "jotai/utils"
 //     setTimeout(tick, 1000)
 // }
 
-// setTimeout(tick, 1000)
-
-function Simulation() {
-    const setState = useSetAtom(stateAtom)
-
-    useEffect(() => {
-        setState("playing")
-
-        return () => {
-            setState("paused")
-        }
-    }, [setState])
-
-    return null
-}
-
 export default function InGame() {
     return (
         <Suspense fallback="Loading...">
             <Provider store={store}>
                 <Outlet />
-                <div>
-                    <Link to={"/"}>Quit</Link>
-                </div>
             </Provider>
         </Suspense>
     )

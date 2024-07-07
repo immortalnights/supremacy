@@ -4,7 +4,9 @@ import { GameSession } from "./types"
 
 export const store = createStore()
 
-export const stateAtom = atom<"setup" | "playing" | "paused">("setup")
+export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">(
+    "paused",
+)
 export const sessionAtom = atom<GameSession>({
     id: "",
     host: false,
