@@ -36,7 +36,12 @@ export const selectedPlanetAtom = atom<
             planet = planets.find((p) => p.id === planetId)
             console.debug("User selected planet", planetId, planet)
         } else {
-            planet = planets.find((p) => p.owner === localPlayer && p.capital)
+            planet = planets.find(
+                (p) =>
+                    p.type !== "lifeless" &&
+                    p.owner === localPlayer &&
+                    p.capital,
+            )
             console.debug("Default selected planet", planet)
         }
 

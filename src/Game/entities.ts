@@ -1,19 +1,29 @@
-export interface Planet {
+interface BasePlanet {
     id: string
     gridIndex: number
     name: string
-    owner: string | undefined
-    capital?: boolean
-    credits?: number
-    food?: number
-    minerals?: number
-    fuels?: number
-    energy?: number
-    population?: number
-    growth?: number
-    moral?: number
-    tax?: number
+    type: "lifeless" | "metropolis" | "volcanic" | "dessert" | "tropical"
 }
+
+export interface LifelessPlanet extends BasePlanet {
+    type: "lifeless"
+}
+export interface ColonizedPlanet extends BasePlanet {
+    type: "metropolis" | "volcanic" | "dessert" | "tropical"
+    owner: string
+    capital: boolean
+    credits: number
+    food: number
+    minerals: number
+    fuels: number
+    energy: number
+    population: number
+    growth: number
+    moral: number
+    tax: number
+}
+
+export type Planet = LifelessPlanet | ColonizedPlanet
 
 export interface Ship {
     id: string
