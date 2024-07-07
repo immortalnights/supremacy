@@ -52,7 +52,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                 const originalPlanets = get(planetsAtom)
                 let modifiedPlanets = originalPlanets
                 const originalShips = get(shipsAtom)
-                let modifiedShips = originalPlanets
+                let modifiedShips = originalShips
                 const originalPlatoons = get(platoonsAtom)
                 let modifiedPlatoons = originalPlatoons
 
