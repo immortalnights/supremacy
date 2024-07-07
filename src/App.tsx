@@ -16,6 +16,9 @@ function App() {
                 <PeerConnectionProvider>
                     <ManagerProvider>
                         <RouterProvider router={router} />
+                        <div>
+                            <a href="/">Return to main menu</a>
+                        </div>
                         <WebSocketConnectionState />
                     </ManagerProvider>
                 </PeerConnectionProvider>
