@@ -98,7 +98,7 @@ const simulatePlanets = (planets: Planet[]): Planet[] => {
 
 const useMultiplayerSync = () => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { multiplayer } = useAtomValue(sessionAtom)
+    const { host, multiplayer } = useAtomValue(sessionAtom)
 
     useEffect(() => {
         let peerMessageHandler
@@ -123,11 +123,11 @@ const useMultiplayerSync = () => {
             ships: Ship[]
             platoons: Platoon[]
         }) => {
-            if (multiplayer) {
+            if (host && multiplayer) {
                 send("update-world", { ...changes })
             }
         },
-        [multiplayer, send],
+        [host, multiplayer, send],
     )
 
     return sync
