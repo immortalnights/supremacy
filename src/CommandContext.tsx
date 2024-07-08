@@ -87,6 +87,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.planet,
                         data.newTax,
                     )
+                    set(planetsAtom, modifiedPlanets)
                 } else {
                     console.error("Unknown command")
                 }
