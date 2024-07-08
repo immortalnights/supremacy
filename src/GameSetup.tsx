@@ -10,10 +10,17 @@ import {
 } from "./Game/store"
 import { GameSession, GameSettings, type Difficulty } from "./Game/types"
 import { Navigate } from "react-router-dom"
-import { Planet, Platoon, Ship } from "./Game/entities"
+import {
+    ColonizedPlanet,
+    LifelessPlanet,
+    Planet,
+    Platoon,
+    Ship,
+} from "./Game/entities"
 import { useManager, usePeerConnection } from "webrtc-lobby-lib"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useAtom } from "jotai"
+import { random } from "./Game/utilities"
 
 interface GameData {
     id: string
@@ -37,48 +44,80 @@ const setupNewGame = ({
         impossible: 32,
     }
 
-    const defaultPlanets = Array.from<unknown, Planet>(
-        { length: planetsForDifficulty[difficulty] },
+    // In multiplayer, both planets are created equal
+    // TODO apply difficulty variant
+    const playerPlanetInitial = {
+        credits: random(50000, 60000),
+        food: random(3000, 5000),
+        minerals: random(2000, 5000),
+        fuels: random(2000, 5000),
+        energy: random(2000, 5000),
+        population: random(1000, 2000),
+    }
+
+    const totalPlanets = planetsForDifficulty[difficulty]
+
+    // Create AI or Player 2 planet
+    let player2Planet
+    if (multiplayer) {
+        player2Planet = {
+            id: "0",
+            gridIndex: 0,
+            name: "Homebase!",
+            type: "metropolis",
+            owner: player2.id,
+            capital: true,
+            ...playerPlanetInitial,
+            morale: 75,
+            growth: 0,
+            tax: 25,
+        } satisfies ColonizedPlanet
+    } else {
+        // TODO Apply difficult variants
+        player2Planet = {
+            id: "0",
+            gridIndex: 0,
+            name: "EnemyBase!",
+            type: "metropolis",
+            owner: "AI",
+            capital: true,
+            credits: random(50000, 60000),
+            food: random(3000, 5000),
+            minerals: random(2000, 5000),
+            fuels: random(2000, 5000),
+            energy: random(2000, 5000),
+            population: random(1000, 2000),
+            morale: 75,
+            growth: 0,
+            tax: 25,
+        } satisfies ColonizedPlanet
+    }
+
+    const player1Planet = {
+        id: String(totalPlanets - 1),
+        gridIndex: totalPlanets - 1,
+        name: "Homebase!",
+        type: "metropolis",
+        owner: player1.id,
+        capital: true,
+        ...playerPlanetInitial,
+        morale: 75,
+        growth: 0,
+        tax: 25,
+    } satisfies ColonizedPlanet
+
+    const defaultPlanets: Planet[] = Array.from<unknown, LifelessPlanet>(
+        { length: totalPlanets - 2 },
         (_, index) => ({
-            id: String(index),
+            id: String(1 + index),
+            gridIndex: 1 + index,
             name: "",
-            gridIndex: index,
+            type: "lifeless",
         }),
     )
 
-    // EnemyBase (single player)
-    defaultPlanets[0] = {
-        ...defaultPlanets[0],
-        name: multiplayer ? "Homebase!" : "EnemyBase",
-        owner: player2.id,
-        capital: true,
-        credits: 1000,
-        food: 1000,
-        minerals: 1000,
-        fuels: 1000,
-        energy: 1000,
-        population: 1000,
-        growth: 0,
-        moral: 0,
-        tax: 10,
-    }
-
-    const lastPlanet = defaultPlanets[defaultPlanets.length - 1]
-    defaultPlanets[defaultPlanets.length - 1] = {
-        ...lastPlanet,
-        name: "Homebase!",
-        owner: player1.id,
-        capital: true,
-        credits: 1000,
-        food: 1000,
-        minerals: 1000,
-        fuels: 1000,
-        energy: 1000,
-        population: 1000,
-        growth: 0,
-        moral: 0,
-        tax: 10,
-    }
+    defaultPlanets.unshift(player2Planet)
+    defaultPlanets.push(player1Planet)
 
     return {
         id: "unknown",

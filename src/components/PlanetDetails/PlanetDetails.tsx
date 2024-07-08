@@ -1,4 +1,4 @@
-import { Planet } from "../../Game/entities"
+import { ColonizedPlanet, Planet } from "../../Game/entities"
 import Button from "../Button"
 import Date from "../Date"
 import taxUpIcon from "/images/tax_up.png"
@@ -6,6 +6,7 @@ import taxDownIcon from "/images/tax_down.png"
 import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
 import { selectedPlanetAtom } from "../../Game/store"
 import { useAtomValue } from "jotai"
+import { useAdjustTax } from "../../commands"
 
 function TaxRate({
     value,
@@ -58,7 +59,8 @@ function TaxRate({
 }
 
 export default function PlanetDetails() {
-    const planet = useAtomValue(selectedPlanetAtom)
+    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const adjustTax = useAdjustTax()
 
     let populationGrowth
     if (planet.population) {
@@ -145,12 +147,12 @@ export default function PlanetDetails() {
                     value={populationGrowth}
                     postfix="%"
                 />
-                <Metadata label="Moral" value={planet.moral} postfix="%" />
+                <Metadata label="Moral" value={planet.morale} postfix="%" />
 
                 <TaxRate
                     value={planet.tax}
-                    onIncrease={() => {}}
-                    onDecrease={() => {}}
+                    onIncrease={() => adjustTax(planet, +1)}
+                    onDecrease={() => adjustTax(planet, -1)}
                 />
 
                 <Metadata

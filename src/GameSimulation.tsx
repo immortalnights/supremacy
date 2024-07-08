@@ -12,7 +12,8 @@ import { CommandProvider } from "./CommandContext"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { Planet, Platoon, Ship } from "./Game/entities"
+import { ColonizedPlanet, Planet, Platoon, Ship } from "./Game/entities"
+import { calculateGrowth } from "./Game/utilities"
 
 const speedMap = {
     slow: 2,
@@ -37,6 +38,50 @@ const simulateShips = (
     return [ships, planets]
 }
 
+const PLANET_POPULATION_LIMIT = 30000
+
+const calculateMorale = ({ morale, tax, food }: ColonizedPlanet) => {
+    if (food === 0) {
+        morale = 1
+    } else {
+        const targetMorale = 100 - tax
+        if (morale > targetMorale) {
+            morale -= 1
+        } else if (morale < targetMorale) {
+            morale += 1
+        }
+    }
+
+    return morale
+}
+
+const simulatePlanet = (planet: ColonizedPlanet): Planet => {
+    const modifiedPlanet = { ...planet }
+
+    // Consume food
+    modifiedPlanet.food = Math.max(
+        Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004),
+        0,
+    )
+    // Adjust morale
+    modifiedPlanet.morale = calculateMorale(modifiedPlanet)
+    // Adjust growth
+    modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
+    // Apply population growth
+    modifiedPlanet.population = Math.min(
+        modifiedPlanet.population +
+            Math.floor(
+                modifiedPlanet.population * (modifiedPlanet.growth / 100),
+            ),
+        PLANET_POPULATION_LIMIT,
+    )
+    // Collect taxes
+    // FIXME tax should only be applied every _other_ day
+    modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
+
+    return modifiedPlanet
+}
+
 // Pure simulation function
 const simulatePlanets = (planets: Planet[]): Planet[] => {
     return planets.map((planet) => {
@@ -44,9 +89,7 @@ const simulatePlanets = (planets: Planet[]): Planet[] => {
         if (planet.type === "lifeless") {
             modifiedPlanet = planet
         } else {
-            modifiedPlanet = { ...planet }
-            // Adjust the population by the growth percentage
-            modifiedPlanet.population += 1
+            modifiedPlanet = simulatePlanet(planet)
         }
 
         return modifiedPlanet

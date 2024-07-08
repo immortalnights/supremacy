@@ -18,8 +18,8 @@ export interface ColonizedPlanet extends BasePlanet {
     fuels: number
     energy: number
     population: number
+    morale: number
     growth: number
-    moral: number
     tax: number
 }
 

@@ -1,4 +1,4 @@
-import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
+import { Getter, Setter, useAtomValue } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import {
     ReactNode,
@@ -10,6 +10,7 @@ import {
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { Planet } from "./Game/entities"
+import { clamp } from "./Game/utilities"
 
 export const CommandContext = createContext<{
     exec: (command: string, data: object) => void
@@ -20,20 +21,35 @@ export const CommandContext = createContext<{
 })
 
 // FIXME move somewhere better
-const applyRenamePlanet = (
-    planets: Planet[],
-    planet: string,
-    newName: string,
-) => {
+const applyRenamePlanet = (planets: Planet[], id: string, newName: string) => {
     const cpy = [...planets]
 
-    const index = cpy.findIndex((p) => p.id === planet)
+    const index = cpy.findIndex((p) => p.id === id)
     if (index !== -1) {
         const originalPlanet = cpy[index]
         console.log(
             `Renaming planet '${originalPlanet.name}' (${originalPlanet.id}) to '${newName}'`,
         )
         cpy[index] = { ...originalPlanet, name: newName }
+    }
+
+    return cpy
+}
+
+const applyModifyTax = (planets: Planet[], id: string, newTax: number) => {
+    const cpy = [...planets]
+    const index = cpy.findIndex((p) => p.id === id)
+    if (index !== -1) {
+        const planet = cpy[index]
+
+        if (planet.type !== "lifeless") {
+            const modifiedPlanet = { ...planet }
+            const tax = clamp(newTax, 0, 100)
+            console.log(
+                `Setting planet '${modifiedPlanet.name}' (${modifiedPlanet.id}) tax to '${tax}'`,
+            )
+            cpy[index] = { ...modifiedPlanet, tax }
+        }
     }
 
     return cpy
@@ -58,7 +74,6 @@ export function CommandProvider({ children }: { children: ReactNode }) {
 
                 if (command === "rename-planet") {
                     // Apply the change locally
-
                     modifiedPlanets = applyRenamePlanet(
                         originalPlanets,
                         data.planet,
@@ -66,6 +81,12 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
 
                     set(planetsAtom, modifiedPlanets)
+                } else if (command === "set-planet-tax") {
+                    modifiedPlanets = applyModifyTax(
+                        originalPlanets,
+                        data.planet,
+                        data.newTax,
+                    )
                 } else {
                     console.error("Unknown command")
                 }
