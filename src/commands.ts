@@ -19,3 +19,11 @@ export function useAdjustTax() {
         exec("set-planet-tax", { planet: planet.id, newTax })
     }
 }
+
+export function usePurchaseShip() {
+    const { exec } = useContext(CommandContext)
+
+    return (shipType: string, planet: ColonizedPlanet, name: string) => {
+        exec("purchase-ship", { planet: planet.id, type: shipType, name })
+    }
+}
