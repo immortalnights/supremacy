@@ -2,19 +2,24 @@ import { ReactNode } from "react"
 
 export default function Button({
     children,
+    type = "button",
+    disabled = false,
     onClick,
     style,
 }: {
     children: ReactNode
-    onClick: () => void
+    type?: HTMLButtonElement["type"]
+    disabled?: boolean
+    onClick?: () => void
     style?: React.CSSProperties
 }) {
     return (
         <button
+            type={type}
             title={""}
             style={{
                 cursor: "pointer",
-                width: "100%",
+                width: "auto",
                 border: "none",
                 background: "transparent",
                 textAlign: "left",
@@ -23,6 +28,7 @@ export default function Button({
                 margin: 0,
                 ...style,
             }}
+            disabled={disabled}
             onClick={onClick}
         >
             {children}
