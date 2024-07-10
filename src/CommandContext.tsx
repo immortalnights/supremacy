@@ -9,8 +9,13 @@ import {
 } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { Planet } from "./Game/entities"
+import { ColonizedPlanet, Planet, Ship } from "./Game/entities"
 import { clamp } from "./Game/utilities"
+import {
+    canAffordShip,
+    commissionShip,
+    deductShipCost,
+} from "./Game/Shipyard/utilities"
 
 export const CommandContext = createContext<{
     exec: (command: string, data: object) => void
@@ -55,6 +60,49 @@ const applyModifyTax = (planets: Planet[], id: string, newTax: number) => {
     return cpy
 }
 
+const purchaseShip = (
+    planets: Planet[],
+    ships: Ship[],
+    id: string,
+    type: string,
+    name: string,
+) => {
+    let modifiedPlanets
+    let modifiedShips
+    const index = planets.findIndex((p) => p.id === id)
+
+    if (index !== -1) {
+        const currentPlanet = planets[index]
+        if (currentPlanet.type === "lifeless") {
+            console.error("Cannot purchase ships on a lifeless planet")
+        } else if (!currentPlanet.capital) {
+            console.error("Cannot purchase ships from none capital planet")
+        } else if (!canAffordShip(currentPlanet, type)) {
+            console.log("Cannot afford ship")
+        } else {
+            const ownedShips = ships.filter(
+                (ship) => ship.owner === currentPlanet.owner,
+            ).length
+
+            if (ownedShips > 32) {
+                console.error(
+                    `Player ${currentPlanet.owner} cannot own more than 32 ships`,
+                )
+            } else {
+                modifiedPlanets = [...planets]
+
+                const modifiedPlanet = deductShipCost(currentPlanet, type)
+                modifiedPlanets[index] = { ...modifiedPlanet }
+
+                const newShip = commissionShip(type, name, modifiedPlanet.owner)
+                modifiedShips = [...ships, newShip]
+            }
+        }
+    }
+
+    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
+}
+
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
@@ -88,6 +136,16 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.newTax,
                     )
                     set(planetsAtom, modifiedPlanets)
+                } else if (command === "purchase-ship") {
+                    ;[modifiedPlanets, modifiedShips] = purchaseShip(
+                        originalPlanets,
+                        originalShips,
+                        data.planet,
+                        data.type,
+                        data.name,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else {
                     console.error("Unknown command")
                 }
