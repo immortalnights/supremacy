@@ -7,22 +7,30 @@ import {
 } from "webrtc-lobby-lib"
 import { router } from "./router"
 import "./App.css"
-import { StrictMode } from "react"
+import { ReactNode, StrictMode } from "react"
+
+function MultiplayerProvider({ children }: { children: ReactNode }) {
+    return (
+        <WebSocketProvider>
+            <PeerConnectionProvider>
+                <ManagerProvider>
+                    {children}
+                    <WebSocketConnectionState />
+                </ManagerProvider>
+            </PeerConnectionProvider>
+        </WebSocketProvider>
+    )
+}
 
 function App() {
     return (
         <StrictMode>
-            <WebSocketProvider>
-                <PeerConnectionProvider>
-                    <ManagerProvider>
-                        <RouterProvider router={router} />
-                        <div>
-                            <a href="/">Return to main menu</a>
-                        </div>
-                        <WebSocketConnectionState />
-                    </ManagerProvider>
-                </PeerConnectionProvider>
-            </WebSocketProvider>
+            <MultiplayerProvider>
+                <RouterProvider router={router} />
+                <div>
+                    <a href="/">Return to main menu</a>
+                </div>
+            </MultiplayerProvider>
         </StrictMode>
     )
 }
