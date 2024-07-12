@@ -7,15 +7,7 @@ export const store = createStore()
 export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">(
     "paused",
 )
-export const sessionAtom = atom<GameSession>({
-    id: "",
-    host: false,
-    difficulty: "easy",
-    multiplayer: false,
-    localPlayer: "unknown",
-    player1: { id: "unknown", name: "unknown" },
-    player2: { id: "unknown", name: "unknown" },
-})
+export const sessionAtom = atom<GameSession | undefined>(undefined)
 export const dateAtom = atom<number>(0)
 export const planetsAtom = atom<Planet[]>([])
 const userSelectedPlanetIdAtom = atom<string | undefined>(undefined)

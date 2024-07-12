@@ -204,6 +204,12 @@ function Simulation() {
 }
 
 export function GameSimulation() {
+    const session = useAtomValue(sessionAtom)
+
+    if (!session) {
+        throw Error("Missing session data!")
+    }
+
     return (
         <>
             {/* <Provider store={store}> */}

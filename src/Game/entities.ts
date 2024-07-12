@@ -8,16 +8,20 @@ interface BasePlanet {
 export interface LifelessPlanet extends BasePlanet {
     type: "lifeless"
 }
-export interface ColonizedPlanet extends BasePlanet {
-    type: "metropolis" | "volcanic" | "dessert" | "tropical"
-    owner: string
-    capital: boolean
+
+export interface PlanetResources {
     credits: number
     food: number
     minerals: number
     fuels: number
     energy: number
     population: number
+}
+
+export interface ColonizedPlanet extends BasePlanet, PlanetResources {
+    type: "metropolis" | "volcanic" | "dessert" | "tropical"
+    owner: string
+    capital: boolean
     morale: number
     growth: number
     tax: number

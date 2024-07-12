@@ -8,7 +8,14 @@ import {
     shipsAtom,
     platoonsAtom,
 } from "./Game/store"
-import { GameSession, GameSettings, type Difficulty } from "./Game/types"
+import {
+    difficulties,
+    GameConfiguration,
+    GameData,
+    GameSession,
+    GameSettings,
+    type Difficulty,
+} from "./Game/types"
 import { Navigate } from "react-router-dom"
 import {
     ColonizedPlanet,
@@ -17,19 +24,16 @@ import {
     Platoon,
     Ship,
 } from "./Game/entities"
-import { useManager, usePeerConnection } from "webrtc-lobby-lib"
+import { LocalPlayer, useManager, usePeerConnection } from "webrtc-lobby-lib"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useAtom } from "jotai"
 import { random } from "./Game/utilities"
-
-interface GameData {
-    id: string
-    name: string
-    multiplayer: boolean
-    planets: Planet[]
-    ships: Ship[]
-    platoons: Platoon[]
-}
+import {
+    hydrateAtomsFromGameData,
+    initializeMultiplayerGame,
+    initializeSinglePlayerGame,
+    saveGame,
+} from "./gameSetupUtilities"
 
 const setupNewGame = ({
     difficulty,
@@ -178,12 +182,11 @@ type SetupState =
     | "ready"
     | "error"
 
-export default function GameSetup() {
-    const settings = useActionData() as GameSettings | undefined
+const useMultiplayer = () => {
     const isMultiplayer = !settings
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { state: mpState, player: localPlayer, room, game } = useManager()
-    const [state, setState] = useState<SetupState>("initializing")
+    const { player: localPlayer, room, game } = useManager()
+    const [session, setSession] = useAtom(sessionAtom)
     const hydrateAtoms = useCallback((data: GameData) => {
         // store.set(simulationSpeedAtom, "normal")
         store.set(dateAtom, 0)
@@ -191,8 +194,6 @@ export default function GameSetup() {
         store.set(shipsAtom, [] as Ship[])
         store.set(platoonsAtom, [] as Platoon[])
     }, [])
-    // FIXME writable because multiplayer manager data is incomplete...
-    const [session, setSession] = useAtom(sessionAtom)
 
     // FIXME is invalid at the moment
     const otherPlayer = useMemo(
@@ -200,11 +201,9 @@ export default function GameSetup() {
             isMultiplayer ? { id: "remote", name: "Remote Player" } : undefined,
         [isMultiplayer],
     )
+
     // room.players.find((p) => p.id !== player.id) ??
     // throwError("Failed to find other player")
-    console.log(state, mpState, settings, room, game)
-
-    // hacky, but currently the only way to know
 
     // Message handler effect
     useEffect(() => {
@@ -333,6 +332,65 @@ export default function GameSetup() {
         otherPlayer,
         send,
     ])
+}
+
+export default function GameSetup() {
+    const configuration = useActionData() as GameConfiguration | undefined
+    const [state, setState] = useState<SetupState>("initializing")
+    const [session, setSession] = useAtom(sessionAtom)
+    const hydrateAtoms = useCallback((data: GameData) => {
+        // store.set(simulationSpeedAtom, "normal")
+        store.set(dateAtom, 0)
+        store.set(planetsAtom, data.planets)
+        store.set(shipsAtom, [] as Ship[])
+        store.set(platoonsAtom, [] as Platoon[])
+    }, [])
+
+    console.log(configuration, session, state)
+
+    // At the moment, multiplayer is identified by the lack of configuration
+    useEffect(() => {
+        if (!session) {
+            if (!configuration) {
+                // Synch players before creating the game data
+                // Once synched, redirect to game screen.
+            } else {
+                const playerId = configuration.player1Id
+                const data = initializeSinglePlayerGame(
+                    configuration.difficulty,
+                    configuration.planets,
+                    playerId,
+                )
+
+                const sessionData = {
+                    id: crypto.randomUUID(),
+                    multiplayer: false,
+                    host: true,
+                    difficulty: configuration.difficulty,
+                    created: new Date().toISOString(),
+                    playtime: 0,
+                    player1: {
+                        id: playerId,
+                        name: configuration.player1Name,
+                    },
+                    player2: undefined,
+                    localPlayer: playerId,
+                } satisfies GameSession
+
+                saveGame(
+                    sessionData,
+                    "paused",
+                    data.planets,
+                    data.ships,
+                    data.platoons,
+                )
+
+                hydrateAtoms(data)
+                setSession(sessionData)
+                setState("ready")
+            }
+        }
+    }, [configuration, hydrateAtoms, session, setSession])
 
     const redirect = session && (
         <Navigate to={`/Game/${session.id}/SolarSystem`} replace />

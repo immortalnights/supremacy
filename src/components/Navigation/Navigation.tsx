@@ -10,6 +10,16 @@ import spyIcon from "/images/spy.png"
 import saveIcon from "/images/save.png"
 import Button from "../Button"
 import { Link } from "react-router-dom"
+import { useAtomCallback } from "jotai/utils"
+import { useCallback } from "react"
+import {
+    planetsAtom,
+    platoonsAtom,
+    sessionAtom,
+    shipsAtom,
+} from "../../Game/store"
+import { saveGame } from "../../gameSetupUtilities"
+import { Getter } from "jotai"
 
 const linkMap = {
     overview: { to: "Overview", icon: overviewIcon },
@@ -26,6 +36,19 @@ const linkMap = {
 
 export type NavigationItem = keyof typeof linkMap
 
+const useSaveGame = () => {
+    return useAtomCallback(
+        useCallback((get: Getter) => {
+            const session = get(sessionAtom)
+            const planets = get(planetsAtom)
+            const ships = get(shipsAtom)
+            const platoons = get(platoonsAtom)
+
+            saveGame(session, "paused", planets, ships, platoons)
+        }, []),
+    )
+}
+
 export default function Navigation({
     items,
     direction = "row",
@@ -33,6 +56,16 @@ export default function Navigation({
     items: NavigationItem[]
     direction?: "row" | "column"
 }) {
+    const saveGame = useSaveGame()
+
+    // This is a really bad place to put this...
+    const handleActionClick = (item: NavigationItem) => {
+        console.log(item)
+        if (item === "save") {
+            saveGame()
+        }
+    }
+
     const links = items.map((item) => {
         const details = linkMap[item]
         let component
@@ -51,7 +84,7 @@ export default function Navigation({
             component = (
                 <Button
                     key={item}
-                    onClick={() => {}}
+                    onClick={() => handleActionClick(item)}
                     style={{ width: "auto", height: 34 }}
                 >
                     <img alt={item} src={details.icon} style={{ height: 34 }} />

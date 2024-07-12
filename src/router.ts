@@ -12,12 +12,13 @@ import {
     Surface,
     Training,
 } from "./Game"
-import { type GameSettings } from "./Game/types"
+import { Difficulty, GameConfiguration } from "./Game/types"
 import GameSetup from "./GameSetup"
 import { isDifficulty } from "./Game/utilities"
 import Lobby from "./Lobby"
-import GameRoom from "./GameRoom"
+// import GameRoom from "./GameRoom"
 import { GameSimulation } from "./GameSimulation"
+import GameSessionBoundary from "./GameSessionBoundry"
 
 export const router = createBrowserRouter([
     {
@@ -41,40 +42,39 @@ export const router = createBrowserRouter([
     {
         path: "Game/*",
         action: () => true,
+        // jotai provider is here
         Component: GameRoot,
         children: [
             {
                 path: "Setup",
-                action: async ({ request }): Promise<GameSettings> => {
+                // Keep the form handling simply and pass through the data to the Component
+                action: async ({ request }): Promise<GameConfiguration> => {
                     const data = await request.formData()
 
-                    const difficulty = data.get("difficulty")?.toString()
-
                     return {
-                        id: undefined,
-                        host: true,
+                        difficulty: data
+                            .get("difficulty")
+                            ?.toString() as Difficulty,
                         multiplayer:
-                            Number(data.get("players")?.toString() ?? 1) > 1,
-                        difficulty: isDifficulty(difficulty)
-                            ? difficulty
-                            : "easy",
-                        player1: {
-                            id: "local",
-                            name: "Local Player",
-                        },
-                        player2: {
-                            id: "cpu",
-                            name: "AI Player",
-                        },
+                            data.get("multiplayer")?.toString() === "true",
+                        planets: Number(data.get("planets")?.toString()),
+                        player1Id: crypto.randomUUID(),
+                        player1Name:
+                            data.get("player1Name")?.toString() ?? "noname",
+                        player2Id: data.get("player2Id")?.toString(),
+                        player2Name: data.get("player2Name")?.toString(),
                     }
                 },
                 Component: GameSetup,
             },
             {
                 path: ":id",
+                // Simulation is here
                 Component: GameSimulation,
+                ErrorBoundary: GameSessionBoundary,
                 children: [
                     {
+                        index: true,
                         path: "SolarSystem",
                         Component: SolarSystem,
                     },
