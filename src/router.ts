@@ -14,7 +14,6 @@ import {
 } from "./Game"
 import { Difficulty, GameConfiguration } from "./Game/types"
 import GameSetup from "./GameSetup"
-import { isDifficulty } from "./Game/utilities"
 import Lobby from "./Lobby"
 // import GameRoom from "./GameRoom"
 import { GameSimulation } from "./GameSimulation"

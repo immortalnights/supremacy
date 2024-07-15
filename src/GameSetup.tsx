@@ -31,7 +31,13 @@ type SetupState =
     | "ready"
     | "error"
 
-const useMultiplayer2 = ({ onReady, onError }: {}) => {
+const useMultiplayer2 = ({
+    onReady,
+    onError,
+}: {
+    onReady: () => void
+    onError: () => void
+}) => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { player: localPlayer, game } = useManager()
     const [session, setSession] = useAtom(sessionAtom)

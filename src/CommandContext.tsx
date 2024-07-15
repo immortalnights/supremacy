@@ -9,7 +9,7 @@ import {
 } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { ColonizedPlanet, Planet, Ship } from "./Game/entities"
+import { Planet, Ship } from "./Game/entities"
 import { clamp } from "./Game/utilities"
 import {
     canAffordShip,
@@ -193,7 +193,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
         return () => {
             unsubscribe(peerMessageHandler)
         }
-    }, [exec, update, send, subscribe, unsubscribe])
+    }, [host, exec, update, send, subscribe, unsubscribe])
 
     const value = useMemo(
         () => ({

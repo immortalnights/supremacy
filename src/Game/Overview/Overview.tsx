@@ -8,7 +8,7 @@ import transferIcon from "/images/transfer.png"
 import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
-import { useAtom, useAtomValue, useSetAtom, useStore } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
 import { Planet } from "../entities"
 import {
