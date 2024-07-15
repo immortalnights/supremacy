@@ -109,7 +109,12 @@ export const initializeMultiplayerGame = (
         initializeCapitalPlanet("Homebase!", player2Id, 0, resources),
     )
     defaultPlanets.unshift(
-        initializeCapitalPlanet("Homebase!", player1Id, 0, resources),
+        initializeCapitalPlanet(
+            "Homebase!",
+            player1Id,
+            planetCount - 1,
+            resources,
+        ),
     )
 
     return {
