@@ -109,7 +109,10 @@ export default function PlanetDetails() {
                                 : "Enemy Star"
                         }
                     />
-                    <Metadata label="Credits" value={planet.credits} />
+                    <Metadata
+                        label="Credits"
+                        value={Math.floor(planet.credits)}
+                    />
                 </div>
                 <div
                     style={{
@@ -119,7 +122,11 @@ export default function PlanetDetails() {
                         marginTop: 8,
                     }}
                 >
-                    <Metadata label="Food" value={planet.food} postfix=".T" />
+                    <Metadata
+                        label="Food"
+                        value={Math.floor(planet.food)}
+                        postfix=".T"
+                    />
                     <Metadata
                         label="Minerals"
                         value={planet.minerals}
@@ -141,7 +148,10 @@ export default function PlanetDetails() {
                     width: "100%",
                 }}
             >
-                <Metadata label="Population" value={planet.population} />
+                <Metadata
+                    label="Population"
+                    value={Math.floor(planet.population)}
+                />
                 <Metadata
                     label="Pop. Growth"
                     value={populationGrowth}
