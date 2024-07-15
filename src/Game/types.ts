@@ -27,7 +27,7 @@ export interface GameConfiguration {
 
 export interface GameSession {
     id: string
-    multiplayer: false
+    multiplayer: boolean
     host: boolean
     difficulty: Difficulty
     created: string
