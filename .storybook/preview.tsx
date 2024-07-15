@@ -13,6 +13,11 @@ const preview: Preview = {
     },
     decorators: [
         (Story) => (
+            <div style={{ background: "darkgray" }}>
+                <Story />
+            </div>
+        ),
+        (Story) => (
             <MemoryRouter>
                 <Story />
             </MemoryRouter>
