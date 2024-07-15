@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useMemo } from "react"
 import { LastSaveData } from "./Game/types"
 
-const Menu = () => {
+export default function Main() {
     const { joinLobby } = useManager()
     const navigate = useNavigate()
     const savedGame = useMemo((): LastSaveData | undefined => {
@@ -37,5 +37,3 @@ const Menu = () => {
         </div>
     )
 }
-
-export default Menu
