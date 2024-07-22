@@ -8,7 +8,7 @@ import {
     useMemo,
 } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
-import { usePeerConnection } from "webrtc-lobby-lib"
+import { useManager, usePeerConnection } from "webrtc-lobby-lib"
 import { Planet, Ship } from "./Game/entities"
 import { clamp } from "./Game/utilities"
 import {
@@ -16,14 +16,7 @@ import {
     commissionShip,
     deductShipCost,
 } from "./Game/Shipyard/utilities"
-
-export const CommandContext = createContext<{
-    exec: (command: string, data: object) => void
-}>({
-    exec: () => () => {
-        throw new Error("Missing CommandProvider")
-    },
-})
+import { CommandContext } from "./CommandContext"
 
 // FIXME move somewhere better
 const applyRenamePlanet = (planets: Planet[], id: string, newName: string) => {
@@ -61,28 +54,40 @@ const applyModifyTax = (planets: Planet[], id: string, newTax: number) => {
 }
 
 const purchaseShip = (
+    player: string,
     planets: Planet[],
     ships: Ship[],
-    id: string,
     type: string,
     name: string,
 ) => {
     let modifiedPlanets
     let modifiedShips
-    const index = planets.findIndex((p) => p.id === id)
+    // for now, purchases always get applied to the players capital, regardless of the selected planet
+    const index = planets.findIndex(
+        (p) => p.type !== "lifeless" && p.capital && p.owner === player,
+    )
 
     if (index !== -1) {
         const currentPlanet = planets[index]
+        // Count ships in planet docking bay
+        const dockedShips = ships.filter(
+            (s) =>
+                s.location.planet === currentPlanet.id &&
+                s.location.position === "docked",
+        )
+
         if (currentPlanet.type === "lifeless") {
             console.error("Cannot purchase ships on a lifeless planet")
-        } else if (!currentPlanet.capital) {
-            console.error("Cannot purchase ships from none capital planet")
+            // } else if (!currentPlanet.capital) {
+            //     console.error("Cannot purchase ships from none capital planet")
+        } else if (dockedShips.length >= 3) {
         } else if (!canAffordShip(currentPlanet, type)) {
             console.log("Cannot afford ship")
         } else {
             const ownedShips = ships.filter(
                 (ship) => ship.owner === currentPlanet.owner,
             ).length
+            // Ships in docking bay (at capital)
 
             if (ownedShips > 32) {
                 console.error(
@@ -105,6 +110,7 @@ const purchaseShip = (
 
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
+    const { player: localPlayer } = useManager()
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { host } = useAtomValue(sessionAtom)
 
@@ -137,10 +143,11 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "purchase-ship") {
+                    // Purchases are (currently) only made on the capital
                     ;[modifiedPlanets, modifiedShips] = purchaseShip(
+                        localPlayer.id,
                         originalPlanets,
                         originalShips,
-                        data.planet,
                         data.type,
                         data.name,
                     )

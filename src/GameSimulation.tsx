@@ -8,7 +8,7 @@ import {
     shipsAtom,
     simulationSpeedAtom,
 } from "./Game/store"
-import { CommandProvider } from "./CommandContext"
+import { CommandProvider } from "./CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
