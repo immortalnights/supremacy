@@ -5,7 +5,7 @@ type Entity = {
     id: string
     name: string
     owner: string | undefined
-    gridIndex: number
+    gridIndex?: number
 }
 
 function Cell({
@@ -61,6 +61,21 @@ function EntityCell<T extends Entity>({
     )
 }
 
+const gridEntity = (entities: Entity[], index: number) => {
+    let entity
+
+    if (entities.length > 0 && entities[0].gridIndex) {
+        const rowIndex = Math.floor(index / 4)
+        const colIndex = index % 4
+        const entityIndex = rowIndex + colIndex * 8
+        entity = entities.find((item) => item.gridIndex === entityIndex)
+    } else if (entities.length > index) {
+        entity = entities[index]
+    }
+
+    return entity
+}
+
 function EntityRow<T extends Entity>({
     row,
     columns,
@@ -80,12 +95,7 @@ function EntityRow<T extends Entity>({
                 .fill(undefined)
                 .map((_, col) => {
                     const index = col + row * 4
-                    const rowIndex = Math.floor(index / 4)
-                    const colIndex = index % 4
-                    const entityIndex = rowIndex + colIndex * 8
-                    const entity = entities.find(
-                        (entity) => entity.gridIndex === entityIndex, //entityIndex,
-                    )
+                    const entity = gridEntity(entities, index)
 
                     return entity ? (
                         <EntityCell
