@@ -1,6 +1,8 @@
+import { useAtomValue } from "jotai"
 import { Planet, Ship } from "../../Game/entities"
 import { shipInLocation } from "../../Game/utilities"
 import Button from "../Button"
+import { shipsAtom } from "../../Game/store"
 
 function Bay({
     number,
@@ -33,13 +35,18 @@ function Bay({
 
 export default function DockingBay({
     planet,
-    ships,
     onClick,
 }: {
     planet: Planet
-    ships: Ship[]
     onClick: (ship: Ship) => void
 }) {
+    const ships = useAtomValue(shipsAtom)
+    const shipsInBay = ships.filter(
+        (ship) =>
+            ship.location.planet === planet.id &&
+            ship.location.position === "docked",
+    )
+
     return (
         <div style={{ userSelect: "none" }}>
             <div>Planet</div>
@@ -51,7 +58,7 @@ export default function DockingBay({
                 {Array(3)
                     .fill(undefined)
                     .map((_, index) => {
-                        const ship = shipInLocation(ships, 1 + index)
+                        const ship = shipInLocation(shipsInBay, 1 + index)
                         return (
                             <Bay
                                 key={`B${index}${ship?.name}`}

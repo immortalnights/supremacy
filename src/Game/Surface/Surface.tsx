@@ -2,8 +2,13 @@ import DockingBay from "../../components/DockingBay"
 import PlanetSurface from "../../components/PlanetSurface"
 import surfaceBackground from "/images/surface_background.png"
 import Navigation from "../../components/Navigation"
+import { useAtomValue } from "jotai"
+import { selectedPlanetAtom } from "../store"
+import { ColonizedPlanet } from "../entities"
 
 export default function Surface() {
+    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+
     return (
         <div>
             <div>
@@ -18,10 +23,7 @@ export default function Surface() {
                         padding: "2px 0px",
                     }}
                 >
-                    <DockingBay
-                        planet={{ id: 1, name: "Homebase!" }}
-                        ships={[]}
-                    />
+                    <DockingBay planet={planet} />
                     <PlanetSurface ships={[]} />
                 </div>
                 <div

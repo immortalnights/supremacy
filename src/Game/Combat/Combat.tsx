@@ -1,19 +1,22 @@
+import { useAtomValue } from "jotai"
 import Button from "../../components/Button"
 import CombatAggression from "../../components/CombatAggression"
 import DockingBay from "../../components/DockingBay"
 import Navigation from "../../components/Navigation"
 import PlatoonGrid from "../../components/PlatoonGrid"
-import { Platoon, Ship } from "../entities"
+import { ColonizedPlanet, Platoon, Ship } from "../entities"
 import combatVictory from "/images/combat_victory.gif"
+import { selectedPlanetAtom } from "../store"
 
 export default function Combat() {
+    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
     const ship: Ship | undefined = undefined
 
     return (
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
-                    <DockingBay planet={{ name: "Starbase!" }} ships={[]} />
+                    <DockingBay planet={planet} />
                     <div>
                         <div>Ship</div>
                         <div>{ship?.name}</div>

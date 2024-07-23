@@ -12,7 +12,9 @@ import unload from "/images/unload.png"
 import decommission from "/images/decommission2.png"
 import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
-import { Ship } from "../entities"
+import { ColonizedPlanet, Ship } from "../entities"
+import { useAtomValue } from "jotai"
+import { selectedPlanetAtom } from "../store"
 
 function CargoItem({
     label,
@@ -127,12 +129,14 @@ function ShipFuel({
 }
 
 export default function Cargo() {
+    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+
     return (
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
                     <div>
-                        <DockingBay planet={{ name: "Homebase!" }} ships={[]} />
+                        <DockingBay planet={planet} />
                     </div>
                     <ShipCargoDetails ship={undefined} />
                 </div>
