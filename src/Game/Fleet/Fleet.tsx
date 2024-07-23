@@ -8,19 +8,24 @@ import Button from "../../components/Button"
 import ShipDetails from "../../components/ShipDetails"
 import ShipHeading from "../../components/ShipHeading"
 import Navigation from "../../components/Navigation"
-import EntityGrid from "../../components/EntityGrid"
+import { useAtomValue } from "jotai"
+import { selectedPlanetAtom } from "../store"
+import { ColonizedPlanet } from "../entities"
+import FleetGrid from "../../components/FleetGrid"
+import { useState } from "react"
 
 export default function Fleet() {
-    const planet = {
-        id: "1",
-        name: "Homebase!",
+    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const [selectedShip, setSelectedShip] = useState<Ship | undefined>()
+
+    const handleShipSelected = (ship: Ship) => {
+        setSelectedShip(ship)
     }
-    const ships = []
 
     return (
         <div>
             <div style={{ display: "flex" }}>
-                <DockingBay planet={planet} ships={ships} />
+                <DockingBay planet={planet} onClick={handleShipSelected} />
                 <div>
                     <div>
                         <Button>
@@ -34,7 +39,7 @@ export default function Fleet() {
                         </Button>
                     </div>
                     <div>
-                        <ShipDetails />
+                        <ShipDetails ship={selectedShip} />
                     </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column" }}>
@@ -54,8 +59,8 @@ export default function Fleet() {
                     items={["combat", "shipyard", "cargo"]}
                     direction="column"
                 />
-                <EntityGrid entities={[]} />
-                <ShipHeading />
+                <FleetGrid onClick={handleShipSelected} />
+                <ShipHeading ship={selectedShip} />
                 <Navigation
                     items={["surface", "overview", "training"]}
                     direction="column"
