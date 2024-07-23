@@ -41,12 +41,27 @@ export interface Ship {
     passengers: number
     passengerLimit: number
     cargoCapacity: number
-    location: {
-        planet?: Planet["id"]
-        position: "landed" | "docked" | "orbit" | "outer-space"
-        // Bay or Planet Surface numeric location
-        index?: number
-    }
+    location:
+        | {
+              planet: Planet["id"]
+              position: "orbit"
+          }
+        | {
+              planet: Planet["id"]
+              position: "landed" | "docked"
+              // Bay or Planet Surface numeric location
+              index?: number
+          }
+        | {
+              planet: undefined
+              position: "outer-space"
+              index: undefined
+              heading: {
+                  from: Planet["id"]
+                  to: Planet["id"]
+                  eta: number
+              }
+          }
     active: boolean
     value: number
 }
