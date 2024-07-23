@@ -19,6 +19,7 @@ import {
     ChangeEvent,
 } from "react"
 import { useRenamePlanet } from "../../commands"
+import PlanetGrid from "../../components/PlanetGrid"
 
 function RenamePlanet({
     onRename,
@@ -100,28 +101,6 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
         </div>
     )
 }
-
-function PlanetGrid() {
-    const { localPlayer } = useAtomValue(sessionAtom)
-    const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
-    const planets = useAtomValue(planetsAtom)
-    const filteredPlanets = planets.filter((planet) => !!planet.name)
-
-    const handleSelectPlanet = (planet: Planet) => {
-        // if (planet.owner === "local") {
-        setSelectedPlanet(planet)
-        // }
-    }
-
-    return (
-        <EntityGrid
-            entities={filteredPlanets}
-            localPlayer={localPlayer}
-            onClick={handleSelectPlanet}
-        />
-    )
-}
-
 export default function Overview() {
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(
         undefined,
