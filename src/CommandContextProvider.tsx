@@ -1,52 +1,58 @@
 import { Getter, Setter, useAtomValue } from "jotai"
 import { useAtomCallback } from "jotai/utils"
-import {
-    ReactNode,
-    createContext,
-    useCallback,
-    useEffect,
-    useMemo,
-} from "react"
+import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
-import { useManager, usePeerConnection } from "webrtc-lobby-lib"
+import { usePeerConnection } from "webrtc-lobby-lib"
 import { Planet, Ship } from "./Game/entities"
 import { clamp } from "./Game/utilities"
 import {
     canAffordShip,
     commissionShip,
     deductShipCost,
+    nextFreeIndex,
 } from "./Game/Shipyard/utilities"
 import { CommandContext } from "./CommandContext"
 
 // FIXME move somewhere better
-const applyRenamePlanet = (planets: Planet[], id: string, newName: string) => {
+const applyRenamePlanet = (
+    player: string,
+    planets: Planet[],
+    id: string,
+    newName: string,
+) => {
     const cpy = [...planets]
 
     const index = cpy.findIndex((p) => p.id === id)
     if (index !== -1) {
-        const originalPlanet = cpy[index]
-        console.log(
-            `Renaming planet '${originalPlanet.name}' (${originalPlanet.id}) to '${newName}'`,
-        )
-        cpy[index] = { ...originalPlanet, name: newName }
+        const planet = cpy[index]
+        if (planet.type !== "lifeless" && planet.owner === player) {
+            console.log(
+                `Renaming planet '${planet.name}' (${planet.id}) to '${newName}'`,
+            )
+            cpy[index] = { ...planet, name: newName }
+        }
     }
 
     return cpy
 }
 
-const applyModifyTax = (planets: Planet[], id: string, newTax: number) => {
+const applyModifyTax = (
+    player: string,
+    planets: Planet[],
+    id: string,
+    newTax: number,
+) => {
     const cpy = [...planets]
     const index = cpy.findIndex((p) => p.id === id)
     if (index !== -1) {
         const planet = cpy[index]
 
-        if (planet.type !== "lifeless") {
-            const modifiedPlanet = { ...planet }
+        if (planet.type !== "lifeless" && planet.owner === player) {
             const tax = clamp(newTax, 0, 100)
             console.log(
-                `Setting planet '${modifiedPlanet.name}' (${modifiedPlanet.id}) tax to '${tax}'`,
+                `Setting planet '${planet.name}' (${planet.id}) tax to '${tax}'`,
             )
-            cpy[index] = { ...modifiedPlanet, tax }
+            cpy[index] = { ...planet, tax }
         }
     }
 
@@ -62,44 +68,58 @@ const purchaseShip = (
 ) => {
     let modifiedPlanets
     let modifiedShips
-    // for now, purchases always get applied to the players capital, regardless of the selected planet
+    // For now, purchases always get applied to the players capital, regardless of the selected planet
     const index = planets.findIndex(
         (p) => p.type !== "lifeless" && p.capital && p.owner === player,
     )
 
     if (index !== -1) {
-        const currentPlanet = planets[index]
+        const capital = planets[index]
         // Count ships in planet docking bay
         const dockedShips = ships.filter(
             (s) =>
-                s.location.planet === currentPlanet.id &&
+                s.location.planet === capital.id &&
                 s.location.position === "docked",
         )
 
-        if (currentPlanet.type === "lifeless") {
+        if (capital.type === "lifeless") {
             console.error("Cannot purchase ships on a lifeless planet")
-            // } else if (!currentPlanet.capital) {
+            // } else if (!planet.capital) {
             //     console.error("Cannot purchase ships from none capital planet")
         } else if (dockedShips.length >= 3) {
-        } else if (!canAffordShip(currentPlanet, type)) {
+            console.error(
+                "Cannot purchase ship, capital has no available docking bays",
+            )
+        } else if (!canAffordShip(capital, type)) {
             console.log("Cannot afford ship")
         } else {
             const ownedShips = ships.filter(
-                (ship) => ship.owner === currentPlanet.owner,
+                (ship) => ship.owner === capital.owner,
             ).length
-            // Ships in docking bay (at capital)
 
             if (ownedShips > 32) {
                 console.error(
-                    `Player ${currentPlanet.owner} cannot own more than 32 ships`,
+                    `Player ${capital.owner} cannot own more than 32 ships`,
                 )
             } else {
+                const availableBayIndex = nextFreeIndex(dockedShips, 3)
+                if (availableBayIndex === -1) {
+                    console.assert(
+                        `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
+                    )
+                }
+
                 modifiedPlanets = [...planets]
 
-                const modifiedPlanet = deductShipCost(currentPlanet, type)
-                modifiedPlanets[index] = { ...modifiedPlanet }
+                const modifiedPlanet = deductShipCost(capital, type)
+                modifiedPlanets[index] = modifiedPlanet
 
-                const newShip = commissionShip(type, name, modifiedPlanet.owner)
+                const newShip = commissionShip(
+                    type,
+                    name,
+                    modifiedPlanet,
+                    availableBayIndex,
+                )
                 modifiedShips = [...ships, newShip]
             }
         }
@@ -110,9 +130,8 @@ const purchaseShip = (
 
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
-    const { player: localPlayer } = useManager()
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { host } = useAtomValue(sessionAtom)
+    const { localPlayer, host } = useAtomValue(sessionAtom)
 
     const exec = useAtomCallback(
         useCallback(
@@ -145,7 +164,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                 } else if (command === "purchase-ship") {
                     // Purchases are (currently) only made on the capital
                     ;[modifiedPlanets, modifiedShips] = purchaseShip(
-                        localPlayer.id,
+                        localPlayer,
                         originalPlanets,
                         originalShips,
                         data.type,
