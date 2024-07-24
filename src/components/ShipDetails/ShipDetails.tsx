@@ -34,6 +34,7 @@ export default function ShipDetails({ ship }: { ship?: Ship }) {
                 <div
                     style={{
                         width: 80,
+                        textAlign: "left",
                     }}
                 >
                     Class

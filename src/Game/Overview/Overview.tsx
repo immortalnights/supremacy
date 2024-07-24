@@ -9,14 +9,20 @@ import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
 import { useAtomValue, useSetAtom } from "jotai"
-import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
-import { Planet } from "../entities"
+import {
+    planetsAtom,
+    selectedPlanetAtom,
+    sessionAtom,
+    shipsAtom,
+} from "../store"
+import { ColonizedPlanet, Planet, ShipPosition } from "../entities"
 import {
     FormEvent,
     KeyboardEvent,
     FocusEvent,
     useState,
     ChangeEvent,
+    useMemo,
 } from "react"
 import { useRenamePlanet } from "../../commands"
 import PlanetGrid from "../../components/PlanetGrid"
@@ -77,7 +83,10 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     // const transfer = useTransferCredits()
 
     const handleStartRenamePlanet = () => {
-        if (selectedPlanet?.owner === localPlayer) {
+        if (
+            selectedPlanet?.type !== "lifeless" &&
+            selectedPlanet?.owner === localPlayer
+        ) {
             onRename(selectedPlanet)
         }
     }
@@ -101,7 +110,68 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
         </div>
     )
 }
+
+function PlanetShipOverview() {
+    const [viewPosition, setViewPosition] = useState<ShipPosition>("orbit")
+    const { localPlayer } = useAtomValue(sessionAtom)
+    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    const ships = useAtomValue(shipsAtom)
+
+    const filteredShips =
+        selectedPlanet?.type !== "lifeless" &&
+        selectedPlanet?.owner === localPlayer
+            ? ships.filter(
+                  (ship) =>
+                      ship.location.planet === selectedPlanet?.id &&
+                      ship.location.position === viewPosition,
+              )
+            : []
+
+    const message = useMemo(() => {
+        let msg
+        switch (viewPosition) {
+            case "orbit": {
+                msg = `Ships in orbit above ${selectedPlanet?.name}`
+                break
+            }
+            case "landed": {
+                msg = `Ships on surface of above ${selectedPlanet?.name}`
+                break
+            }
+            case "docked": {
+                msg = `In docking bays on ${selectedPlanet?.name}`
+                break
+            }
+            default: {
+                break
+            }
+        }
+
+        return msg
+    }, [viewPosition, selectedPlanet])
+
+    return (
+        <>
+            <div style={{ display: "flex", flexDirection: "row", gap: 1 }}>
+                <Button onClick={() => setViewPosition("orbit")}>
+                    <img src={orbitingIcon}></img>
+                </Button>
+                <Button onClick={() => setViewPosition("landed")}>
+                    <img src={landedIcon}></img>
+                </Button>
+                <Button onClick={() => setViewPosition("docked")}>
+                    <img src={dockedIcon}></img>
+                </Button>
+            </div>
+            <div>{message}</div>
+            <ShipLocationGrid ships={filteredShips} onClick={() => {}} />
+        </>
+    )
+}
+
 export default function Overview() {
+    const { localPlayer } = useAtomValue(sessionAtom)
+    const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(
         undefined,
     )
@@ -116,6 +186,12 @@ export default function Overview() {
 
     const handleEndRenamePlanet = () => {
         setRenamingPlanet(undefined)
+    }
+
+    const handleSelectPlanet = (planet: Planet) => {
+        if (planet.type !== "lifeless" && planet.owner === localPlayer) {
+            setSelectedPlanet(planet)
+        }
     }
 
     return (
@@ -138,22 +214,11 @@ export default function Overview() {
                             items={["combat", "fleet", "cargo"]}
                             direction="column"
                         />
-                        <PlanetGrid />
+                        <PlanetGrid onSelectPlanet={handleSelectPlanet} />
                     </div>
                 </div>
                 <div>
-                    <div style={{ display: "flex", flexDirection: "row" }}>
-                        <Button>
-                            <img src={orbitingIcon}></img>
-                        </Button>
-                        <Button>
-                            <img src={landedIcon}></img>
-                        </Button>
-                        <Button>
-                            <img src={dockedIcon}></img>
-                        </Button>
-                    </div>
-                    <ShipLocationGrid ships={[]} />
+                    <PlanetShipOverview />
                 </div>
             </div>
         </div>

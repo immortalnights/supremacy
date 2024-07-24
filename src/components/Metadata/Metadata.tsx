@@ -3,20 +3,41 @@ import { CSSProperties, ComponentProps } from "react"
 export type MetadataAlignment = "left" | "right"
 type TextAlignment = "left" | "right" | "center"
 
+type MetadataValueType = {
+    label: string
+    postfix?: string
+    textAlign?: TextAlignment
+} & (
+    | {
+          value?: undefined
+          format?: unknown
+          defaultValue?: undefined
+      }
+    | {
+          value?: number
+          format?: (val: number) => number
+          defaultValue?: number
+      }
+    | {
+          value?: string
+          format?: (val: string) => string
+          defaultValue?: string
+      }
+)
+
 export function MetadataValue({
     label,
     value,
+    format,
     postfix,
-    defaultValue = "",
+    defaultValue,
     textAlign = "right",
-}: {
-    label: string
-    value?: string | number
-    postfix?: string
-    defaultValue?: string | number
-    textAlign?: TextAlignment
-}) {
-    const displayValue = value ?? defaultValue
+}: MetadataValueType) {
+    const actualValue = value ?? defaultValue
+    const displayValue =
+        format instanceof Function && actualValue
+            ? format(actualValue)
+            : actualValue
 
     return (
         <div
@@ -24,7 +45,7 @@ export function MetadataValue({
             style={{
                 border: "1px solid lightgray",
                 width: textAlign === "center" ? "auto" : 80,
-                height: "1em",
+                height: "1.5em",
                 textAlign,
                 padding: "1px 8px",
                 whiteSpace: "nowrap",

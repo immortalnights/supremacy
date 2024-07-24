@@ -1,4 +1,4 @@
-import { ColonizedPlanet, Planet } from "../../Game/entities"
+import { ColonizedPlanet } from "../../Game/entities"
 import Button from "../Button"
 import Date from "../Date"
 import taxUpIcon from "/images/tax_up.png"
@@ -62,7 +62,7 @@ export default function PlanetDetails() {
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
     const adjustTax = useAdjustTax()
 
-    let populationGrowth
+    let populationGrowth = ""
     if (planet.population) {
         let growthModifier
         if (planet.growth > 0) {
@@ -72,8 +72,10 @@ export default function PlanetDetails() {
         } else {
             growthModifier = ""
         }
-        populationGrowth = `${growthModifier}${planet.growth}`
+        populationGrowth = `${growthModifier} ${Math.abs(planet.growth).toFixed(2)}`
     }
+
+    const planetStrength = 0
 
     return (
         <div
@@ -111,7 +113,8 @@ export default function PlanetDetails() {
                     />
                     <Metadata
                         label="Credits"
-                        value={Math.floor(planet.credits)}
+                        value={planet.credits}
+                        format={Math.floor}
                     />
                 </div>
                 <div
@@ -124,18 +127,26 @@ export default function PlanetDetails() {
                 >
                     <Metadata
                         label="Food"
-                        value={Math.floor(planet.food)}
+                        value={planet.food}
+                        format={Math.floor}
                         postfix=".T"
                     />
                     <Metadata
                         label="Minerals"
                         value={planet.minerals}
+                        format={Math.floor}
                         postfix=".T"
                     />
-                    <Metadata label="Fuels" value={planet.fuels} postfix=".T" />
+                    <Metadata
+                        label="Fuels"
+                        value={planet.fuels}
+                        format={Math.floor}
+                        postfix=".T"
+                    />
                     <Metadata
                         label="Energy"
                         value={planet.energy}
+                        format={Math.floor}
                         postfix=".T"
                     />
                 </div>
@@ -150,24 +161,30 @@ export default function PlanetDetails() {
             >
                 <Metadata
                     label="Population"
-                    value={Math.floor(planet.population)}
+                    value={planet.population}
+                    format={Math.floor}
                 />
                 <Metadata
                     label="Pop. Growth"
                     value={populationGrowth}
                     postfix="%"
                 />
-                <Metadata label="Moral" value={planet.morale} postfix="%" />
+                <Metadata
+                    label="Moral"
+                    value={planet.morale.toFixed(2)}
+                    postfix="%"
+                />
 
                 <TaxRate
-                    value={planet.tax}
+                    value={Math.floor(planet.tax)}
                     onIncrease={() => adjustTax(planet, +1)}
                     onDecrease={() => adjustTax(planet, -1)}
                 />
 
                 <Metadata
                     label="Military Strength"
-                    value={planet.strength}
+                    value={planetStrength}
+                    format={Math.floor}
                     style={{ marginTop: 20 }}
                 />
             </div>

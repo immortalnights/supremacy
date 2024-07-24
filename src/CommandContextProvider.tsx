@@ -148,6 +148,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                 if (command === "rename-planet") {
                     // Apply the change locally
                     modifiedPlanets = applyRenamePlanet(
+                        localPlayer,
                         originalPlanets,
                         data.planet,
                         data.newName,
@@ -156,6 +157,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "set-planet-tax") {
                     modifiedPlanets = applyModifyTax(
+                        localPlayer,
                         originalPlanets,
                         data.planet,
                         data.newTax,

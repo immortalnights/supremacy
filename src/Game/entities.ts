@@ -29,6 +29,8 @@ export interface ColonizedPlanet extends BasePlanet, PlanetResources {
 
 export type Planet = LifelessPlanet | ColonizedPlanet
 
+export type ShipPosition = "orbit" | "landed" | "docked" | "outer-space"
+
 export interface Ship {
     id: string
     name: string
