@@ -21,6 +21,7 @@ export const selectedPlanetAtom = atom<
 
         let planet
         if (planets instanceof Promise) {
+            console.debug("waiting for planets!")
             planets = await planets
         }
 

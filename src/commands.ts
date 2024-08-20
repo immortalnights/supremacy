@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import { CommandContext } from "./CommandContext"
-import { ColonizedPlanet, Planet } from "./Game/entities"
+import { ColonizedPlanet, Planet, ShipBlueprint } from "./Game/entities"
 import { clamp } from "./Game/utilities"
 
 export function useRenamePlanet() {
@@ -23,7 +23,11 @@ export function useAdjustTax() {
 export function usePurchaseShip() {
     const { exec } = useContext(CommandContext)
 
-    return (shipType: string, planet: ColonizedPlanet, name: string) => {
-        exec("purchase-ship", { planet: planet.id, type: shipType, name })
+    return (
+        blueprint: ShipBlueprint,
+        planet: ColonizedPlanet,
+        name: string,
+    ) => {
+        exec("purchase-ship", { planet: planet.id, blueprint, name })
     }
 }

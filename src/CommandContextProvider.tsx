@@ -3,7 +3,7 @@ import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { Planet, Ship } from "./Game/entities"
+import { Planet, Ship, ShipBlueprint } from "./Game/entities"
 import { clamp } from "./Game/utilities"
 import {
     canAffordShip,
@@ -63,7 +63,7 @@ const purchaseShip = (
     player: string,
     planets: Planet[],
     ships: Ship[],
-    type: string,
+    blueprint: ShipBlueprint,
     name: string,
 ) => {
     let modifiedPlanets
@@ -90,16 +90,28 @@ const purchaseShip = (
             console.error(
                 "Cannot purchase ship, capital has no available docking bays",
             )
-        } else if (!canAffordShip(capital, type)) {
+        } else if (!canAffordShip(capital, blueprint.cost)) {
             console.log("Cannot afford ship")
         } else {
-            const ownedShips = ships.filter(
+            const totalOwnedShips = ships.filter(
                 (ship) => ship.owner === capital.owner,
             ).length
+            const ownedShips = ships.filter(
+                (ship) =>
+                    ship.class === blueprint.class &&
+                    ship.owner === capital.owner,
+            ).length
 
-            if (ownedShips > 32) {
+            if (totalOwnedShips > 32) {
                 console.error(
                     `Player ${capital.owner} cannot own more than 32 ships`,
+                )
+            } else if (
+                blueprint.class === "Atmosphere Processor" &&
+                ownedShips === 1
+            ) {
+                console.error(
+                    `Player ${capital.owner} cannot own more than 1 Atmosphere Processor`,
                 )
             } else {
                 const availableBayIndex = nextFreeIndex(dockedShips, 3)
@@ -111,11 +123,11 @@ const purchaseShip = (
 
                 modifiedPlanets = [...planets]
 
-                const modifiedPlanet = deductShipCost(capital, type)
+                const modifiedPlanet = deductShipCost(capital, blueprint.cost)
                 modifiedPlanets[index] = modifiedPlanet
 
                 const newShip = commissionShip(
-                    type,
+                    blueprint,
                     name,
                     modifiedPlanet,
                     availableBayIndex,
@@ -169,7 +181,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         localPlayer,
                         originalPlanets,
                         originalShips,
-                        data.type,
+                        data.blueprint,
                         data.name,
                     )
                     set(planetsAtom, modifiedPlanets)

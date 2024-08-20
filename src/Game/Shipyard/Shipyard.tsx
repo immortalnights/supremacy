@@ -1,52 +1,56 @@
-import { FormEvent, useState } from "react"
+import { FormEvent, useMemo, useState } from "react"
 import Button from "../../components/Button"
-import { ColonizedPlanet, Planet, Ship } from "../entities"
+import { ColonizedPlanet, ShipBlueprint, ShipClass } from "../entities"
 import battleship from "/images/battleship.gif"
 import solar from "/images/solar.gif"
 import catalog from "../../data/ships.json"
-import { selectedPlanetAtom } from "../store"
-import { useAtomValue } from "jotai"
+import { selectedPlanetAtom, sessionAtom, shipsAtom } from "../store"
+import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "../../commands"
 
-const shipTypes: string[] = Object.keys(catalog)
-
-const images: { [key: (typeof shipTypes)[number]]: string } = {
-    battlecruiser: battleship,
-    generator: solar,
-    atmos: battleship,
-    carrier: battleship,
-    miningstation: battleship,
-    horticultural: battleship,
+const images: { [key in ShipClass]: string } = {
+    "B-29 Battle Cruiser": battleship,
+    "Solar-Satellite Generator": solar,
+    "Atmosphere Processor": battleship,
+    "Cargo Store / Carrier": battleship,
+    "Core Mining Station": battleship,
+    "Horticultural Station": battleship,
 }
 
 function PurchaseShip({
-    type,
+    ship,
     planet,
     owned,
     onPurchased,
     onCancel,
 }: {
-    type: string
+    ship: ShipBlueprint
     planet: ColonizedPlanet
     owned: number
     onPurchased: () => void
     onCancel: () => void
 }) {
     const purchase = usePurchaseShip()
-    const [name, setName] = useState(`${type}${owned}`)
+    const [name] = useState(`${ship.shortName}${owned}`)
 
     const handleChange = () => {}
 
     const handleBuy = (ev: FormEvent) => {
         ev.preventDefault()
-        purchase(type, planet, name)
+        // FIXME send whole ship data?
+        purchase(ship, planet, name)
         onPurchased()
     }
 
     return (
         <div>
             <form onSubmit={handleBuy}>
-                <input type="text" value={name} onChange={handleChange} />
+                <input
+                    type="text"
+                    value={name}
+                    onChange={handleChange}
+                    autoFocus
+                />
                 <Button type="submit">Buy</Button>
                 <Button type="button" onClick={onCancel}>
                     Cancel
@@ -57,17 +61,29 @@ function PurchaseShip({
 }
 
 export default function Shipyard() {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
     const [index, setIndex] = useState(0)
-    const ship = catalog[shipTypes[index]]
+    const ship = catalog[index]
     const [purchasing, setPurchasing] = useState(false)
-    const owned = 0
+    const ownedAtom = useMemo(
+        () =>
+            atom(
+                (get) =>
+                    get(shipsAtom).filter(
+                        (s) =>
+                            s.owner === localPlayer && s.class === ship.class,
+                    ).length,
+            ),
+        [localPlayer, ship.class],
+    )
+    const owned = useAtomValue(ownedAtom)
 
     const handlePrevious = () => {
-        setIndex((index - 1 + shipTypes.length) % shipTypes.length)
+        setIndex((index - 1 + catalog.length) % catalog.length)
     }
     const handleNext = () => {
-        setIndex((index + 1) % shipTypes.length)
+        setIndex((index + 1) % catalog.length)
     }
     const handleBuy = () => {
         setPurchasing(true)
@@ -81,7 +97,7 @@ export default function Shipyard() {
 
     return (
         <div>
-            <img src={images[shipTypes[index]]} />
+            <img src={images[ship.class]} />
             <div>
                 <div style={{ display: "flex" }}>
                     <Button onClick={handlePrevious} style={{ padding: 5 }}>
@@ -91,14 +107,19 @@ export default function Shipyard() {
                         Buy
                     </Button>
                     <div style={{ flexGrow: 1 }}>
-                        {purchasing && (
+                        {purchasing ? (
                             <PurchaseShip
-                                type={shipTypes[index]}
+                                ship={ship}
                                 planet={planet}
                                 owned={owned}
                                 onPurchased={handlePurchased}
                                 onCancel={handleCancel}
                             />
+                        ) : (
+                            <>
+                                <div>{ship.description}</div>
+                                <div>Type: {ship.class}</div>
+                            </>
                         )}
                     </div>
                     <Button onClick={handleNext} style={{ padding: 5 }}>
@@ -112,9 +133,9 @@ export default function Shipyard() {
                         <div>
                             <strong>Starbase</strong>
                         </div>
-                        <div>{planet.credits}: Credits</div>
-                        <div>{planet.minerals}: Minerals</div>
-                        <div>{planet.energy}: Energy</div>
+                        <div>{Math.floor(planet.credits)}: Credits</div>
+                        <div>{Math.floor(planet.minerals)}: Minerals</div>
+                        <div>{Math.floor(planet.energy)}: Energy</div>
                     </div>
                     <div>
                         <div>
@@ -129,16 +150,23 @@ export default function Shipyard() {
                             <strong>Capacity</strong>
                         </div>
                         <div>{ship.requiredCrew}: Crew</div>
-                        <div>{ship.cargoCapacity}: Payload</div>
-                        <div>{ship.fuelCapacity}: Fuel</div>
+                        <div>{ship.capacity.cargo}: Payload</div>
+                        <div>
+                            {ship.capacity.fuel > 0
+                                ? ship.capacity.fuel
+                                : "Nuclear"}
+                            : Fuel
+                        </div>
                     </div>
                     <div>
                         <div>
                             <strong>Data</strong>
                         </div>
                         <div>{owned}: Owned</div>
-                        <div>{ship.range}: Range</div>
-                        <div>{ship.civilianCapacity}: Seats</div>
+                        <div>
+                            {ship.range > 0 ? ship.range : "Infinite"}: Range
+                        </div>
+                        <div>{ship.capacity.civilians}: Seats</div>
                     </div>
                 </div>
             </div>

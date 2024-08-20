@@ -13,7 +13,7 @@ export interface PlanetResources {
     credits: number
     food: number
     minerals: number
-    fuels: number
+    fuel: number
     energy: number
     population: number
 }
@@ -31,11 +31,33 @@ export type Planet = LifelessPlanet | ColonizedPlanet
 
 export type ShipPosition = "orbit" | "landed" | "docked" | "outer-space"
 
+export type ShipClass =
+    | "B-29 Battle Cruiser"
+    | "Solar-Satellite Generator"
+    | "Atmosphere Processor"
+    | "Cargo Store / Carrier"
+    | "Core Mining Station"
+    | "Horticultural Station"
+
+export interface ShipBlueprint {
+    class: ShipClass
+    description: string
+    shortName: string
+    requiredCrew: number
+    capacity: object
+    cost: {
+        credits: 975
+        energy: 92
+        minerals: 7
+    }
+}
+
 export interface Ship {
     id: string
     name: string
+    class: ShipClass
+    description: string
     owner: string
-    class: "atmos" | "battle" | "cargo" | "farming" | "mining" | "solar"
     requiredCrew: number
     crew: number
     maxFuel: number

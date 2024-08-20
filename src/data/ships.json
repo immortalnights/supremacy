@@ -1,13 +1,13 @@
-{
-    "battlecruiser": {
-        "type": "B-29 Battle Cruiser",
+[
+    {
+        "class": "B-29 Battle Cruiser",
         "description": "Carries four fully equipped platoons into battle.",
         "shortName": "Battle",
         "requiredCrew": 21,
         "capacity": {
             "civilians": 4500,
             "cargo": 600,
-            "fuels": 1000,
+            "fuel": 1000,
             "platoons": 4
         },
         "speed": 1,
@@ -20,15 +20,15 @@
         "value": 3850,
         "harvester": null
     },
-    "generator": {
-        "type": "Solar-Satellite Generator",
+    {
+        "class": "Solar-Satellite Generator",
         "description": "Transmits solar energy to the planet from orbit.",
         "shortName": "Solar",
         "requiredCrew": 0,
         "capacity": {
             "civilians": 0,
             "cargo": 0,
-            "fuels": 0,
+            "fuel": 0,
             "platoons": 0
         },
         "speed": 1,
@@ -44,20 +44,20 @@
             "resources": {
                 "food": 0,
                 "minerals": 0,
-                "fuels": 0,
+                "fuel": 0,
                 "energy": 6
             }
         }
     },
-    "atmos": {
-        "type": "Atmosphere Processor",
+    {
+        "class": "Atmosphere Processor",
         "description": "Generates new living plants from lifeless ones.",
         "shortName": "Atmos",
         "requiredCrew": 0,
         "capacity": {
             "civilians": 0,
             "cargo": 0,
-            "fuels": 0,
+            "fuel": 0,
             "platoons": 0
         },
         "speed": 1,
@@ -71,15 +71,15 @@
         "limit": 1,
         "harvester": null
     },
-    "carrier": {
-        "type": "Cargo Store / Carrier",
+    {
+        "class": "Cargo Store / Carrier",
         "description": "Deep space heavy duty cargo / personnel carrier.",
         "shortName": "Cargo",
         "requiredCrew": 11,
         "capacity": {
             "civilians": 1850,
             "cargo": 2250,
-            "fuels": 1250,
+            "fuel": 1250,
             "platoons": 0
         },
         "speed": 1,
@@ -92,15 +92,15 @@
         "value": 1000,
         "harvester": null
     },
-    "miningstation": {
-        "type": "Core Mining Station",
-        "description": "Generates fuels and minerals when running on surface.",
+    {
+        "class": "Core Mining Station",
+        "description": "Generates fuel and minerals when running on surface.",
         "shortName": "Mining",
         "requiredCrew": 294,
         "capacity": {
             "civilians": 0,
             "cargo": 950,
-            "fuels": 1400,
+            "fuel": 1400,
             "platoons": 0
         },
         "speed": 1,
@@ -116,20 +116,20 @@
             "resources": {
                 "food": 0,
                 "minerals": 2,
-                "fuels": 7,
+                "fuel": 7,
                 "energy": -1
             }
         }
     },
-    "horticultural": {
-        "type": "Horticultural Station",
+    {
+        "class": "Horticultural Station",
         "description": "Generates food supplies when running on surface.",
         "shortName": "Farming",
         "requiredCrew": 175,
         "capacity": {
             "civilians": 0,
             "cargo": 950,
-            "fuels": 750,
+            "fuel": 750,
             "platoons": 0
         },
         "speed": 1,
@@ -145,9 +145,9 @@
             "resources": {
                 "food": 12,
                 "minerals": 0,
-                "fuels": 0,
+                "fuel": 0,
                 "energy": -1
             }
         }
     }
-}
+]

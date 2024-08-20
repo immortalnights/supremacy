@@ -30,7 +30,7 @@ const initializePlanetResources = (
         credits: random(50000, 60000),
         food: random(3000, 5000),
         minerals: random(2000, 5000),
-        fuels: random(2000, 5000),
+        fuel: random(2000, 5000),
         energy: random(2000, 5000),
         population: random(1000, 2000),
     }

@@ -26,7 +26,7 @@ export const OwnedPlanet: Story = {
             credits: 1234,
             food: 25,
             minerals: 25,
-            fuels: 25,
+            fuel: 25,
             energy: 25,
             population: 120,
             growth: 5,

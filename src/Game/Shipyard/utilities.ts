@@ -1,16 +1,16 @@
-import { ColonizedPlanet, Ship } from "../entities"
+import { ColonizedPlanet, Ship, ShipBlueprint } from "../entities"
 import { shipInLocation } from "../utilities"
 
 export const canAffordShip = (
     planet: ColonizedPlanet,
-    type: string,
+    cost: ShipBlueprint["cost"],
 ): boolean => {
     return true
 }
 
 export const deductShipCost = (
     planet: ColonizedPlanet,
-    type: string,
+    cost: ShipBlueprint["cost"],
 ): ColonizedPlanet => {
     return { ...planet }
 }
@@ -34,7 +34,7 @@ export const nextFreeIndex = (ships: Ship[], maxIndex: number): number => {
 }
 
 export const commissionShip = (
-    type: string,
+    ship: ShipBlueprint,
     name: string,
     planet: ColonizedPlanet,
     index: number,
@@ -43,7 +43,7 @@ export const commissionShip = (
         id: crypto.randomUUID(),
         name,
         owner: planet.owner,
-        class: type,
+        class: ship.class,
         // requiredCrew: number
         crew: 0,
         // maxFuel: number
