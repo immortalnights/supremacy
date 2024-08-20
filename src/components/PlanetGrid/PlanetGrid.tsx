@@ -17,6 +17,7 @@ export default function PlanetGrid({
     return (
         <EntityGrid
             entities={filteredPlanets}
+            fixedPositions={true}
             localPlayer={localPlayer}
             onClick={onSelectPlanet}
         />

@@ -64,13 +64,11 @@ function EntityCell<T extends Entity>({
 const gridEntity = (entities: Entity[], index: number) => {
     let entity
 
-    if (entities.length > 0 && entities[0].gridIndex) {
+    if (entities.length > 0) {
         const rowIndex = Math.floor(index / 4)
         const colIndex = index % 4
         const entityIndex = rowIndex + colIndex * 8
         entity = entities.find((item) => item.gridIndex === entityIndex)
-    } else if (entities.length > index) {
-        entity = entities[index]
     }
 
     return entity
@@ -80,12 +78,14 @@ function EntityRow<T extends Entity>({
     row,
     columns,
     entities,
+    fixedPositions,
     localPlayer,
     onClick,
 }: {
     row: number
     columns: number
     entities: T[]
+    fixedPositions: boolean
     localPlayer?: string
     onClick: (planet: T) => void
 }) {
@@ -95,7 +95,9 @@ function EntityRow<T extends Entity>({
                 .fill(undefined)
                 .map((_, col) => {
                     const index = col + row * 4
-                    const entity = gridEntity(entities, index)
+                    const entity = fixedPositions
+                        ? gridEntity(entities, index)
+                        : entities[index]
 
                     return entity ? (
                         <EntityCell
@@ -114,10 +116,12 @@ function EntityRow<T extends Entity>({
 
 export default function EntityGrid<T extends Entity>({
     entities,
+    fixedPositions = false,
     localPlayer,
     onClick,
 }: {
     entities: T[]
+    fixedPositions?: boolean
     localPlayer?: string
     onClick: (planet: T) => void
 }) {
@@ -135,6 +139,7 @@ export default function EntityGrid<T extends Entity>({
                             row={row}
                             columns={columns}
                             entities={entities}
+                            fixedPositions={fixedPositions}
                             localPlayer={localPlayer}
                             onClick={onClick}
                         />
