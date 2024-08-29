@@ -42,6 +42,7 @@ export interface SaveGameData extends GameData {
     session: GameSession
     speed: string
 }
+
 export interface LastSaveData {
     id: string
     multiplayer: boolean

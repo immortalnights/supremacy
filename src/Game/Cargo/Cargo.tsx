@@ -12,70 +12,102 @@ import unload from "/images/unload.png"
 import decommission from "/images/decommission2.png"
 import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
-import { ColonizedPlanet, Ship } from "../entities"
+import { CargoType, ColonizedPlanet, Planet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
 import { selectedPlanetAtom } from "../store"
+import { useState } from "react"
+import {
+    useCrewShip,
+    useDecommission,
+    useLoadCargo,
+    useLoadFuel,
+    useLoadPassengers,
+    useUnloadShip,
+} from "../../commands"
 
 function CargoItem({
+    cargo,
     label,
-    inStore,
-    inShip,
-    onLoad,
-    onUnload,
+    planet,
+    ship,
 }: {
+    cargo: CargoType
     label: string
-    inStore: number
-    inShip: number | undefined
-    onLoad: () => void
-    onUnload: () => void
+    planet: ColonizedPlanet
+    ship?: Ship
 }) {
+    const [load, unload] = useLoadCargo()
+
+    const handleLoadCargo = () => {
+        if (ship) {
+            load(ship, cargo, 1)
+        }
+    }
+
+    const handleUnloadCargo = () => {
+        if (ship) {
+            unload(ship, cargo, 1)
+        }
+    }
+
     return (
         <div>
             <div style={{ display: "flex", justifyContent: "center" }}>
-                <Button onClick={onUnload}>
+                <Button onClick={handleLoadCargo}>
                     <img src={unloadCargo} />
                 </Button>
-                <Button onClick={onLoad}>
+                <Button onClick={handleUnloadCargo}>
                     <img src={loadCargo} />
                 </Button>
             </div>
             <div style={{ textAlign: "center" }}>{label}</div>
             <div>
-                <MetadataValue value={inStore} />
-                <MetadataValue value={inShip ?? ""} />
+                <MetadataValue label="" value={planet[cargo]} />
+                <MetadataValue label="" value={ship?.cargo[cargo] ?? ""} />
             </div>
         </div>
     )
 }
 
-function ShipCargoDetails({ ship }: { ship?: Ship }) {
+function ShipCargoDetails({
+    ship,
+    planet: { population },
+}: {
+    ship?: Ship
+    planet: ColonizedPlanet
+}) {
     const totalCargo = ship ? 0 : undefined
     return (
         <div>
             <Metadata label="Ship" value={ship?.name ?? ""} />
-            <Metadata label="Civilians" value={ship?.passengers ?? ""} />
-            <Metadata label="Seats" value={ship?.passengerLimit ?? ""} />
+            <Metadata label="Civilians" value={population ?? ""} />
+            <Metadata label="Seats" value={ship?.capacity.civilians ?? ""} />
             <Metadata label="To Crew" value={ship?.requiredCrew ?? ""} />
-            <Metadata label="Capacity" value={ship?.cargoCapacity ?? ""} />
-            <Metadata label="Max Fuel" value={ship?.maxFuel ?? ""} />
+            <Metadata label="Capacity" value={ship?.capacity.cargo ?? ""} />
+            <Metadata label="Max Fuel" value={ship?.capacity.fuel ?? ""} />
             <Metadata label="Payload" value={totalCargo ?? ""} />
             <Metadata label="Value" value={ship?.value ?? ""} />
         </div>
     )
 }
 
-function ShipPassengers({
-    ship,
-    onLoad,
-    onUnload,
-}: {
-    ship?: Ship
-    onLoad: () => void
-    onUnload: () => void
-}) {
+function ShipPassengers({ ship }: { ship?: Ship }) {
+    const [load, unload] = useLoadPassengers()
+
+    const handleLoadPassengers = () => {
+        if (ship) {
+            load(ship, 1)
+        }
+    }
+    const handleUnloadPassengers = () => {
+        if (ship) {
+            unload(ship, 1)
+        }
+    }
+
     return (
         <div>
-            <MetadataValue label="Passengers" value={ship?.passengers ?? ""} />
+            <MetadataValue label="Passengers" value={ship?.passengers ?? 0} />
             <div style={{ display: "flex" }}>
                 <div
                     style={{
@@ -83,10 +115,10 @@ function ShipPassengers({
                         flexDirection: "column",
                     }}
                 >
-                    <Button onClick={onLoad}>
+                    <Button onClick={handleLoadPassengers}>
                         <img src={yellowUp} />
                     </Button>
-                    <Button onClick={onUnload}>
+                    <Button onClick={handleUnloadPassengers}>
                         <img src={yellowDown} />
                     </Button>
                 </div>
@@ -96,18 +128,23 @@ function ShipPassengers({
     )
 }
 
-function ShipFuel({
-    ship,
-    onLoad,
-    onUnload,
-}: {
-    ship?: Ship
-    onLoad: () => void
-    onUnload: () => void
-}) {
+function ShipFuel({ ship }: { ship?: Ship }) {
+    const [load, unload] = useLoadFuel()
+
+    const handleLoadFuel = () => {
+        if (ship) {
+            load(ship, 1)
+        }
+    }
+    const handleUnloadFuel = () => {
+        if (ship) {
+            unload(ship, 1)
+        }
+    }
+
     return (
         <div>
-            <MetadataValue label="Fuel" value={ship?.passengers ?? ""} />
+            <MetadataValue label="Fuel" value={ship?.fuel ?? 0} />
             <div style={{ display: "flex" }}>
                 <div
                     style={{
@@ -115,10 +152,10 @@ function ShipFuel({
                         flexDirection: "column",
                     }}
                 >
-                    <Button onClick={onLoad}>
+                    <Button onClick={handleLoadFuel}>
                         <img src={yellowUp} />
                     </Button>
-                    <Button onClick={onUnload}>
+                    <Button onClick={handleUnloadFuel}>
                         <img src={yellowDown} />
                     </Button>
                 </div>
@@ -130,37 +167,75 @@ function ShipFuel({
 
 export default function Cargo() {
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const [selectedShip, setSelectedShip] = useState<Ship | undefined>(
+        undefined,
+    )
+    const crewShip = useCrewShip()
+    const unloadShip = useUnloadShip()
+    const decommissionShip = useDecommission()
+
+    const handleSelectShip = (ship: Ship) => {
+        setSelectedShip(ship)
+    }
+
+    const handleCrewShip = () => {
+        if (selectedShip) {
+            crewShip(selectedShip)
+        }
+    }
+
+    const handleUnloadShip = () => {
+        if (selectedShip) {
+            unloadShip(selectedShip)
+        }
+    }
+
+    const handleDecommissionShip = () => {
+        if (selectedShip) {
+            decommissionShip(selectedShip)
+        }
+    }
 
     return (
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
                     <div>
-                        <DockingBay planet={planet} />
+                        <DockingBay
+                            planet={planet}
+                            onClick={handleSelectShip}
+                        />
                     </div>
-                    <ShipCargoDetails ship={undefined} />
+                    <ShipCargoDetails planet={planet} ship={selectedShip} />
                 </div>
                 <div>{/* messages */}</div>
                 <div style={{ display: "flex" }}>
                     <div>
                         <div style={{ display: "flex" }}>
-                            <ShipIcon ship={undefined} />
-                            <ShipPassengers ship={undefined} />
-                            <ShipFuel ship={undefined} />
+                            <ShipIcon ship={selectedShip} />
+                            <ShipPassengers ship={selectedShip} />
+                            <ShipFuel ship={selectedShip} />
                         </div>
                         <div>
-                            <Metadata label="Class" alignment="right" />
+                            <Metadata
+                                label="Class"
+                                alignment="right"
+                                value={selectedShip?.class ?? ""}
+                            />
                         </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <Button>
-                            <img src={crew} />
+                            <img src={crew} onClick={handleCrewShip} />
                         </Button>
                         <Button>
-                            <img src={unload} />
+                            <img src={unload} onClick={handleUnloadShip} />
                         </Button>
                         <Button>
-                            <img src={decommission} />
+                            <img
+                                src={decommission}
+                                onClick={handleDecommissionShip}
+                            />
                         </Button>
                     </div>
                 </div>
@@ -177,10 +252,30 @@ export default function Cargo() {
                 </div>
             </div>
             <div style={{ display: "flex" }}>
-                <CargoItem label="Food" inStore={0} />
-                <CargoItem label="Minerals" inStore={0} />
-                <CargoItem label="Fuels" inStore={0} />
-                <CargoItem label="Energy" inStore={0} />
+                <CargoItem
+                    cargo="food"
+                    label="Food"
+                    planet={planet}
+                    ship={selectedShip}
+                />
+                <CargoItem
+                    cargo="minerals"
+                    label="Minerals"
+                    planet={planet}
+                    ship={selectedShip}
+                />
+                <CargoItem
+                    cargo="fuels"
+                    label="Fuels"
+                    planet={planet}
+                    ship={selectedShip}
+                />
+                <CargoItem
+                    cargo="energy"
+                    label="Energy"
+                    planet={planet}
+                    ship={selectedShip}
+                />
             </div>
         </div>
     )

@@ -9,19 +9,18 @@ export interface LifelessPlanet extends BasePlanet {
     type: "lifeless"
 }
 
-export interface PlanetResources {
-    credits: number
-    food: number
-    minerals: number
-    fuel: number
-    energy: number
-    population: number
+export type CargoType = "food" | "minerals" | "fuels" | "energy"
+
+export type PlanetResources = {
+    [key in CargoType]: number
 }
 
 export interface ColonizedPlanet extends BasePlanet, PlanetResources {
     type: "metropolis" | "volcanic" | "dessert" | "tropical"
     owner: string
     capital: boolean
+    credits: number
+    population: number
     morale: number
     growth: number
     tax: number
@@ -44,7 +43,12 @@ export interface ShipBlueprint {
     description: string
     shortName: string
     requiredCrew: number
-    capacity: object
+    capacity: {
+        civilians: number
+        cargo: number
+        fuel: number
+        platoons: number
+    }
     cost: {
         credits: 975
         energy: 92
@@ -60,11 +64,17 @@ export interface Ship {
     owner: string
     requiredCrew: number
     crew: number
-    maxFuel: number
     fuel: number
     passengers: number
-    passengerLimit: number
-    cargoCapacity: number
+    capacity: {
+        civilians: number
+        cargo: number
+        fuel: number
+        platoons: number
+    }
+    cargo: {
+        [key in CargoType]: number
+    }
     location:
         | {
               planet: Planet["id"]

@@ -10,7 +10,7 @@ import ShipHeading from "../../components/ShipHeading"
 import Navigation from "../../components/Navigation"
 import { useAtomValue } from "jotai"
 import { selectedPlanetAtom } from "../store"
-import { ColonizedPlanet } from "../entities"
+import { ColonizedPlanet, Ship } from "../entities"
 import FleetGrid from "../../components/FleetGrid"
 import { useState } from "react"
 

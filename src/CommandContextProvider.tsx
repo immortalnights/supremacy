@@ -186,8 +186,17 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
+                } else if (command === "crew-ship") {
+                } else if (command === "unload-ship") {
+                } else if (command === "decommission-ship") {
+                } else if (command === "load-passengers") {
+                } else if (command === "unload-passengers") {
+                } else if (command === "load-fuel") {
+                } else if (command === "unload-fuel") {
+                } else if (command === "load-cargo") {
+                } else if (command === "unload-cargo") {
                 } else {
-                    console.error("Unknown command")
+                    console.error(`Unknown command '${command}'`)
                 }
 
                 if (host) {

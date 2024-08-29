@@ -42,21 +42,26 @@ export const commissionShip = (
     return {
         id: crypto.randomUUID(),
         name,
+        description: ship.description,
         owner: planet.owner,
         class: ship.class,
-        // requiredCrew: number
+        requiredCrew: ship.requiredCrew,
         crew: 0,
-        // maxFuel: number
         fuel: 0,
         passengers: 0,
-        // passengerLimit: number
-        // cargoCapacity: number
+        capacity: { ...ship.capacity },
         location: {
             planet: planet.id,
             position: "docked",
             index,
         },
+        cargo: {
+            food: 0,
+            minerals: 0,
+            fuels: 0,
+            energy: 0,
+        },
         active: false,
-        // value: number
+        value: ship.cost.credits,
     }
 }
