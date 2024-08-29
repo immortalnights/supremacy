@@ -139,7 +139,7 @@ export default function PlanetDetails() {
                     />
                     <Metadata
                         label="Fuels"
-                        value={planet.fuel}
+                        value={planet.fuels}
                         format={Math.floor}
                         postfix=".T"
                     />

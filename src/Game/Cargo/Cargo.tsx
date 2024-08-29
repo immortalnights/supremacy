@@ -14,7 +14,7 @@ import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
 import { CargoType, ColonizedPlanet, Planet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
-import { selectedPlanetAtom } from "../store"
+import { selectedPlanetAtom, shipsAtom } from "../store"
 import { useState } from "react"
 import {
     useCrewShip,
@@ -46,7 +46,7 @@ function CargoItem({
 
     const handleUnloadCargo = () => {
         if (ship) {
-            unload(ship, cargo, 1)
+            unload(ship, cargo, -1)
         }
     }
 
@@ -84,7 +84,7 @@ function ShipCargoDetails({
             <Metadata label="Seats" value={ship?.capacity.civilians ?? ""} />
             <Metadata label="To Crew" value={ship?.requiredCrew ?? ""} />
             <Metadata label="Capacity" value={ship?.capacity.cargo ?? ""} />
-            <Metadata label="Max Fuel" value={ship?.capacity.fuel ?? ""} />
+            <Metadata label="Max Fuel" value={ship?.capacity.fuels ?? ""} />
             <Metadata label="Payload" value={totalCargo ?? ""} />
             <Metadata label="Value" value={ship?.value ?? ""} />
         </div>
@@ -101,7 +101,7 @@ function ShipPassengers({ ship }: { ship?: Ship }) {
     }
     const handleUnloadPassengers = () => {
         if (ship) {
-            unload(ship, 1)
+            unload(ship, -1)
         }
     }
 
@@ -138,13 +138,13 @@ function ShipFuel({ ship }: { ship?: Ship }) {
     }
     const handleUnloadFuel = () => {
         if (ship) {
-            unload(ship, 1)
+            unload(ship, -1)
         }
     }
 
     return (
         <div>
-            <MetadataValue label="Fuel" value={ship?.fuel ?? 0} />
+            <MetadataValue label="Fuel" value={ship?.fuels ?? 0} />
             <div style={{ display: "flex" }}>
                 <div
                     style={{
@@ -167,15 +167,18 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 
 export default function Cargo() {
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
-    const [selectedShip, setSelectedShip] = useState<Ship | undefined>(
+    const [selectedShipId, setSelectedShipId] = useState<string | undefined>(
         undefined,
+    )
+    const selectedShip = useAtomValue(shipsAtom).find(
+        (s) => s.id === selectedShipId,
     )
     const crewShip = useCrewShip()
     const unloadShip = useUnloadShip()
     const decommissionShip = useDecommission()
 
     const handleSelectShip = (ship: Ship) => {
-        setSelectedShip(ship)
+        setSelectedShipId(ship.id)
     }
 
     const handleCrewShip = () => {

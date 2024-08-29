@@ -20,7 +20,7 @@ export default function ShipDetails({ ship }: { ship?: Ship }) {
                     style={{ display: "flex", flexDirection: "column", gap: 6 }}
                 >
                     <Metadata label="Crew" value={ship?.crew} />
-                    <Metadata label="Fuel" value={ship?.fuel} />
+                    <Metadata label="Fuel" value={ship?.fuels} />
                 </div>
             </div>
 

@@ -47,7 +47,7 @@ export const commissionShip = (
         class: ship.class,
         requiredCrew: ship.requiredCrew,
         crew: 0,
-        fuel: 0,
+        fuels: 0,
         passengers: 0,
         capacity: { ...ship.capacity },
         location: {

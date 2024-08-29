@@ -6,9 +6,9 @@ export default function ShipHeading({ ship }: { ship?: Ship }) {
     let from = undefined
     let to = undefined
     let eta = undefined
-    let fuel = undefined
+    let fuels = undefined
     if (ship && ship.location.position === "outer-space") {
-        ;({ name, fuel } = ship)
+        ;({ name, fuels } = ship)
         ;({ from, to, eta } = ship.location.heading)
     }
 
@@ -20,7 +20,7 @@ export default function ShipHeading({ ship }: { ship?: Ship }) {
                 <Metadata label="From" value={from} />
                 <Metadata label="To" value={to} />
                 <Metadata label="ETA" value={eta} />
-                <Metadata label="Fuel" value={fuel} />
+                <Metadata label="Fuel" value={fuels} />
             </div>
         </div>
     )

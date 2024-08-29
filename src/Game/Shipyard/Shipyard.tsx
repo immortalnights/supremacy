@@ -152,8 +152,8 @@ export default function Shipyard() {
                         <div>{ship.requiredCrew}: Crew</div>
                         <div>{ship.capacity.cargo}: Payload</div>
                         <div>
-                            {ship.capacity.fuel > 0
-                                ? ship.capacity.fuel
+                            {ship.capacity.fuels > 0
+                                ? ship.capacity.fuels
                                 : "Nuclear"}
                             : Fuel
                         </div>

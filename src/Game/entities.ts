@@ -46,7 +46,7 @@ export interface ShipBlueprint {
     capacity: {
         civilians: number
         cargo: number
-        fuel: number
+        fuels: number
         platoons: number
     }
     cost: {
@@ -64,12 +64,12 @@ export interface Ship {
     owner: string
     requiredCrew: number
     crew: number
-    fuel: number
+    fuels: number
     passengers: number
     capacity: {
         civilians: number
         cargo: number
-        fuel: number
+        fuels: number
         platoons: number
     }
     cargo: {

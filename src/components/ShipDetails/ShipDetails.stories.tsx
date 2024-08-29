@@ -21,7 +21,7 @@ export const Default: Story = {
             owner: "local",
             class: "Class Unknown",
             crew: 0,
-            fuel: 0,
+            fuels: 0,
             location: {
                 planet: 31,
                 position: "landed",

@@ -12,6 +12,15 @@ import {
     nextFreeIndex,
 } from "./Game/Shipyard/utilities"
 import { CommandContext } from "./CommandContext"
+import {
+    crewShip,
+    decommissionShip,
+    modifyCargo,
+    modifyShipFuel,
+    modifyShipPassengers,
+    purchaseShip,
+    unloadShipCargo,
+} from "./Game/shipCommands"
 
 // FIXME move somewhere better
 const applyRenamePlanet = (
@@ -57,87 +66,6 @@ const applyModifyTax = (
     }
 
     return cpy
-}
-
-const purchaseShip = (
-    player: string,
-    planets: Planet[],
-    ships: Ship[],
-    blueprint: ShipBlueprint,
-    name: string,
-) => {
-    let modifiedPlanets
-    let modifiedShips
-    // For now, purchases always get applied to the players capital, regardless of the selected planet
-    const index = planets.findIndex(
-        (p) => p.type !== "lifeless" && p.capital && p.owner === player,
-    )
-
-    if (index !== -1) {
-        const capital = planets[index]
-        // Count ships in planet docking bay
-        const dockedShips = ships.filter(
-            (s) =>
-                s.location.planet === capital.id &&
-                s.location.position === "docked",
-        )
-
-        if (capital.type === "lifeless") {
-            console.error("Cannot purchase ships on a lifeless planet")
-            // } else if (!planet.capital) {
-            //     console.error("Cannot purchase ships from none capital planet")
-        } else if (dockedShips.length >= 3) {
-            console.error(
-                "Cannot purchase ship, capital has no available docking bays",
-            )
-        } else if (!canAffordShip(capital, blueprint.cost)) {
-            console.log("Cannot afford ship")
-        } else {
-            const totalOwnedShips = ships.filter(
-                (ship) => ship.owner === capital.owner,
-            ).length
-            const ownedShips = ships.filter(
-                (ship) =>
-                    ship.class === blueprint.class &&
-                    ship.owner === capital.owner,
-            ).length
-
-            if (totalOwnedShips > 32) {
-                console.error(
-                    `Player ${capital.owner} cannot own more than 32 ships`,
-                )
-            } else if (
-                blueprint.class === "Atmosphere Processor" &&
-                ownedShips === 1
-            ) {
-                console.error(
-                    `Player ${capital.owner} cannot own more than 1 Atmosphere Processor`,
-                )
-            } else {
-                const availableBayIndex = nextFreeIndex(dockedShips, 3)
-                if (availableBayIndex === -1) {
-                    console.assert(
-                        `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
-                    )
-                }
-
-                modifiedPlanets = [...planets]
-
-                const modifiedPlanet = deductShipCost(capital, blueprint.cost)
-                modifiedPlanets[index] = modifiedPlanet
-
-                const newShip = commissionShip(
-                    blueprint,
-                    name,
-                    modifiedPlanet,
-                    availableBayIndex,
-                )
-                modifiedShips = [...ships, newShip]
-            }
-        }
-    }
-
-    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
 }
 
 // FIXME this needs to work for none mp!
@@ -187,14 +115,94 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "crew-ship") {
+                    ;[modifiedPlanets, modifiedShips] = crewShip(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "unload-ship") {
+                    ;[modifiedPlanets, modifiedShips] = unloadShipCargo(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "decommission-ship") {
+                    ;[modifiedPlanets, modifiedShips] = decommissionShip(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "load-passengers") {
+                    ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "unload-passengers") {
+                    ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "load-fuel") {
+                    ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "unload-fuel") {
+                    ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "load-cargo") {
+                    ;[modifiedPlanets, modifiedShips] = modifyCargo(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.cargo,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else if (command === "unload-cargo") {
+                    ;[modifiedPlanets, modifiedShips] = modifyCargo(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.cargo,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
                 } else {
                     console.error(`Unknown command '${command}'`)
                 }

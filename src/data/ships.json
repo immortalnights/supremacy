@@ -7,7 +7,7 @@
         "capacity": {
             "civilians": 4500,
             "cargo": 600,
-            "fuel": 1000,
+            "fuels": 1000,
             "platoons": 4
         },
         "speed": 1,
@@ -28,7 +28,7 @@
         "capacity": {
             "civilians": 0,
             "cargo": 0,
-            "fuel": 0,
+            "fuels": 0,
             "platoons": 0
         },
         "speed": 1,
@@ -44,7 +44,7 @@
             "resources": {
                 "food": 0,
                 "minerals": 0,
-                "fuel": 0,
+                "fuels": 0,
                 "energy": 6
             }
         }
@@ -57,7 +57,7 @@
         "capacity": {
             "civilians": 0,
             "cargo": 0,
-            "fuel": 0,
+            "fuels": 0,
             "platoons": 0
         },
         "speed": 1,
@@ -79,7 +79,7 @@
         "capacity": {
             "civilians": 1850,
             "cargo": 2250,
-            "fuel": 1250,
+            "fuels": 1250,
             "platoons": 0
         },
         "speed": 1,
@@ -100,7 +100,7 @@
         "capacity": {
             "civilians": 0,
             "cargo": 950,
-            "fuel": 1400,
+            "fuels": 1400,
             "platoons": 0
         },
         "speed": 1,
@@ -116,7 +116,7 @@
             "resources": {
                 "food": 0,
                 "minerals": 2,
-                "fuel": 7,
+                "fuels": 7,
                 "energy": -1
             }
         }
@@ -129,7 +129,7 @@
         "capacity": {
             "civilians": 0,
             "cargo": 950,
-            "fuel": 750,
+            "fuels": 750,
             "platoons": 0
         },
         "speed": 1,
@@ -145,7 +145,7 @@
             "resources": {
                 "food": 12,
                 "minerals": 0,
-                "fuel": 0,
+                "fuels": 0,
                 "energy": -1
             }
         }
