@@ -1,4 +1,4 @@
-import { ReactNode } from "react"
+import { ReactNode, MouseEventHandler } from "react"
 
 export default function Button({
     children,
@@ -10,7 +10,7 @@ export default function Button({
     children: ReactNode
     type?: HTMLButtonElement["type"]
     disabled?: boolean
-    onClick?: () => void
+    onClick?: MouseEventHandler
     style?: React.CSSProperties
 }) {
     return (
