@@ -25,7 +25,7 @@ export const nextFreeIndex = (ships: Ship[], maxIndex: number): number => {
     for (let index = 0; index < maxIndex; index++) {
         const ship = shipInLocation(ships, index)
         if (!ship) {
-            availableIndex = 1 + index
+            availableIndex = index
             break
         }
     }
