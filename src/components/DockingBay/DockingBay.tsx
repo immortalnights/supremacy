@@ -58,7 +58,7 @@ export default function DockingBay({
                 {Array(3)
                     .fill(undefined)
                     .map((_, index) => {
-                        const ship = shipInLocation(shipsInBay, 1 + index)
+                        const ship = shipInLocation(shipsInBay, index)
                         return (
                             <Bay
                                 key={`B${index}${ship?.name}`}
