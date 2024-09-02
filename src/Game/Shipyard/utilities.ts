@@ -1,18 +1,38 @@
-import { ColonizedPlanet, Ship, ShipBlueprint } from "../entities"
+import { cargoTypes, ColonizedPlanet, Ship, ShipBlueprint } from "../entities"
+import { Difficulty } from "../types"
 import { shipInLocation } from "../utilities"
 
 export const canAffordShip = (
     planet: ColonizedPlanet,
     cost: ShipBlueprint["cost"],
+    difficulty: Difficulty,
 ): boolean => {
-    return true
+    return planet.credits >= cost.credits
 }
 
+//* Assumes both planet are mutable */
 export const deductShipCost = (
     planet: ColonizedPlanet,
     cost: ShipBlueprint["cost"],
+    difficulty: Difficulty,
 ): ColonizedPlanet => {
-    return { ...planet }
+    planet.credits -= cost.credits
+
+    return planet
+}
+
+export const getShipCurrentCargoAmount = (ship: Ship) =>
+    Object.entries(ship.cargo).reduce(
+        (prevValue, [_cargo, quantity]) => prevValue + quantity,
+        0,
+    )
+
+//* Assumes both ship and planet are mutable */
+export const unloadCargo = (ship: Ship, planet: ColonizedPlanet) => {
+    for (const cargo of cargoTypes) {
+        planet[cargo] += ship.cargo[cargo]
+        ship.cargo[cargo] = 0
+    }
 }
 
 /**

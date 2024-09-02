@@ -1,3 +1,4 @@
+import { PLANET_POPULATION_LIMIT } from "../settings"
 import {
     Planet,
     Ship,
@@ -9,8 +10,11 @@ import {
     canAffordShip,
     commissionShip,
     deductShipCost,
+    getShipCurrentCargoAmount,
     nextFreeIndex,
+    unloadCargo,
 } from "./Shipyard/utilities"
+import { Difficulty } from "./types"
 
 const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
     planet.type !== "lifeless"
@@ -31,12 +35,29 @@ const getShipPlanet = (planets: Planet[], ship: Ship) => {
     return planet
 }
 
+const canModifyShipAtPlanet = (
+    player: string,
+    ship: Ship,
+    planet: ColonizedPlanet,
+): boolean => {
+    let ok = false
+    if (planet.owner !== player) {
+        console.error(`Planet ${ship.name} is not owned by player ${player}`)
+    } else if (ship.owner !== player) {
+        console.error(`Ship ${ship.name} is not owned by player ${player}`)
+    } else {
+        ok = true
+    }
+    return ok
+}
+
 export const purchaseShip = (
     player: string,
     planets: Planet[],
     ships: Ship[],
     blueprint: ShipBlueprint,
     name: string,
+    difficulty: Difficulty,
 ) => {
     let modifiedPlanets
     let modifiedShips
@@ -62,7 +83,7 @@ export const purchaseShip = (
             console.error(
                 "Cannot purchase ship, capital has no available docking bays",
             )
-        } else if (!canAffordShip(capital, blueprint.cost)) {
+        } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
             console.log("Cannot afford ship")
         } else {
             const totalOwnedShips = ships.filter(
@@ -94,8 +115,10 @@ export const purchaseShip = (
                 }
 
                 modifiedPlanets = [...planets]
+                const modifiedPlanet = { ...capital }
 
-                const modifiedPlanet = deductShipCost(capital, blueprint.cost)
+                deductShipCost(capital, blueprint.cost, difficulty)
+
                 modifiedPlanets[index] = modifiedPlanet
 
                 const newShip = commissionShip(
@@ -104,6 +127,7 @@ export const purchaseShip = (
                     modifiedPlanet,
                     availableBayIndex,
                 )
+                console.debug("new ship", newShip)
                 modifiedShips = [...ships, newShip]
             }
         }
@@ -122,14 +146,8 @@ export const crewShip = (
     let modifiedShips
     const planet = getShipPlanet(planets, ship)
 
-    if (planet) {
-        if (planet.owner !== player) {
-            console.error(
-                `Planet ${ship.name} is not owned by player ${player}`,
-            )
-        } else if (ship.owner !== player) {
-            console.error(`Ship ${ship.name} is not owned by player ${player}`)
-        } else if (ship.crew === ship.requiredCrew) {
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        if (ship.crew === ship.requiredCrew) {
             console.warn(`Ship ${ship.name} already has a full crew`)
         } else if (planet.population < ship.requiredCrew) {
             console.warn(
@@ -171,7 +189,35 @@ export const unloadShipCargo = (
     planets: Planet[],
     ships: Ship[],
     ship: Ship,
-) => {}
+) => {
+    let modifiedPlanets
+    let modifiedShips
+    const planet = getShipPlanet(planets, ship)
+
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        const planetIndex = planets.indexOf(planet)
+        const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+        if (planetIndex === -1 || shipIndex === -1) {
+            throw new Error(
+                `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
+            )
+        }
+
+        modifiedPlanets = [...planets]
+        const modifiedPlanet = { ...planet }
+
+        modifiedShips = [...ships]
+        const modifiedShip = { ...ship }
+
+        unloadCargo(modifiedShip, modifiedPlanet)
+
+        modifiedPlanets[planetIndex] = modifiedPlanet
+        modifiedShips[shipIndex] = modifiedShip
+    }
+
+    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
+}
 
 export const decommissionShip = (
     player: string,
@@ -183,34 +229,38 @@ export const decommissionShip = (
     let modifiedShips
     const planet = getShipPlanet(planets, ship)
 
-    if (planet) {
-        if (planet.owner !== player) {
-            console.error(
-                `Planet ${ship.name} is not owned by player ${player}`,
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        const planetIndex = planets.indexOf(planet)
+        const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+        if (planetIndex === -1 || shipIndex === -1) {
+            throw new Error(
+                `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
             )
-        } else if (ship.owner !== player) {
-            console.error(`Ship ${ship.name} is not owned by player ${player}`)
-        } else {
-            const planetIndex = planets.indexOf(planet)
-            const shipIndex = ships.findIndex((s) => s.id === ship.id)
-
-            if (planetIndex === -1 || shipIndex === -1) {
-                throw new Error(
-                    `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
-                )
-            }
-
-            modifiedPlanets = [...planets]
-
-            const modifiedPlanet = {
-                ...planets[planetIndex],
-            } as ColonizedPlanet
-            modifiedPlanet.credits += ship.value
-            modifiedPlanets[planetIndex] = modifiedPlanet
-
-            ships.splice(shipIndex, 1)
-            modifiedShips = [...ships]
         }
+
+        modifiedPlanets = [...planets]
+        const modifiedPlanet = { ...planet }
+        const modifiedShip = { ...ship }
+
+        modifiedPlanet.credits += modifiedShip.value
+        modifiedShip.value = 0
+
+        unloadCargo(modifiedShip, planet)
+
+        planet.population += ship.passengers
+        ship.passengers = 0
+
+        planet.fuels += ship.fuels
+        ship.fuels = 0
+
+        planet.population += ship.crew
+        ship.crew = 0
+
+        modifiedPlanets[planetIndex] = modifiedPlanet
+
+        ships.splice(shipIndex, 1)
+        modifiedShips = [...ships]
     }
 
     return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
@@ -227,14 +277,8 @@ export const modifyShipPassengers = (
     let modifiedShips
     const planet = getShipPlanet(planets, ship)
 
-    if (planet) {
-        if (planet.owner !== player) {
-            console.error(
-                `Planet ${ship.name} is not owned by player ${player}`,
-            )
-        } else if (ship.owner !== player) {
-            console.error(`Ship ${ship.name} is not owned by player ${player}`)
-        } else if (ship.passengers >= ship.capacity.civilians) {
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        if (quantity > 0 && ship.passengers >= ship.capacity.civilians) {
             console.warn(
                 `Ship ${ship.name} does not have space for more passengers`,
             )
@@ -252,23 +296,29 @@ export const modifyShipPassengers = (
                 )
             }
 
-            const toMove = Math.min(
-                ship.capacity.civilians - ship.passengers,
-                planet.population,
-                quantity,
-            )
+            const toMove =
+                quantity > 0
+                    ? Math.min(
+                          ship.capacity.civilians - ship.passengers,
+                          planet.population,
+                          quantity,
+                      )
+                    : -Math.min(
+                          PLANET_POPULATION_LIMIT - planet.population,
+                          ship.passengers,
+                          Math.abs(quantity),
+                      )
 
             modifiedPlanets = [...planets]
-
-            const modifiedPlanet = {
-                ...planets[planetIndex],
-            } as ColonizedPlanet
-            modifiedPlanet.population -= toMove
-            modifiedPlanets[planetIndex] = modifiedPlanet
+            const modifiedPlanet = { ...planet }
 
             modifiedShips = [...ships]
             const modifiedShip = { ...ships[shipIndex] }
+
+            modifiedPlanet.population -= toMove
             modifiedShip.passengers += toMove
+
+            modifiedPlanets[planetIndex] = modifiedPlanet
             modifiedShips[shipIndex] = modifiedShip
         }
     }
@@ -287,14 +337,8 @@ export const modifyShipFuel = (
     let modifiedShips
     const planet = getShipPlanet(planets, ship)
 
-    if (planet) {
-        if (planet.owner !== player) {
-            console.error(
-                `Planet ${ship.name} is not owned by player ${player}`,
-            )
-        } else if (ship.owner !== player) {
-            console.error(`Ship ${ship.name} is not owned by player ${player}`)
-        } else if (ship.fuels >= ship.capacity.fuels) {
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        if (quantity > 0 && ship.fuels >= ship.capacity.fuels) {
             console.warn(`Ship ${ship.name} does not have space for more fuel`)
         } else if (quantity < 0 && ship.fuels === 0) {
             console.error(`Ship ${ship.name} does not have any fuel to unload`)
@@ -308,23 +352,25 @@ export const modifyShipFuel = (
                 )
             }
 
-            const toMove = Math.min(
-                ship.capacity.fuels - ship.fuels,
-                planet.fuels,
-                quantity,
-            )
+            const toMove =
+                quantity > 0
+                    ? Math.min(
+                          ship.capacity.fuels - ship.fuels,
+                          planet.fuels,
+                          quantity,
+                      )
+                    : -Math.min(ship.fuels, Math.abs(quantity))
 
             modifiedPlanets = [...planets]
-
-            const modifiedPlanet = {
-                ...planets[planetIndex],
-            } as ColonizedPlanet
-            modifiedPlanet.fuels -= toMove
-            modifiedPlanets[planetIndex] = modifiedPlanet
+            const modifiedPlanet = { ...planet }
 
             modifiedShips = [...ships]
             const modifiedShip = { ...ships[shipIndex] }
+
+            modifiedPlanet.fuels -= toMove
             modifiedShip.fuels += toMove
+
+            modifiedPlanets[planetIndex] = modifiedPlanet
             modifiedShips[shipIndex] = modifiedShip
         }
     }
@@ -339,4 +385,52 @@ export const modifyCargo = (
     ship: Ship,
     cargo: CargoType,
     quantity: number,
-) => {}
+) => {
+    let modifiedPlanets
+    let modifiedShips
+    const planet = getShipPlanet(planets, ship)
+
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        const currentCargo = getShipCurrentCargoAmount(ship)
+
+        if (quantity > 0 && currentCargo >= ship.capacity.cargo) {
+            console.warn(`Ship ${ship.name} does not have space for more cargo`)
+        } else if (quantity < 0 && ship.cargo[cargo] === 0) {
+            console.error(
+                `Ship ${ship.name} does not have any ${cargo} to unload`,
+            )
+        } else {
+            const planetIndex = planets.indexOf(planet)
+            const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+            if (planetIndex === -1 || shipIndex === -1) {
+                throw new Error(
+                    `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
+                )
+            }
+
+            const toMove =
+                quantity > 0
+                    ? Math.min(
+                          ship.capacity.cargo - currentCargo,
+                          planet[cargo],
+                          quantity,
+                      )
+                    : -Math.min(ship.cargo[cargo], Math.abs(quantity))
+
+            modifiedPlanets = [...planets]
+            const modifiedPlanet = { ...planet }
+
+            modifiedShips = [...ships]
+            const modifiedShip = { ...ships[shipIndex] }
+
+            modifiedPlanet[cargo] -= toMove
+            modifiedShip.cargo[cargo] += toMove
+
+            modifiedPlanets[planetIndex] = modifiedPlanet
+            modifiedShips[shipIndex] = modifiedShip
+        }
+    }
+
+    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
+}

@@ -9,7 +9,8 @@ export interface LifelessPlanet extends BasePlanet {
     type: "lifeless"
 }
 
-export type CargoType = "food" | "minerals" | "fuels" | "energy"
+export const cargoTypes = ["food", "minerals", "fuels", "energy"] as const
+export type CargoType = (typeof cargoTypes)[number]
 
 export type PlanetResources = {
     [key in CargoType]: number

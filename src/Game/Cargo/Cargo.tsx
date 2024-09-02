@@ -15,7 +15,7 @@ import unloadCargo from "/images/unload_cargo.png"
 import { CargoType, ColonizedPlanet, Planet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
 import { selectedPlanetAtom, shipsAtom } from "../store"
-import { useState } from "react"
+import { MouseEvent, useState } from "react"
 import {
     useCrewShip,
     useDecommission,
@@ -24,6 +24,18 @@ import {
     useLoadPassengers,
     useUnloadShip,
 } from "../../commands"
+
+const getModifierAmount = (event: MouseEvent, max: number = 1) => {
+    let amount
+    if (event.ctrlKey) {
+        amount = max
+    } else if (event.shiftKey) {
+        amount = 100
+    } else {
+        amount = 1
+    }
+    return amount
+}
 
 function CargoItem({
     cargo,
@@ -38,15 +50,15 @@ function CargoItem({
 }) {
     const [load, unload] = useLoadCargo()
 
-    const handleLoadCargo = () => {
+    const handleLoadCargo = (event: MouseEvent) => {
         if (ship) {
-            load(ship, cargo, 1)
+            load(ship, cargo, getModifierAmount(event, ship.capacity.cargo))
         }
     }
 
-    const handleUnloadCargo = () => {
+    const handleUnloadCargo = (event: MouseEvent) => {
         if (ship) {
-            unload(ship, cargo, -1)
+            unload(ship, cargo, -getModifierAmount(event, ship.capacity.cargo))
         }
     }
 
@@ -94,14 +106,14 @@ function ShipCargoDetails({
 function ShipPassengers({ ship }: { ship?: Ship }) {
     const [load, unload] = useLoadPassengers()
 
-    const handleLoadPassengers = () => {
+    const handleLoadPassengers = (event: MouseEvent) => {
         if (ship) {
-            load(ship, 1)
+            load(ship, getModifierAmount(event, ship.capacity.civilians))
         }
     }
-    const handleUnloadPassengers = () => {
+    const handleUnloadPassengers = (event: MouseEvent) => {
         if (ship) {
-            unload(ship, -1)
+            unload(ship, -getModifierAmount(event, ship.capacity.civilians))
         }
     }
 
@@ -131,14 +143,14 @@ function ShipPassengers({ ship }: { ship?: Ship }) {
 function ShipFuel({ ship }: { ship?: Ship }) {
     const [load, unload] = useLoadFuel()
 
-    const handleLoadFuel = () => {
+    const handleLoadFuel = (event: MouseEvent) => {
         if (ship) {
-            load(ship, 1)
+            load(ship, getModifierAmount(event, ship.capacity.fuels))
         }
     }
-    const handleUnloadFuel = () => {
+    const handleUnloadFuel = (event: MouseEvent) => {
         if (ship) {
-            unload(ship, -1)
+            unload(ship, -getModifierAmount(event, ship.capacity.fuels))
         }
     }
 

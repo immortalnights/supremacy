@@ -141,7 +141,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "load-passengers") {
+                } else if (command === "modify-passengers") {
                     ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
                         localPlayer,
                         originalPlanets,
@@ -151,27 +151,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "unload-passengers") {
-                    ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
-                        localPlayer,
-                        originalPlanets,
-                        originalShips,
-                        data.ship,
-                        data.quantity,
-                    )
-                    set(planetsAtom, modifiedPlanets)
-                    set(shipsAtom, modifiedShips)
-                } else if (command === "load-fuel") {
-                    ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
-                        localPlayer,
-                        originalPlanets,
-                        originalShips,
-                        data.ship,
-                        data.quantity,
-                    )
-                    set(planetsAtom, modifiedPlanets)
-                    set(shipsAtom, modifiedShips)
-                } else if (command === "unload-fuel") {
+                } else if (command === "modify-fuel") {
                     ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
                         localPlayer,
                         originalPlanets,

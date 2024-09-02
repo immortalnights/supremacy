@@ -14,6 +14,7 @@ import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { ColonizedPlanet, Planet, Platoon, Ship } from "./Game/entities"
 import { calculateGrowth } from "./Game/utilities"
+import { PLANET_POPULATION_LIMIT } from "./settings"
 
 const speedMap = {
     slow: 2,
@@ -37,8 +38,6 @@ const simulateShips = (
 ): [Ship[], Planet[]] => {
     return [ships, planets]
 }
-
-const PLANET_POPULATION_LIMIT = 30000
 
 const calculateMorale = ({ morale, tax, food }: ColonizedPlanet) => {
     if (food === 0) {

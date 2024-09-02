@@ -52,10 +52,10 @@ export function useLoadPassengers() {
     const { exec } = useContext(CommandContext)
 
     const load = (ship: Ship, quantity: number) =>
-        exec("load-passengers", { ship, quantity })
+        exec("modify-passengers", { ship, quantity })
 
     const unload = (ship: Ship, quantity: number) =>
-        exec("unload-passengers", { ship, quantity })
+        exec("modify-passengers", { ship, quantity })
 
     return [load, unload]
 }
@@ -64,10 +64,10 @@ export function useLoadFuel() {
     const { exec } = useContext(CommandContext)
 
     const load = (ship: Ship, quantity: number) =>
-        exec("load-fuel", { ship, quantity })
+        exec("modify-fuel", { ship, quantity })
 
     const unload = (ship: Ship, quantity: number) =>
-        exec("unload-fuel", { ship, quantity })
+        exec("modify-fuel", { ship, quantity })
 
     return [load, unload]
 }

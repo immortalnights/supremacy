@@ -1,0 +1,1 @@
+export const PLANET_POPULATION_LIMIT = 30000
