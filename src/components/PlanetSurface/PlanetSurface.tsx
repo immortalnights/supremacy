@@ -1,7 +1,8 @@
-import { Ship } from "../../Game/entities"
+import { ColonizedPlanet, Ship } from "../../Game/entities"
 import { shipInLocation } from "../../Game/utilities"
 import Button from "../Button"
 import ShipIcon from "../ShipIcon"
+import { useShipsOnPlanetSurface } from "../../Game/dataHooks"
 
 function Location({
     ship,
@@ -34,7 +35,7 @@ function Location({
 
     return (
         <div style={{ userSelect: "none" }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", justifyContent: "space-around" }}>
                 <Button onClick={handleEnable} style={{ textAlign: "right" }}>
                     On
                 </Button>
@@ -74,22 +75,24 @@ function Location({
 }
 
 export default function PlanetSurface({
-    ships,
+    planet,
     onClick,
     onEnable,
     onDisable,
 }: {
-    ships: Ship[]
+    planet: ColonizedPlanet
     onClick: (ship: Ship) => void
     onEnable: (ship: Ship) => void
     onDisable: (ship: Ship) => void
 }) {
+    const ships = useShipsOnPlanetSurface(planet)
+
     return (
         <div style={{ display: "flex" }}>
             {Array(6)
                 .fill(undefined)
                 .map((_, index) => {
-                    const ship = shipInLocation(ships, 1 + index)
+                    const ship = shipInLocation(ships, index)
                     return (
                         <Location
                             key={`S${index}${ship?.name}`}

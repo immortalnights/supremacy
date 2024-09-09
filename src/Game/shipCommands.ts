@@ -1,3 +1,4 @@
+import { throwError } from "game-signaling-server/client"
 import { PLANET_POPULATION_LIMIT } from "../settings"
 import {
     Planet,
@@ -5,6 +6,7 @@ import {
     ColonizedPlanet,
     ShipBlueprint,
     CargoType,
+    ShipPosition,
 } from "./entities"
 import {
     canAffordShip,
@@ -15,6 +17,7 @@ import {
     unloadCargo,
 } from "./Shipyard/utilities"
 import { Difficulty } from "./types"
+import { shipsDockedAtPlanet, shipsOnPlanetSurface } from "./utilities"
 
 const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
     planet.type !== "lifeless"
@@ -433,4 +436,121 @@ export const modifyCargo = (
     }
 
     return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
+}
+
+const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
+    orbit: ["docked", "outer-space"],
+    surface: ["docked"],
+    docked: ["surface", "orbit"],
+    "outer-space": ["orbit"],
+}
+
+export const transitionShip = (
+    player: string,
+    planets: Planet[],
+    ships: Ship[],
+    ship: Ship,
+    targetPlanet: Planet,
+    targetPosition: ShipPosition,
+) => {
+    let modifiedShips
+
+    const currentPosition = ship.location.position
+    if (!transitionMatrix[currentPosition].includes(targetPosition)) {
+        console.error(
+            `Cannot move ship ${ship.name} from ${currentPosition} to ${targetPosition}`,
+        )
+    } else {
+        const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+        if (shipIndex === -1) {
+            throw new Error(`Invalid ship (${shipIndex}) index`)
+        }
+
+        try {
+            let location: Ship["location"]
+            switch (targetPosition) {
+                case "docked": {
+                    const planet =
+                        planets.find(
+                            (planet) => planet.id === targetPlanet.id,
+                        ) ??
+                        throwError(
+                            `Failed to find target planet ${targetPlanet.name}`,
+                        )
+                    const dockedShips = shipsDockedAtPlanet(ships, planet)
+
+                    if (dockedShips.length >= 3) {
+                        throw new Error("Planet docking bays are full")
+                    } else {
+                        // Any ship can dock at any planet, assuming there is space
+                        location = {
+                            position: "docked",
+                            planet: planet.id,
+                            index: nextFreeIndex(dockedShips, 3),
+                        }
+                    }
+                    break
+                }
+                case "surface": {
+                    const planet =
+                        planets.find(
+                            (planet) => planet.id === targetPlanet.id,
+                        ) ??
+                        throwError(
+                            `Failed to find target planet ${targetPlanet.name}`,
+                        )
+                    const landedShips = shipsOnPlanetSurface(ships, planet)
+
+                    if (planet.type === "lifeless") {
+                        throw new Error(
+                            "Cannot land a ship on a lifeless planet",
+                        )
+                    } else if (planet.owner !== player) {
+                        throw new Error(
+                            `Player does not have permission to land a ship at planet ${planet.name}`,
+                        )
+                    } else if (landedShips.length >= 6) {
+                        throw new Error("Planet surface locations are full")
+                    } else {
+                        // Any ship can dock at any planet, assuming there is space
+                        location = {
+                            position: "surface",
+                            planet: planet.id,
+                            index: nextFreeIndex(landedShips, 6),
+                        }
+                    }
+                    break
+                }
+
+                default: {
+                    throw new Error("Unsupported")
+                }
+            }
+
+            modifiedShips = [...ships]
+            const modifiedShip = { ...ships[shipIndex], location }
+            modifiedShips[shipIndex] = modifiedShip
+        } catch (error) {
+            console.error("Failed to transition ship", error)
+        }
+    }
+
+    return modifiedShips ?? ships
+}
+
+export const toggleShip = (
+    player: string,
+    planets: Planet[],
+    ships: Ship[],
+    ship: Ship,
+    enabled: boolean,
+) => {
+    let modifiedShips
+    const planet = getShipPlanet(planets, ship)
+
+    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+    }
+
+    return modifiedShips ?? ships
 }

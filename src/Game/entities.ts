@@ -29,7 +29,7 @@ export interface ColonizedPlanet extends BasePlanet, PlanetResources {
 
 export type Planet = LifelessPlanet | ColonizedPlanet
 
-export type ShipPosition = "orbit" | "landed" | "docked" | "outer-space"
+export type ShipPosition = "orbit" | "surface" | "docked" | "outer-space"
 
 export type ShipClass =
     | "B-29 Battle Cruiser"
@@ -57,6 +57,36 @@ export interface ShipBlueprint {
     }
 }
 
+interface Location {
+    position: ShipPosition
+}
+
+interface InOrbit extends Location {
+    position: "orbit"
+    planet: Planet["id"]
+}
+
+interface Docked extends Location {
+    position: "docked"
+    planet: Planet["id"]
+    index: number
+}
+
+interface Surface extends Location {
+    position: "surface"
+    planet: Planet["id"]
+    index: number
+}
+
+interface OuterSpace extends Location {
+    position: "outer-space"
+    heading: {
+        from: Planet["id"]
+        to: Planet["id"]
+        eat: number
+    }
+}
+
 export interface Ship {
     id: string
     name: string
@@ -76,27 +106,7 @@ export interface Ship {
     cargo: {
         [key in CargoType]: number
     }
-    location:
-        | {
-              planet: Planet["id"]
-              position: "orbit"
-          }
-        | {
-              planet: Planet["id"]
-              position: "landed" | "docked"
-              // Bay or Planet Surface numeric location
-              index?: number
-          }
-        | {
-              planet: undefined
-              position: "outer-space"
-              index: undefined
-              heading: {
-                  from: Planet["id"]
-                  to: Planet["id"]
-                  eta: number
-              }
-          }
+    location: InOrbit | Docked | Surface | OuterSpace
     active: boolean
     value: number
 }

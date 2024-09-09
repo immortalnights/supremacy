@@ -19,6 +19,8 @@ import {
     modifyShipFuel,
     modifyShipPassengers,
     purchaseShip,
+    toggleShip,
+    transitionShip,
     unloadShipCargo,
 } from "./Game/shipCommands"
 
@@ -182,6 +184,25 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.quantity,
                     )
                     set(planetsAtom, modifiedPlanets)
+                    set(shipsAtom, modifiedShips)
+                } else if (command === "transition-ship") {
+                    modifiedShips = transitionShip(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.planet,
+                        data.position,
+                    )
+                    set(shipsAtom, modifiedShips)
+                } else if (command === "toggle-ship") {
+                    modifiedShips = toggleShip(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.enabled,
+                    )
                     set(shipsAtom, modifiedShips)
                 } else {
                     console.error(`Unknown command '${command}'`)

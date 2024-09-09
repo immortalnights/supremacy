@@ -8,12 +8,12 @@ import miningIcon from "/images/mining_icon.png"
 import solarIcon from "/images/solar_icon.png"
 
 const iconMap: { [Key in Ship["class"]]: string } = {
-    atmos: atmosIcon,
-    battle: battleIcon,
-    cargo: cargoIcon,
-    farming: farmingIcon,
-    mining: miningIcon,
-    solar: solarIcon,
+    "B-29 Battle Cruiser": battleIcon,
+    "Solar-Satellite Generator": solarIcon,
+    "Atmosphere Processor": atmosIcon,
+    "Cargo Store / Carrier": cargoIcon,
+    "Core Mining Station": miningIcon,
+    "Horticultural Station": farmingIcon,
 }
 
 export default function ShipIcon({ ship }: { ship?: Ship }) {

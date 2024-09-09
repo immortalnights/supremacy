@@ -122,8 +122,8 @@ function PlanetShipOverview() {
         selectedPlanet?.owner === localPlayer
             ? ships.filter(
                   (ship) =>
-                      ship.location.planet === selectedPlanet?.id &&
-                      ship.location.position === viewPosition,
+                      ship.location.position === viewPosition &&
+                      ship.location.planet === selectedPlanet?.id,
               )
             : []
 
@@ -134,7 +134,7 @@ function PlanetShipOverview() {
                 msg = `Ships in orbit above ${selectedPlanet?.name}`
                 break
             }
-            case "landed": {
+            case "surface": {
                 msg = `Ships on surface of above ${selectedPlanet?.name}`
                 break
             }
@@ -156,7 +156,7 @@ function PlanetShipOverview() {
                 <Button onClick={() => setViewPosition("orbit")}>
                     <img src={orbitingIcon}></img>
                 </Button>
-                <Button onClick={() => setViewPosition("landed")}>
+                <Button onClick={() => setViewPosition("surface")}>
                     <img src={landedIcon}></img>
                 </Button>
                 <Button onClick={() => setViewPosition("docked")}>
