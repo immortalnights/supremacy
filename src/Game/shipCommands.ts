@@ -27,8 +27,9 @@ const getShipPlanet = (planets: Planet[], ship: Ship) => {
         .filter(isColonizedPlanet)
         .find(
             (p) =>
-                p.id === ship.location.planet &&
-                ship.location.position === "docked",
+                (ship.location.position === "docked" ||
+                    ship.location.position === "surface") &&
+                p.id === ship.location.planet,
         )
 
     if (!planet) {
@@ -529,7 +530,11 @@ export const transitionShip = (
             }
 
             modifiedShips = [...ships]
-            const modifiedShip = { ...ships[shipIndex], location }
+            const modifiedShip = {
+                ...ships[shipIndex],
+                location,
+                active: false,
+            }
             modifiedShips[shipIndex] = modifiedShip
         } catch (error) {
             console.error("Failed to transition ship", error)
@@ -550,6 +555,26 @@ export const toggleShip = (
     const planet = getShipPlanet(planets, ship)
 
     if (planet && canModifyShipAtPlanet(player, ship, planet)) {
+        if (ship.crew !== ship.requiredCrew) {
+            console.error(`Ship ${ship.name} does not have the required crew`)
+        } else if (
+            ship.class !== "Core Mining Station" &&
+            ship.class !== "Horticultural Station"
+        ) {
+            console.error(
+                `Ship ${ship.name} (${ship.class}) cannot be activated`,
+            )
+        } else {
+            const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+            if (shipIndex === -1) {
+                throw new Error(`Invalid ship (${shipIndex}) index`)
+            }
+
+            modifiedShips = [...ships]
+            const modifiedShip = { ...ships[shipIndex], active: enabled }
+            modifiedShips[shipIndex] = modifiedShip
+        }
     }
 
     return modifiedShips ?? ships
