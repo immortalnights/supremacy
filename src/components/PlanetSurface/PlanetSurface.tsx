@@ -1,8 +1,9 @@
-import { ColonizedPlanet, Ship } from "../../Game/entities"
+import { Planet, Ship } from "../../Game/entities"
 import { shipInLocation } from "../../Game/utilities"
 import Button from "../Button"
 import ShipIcon from "../ShipIcon"
 import { useShipsOnPlanetSurface } from "../../Game/dataHooks"
+import { useEnableDisableShip, useMoveShip } from "../../Game/Surface/commands"
 
 function Location({
     ship,
@@ -74,18 +75,28 @@ function Location({
     )
 }
 
-export default function PlanetSurface({
-    planet,
-    onClick,
-    onEnable,
-    onDisable,
-}: {
-    planet: ColonizedPlanet
-    onClick: (ship: Ship) => void
-    onEnable: (ship: Ship) => void
-    onDisable: (ship: Ship) => void
-}) {
+export default function PlanetSurface({ planet }: { planet: Planet }) {
     const ships = useShipsOnPlanetSurface(planet)
+    const moveShipTo = useMoveShip()
+    const toggleShip = useEnableDisableShip()
+
+    const handleShipClick = (ship: Ship) => {
+        if (ship) {
+            moveShipTo(ship, planet, "docked")
+        }
+    }
+
+    const handleEnableClick = (ship: Ship) => {
+        if (ship) {
+            toggleShip(ship, true)
+        }
+    }
+
+    const handleDisableClick = (ship: Ship) => {
+        if (ship) {
+            toggleShip(ship, false)
+        }
+    }
 
     return (
         <div style={{ display: "flex" }}>
@@ -97,9 +108,9 @@ export default function PlanetSurface({
                         <Location
                             key={`S${index}${ship?.name}`}
                             ship={ship}
-                            onClick={onClick}
-                            onEnable={onEnable}
-                            onDisable={onDisable}
+                            onClick={handleShipClick}
+                            onEnable={handleEnableClick}
+                            onDisable={handleDisableClick}
                         />
                     )
                 })}

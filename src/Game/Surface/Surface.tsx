@@ -5,34 +5,15 @@ import Navigation from "../../components/Navigation"
 import { useAtomValue } from "jotai"
 import { selectedPlanetAtom } from "../store"
 import { ColonizedPlanet, Ship } from "../entities"
-import { useMoveShip, useEnableDisableShip } from "./commands"
+import { useMoveShip } from "./commands"
 
 export default function Surface() {
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
     const moveShipTo = useMoveShip()
-    const toggleShip = useEnableDisableShip()
 
-    const handleMoveToSurface = (ship: Ship) => {
+    const handleClickDockedShip = (ship: Ship) => {
         if (ship) {
             moveShipTo(ship, planet, "surface")
-        }
-    }
-
-    const handleMoveToDockingBay = (ship: Ship) => {
-        if (ship) {
-            moveShipTo(ship, planet, "docked")
-        }
-    }
-
-    const handleEnableShip = (ship: Ship) => {
-        if (ship) {
-            toggleShip(ship, true)
-        }
-    }
-
-    const handleDisableShip = (ship: Ship) => {
-        if (ship) {
-            toggleShip(ship, false)
         }
     }
 
@@ -50,13 +31,11 @@ export default function Surface() {
                         padding: "2px 0px",
                     }}
                 >
-                    <DockingBay planet={planet} onClick={handleMoveToSurface} />
-                    <PlanetSurface
+                    <DockingBay
                         planet={planet}
-                        onClick={handleMoveToDockingBay}
-                        onEnable={handleEnableShip}
-                        onDisable={handleDisableShip}
+                        onClick={handleClickDockedShip}
                     />
+                    <PlanetSurface planet={planet} />
                 </div>
                 <div
                     style={{
