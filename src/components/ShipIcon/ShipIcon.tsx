@@ -16,7 +16,13 @@ const iconMap: { [Key in Ship["class"]]: string } = {
     "Horticultural Station": farmingIcon,
 }
 
-export default function ShipIcon({ ship }: { ship?: Ship }) {
+export default function ShipIcon({
+    ship,
+    style,
+}: {
+    ship?: Ship
+    style?: React.CSSProperties
+}) {
     let img = emptyIcon
     if (ship) {
         img = iconMap[ship.class]
@@ -24,5 +30,5 @@ export default function ShipIcon({ ship }: { ship?: Ship }) {
         img = emptyIcon
     }
 
-    return <img style={{}} src={img} />
+    return <img src={img} style={style} />
 }
