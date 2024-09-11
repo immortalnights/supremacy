@@ -9,17 +9,63 @@ import ShipDetails from "../../components/ShipDetails"
 import ShipHeading from "../../components/ShipHeading"
 import Navigation from "../../components/Navigation"
 import { useAtomValue } from "jotai"
-import { selectedPlanetAtom } from "../store"
+import { selectedPlanetAtom, shipsAtom } from "../store"
 import { ColonizedPlanet, Ship } from "../entities"
 import FleetGrid from "../../components/FleetGrid"
 import { useState } from "react"
+import { useMoveShip } from "../Surface/commands"
+import { useDecommission } from "../../commands"
+import ShipIcon from "../../components/ShipIcon"
+
+const useSelectedShip = (id?: Ship["id"]) => {
+    let ship
+    const ships = useAtomValue(shipsAtom)
+    if (id) {
+        ship = ships.find((item) => item.id === id)
+    }
+    return ship
+}
 
 export default function Fleet() {
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
-    const [selectedShip, setSelectedShip] = useState<Ship | undefined>()
+    const [selectedShip, setSelectedShip] = useState<Ship["id"] | undefined>()
+    const ship = useSelectedShip(selectedShip)
+    const [isSelectingDestination, setIsSelectingDestination] = useState(false)
+    const move = useMoveShip()
+    const decommission = useDecommission()
 
     const handleShipSelected = (ship: Ship) => {
-        setSelectedShip(ship)
+        setSelectedShip(ship.id)
+    }
+
+    const handleLaunchShip = () => {
+        if (ship) {
+            move(ship, planet, "orbit")
+        }
+    }
+    const handleTransferShip = () => {
+        if (ship) {
+            setIsSelectingDestination(true)
+            // move(ship, planet, "outer-space")
+        }
+    }
+    const handleDockShip = () => {
+        if (ship) {
+            move(ship, planet, "docked")
+        }
+    }
+    const handleDecommissionShip = () => {
+        if (ship) {
+            decommission(ship)
+        }
+    }
+    const handleRenameShip = () => {}
+
+    let grid
+    if (isSelectingDestination) {
+        grid = null
+    } else {
+        grid = <FleetGrid onClick={handleShipSelected} />
     }
 
     return (
@@ -28,26 +74,38 @@ export default function Fleet() {
                 <DockingBay planet={planet} onClick={handleShipSelected} />
                 <div>
                     <div>
-                        <Button>
+                        <Button onClick={handleLaunchShip}>
                             <img src={launchIcon} />
                         </Button>
-                        <Button>
+                        <Button onClick={handleTransferShip}>
                             <img src={travelIcon} />
                         </Button>
-                        <Button>
+                        <Button onClick={handleDockShip}>
                             <img src={dockIcon} />
                         </Button>
                     </div>
                     <div>
-                        <ShipDetails ship={selectedShip} />
+                        <ShipDetails ship={ship} />
                     </div>
                 </div>
                 <div style={{ display: "flex", flexDirection: "column" }}>
-                    <Button>
+                    <Button onClick={handleDecommissionShip}>
                         <img src={decommissionIcon} />
                     </Button>
-                    <Button>
-                        <img src={renameIcon} />
+                    <Button onClick={handleRenameShip}>
+                        <div style={{ position: "relative" }}>
+                            <img src={renameIcon} />
+                            {ship && (
+                                <ShipIcon
+                                    ship={ship}
+                                    style={{
+                                        position: "absolute",
+                                        left: "12px",
+                                        top: "22px",
+                                    }}
+                                />
+                            )}
+                        </div>
                     </Button>
                 </div>
             </div>
@@ -59,8 +117,8 @@ export default function Fleet() {
                     items={["combat", "shipyard", "cargo"]}
                     direction="column"
                 />
-                <FleetGrid onClick={handleShipSelected} />
-                <ShipHeading ship={selectedShip} />
+                {grid}
+                <ShipHeading ship={ship} />
                 <Navigation
                     items={["surface", "overview", "training"]}
                     direction="column"
