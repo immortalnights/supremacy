@@ -7,6 +7,7 @@ import {
 } from "./store"
 import { shipsDockedAtPlanet, shipsOnPlanetSurface } from "./utilities"
 import type { ColonizedPlanet, Planet } from "./entities"
+import { throwError } from "game-signaling-server/client"
 
 const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
     planet.type !== "lifeless"
@@ -32,7 +33,9 @@ export const useCapitalPlanet = () => {
             planet.owner === localPlayer,
     )
 
-    return capital && isColonizedPlanet(capital) ? capital : undefined
+    return capital && isColonizedPlanet(capital)
+        ? capital
+        : throwError("Failed to find capital planet")
 }
 
 export const useShipsInDockingBay = (planet: Planet) => {
