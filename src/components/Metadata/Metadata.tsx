@@ -7,6 +7,7 @@ type MetadataValueType = {
     label: string
     postfix?: string
     textAlign?: TextAlignment
+    style?: React.CSSProperties
 } & (
     | {
           value?: undefined
@@ -32,6 +33,7 @@ export function MetadataValue({
     postfix,
     defaultValue,
     textAlign = "right",
+    style,
 }: MetadataValueType) {
     const actualValue = value ?? defaultValue
     const displayValue =
@@ -52,6 +54,7 @@ export function MetadataValue({
                 textOverflow: "ellipsis",
                 overflow: "hidden",
                 flex: "1 0 auto",
+                ...style,
             }}
         >
             {displayValue}
