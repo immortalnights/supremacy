@@ -12,6 +12,16 @@ import training_fast from "/images/training_fast.gif"
 import training_medium from "/images/training_medium.gif"
 import training_slow from "/images/training_slow.gif"
 import Metadata, { MetadataValue } from "../../components/Metadata"
+import { useMemo, useState } from "react"
+import { useCapitalPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
+
+const suffixes = new Map([
+    ["one", "st"],
+    ["two", "nd"],
+    ["few", "rd"],
+    ["other", "th"],
+])
 
 const calibre = {
     paused: training_calibre,
@@ -20,14 +30,30 @@ const calibre = {
     slow: training_slow,
 }
 
-function PlatoonSelector() {
-    const handlePreviousPlatoon = () => {}
-    const handleNextPlatoon = () => {}
+function PlatoonSelector({
+    platoon,
+    onChangePlatoon,
+}: {
+    platoon: number
+    onChangePlatoon: (delta: number) => void
+}) {
+    const ordinal = useMemo(() => {
+        const pr = new Intl.PluralRules("en-US", { type: "ordinal" })
+        const formatOrdinals = (value: number) => {
+            const rule = pr.select(value)
+            const suffix = suffixes.get(rule)
+            return `${value}${suffix}`
+        }
+        return formatOrdinals(platoon)
+    }, [platoon])
+
+    const handleNextPlatoon = () => onChangePlatoon(1)
+    const handlePreviousPlatoon = () => onChangePlatoon(-1)
+
     return (
         <div
             style={{
                 display: "flex",
-                justifyContent: "space-around",
                 alignItems: "center",
                 gap: 4,
             }}
@@ -40,7 +66,7 @@ function PlatoonSelector() {
                     width: "3em",
                 }}
             >
-                1st
+                {ordinal}
             </div>
             <div
                 style={{
@@ -49,10 +75,10 @@ function PlatoonSelector() {
                     maxHeight: 42,
                 }}
             >
-                <Button onClick={handlePreviousPlatoon}>
+                <Button onClick={handleNextPlatoon}>
                     <img src={whiteUp} />
                 </Button>
-                <Button onClick={handleNextPlatoon}>
+                <Button onClick={handlePreviousPlatoon}>
                     <img src={whiteDown} />
                 </Button>
             </div>
@@ -63,6 +89,7 @@ function PlatoonSelector() {
 function PlatoonTroops() {
     const handleHireTroops = () => {}
     const handleDismissTroops = () => {}
+
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div>Troops</div>
@@ -93,7 +120,7 @@ function PlatoonTroops() {
     )
 }
 
-function PlanetCivilians() {
+function PlanetCivilians({ civilians }: { civilians: number }) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <div>Civilians</div>
@@ -104,7 +131,7 @@ function PlanetCivilians() {
                     width: "3em",
                 }}
             >
-                0
+                {Math.floor(civilians)}
             </div>
         </div>
     )
@@ -155,15 +182,38 @@ function WeaponSelector() {
 }
 
 export default function Training() {
+    const capital =
+        useCapitalPlanet() ?? throwError("Failed to find Player capital")
+    const [platoon, setPlatoon] = useState(1)
+
+    const handleChangePlatoon = (delta: number) => {
+        let index = platoon + delta
+        if (index > 24) {
+            index = 1
+        } else if (index < 1) {
+            index = 24
+        }
+        setPlatoon(index)
+    }
+
     const handleEquipPlatoon = () => {}
     const handleDismissPlatoon = () => {}
 
     return (
         <div>
-            <div style={{ display: "flex", padding: 6 }}>
-                <PlatoonSelector />
+            <div
+                style={{
+                    display: "flex",
+                    padding: 6,
+                    justifyContent: "space-around",
+                }}
+            >
+                <PlatoonSelector
+                    platoon={platoon}
+                    onChangePlatoon={handleChangePlatoon}
+                />
                 <PlatoonTroops />
-                <PlanetCivilians />
+                <PlanetCivilians civilians={capital.population} />
             </div>
             <div style={{ display: "flex", padding: 6 }}>
                 <ArmourSelector />
@@ -181,7 +231,8 @@ export default function Training() {
                         <Metadata
                             label="Credits"
                             alignment="right"
-                            value={""}
+                            value={capital.credits}
+                            format={Math.floor}
                         />
                     </div>
                     <div style={{ display: "flex" }}>
