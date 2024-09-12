@@ -91,7 +91,7 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
         }
     }
     const handleTransferToCapital = () => {
-        if (!selectedPlanet?.capital) {
+        if (selectedPlanet?.type !== "lifeless" && !selectedPlanet?.capital) {
             // transfer(selectedPlanet)
         }
     }

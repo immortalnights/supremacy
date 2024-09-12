@@ -12,9 +12,9 @@ import unload from "/images/unload.png"
 import decommission from "/images/decommission2.png"
 import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
-import { CargoType, ColonizedPlanet, Planet, Ship } from "../entities"
+import { CargoType, ColonizedPlanet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
-import { selectedPlanetAtom, shipsAtom } from "../store"
+import { shipsAtom } from "../store"
 import { MouseEvent, useState } from "react"
 import {
     useCrewShip,

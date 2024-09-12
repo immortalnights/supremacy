@@ -9,13 +9,15 @@ import ShipDetails from "../../components/ShipDetails"
 import ShipHeading from "../../components/ShipHeading"
 import Navigation from "../../components/Navigation"
 import { useAtomValue } from "jotai"
-import { selectedPlanetAtom, shipsAtom } from "../store"
-import { ColonizedPlanet, Ship } from "../entities"
+import { shipsAtom } from "../store"
+import { Ship } from "../entities"
 import FleetGrid from "../../components/FleetGrid"
 import { useState } from "react"
 import { useMoveShip } from "../Surface/commands"
 import { useDecommission } from "../../commands"
 import ShipIcon from "../../components/ShipIcon"
+import { useSelectedColonizedPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
 
 const useSelectedShip = (id?: Ship["id"]) => {
     let ship
@@ -27,7 +29,9 @@ const useSelectedShip = (id?: Ship["id"]) => {
 }
 
 export default function Fleet() {
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet =
+        useSelectedColonizedPlanet() ??
+        throwError("Cannot view Fleet of lifeless planet")
     const [selectedShip, setSelectedShip] = useState<Ship["id"] | undefined>()
     const ship = useSelectedShip(selectedShip)
     const [isSelectingDestination, setIsSelectingDestination] = useState(false)

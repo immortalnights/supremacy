@@ -14,7 +14,6 @@ import training_slow from "/images/training_slow.gif"
 import Metadata, { MetadataValue } from "../../components/Metadata"
 import { useMemo, useState } from "react"
 import { useCapitalPlanet } from "../dataHooks"
-import { throwError } from "game-signaling-server/client"
 
 const suffixes = new Map([
     ["one", "st"],
@@ -182,8 +181,7 @@ function WeaponSelector() {
 }
 
 export default function Training() {
-    const capital =
-        useCapitalPlanet() ?? throwError("Failed to find Player capital")
+    const capital = useCapitalPlanet()
     const [platoon, setPlatoon] = useState(1)
 
     const handleChangePlatoon = (delta: number) => {

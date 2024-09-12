@@ -1,15 +1,16 @@
-import { useAtomValue } from "jotai"
-import Button from "../../components/Button"
 import CombatAggression from "../../components/CombatAggression"
 import DockingBay from "../../components/DockingBay"
 import Navigation from "../../components/Navigation"
 import PlatoonGrid from "../../components/PlatoonGrid"
-import { ColonizedPlanet, Platoon, Ship } from "../entities"
+import { Ship } from "../entities"
 import combatVictory from "/images/combat_victory.gif"
-import { selectedPlanetAtom } from "../store"
+import { useSelectedColonizedPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
 
 export default function Combat() {
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet =
+        useSelectedColonizedPlanet() ??
+        throwError("Cannot view Combat of lifeless planet")
     const ship: Ship | undefined = undefined
 
     return (

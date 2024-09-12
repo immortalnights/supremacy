@@ -4,9 +4,10 @@ import { ColonizedPlanet, ShipBlueprint, ShipClass } from "../entities"
 import battleship from "/images/battleship.gif"
 import solar from "/images/solar.gif"
 import catalog from "../../data/ships.json"
-import { selectedPlanetAtom, sessionAtom, shipsAtom } from "../store"
+import { sessionAtom, shipsAtom } from "../store"
 import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "../../commands"
+import { useCapitalPlanet } from "../dataHooks"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -62,7 +63,7 @@ function PurchaseShip({
 
 export default function Shipyard() {
     const { localPlayer } = useAtomValue(sessionAtom)
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet = useCapitalPlanet()
     const [index, setIndex] = useState(0)
     const ship = catalog[index]
     const [purchasing, setPurchasing] = useState(false)
