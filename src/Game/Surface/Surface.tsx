@@ -2,13 +2,15 @@ import DockingBay from "../../components/DockingBay"
 import PlanetSurface from "../../components/PlanetSurface"
 import surfaceBackground from "/images/surface_background.png"
 import Navigation from "../../components/Navigation"
-import { useAtomValue } from "jotai"
-import { selectedPlanetAtom } from "../store"
-import { ColonizedPlanet, Ship } from "../entities"
+import { Ship } from "../entities"
 import { useMoveShip } from "./commands"
+import { useSelectedColonizedPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
 
 export default function Surface() {
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet =
+        useSelectedColonizedPlanet() ??
+        throwError("Cannot view Surface of lifeless planet")
     const moveShipTo = useMoveShip()
 
     const handleClickDockedShip = (ship: Ship) => {

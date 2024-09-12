@@ -24,6 +24,8 @@ import {
     useLoadPassengers,
     useUnloadShip,
 } from "../../commands"
+import { useSelectedColonizedPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
 
 const getModifierAmount = (event: MouseEvent, max: number = 1) => {
     let amount
@@ -178,7 +180,9 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 }
 
 export default function Cargo() {
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet =
+        useSelectedColonizedPlanet() ??
+        throwError("Cannot view Cargo of lifeless planet")
     const [selectedShipId, setSelectedShipId] = useState<string | undefined>(
         undefined,
     )
