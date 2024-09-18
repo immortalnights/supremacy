@@ -3,14 +3,8 @@ import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./Game/store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { Planet, Ship, ShipBlueprint } from "./Game/entities"
+import { Planet } from "./Game/entities"
 import { clamp } from "./Game/utilities"
-import {
-    canAffordShip,
-    commissionShip,
-    deductShipCost,
-    nextFreeIndex,
-} from "./Game/Shipyard/utilities"
 import { CommandContext } from "./CommandContext"
 import {
     crewShip,
@@ -23,6 +17,7 @@ import {
     transitionShip,
     unloadShipCargo,
 } from "./Game/shipCommands"
+import { modifyTroops } from "./platoonCommands"
 
 // FIXME move somewhere better
 const applyRenamePlanet = (
@@ -204,6 +199,16 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.enabled,
                     )
                     set(shipsAtom, modifiedShips)
+                } else if (command === "modify-platoon-troops") {
+                    ;[modifiedPlanets, modifiedPlatoons] = modifyTroops(
+                        localPlayer,
+                        originalPlanets,
+                        originalPlatoons,
+                        data.platoon,
+                        data.quantity,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(platoonsAtom, modifiedPlatoons)
                 } else {
                     console.error(`Unknown command '${command}'`)
                 }
