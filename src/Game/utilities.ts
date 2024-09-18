@@ -1,3 +1,4 @@
+import { MouseEvent } from "react"
 import { ColonizedPlanet, Planet, Ship } from "./entities"
 import { type Difficulty, difficulties } from "./types"
 
@@ -16,6 +17,21 @@ export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
 export function isDifficulty(str: string | undefined): str is Difficulty {
     return !!difficulties.find((item) => str === item)
 }
+
+export const getModifierAmount = (event: MouseEvent, max: number = 1) => {
+    let amount
+    if (event.ctrlKey) {
+        amount = max
+    } else if (event.shiftKey) {
+        amount = 100
+    } else {
+        amount = 1
+    }
+    return amount
+}
+
+export const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
+    planet.type !== "lifeless"
 
 export const shipInLocation = (ships: Ship[], index: number) => {
     return ships.find(

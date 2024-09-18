@@ -26,18 +26,7 @@ import {
 } from "../../commands"
 import { useSelectedColonizedPlanet } from "../dataHooks"
 import { throwError } from "game-signaling-server/client"
-
-const getModifierAmount = (event: MouseEvent, max: number = 1) => {
-    let amount
-    if (event.ctrlKey) {
-        amount = max
-    } else if (event.shiftKey) {
-        amount = 100
-    } else {
-        amount = 1
-    }
-    return amount
-}
+import { getModifierAmount } from "../utilities"
 
 function CargoItem({
     cargo,

@@ -17,10 +17,11 @@ import {
     unloadCargo,
 } from "./Shipyard/utilities"
 import { Difficulty } from "./types"
-import { shipsDockedAtPlanet, shipsOnPlanetSurface } from "./utilities"
-
-const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
-    planet.type !== "lifeless"
+import {
+    isColonizedPlanet,
+    shipsDockedAtPlanet,
+    shipsOnPlanetSurface,
+} from "./utilities"
 
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
     const planet: ColonizedPlanet | undefined = planets
@@ -46,7 +47,7 @@ const canModifyShipAtPlanet = (
 ): boolean => {
     let ok = false
     if (planet.owner !== player) {
-        console.error(`Planet ${ship.name} is not owned by player ${player}`)
+        console.error(`Planet ${planet.name} is not owned by player ${player}`)
     } else if (ship.owner !== player) {
         console.error(`Ship ${ship.name} is not owned by player ${player}`)
     } else {
