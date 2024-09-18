@@ -72,6 +72,17 @@ const generatePlanets = (count: number): Planet[] =>
         type: "lifeless",
     }))
 
+const initializePlatoons = (playerId: string, count: number = 24) =>
+    Array.from<unknown, Platoon>({ length: count }, (_, index) => ({
+        id: crypto.randomUUID(),
+        index: index,
+        owner: playerId,
+        size: 0,
+        calibre: 0,
+        state: "standby",
+        location: undefined,
+    }))
+
 export const initializeSinglePlayerGame = (
     difficulty: Difficulty,
     planetCount: number,
@@ -92,7 +103,10 @@ export const initializeSinglePlayerGame = (
     return {
         planets: defaultPlanets,
         ships: [],
-        platoons: [],
+        platoons: [
+            ...initializePlatoons(playerId),
+            /*todo AI platoons*/
+        ],
     }
 }
 
@@ -120,7 +134,10 @@ export const initializeMultiplayerGame = (
     return {
         planets: defaultPlanets,
         ships: [],
-        platoons: [],
+        platoons: [
+            ...initializePlatoons(player1Id),
+            ...initializePlatoons(player2Id),
+        ],
     }
 }
 

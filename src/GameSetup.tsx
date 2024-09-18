@@ -200,8 +200,8 @@ export default function GameSetup() {
         // store.set(simulationSpeedAtom, "normal")
         store.set(dateAtom, 0)
         store.set(planetsAtom, data.planets)
-        store.set(shipsAtom, [] as Ship[])
-        store.set(platoonsAtom, [] as Platoon[])
+        store.set(shipsAtom, data.ships)
+        store.set(platoonsAtom, data.platoons)
     }, [])
 
     console.log(configuration, session, state)
