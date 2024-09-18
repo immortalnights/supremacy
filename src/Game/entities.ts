@@ -111,14 +111,24 @@ export interface Ship {
     value: number
 }
 
-export interface Platoon {
+export type PlatoonState = "standby" | "training" | "equipped"
+
+export type Platoon = {
     id: string
-    name: string
+    index: number
     owner: string
     size: number
-    location: {
-        planet?: Planet["id"]
-        ship?: Ship["id"]
-        index?: number
-    }
-}
+    calibre: number
+    state: PlatoonState
+} & (
+    | { state: "standby" }
+    | { state: "training" }
+    | {
+          state: "equipped"
+          location: {
+              planet?: Planet["id"]
+              ship?: Ship["id"]
+              index?: number
+          }
+      }
+)
