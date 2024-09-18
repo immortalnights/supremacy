@@ -67,13 +67,15 @@ const simulatePlanet = (planet: ColonizedPlanet): Planet => {
     // Adjust growth
     modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
     // Apply population growth
-    modifiedPlanet.population = Math.min(
-        modifiedPlanet.population +
-            Math.floor(
-                modifiedPlanet.population * (modifiedPlanet.growth / 100),
-            ),
-        PLANET_POPULATION_LIMIT,
-    )
+    if (false) {
+        modifiedPlanet.population = Math.min(
+            modifiedPlanet.population +
+                Math.floor(
+                    modifiedPlanet.population * (modifiedPlanet.growth / 100),
+                ),
+            PLANET_POPULATION_LIMIT,
+        )
+    }
     // Collect taxes
     // FIXME tax should only be applied every _other_ day
     modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
