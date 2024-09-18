@@ -12,8 +12,13 @@ import training_fast from "/images/training_fast.gif"
 import training_medium from "/images/training_medium.gif"
 import training_slow from "/images/training_slow.gif"
 import Metadata, { MetadataValue } from "../../components/Metadata"
-import { useMemo, useState } from "react"
+import { MouseEvent, useMemo, useState } from "react"
 import { useCapitalPlanet } from "../dataHooks"
+import { useModifyPlatoonTroops } from "./actions"
+import { getModifierAmount } from "../utilities"
+import { Platoon } from "../entities"
+import { useAtomValue } from "jotai"
+import { platoonsAtom, sessionAtom } from "../store"
 
 const suffixes = new Map([
     ["one", "st"],
@@ -33,7 +38,7 @@ function PlatoonSelector({
     platoon,
     onChangePlatoon,
 }: {
-    platoon: number
+    platoon: Platoon
     onChangePlatoon: (delta: number) => void
 }) {
     const ordinal = useMemo(() => {
@@ -43,7 +48,7 @@ function PlatoonSelector({
             const suffix = suffixes.get(rule)
             return `${value}${suffix}`
         }
-        return formatOrdinals(platoon)
+        return formatOrdinals(1 + platoon.index)
     }, [platoon])
 
     const handleNextPlatoon = () => onChangePlatoon(1)
@@ -85,9 +90,16 @@ function PlatoonSelector({
     )
 }
 
-function PlatoonTroops() {
-    const handleHireTroops = () => {}
-    const handleDismissTroops = () => {}
+function PlatoonTroops({ platoon }: { platoon: Platoon }) {
+    const modifyTroops = useModifyPlatoonTroops()
+
+    const handleHireTroops = (event: MouseEvent) => {
+        modifyTroops(platoon, getModifierAmount(event, 200))
+    }
+
+    const handleDismissTroops = (event: MouseEvent) => {
+        modifyTroops(platoon, -getModifierAmount(event, 200))
+    }
 
     return (
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -99,7 +111,7 @@ function PlatoonTroops() {
                     width: "3em",
                 }}
             >
-                0
+                {platoon.size}
             </div>
             <div
                 style={{
@@ -181,20 +193,29 @@ function WeaponSelector() {
 }
 
 export default function Training() {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const capital = useCapitalPlanet()
-    const [platoon, setPlatoon] = useState(1)
+    const [index, setIndex] = useState(0)
+    const platoon = useAtomValue(platoonsAtom).find(
+        (platoon) => platoon.index === index && platoon.owner === localPlayer,
+    )
+
+    if (!platoon) {
+        throw Error(`Failed to find platoon ${index} for ${localPlayer}`)
+    }
 
     const handleChangePlatoon = (delta: number) => {
-        let index = platoon + delta
-        if (index > 24) {
-            index = 1
-        } else if (index < 1) {
-            index = 24
+        let next = index + delta
+        if (next > 23) {
+            next = 0
+        } else if (next < 0) {
+            next = 23
         }
-        setPlatoon(index)
+        setIndex(next)
     }
 
     const handleEquipPlatoon = () => {}
+
     const handleDismissPlatoon = () => {}
 
     return (
@@ -210,7 +231,7 @@ export default function Training() {
                     platoon={platoon}
                     onChangePlatoon={handleChangePlatoon}
                 />
-                <PlatoonTroops />
+                <PlatoonTroops platoon={platoon} />
                 <PlanetCivilians civilians={capital.population} />
             </div>
             <div style={{ display: "flex", padding: 6 }}>
