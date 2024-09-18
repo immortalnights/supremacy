@@ -1,7 +1,6 @@
 import Button from "../../components/Button"
 import Navigation from "../../components/Navigation"
 import PlanetDetails from "../../components/PlanetDetails"
-import EntityGrid from "../../components/EntityGrid"
 import ShipLocationGrid from "../../components/ShipLocationGrid"
 import renameIcon from "/images/rename_planet.png"
 import transferIcon from "/images/transfer.png"
@@ -9,13 +8,8 @@ import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
 import { useAtomValue, useSetAtom } from "jotai"
-import {
-    planetsAtom,
-    selectedPlanetAtom,
-    sessionAtom,
-    shipsAtom,
-} from "../store"
-import { ColonizedPlanet, Planet, ShipPosition } from "../entities"
+import { selectedPlanetAtom, sessionAtom, shipsAtom } from "../store"
+import { Planet, ShipPosition } from "../entities"
 import {
     FormEvent,
     KeyboardEvent,
@@ -24,8 +18,8 @@ import {
     ChangeEvent,
     useMemo,
 } from "react"
-import { useRenamePlanet } from "../../commands"
 import PlanetGrid from "../../components/PlanetGrid"
+import { useRenamePlanet } from "./actions"
 
 function RenamePlanet({
     onRename,

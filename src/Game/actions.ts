@@ -1,6 +1,6 @@
 import { useContext } from "react"
-import { CommandContext } from "../../CommandContext"
-import { Planet, Ship, ShipPosition } from "../entities"
+import { CommandContext } from "../CommandContext"
+import { Planet, Ship, ShipPosition } from "./entities"
 
 export const useMoveShip = () => {
     const { exec } = useContext(CommandContext)
@@ -8,8 +8,8 @@ export const useMoveShip = () => {
         exec("transition-ship", { ship, planet, position })
 }
 
-export const useEnableDisableShip = () => {
+export function useDecommission() {
     const { exec } = useContext(CommandContext)
-    return (ship: Ship, enabled: boolean) =>
-        exec("toggle-ship", { ship, enabled })
+
+    return (ship: Ship) => exec("decommission-ship", { ship })
 }

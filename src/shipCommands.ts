@@ -1,5 +1,5 @@
 import { throwError } from "game-signaling-server/client"
-import { PLANET_POPULATION_LIMIT } from "../settings"
+import { PLANET_POPULATION_LIMIT } from "./settings"
 import {
     Planet,
     Ship,
@@ -7,21 +7,20 @@ import {
     ShipBlueprint,
     CargoType,
     ShipPosition,
-} from "./entities"
+} from "./Game/entities"
 import {
     canAffordShip,
-    commissionShip,
     deductShipCost,
     getShipCurrentCargoAmount,
     nextFreeIndex,
     unloadCargo,
-} from "./Shipyard/utilities"
-import { Difficulty } from "./types"
+} from "./Game/Shipyard/utilities"
+import { Difficulty } from "./Game/types"
 import {
     isColonizedPlanet,
     shipsDockedAtPlanet,
     shipsOnPlanetSurface,
-} from "./utilities"
+} from "./Game/utilities"
 
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
     const planet: ColonizedPlanet | undefined = planets
@@ -54,6 +53,39 @@ const canModifyShipAtPlanet = (
         ok = true
     }
     return ok
+}
+
+const commissionShip = (
+    ship: ShipBlueprint,
+    name: string,
+    planet: ColonizedPlanet,
+    index: number,
+): Ship => {
+    return {
+        id: crypto.randomUUID(),
+        name,
+        description: ship.description,
+        owner: planet.owner,
+        class: ship.class,
+        requiredCrew: ship.requiredCrew,
+        crew: 0,
+        fuels: 0,
+        passengers: 0,
+        capacity: { ...ship.capacity },
+        location: {
+            planet: planet.id,
+            position: "docked",
+            index,
+        },
+        cargo: {
+            food: 0,
+            minerals: 0,
+            fuels: 0,
+            energy: 0,
+        },
+        active: false,
+        value: ship.cost.credits,
+    }
 }
 
 export const purchaseShip = (

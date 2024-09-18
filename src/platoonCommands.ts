@@ -27,10 +27,6 @@ const getPlatoonPlanet = (planets: Planet[], platoon: Platoon) => {
                 p.id === platoon.location.planet,
         )
 
-    if (!planet) {
-        console.error(`Ship ${ship.name} is not docked at a planet`)
-    }
-
     return planet
 }
 

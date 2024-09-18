@@ -16,17 +16,17 @@ import { CargoType, ColonizedPlanet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
 import { shipsAtom } from "../store"
 import { MouseEvent, useState } from "react"
+import { useDecommission } from "../actions"
+import { useSelectedColonizedPlanet } from "../dataHooks"
+import { throwError } from "game-signaling-server/client"
+import { getModifierAmount } from "../utilities"
 import {
     useCrewShip,
-    useDecommission,
     useLoadCargo,
     useLoadFuel,
     useLoadPassengers,
     useUnloadShip,
-} from "../../commands"
-import { useSelectedColonizedPlanet } from "../dataHooks"
-import { throwError } from "game-signaling-server/client"
-import { getModifierAmount } from "../utilities"
+} from "./actions"
 
 function CargoItem({
     cargo,

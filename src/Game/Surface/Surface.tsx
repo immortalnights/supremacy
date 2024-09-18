@@ -3,7 +3,7 @@ import PlanetSurface from "../../components/PlanetSurface"
 import surfaceBackground from "/images/surface_background.png"
 import Navigation from "../../components/Navigation"
 import { Ship } from "../entities"
-import { useMoveShip } from "./commands"
+import { useMoveShip } from "./actions"
 import { useSelectedColonizedPlanet } from "../dataHooks"
 import { throwError } from "game-signaling-server/client"
 

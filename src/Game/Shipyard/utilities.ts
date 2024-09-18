@@ -52,36 +52,3 @@ export const nextFreeIndex = (ships: Ship[], maxIndex: number): number => {
 
     return availableIndex
 }
-
-export const commissionShip = (
-    ship: ShipBlueprint,
-    name: string,
-    planet: ColonizedPlanet,
-    index: number,
-): Ship => {
-    return {
-        id: crypto.randomUUID(),
-        name,
-        description: ship.description,
-        owner: planet.owner,
-        class: ship.class,
-        requiredCrew: ship.requiredCrew,
-        crew: 0,
-        fuels: 0,
-        passengers: 0,
-        capacity: { ...ship.capacity },
-        location: {
-            planet: planet.id,
-            position: "docked",
-            index,
-        },
-        cargo: {
-            food: 0,
-            minerals: 0,
-            fuels: 0,
-            energy: 0,
-        },
-        active: false,
-        value: ship.cost.credits,
-    }
-}

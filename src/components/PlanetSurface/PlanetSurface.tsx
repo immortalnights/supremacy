@@ -3,7 +3,7 @@ import { shipInLocation } from "../../Game/utilities"
 import Button from "../Button"
 import ShipIcon from "../ShipIcon"
 import { useShipsOnPlanetSurface } from "../../Game/dataHooks"
-import { useEnableDisableShip, useMoveShip } from "../../Game/Surface/commands"
+import { useEnableDisableShip, useMoveShip } from "../../Game/Surface/actions"
 
 function Location({
     ship,

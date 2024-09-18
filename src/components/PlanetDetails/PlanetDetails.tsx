@@ -6,7 +6,7 @@ import taxDownIcon from "/images/tax_down.png"
 import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
 import { selectedPlanetAtom } from "../../Game/store"
 import { useAtomValue } from "jotai"
-import { useAdjustTax } from "../../commands"
+import { useAdjustTax } from "../../actions"
 
 function TaxRate({
     value,

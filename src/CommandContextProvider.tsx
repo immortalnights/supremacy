@@ -16,7 +16,7 @@ import {
     toggleShip,
     transitionShip,
     unloadShipCargo,
-} from "./Game/shipCommands"
+} from "./shipCommands"
 import { modifyTroops } from "./platoonCommands"
 
 // FIXME move somewhere better
