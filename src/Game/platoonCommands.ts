@@ -1,5 +1,5 @@
-import { ColonizedPlanet, Planet, Platoon } from "./Game/entities"
-import { isColonizedPlanet } from "./Game/utilities"
+import { ColonizedPlanet, Planet, Platoon } from "./entities"
+import { isColonizedPlanet } from "./utilities"
 
 // make generic and combine with Ship version?
 const canModifyPlatoonAtPlanet = (
@@ -18,7 +18,7 @@ const canModifyPlatoonAtPlanet = (
     return ok
 }
 
-const getPlatoonPlanet = (planets: Planet[], platoon: Platoon) => {
+export const getPlatoonPlanet = (planets: Planet[], platoon: Platoon) => {
     const planet: ColonizedPlanet | undefined = planets
         .filter(isColonizedPlanet)
         .find(

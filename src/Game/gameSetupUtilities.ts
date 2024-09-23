@@ -5,15 +5,15 @@ import {
     PlanetResources,
     Platoon,
     Ship,
-} from "./Game/entities"
+} from "./entities"
 import {
     Difficulty,
     GameData,
     GameSession,
     LastSaveData,
     SaveGameData,
-} from "./Game/types"
-import { random } from "./Game/utilities"
+} from "./types"
+import { random } from "./utilities"
 
 const planetsForDifficulty: { [K in Difficulty]: number } = {
     easy: 8,

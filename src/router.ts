@@ -1,23 +1,7 @@
 import { createBrowserRouter } from "react-router-dom"
-import Menu from "./Menu/Menu"
-import CreateGame from "./Menu/CreateGame"
-import GameRoot from "./Game/GameRoot"
-import {
-    Overview,
-    Shipyard,
-    SolarSystem,
-    Fleet,
-    Combat,
-    Cargo,
-    Surface,
-    Training,
-} from "./Game"
-import { Difficulty, GameConfiguration } from "./Game/types"
-import GameSetup from "./Menu/GameSetup"
+import { Menu, CreateGame } from "./Menu"
 import Lobby from "./Lobby/Lobby"
-// import GameRoom from "./GameRoom"
-import { GameSimulation } from "./GameSimulation"
-import GameSessionBoundary from "./Game/GameSessionBoundry"
+import { routes as gameRoutes } from "./Game/routes"
 
 export const router = createBrowserRouter([
     {
@@ -38,75 +22,5 @@ export const router = createBrowserRouter([
         //     },
         // ],
     },
-    {
-        path: "Game/*",
-        action: () => true,
-        // jotai provider is here
-        Component: GameRoot,
-        children: [
-            {
-                path: "Setup",
-                // Keep the form handling simply and pass through the data to the Component
-                action: async ({ request }): Promise<GameConfiguration> => {
-                    const data = await request.formData()
-
-                    return {
-                        difficulty: data
-                            .get("difficulty")
-                            ?.toString() as Difficulty,
-                        multiplayer:
-                            data.get("multiplayer")?.toString() === "true",
-                        planets: Number(data.get("planets")?.toString()),
-                        player1Id: crypto.randomUUID(),
-                        player1Name:
-                            data.get("player1Name")?.toString() ?? "noname",
-                        player2Id: data.get("player2Id")?.toString(),
-                        player2Name: data.get("player2Name")?.toString(),
-                    }
-                },
-                Component: GameSetup,
-            },
-            {
-                path: ":id",
-                // Simulation is here
-                Component: GameSimulation,
-                ErrorBoundary: GameSessionBoundary,
-                children: [
-                    {
-                        index: true,
-                        path: "SolarSystem",
-                        Component: SolarSystem,
-                    },
-                    {
-                        path: "Overview",
-                        Component: Overview,
-                    },
-                    {
-                        path: "Shipyard",
-                        Component: Shipyard,
-                    },
-                    {
-                        path: "Fleet",
-                        Component: Fleet,
-                    },
-                    {
-                        path: "Combat",
-                        Component: Combat,
-                    },
-                    {
-                        path: "Cargo",
-                        Component: Cargo,
-                    },
-                    {
-                        path: "Surface",
-                        Component: Surface,
-                    },
-                    {
-                        path: "Training",
-                        Component: Training,
-                    },
-                ],
-            },
-        ],
-    },
+    gameRoutes,
 ])

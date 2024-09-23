@@ -7,13 +7,13 @@ import {
     sessionAtom,
     shipsAtom,
     simulationSpeedAtom,
-} from "./Game/store"
+} from "./store"
 import { CommandProvider } from "./CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { ColonizedPlanet, Planet, Platoon, Ship } from "./Game/entities"
-import { calculateGrowth } from "./Game/utilities"
+import { ColonizedPlanet, Planet, Platoon, Ship } from "./entities"
+import { calculateGrowth } from "./utilities"
 import { PLANET_POPULATION_LIMIT } from "./settings"
 
 const speedMap = {

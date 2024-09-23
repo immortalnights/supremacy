@@ -6,10 +6,10 @@ import {
     planetsAtom,
     shipsAtom,
     platoonsAtom,
-} from "../Game/store"
-import { GameConfiguration, GameData, GameSession } from "../Game/types"
+} from "./store"
+import { GameConfiguration, GameData, GameSession } from "./types"
 import { Navigate } from "react-router-dom"
-import { Platoon, Ship } from "../Game/entities"
+import { Platoon, Ship } from "./entities"
 import {
     DataChannelMessageHandler,
     useManager,

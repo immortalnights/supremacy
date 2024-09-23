@@ -1,6 +1,6 @@
 import Button from "../../components/Button"
 import Navigation from "../components/Navigation"
-import PlanetDetails from "../../components/PlanetDetails"
+import PlanetDetails from "./components/PlanetDetails"
 import ShipLocationGrid from "../components/ShipLocationGrid"
 import renameIcon from "/images/rename_planet.png"
 import transferIcon from "/images/transfer.png"
@@ -18,8 +18,8 @@ import {
     ChangeEvent,
     useMemo,
 } from "react"
-import PlanetGrid from "../../components/PlanetGrid"
 import { useRenamePlanet } from "./actions"
+import PlanetGrid from "../components/PlanetGrid"
 
 function RenamePlanet({
     onRename,

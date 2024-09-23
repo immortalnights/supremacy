@@ -1,5 +1,5 @@
 import DockingBay from "../components/DockingBay"
-import PlanetSurface from "../../components/PlanetSurface"
+import PlanetSurface from "./components/PlanetSurface"
 import surfaceBackground from "/images/surface_background.png"
 import Navigation from "../components/Navigation"
 import { Ship } from "../entities"
