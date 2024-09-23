@@ -67,6 +67,7 @@ const simulatePlanet = (planet: ColonizedPlanet): Planet => {
     // Adjust growth
     modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
     // Apply population growth
+    // eslint-disable-next-line no-constant-condition
     if (false) {
         modifiedPlanet.population = Math.min(
             modifiedPlanet.population +
@@ -105,7 +106,7 @@ const useMultiplayerSync = () => {
         let peerMessageHandler
 
         if (multiplayer) {
-            peerMessageHandler = (peer, { name, body }) => {}
+            peerMessageHandler = (_peer, { _name, _body }) => {}
         } else {
             peerMessageHandler = () => {}
         }

@@ -33,7 +33,6 @@ type SetupState =
 
 const useMultiplayer2 = ({
     onReady,
-    onError,
 }: {
     onReady: () => void
     onError: () => void
@@ -120,6 +119,7 @@ const useMultiplayer2 = ({
         setSession,
         game,
         hydrateAtoms,
+        onReady,
     ])
 
     useEffect(() => {

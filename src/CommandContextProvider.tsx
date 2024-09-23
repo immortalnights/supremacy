@@ -102,7 +102,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "purchase-ship") {
                     // Purchases are (currently) only made on the capital
-                    ;[modifiedPlanets, modifiedShips] = purchaseShip(
+                    [modifiedPlanets, modifiedShips] = purchaseShip(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -112,7 +112,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "crew-ship") {
-                    ;[modifiedPlanets, modifiedShips] = crewShip(
+                    [modifiedPlanets, modifiedShips] = crewShip(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -121,7 +121,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "unload-ship") {
-                    ;[modifiedPlanets, modifiedShips] = unloadShipCargo(
+                    [modifiedPlanets, modifiedShips] = unloadShipCargo(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -130,7 +130,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "decommission-ship") {
-                    ;[modifiedPlanets, modifiedShips] = decommissionShip(
+                    [modifiedPlanets, modifiedShips] = decommissionShip(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -139,7 +139,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "modify-passengers") {
-                    ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
+                    [modifiedPlanets, modifiedShips] = modifyShipPassengers(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -149,7 +149,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "modify-fuel") {
-                    ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
+                    [modifiedPlanets, modifiedShips] = modifyShipFuel(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -159,7 +159,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "load-cargo") {
-                    ;[modifiedPlanets, modifiedShips] = modifyCargo(
+                    [modifiedPlanets, modifiedShips] = modifyCargo(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -170,7 +170,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
                 } else if (command === "unload-cargo") {
-                    ;[modifiedPlanets, modifiedShips] = modifyCargo(
+                    [modifiedPlanets, modifiedShips] = modifyCargo(
                         localPlayer,
                         originalPlanets,
                         originalShips,
@@ -200,7 +200,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(shipsAtom, modifiedShips)
                 } else if (command === "modify-platoon-troops") {
-                    ;[modifiedPlanets, modifiedPlatoons] = modifyTroops(
+                    [modifiedPlanets, modifiedPlatoons] = modifyTroops(
                         localPlayer,
                         originalPlanets,
                         originalPlatoons,
@@ -228,7 +228,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     })
                 }
             },
-            [host, send],
+            [host, send, localPlayer],
         ),
     )
 
