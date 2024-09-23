@@ -16,17 +16,14 @@ jobs:
             - name: Install Dependencies
               run: npm ci
 
-            - name: Install sub-dependencies
-              run: npm run install
-
             - name: Formatting
-              run: npm run format:check
+              run: npm run format
 
             - name: Lint
               run: npm run lint
 
             - name: TSC
-              run: npm run tsc:check
+              run: npm run tsc
 
             - name: Test
               run: npm run test
