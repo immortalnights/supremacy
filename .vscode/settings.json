@@ -2,6 +2,7 @@
     "editor.tabSize": 4,
     "files.eol": "\n",
     "files.insertFinalNewline": true,
+    "prettier.configPath": "./.prettierrc.yaml",
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "search.exclude": {
@@ -12,5 +13,9 @@
     },
     "eslint.enable": true,
     "eslint.options": {},
-    "eslint.workingDirectories": ["./client", "./server"]
+    "eslint.workingDirectories": ["./src"],
+    "[json]": {
+    "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+    }
 }
