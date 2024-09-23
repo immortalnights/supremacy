@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import { CommandContext } from "../../CommandContext"
+import { CommandContext } from "../CommandContext"
 import { Ship } from "../entities"
 
 export const useEnableDisableShip = () => {

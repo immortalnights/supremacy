@@ -1,0 +1,260 @@
+import { useActionData } from "react-router-dom"
+import {
+    store,
+    sessionAtom,
+    dateAtom,
+    planetsAtom,
+    shipsAtom,
+    platoonsAtom,
+} from "../Game/store"
+import { GameConfiguration, GameData, GameSession } from "../Game/types"
+import { Navigate } from "react-router-dom"
+import { Platoon, Ship } from "../Game/entities"
+import {
+    DataChannelMessageHandler,
+    useManager,
+    usePeerConnection,
+} from "webrtc-lobby-lib"
+import { useCallback, useEffect, useState } from "react"
+import { useAtom } from "jotai"
+import {
+    initializeMultiplayerGame,
+    initializeSinglePlayerGame,
+    saveGame,
+} from "./gameSetupUtilities"
+
+type SetupState =
+    | "initializing"
+    | "synchronizing"
+    | "creating"
+    | "waiting"
+    | "ready"
+    | "error"
+
+const useMultiplayer2 = ({
+    onReady,
+}: {
+    onReady: () => void
+    onError: () => void
+}) => {
+    const { send, subscribe, unsubscribe } = usePeerConnection()
+    const { player: localPlayer, game } = useManager()
+    const [session, setSession] = useAtom(sessionAtom)
+    const [state, setState] = useState<SetupState>("initializing")
+    const hydrateAtoms = useCallback((data: GameData) => {
+        // store.set(simulationSpeedAtom, "normal")
+        store.set(dateAtom, 0)
+        store.set(planetsAtom, data.planets)
+        store.set(shipsAtom, [] as Ship[])
+        store.set(platoonsAtom, [] as Platoon[])
+    }, [])
+
+    useEffect(() => {
+        let peerMessageHandler: DataChannelMessageHandler | undefined
+
+        if (localPlayer) {
+            if (localPlayer.host) {
+                peerMessageHandler = (peer, { name, body }) => {
+                    console.debug("Host received message", name)
+                    if (name === "session-synchronization") {
+                        setSession({
+                            id: game,
+                            difficulty: "easy",
+                            multiplayer: true,
+                            host: localPlayer?.host,
+                            localPlayer: localPlayer.id,
+                            player1: {
+                                id: localPlayer.id,
+                                name: localPlayer.name,
+                            },
+                            player2: body.player2,
+                        })
+                        setState("creating")
+                    } else if (name === "initialize-synchronization-complete") {
+                        send("game-start", {})
+                        setState("ready")
+                        onReady()
+                    }
+                }
+            } else {
+                peerMessageHandler = (peer, { name, body }) => {
+                    console.debug("Client received message", name)
+                    if (name === "session-synchronization") {
+                        setSession({
+                            id: game,
+                            difficulty: body.difficulty,
+                            multiplayer: true,
+                            host: localPlayer?.host,
+                            localPlayer: localPlayer?.id,
+                            player1: body.player1,
+                            player2: {
+                                id: localPlayer?.id,
+                                name: localPlayer?.name,
+                            },
+                        })
+                        setState("waiting")
+                    } else if (name === "initial-game-data") {
+                        hydrateAtoms(body as GameData)
+                        console.debug("client sending init-sync-complete")
+                        send("initialize-synchronization-complete", {})
+                    } else if (name === "game-start") {
+                        setState("ready")
+                        onReady()
+                    }
+                }
+            }
+            subscribe(peerMessageHandler)
+        }
+
+        return () => {
+            if (peerMessageHandler) {
+                unsubscribe(peerMessageHandler)
+            }
+        }
+    }, [
+        localPlayer,
+        subscribe,
+        unsubscribe,
+        send,
+        setSession,
+        game,
+        hydrateAtoms,
+        onReady,
+    ])
+
+    useEffect(() => {
+        switch (state) {
+            case "initializing": {
+                break
+            }
+            case "synchronizing": {
+                if (localPlayer) {
+                    let data
+                    if (localPlayer.host) {
+                        data = {
+                            player1: {
+                                id: localPlayer.id,
+                                name: localPlayer.name,
+                            },
+                        }
+                    } else {
+                        data = {
+                            player2: {
+                                id: localPlayer.id,
+                                name: localPlayer.name,
+                            },
+                        }
+                    }
+                    send("session-synchronization", data)
+                }
+                break
+            }
+            case "creating": {
+                if (
+                    localPlayer?.host &&
+                    session?.player1?.id &&
+                    session?.player2?.id
+                ) {
+                    const data = initializeMultiplayerGame(
+                        "easy",
+                        8,
+                        session?.player1?.id,
+                        session?.player2?.id,
+                    )
+                    hydrateAtoms(data)
+                    send("initial-game-data", data)
+                    setState("waiting")
+                } else {
+                    setState("waiting")
+                }
+                break
+            }
+            case "waiting": {
+                break
+            }
+            case "ready": {
+                break
+            }
+            case "error": {
+                break
+            }
+        }
+    }, [localPlayer, session, send, state, hydrateAtoms])
+
+    return useCallback(() => {
+        setState("synchronizing")
+    }, [])
+}
+
+export default function GameSetup() {
+    const configuration = useActionData() as GameConfiguration | undefined
+    const [state, setState] = useState<SetupState>("initializing")
+    const [session, setSession] = useAtom(sessionAtom)
+    const setup = useMultiplayer2({
+        onReady: () => {
+            setState("ready")
+        },
+        onError: () => setState("error"),
+    })
+    const hydrateAtoms = useCallback((data: GameData) => {
+        // store.set(simulationSpeedAtom, "normal")
+        store.set(dateAtom, 0)
+        store.set(planetsAtom, data.planets)
+        store.set(shipsAtom, data.ships)
+        store.set(platoonsAtom, data.platoons)
+    }, [])
+
+    console.log(configuration, session, state)
+
+    // At the moment, multiplayer is identified by the lack of configuration
+    useEffect(() => {
+        if (!session) {
+            if (!configuration) {
+                setup()
+            } else {
+                const playerId = configuration.player1Id
+                const data = initializeSinglePlayerGame(
+                    configuration.difficulty,
+                    configuration.planets,
+                    playerId,
+                )
+
+                const sessionData = {
+                    id: crypto.randomUUID(),
+                    multiplayer: false,
+                    host: true,
+                    difficulty: configuration.difficulty,
+                    created: new Date().toISOString(),
+                    playtime: 0,
+                    player1: {
+                        id: playerId,
+                        name: configuration.player1Name,
+                    },
+                    player2: undefined,
+                    localPlayer: playerId,
+                } satisfies GameSession
+
+                saveGame(
+                    sessionData,
+                    "paused",
+                    data.planets,
+                    data.ships,
+                    data.platoons,
+                )
+
+                hydrateAtoms(data)
+                setSession(sessionData)
+                setState("ready")
+            }
+        }
+    }, [setup, configuration, hydrateAtoms, session, setSession])
+
+    let content
+    if (session && state === "ready") {
+        content = <Navigate to={`/Game/${session.id}/SolarSystem`} replace />
+    } else {
+        content = <div>Loading...</div>
+    }
+
+    return content
+}

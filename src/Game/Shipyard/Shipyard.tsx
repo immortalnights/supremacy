@@ -6,7 +6,7 @@ import solar from "/images/solar.gif"
 import catalog from "../../data/ships.json"
 import { sessionAtom, shipsAtom } from "../store"
 import { atom, useAtomValue } from "jotai"
-import { usePurchaseShip } from "../../actions"
+import { usePurchaseShip } from "./actions"
 import { useCapitalPlanet } from "../dataHooks"
 
 const images: { [key in ShipClass]: string } = {

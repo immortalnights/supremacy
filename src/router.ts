@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom"
-import Menu from "./Menu"
-import CreateGame from "./CreateGame"
-import GameRoot from "./GameRoot"
+import Menu from "./Menu/Menu"
+import CreateGame from "./Menu/CreateGame"
+import GameRoot from "./Game/GameRoot"
 import {
     Overview,
     Shipyard,
@@ -13,11 +13,11 @@ import {
     Training,
 } from "./Game"
 import { Difficulty, GameConfiguration } from "./Game/types"
-import GameSetup from "./GameSetup"
-import Lobby from "./Lobby"
+import GameSetup from "./Menu/GameSetup"
+import Lobby from "./Lobby/Lobby"
 // import GameRoom from "./GameRoom"
 import { GameSimulation } from "./GameSimulation"
-import GameSessionBoundary from "./GameSessionBoundry"
+import GameSessionBoundary from "./Game/GameSessionBoundry"
 
 export const router = createBrowserRouter([
     {

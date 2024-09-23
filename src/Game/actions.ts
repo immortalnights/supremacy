@@ -1,5 +1,5 @@
 import { useContext } from "react"
-import { CommandContext } from "../CommandContext"
+import { CommandContext } from "./CommandContext"
 import { Planet, Ship, ShipPosition } from "./entities"
 
 export const useMoveShip = () => {
