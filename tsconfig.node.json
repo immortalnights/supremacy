@@ -2,10 +2,10 @@
     "compilerOptions": {
         "composite": true,
         "skipLibCheck": true,
+        "strictNullChecks": true,
         "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowSyntheticDefaultImports": true,
-        "strict": true
+        "moduleResolution": "Node",
+        "allowSyntheticDefaultImports": true
     },
-    "include": ["vite.config.ts"]
+    "include": ["vite.config.ts", "prettier.config.mjs"]
 }
