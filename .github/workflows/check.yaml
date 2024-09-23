@@ -1,7 +1,10 @@
-name: ❓Check Linting
+name: ❓ Check Linting
 
 on:
+    push:
+        branches: ["main"]
     pull_request:
+    workflow_dispatch:
 
 jobs:
     checks:
