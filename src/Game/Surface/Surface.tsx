@@ -1,10 +1,10 @@
-import DockingBay from "../components/DockingBay"
+import DockingBay from "Game/components/DockingBay"
 import PlanetSurface from "./components/PlanetSurface"
 import surfaceBackground from "/images/surface_background.png"
-import Navigation from "../components/Navigation"
-import { Ship } from "../entities"
-import { useMoveShip } from "../actions"
-import { useSelectedColonizedPlanet } from "../dataHooks"
+import Navigation from "Game/components/Navigation"
+import { Ship } from "Game/entities"
+import { useMoveShip } from "Game/actions"
+import { useSelectedColonizedPlanet } from "Game/hooks"
 import { throwError } from "game-signaling-server/client"
 
 export default function Surface() {

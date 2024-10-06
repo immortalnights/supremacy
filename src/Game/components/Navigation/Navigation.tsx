@@ -8,16 +8,11 @@ import surfaceIcon from "/images/surface.png"
 import combatIcon from "/images/combat.png"
 import spyIcon from "/images/spy.png"
 import saveIcon from "/images/save.png"
-import Button from "../../../components/Button"
+import Button from "components/Button"
 import { Link } from "react-router-dom"
 import { useAtomCallback } from "jotai/utils"
 import { useCallback } from "react"
-import {
-    planetsAtom,
-    platoonsAtom,
-    sessionAtom,
-    shipsAtom,
-} from "../../store"
+import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../../store"
 import { saveGame } from "../../gameSetupUtilities"
 import { Getter } from "jotai"
 

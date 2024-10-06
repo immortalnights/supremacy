@@ -1,10 +1,10 @@
-import CombatAggression from "../../components/CombatAggression"
+import CombatAggression from "./components/CombatAggression"
 import DockingBay from "../components/DockingBay"
 import Navigation from "../components/Navigation"
 import PlatoonGrid from "../components/PlatoonGrid"
 import { Ship } from "../entities"
 import combatVictory from "/images/combat_victory.gif"
-import { useSelectedColonizedPlanet } from "../dataHooks"
+import { useSelectedColonizedPlanet } from "../hooks"
 import { throwError } from "game-signaling-server/client"
 
 export default function Combat() {
@@ -17,16 +17,20 @@ export default function Combat() {
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
-                    <DockingBay planet={planet} />
+                    <DockingBay planet={planet} onClick={() => {}} />
                     <div>
                         <div>Ship</div>
                         <div>{ship?.name}</div>
-                        <PlatoonGrid platoons={[]} size={4} />
+                        <PlatoonGrid
+                            platoons={[]}
+                            size={4}
+                            onClick={() => {}}
+                        />
                     </div>
                 </div>
                 <div>{/* messages */}</div>
                 <div>
-                    <PlatoonGrid platoons={[]} />
+                    <PlatoonGrid platoons={[]} onClick={() => {}} />
                 </div>
             </div>
             <div></div>
@@ -77,7 +81,11 @@ export default function Combat() {
                         <span>Scaling Factor:</span> <span>0%</span>
                     </div>
                 </div>
-                <CombatAggression aggression={25} />
+                <CombatAggression
+                    aggression={25}
+                    onIncrease={() => {}}
+                    onDecrease={() => {}}
+                />
                 <Navigation
                     items={[
                         "training",

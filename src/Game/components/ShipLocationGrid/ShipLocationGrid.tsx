@@ -1,5 +1,5 @@
 import { Ship } from "../../entities"
-import Button from "../../../components/Button"
+import Button from "components/Button"
 import ShipIcon from "../ShipIcon"
 
 function Item({

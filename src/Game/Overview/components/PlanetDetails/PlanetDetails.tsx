@@ -1,12 +1,14 @@
-import { ColonizedPlanet } from "../../Game/entities"
-import Button from "../Button"
-import Date from "../Date"
+import { ColonizedPlanet } from "Game/entities"
+import Button from "components/Button"
 import taxUpIcon from "/images/tax_up.png"
 import taxDownIcon from "/images/tax_down.png"
-import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
-import { selectedPlanetAtom } from "../../Game/store"
+import Metadata, {
+    MetadataLabel,
+    MetadataValue,
+} from "Game/components/Metadata"
+import { selectedPlanetAtom } from "Game/store"
 import { useAtomValue } from "jotai"
-import { useAdjustTax } from "../../Game/Overview/actions"
+import { useAdjustTax } from "../../actions"
 
 function TaxRate({
     value,

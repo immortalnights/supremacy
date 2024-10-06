@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
-import { Planet } from "../../Game/entities"
-import { sessionAtom, planetsAtom } from "../../Game/store"
+import { Planet } from "../../entities"
+import { sessionAtom, planetsAtom } from "../../store"
 import EntityGrid from "../EntityGrid"
 
 export default function PlanetGrid({

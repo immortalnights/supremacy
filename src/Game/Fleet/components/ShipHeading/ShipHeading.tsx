@@ -1,5 +1,5 @@
-import { Ship } from "../../Game/entities"
-import Metadata from "../Metadata"
+import { Ship } from "Game/entities"
+import Metadata from "Game/components/Metadata"
 
 export default function ShipHeading({ ship }: { ship?: Ship }) {
     let name = undefined
@@ -8,7 +8,7 @@ export default function ShipHeading({ ship }: { ship?: Ship }) {
     let eta = undefined
     let fuels = undefined
     if (ship && ship.location.position === "outer-space") {
-        ({ name, fuels } = ship)
+        ;({ name, fuels } = ship)
         ;({ from, to, eta } = ship.location.heading)
     }
 

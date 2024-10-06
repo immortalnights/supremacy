@@ -1,4 +1,4 @@
-import Button from "../Button"
+import Button from "components/Button"
 import blueUp from "/images/blue_up.png"
 import blueDown from "/images/blue_down.png"
 import aggression25 from "/images/aggression_25.png"

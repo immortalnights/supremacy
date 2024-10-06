@@ -1,6 +1,9 @@
-import { Ship } from "../../Game/entities"
-import Date from "../Date"
-import Metadata, { MetadataLabel, MetadataValue } from "../Metadata"
+import { Ship } from "Game/entities"
+import Date from "Game/components/Date"
+import Metadata, {
+    MetadataLabel,
+    MetadataValue,
+} from "Game/components/Metadata"
 
 export default function ShipDetails({ ship }: { ship?: Ship }) {
     return (

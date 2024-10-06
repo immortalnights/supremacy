@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
-import Metadata, { type MetadataAlignment } from "../Metadata"
-import { dateAtom } from "../../store"
+import Metadata, { type MetadataAlignment } from "Game/components/Metadata"
+import { dateAtom } from "Game/store"
 
 const days_per_month = 60
 

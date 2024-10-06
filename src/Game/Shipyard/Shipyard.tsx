@@ -1,5 +1,4 @@
 import { FormEvent, useMemo, useState } from "react"
-import Button from "components/Button"
 import { ColonizedPlanet, ShipBlueprint, ShipClass } from "../entities"
 import battleship from "/images/battleship.gif"
 import solar from "/images/solar.gif"
@@ -7,7 +6,7 @@ import catalog from "../data/ships.json"
 import { sessionAtom, shipsAtom } from "../store"
 import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "./actions"
-import { useCapitalPlanet } from "../dataHooks"
+import { useCapitalPlanet } from "../hooks"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
