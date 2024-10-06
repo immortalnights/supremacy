@@ -10,6 +10,17 @@ export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value))
 }
 
+export const wrap = (value: number, max: number, base: number = 0) => {
+    let next = value
+    if (value > max - 1) {
+        next = base
+    } else if (value < base) {
+        next = max - 1
+    }
+
+    return next
+}
+
 export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
     return morale * 0.33 - tax * 0.5
 }
