@@ -1,20 +1,25 @@
 import { FormEvent, useMemo, useState } from "react"
 import { ColonizedPlanet, ShipBlueprint, ShipClass } from "../entities"
-import battleship from "/images/battleship.gif"
-import solar from "/images/solar.gif"
+import battleship from "/images/ship-battle-cruiser.gif"
+import solar from "/images/ship-solar-satellite.gif"
+import atmos from "/images/ship-atmosphere-processor.gif"
+import carrier from "/images/ship-cargo-carrier.gif"
+import mining from "/images/ship-mining-station.gif"
+import horticultural from "/images/ship-horticultural.gif"
 import catalog from "../data/ships.json"
 import { sessionAtom, shipsAtom } from "../store"
 import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "./actions"
 import { useCapitalPlanet } from "../hooks"
+import Button from "components/Button"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
     "Solar-Satellite Generator": solar,
-    "Atmosphere Processor": battleship,
-    "Cargo Store / Carrier": battleship,
-    "Core Mining Station": battleship,
-    "Horticultural Station": battleship,
+    "Atmosphere Processor": atmos,
+    "Cargo Store / Carrier": carrier,
+    "Core Mining Station": mining,
+    "Horticultural Station": horticultural,
 }
 
 function PurchaseShip({
@@ -97,7 +102,9 @@ export default function Shipyard() {
 
     return (
         <div>
-            <img src={images[ship.class]} />
+            <div style={{ background: "black", width: 640, height: 282 }}>
+                <img src={images[ship.class]} />
+            </div>
             <div>
                 <div style={{ display: "flex" }}>
                     <Button onClick={handlePrevious} style={{ padding: 5 }}>
