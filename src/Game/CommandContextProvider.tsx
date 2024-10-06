@@ -17,7 +17,7 @@ import {
     transitionShip,
     unloadShipCargo,
 } from "./shipCommands"
-import { modifyTroops } from "./platoonCommands"
+import { modifySuit, modifyTroops, modifyWeapon } from "./platoonCommands"
 
 // FIXME move somewhere better
 const applyRenamePlanet = (
@@ -208,6 +208,22 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.quantity,
                     )
                     set(planetsAtom, modifiedPlanets)
+                    set(platoonsAtom, modifiedPlatoons)
+                } else if (command === "modify-platoon-suit") {
+                    modifiedPlatoons = modifySuit(
+                        localPlayer,
+                        originalPlatoons,
+                        data.platoon,
+                        data.suit,
+                    )
+                    set(platoonsAtom, modifiedPlatoons)
+                } else if (command === "modify-platoon-weapon") {
+                    modifiedPlatoons = modifyWeapon(
+                        localPlayer,
+                        originalPlatoons,
+                        data.platoon,
+                        data.weapon,
+                    )
                     set(platoonsAtom, modifiedPlatoons)
                 } else {
                     console.error(`Unknown command '${command}'`)

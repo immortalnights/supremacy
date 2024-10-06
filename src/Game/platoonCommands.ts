@@ -1,4 +1,10 @@
-import { ColonizedPlanet, Planet, Platoon } from "./entities"
+import {
+    ColonizedPlanet,
+    Planet,
+    Platoon,
+    SuitClass,
+    WeaponClass,
+} from "./entities"
 import { isColonizedPlanet } from "./utilities"
 
 // make generic and combine with Ship version?
@@ -79,6 +85,7 @@ export const modifyTroops = (
                 : -Math.min(platoon.size, Math.abs(quantity))
 
         const change2 = clamp(quantity, platoon.size, capital.population, 200)
+        const originalSize = platoon.size
 
         console.assert(change === change2, "values are different")
 
@@ -91,11 +98,87 @@ export const modifyTroops = (
         modifiedPlanet.population -= change2
         modifiedPlatoon.size += change2
 
+        // Reset the platoon, if all troops are removed
+        if (modifiedPlatoon.size === 0) {
+            modifiedPlatoon.calibre = 0
+            modifiedPlatoon.state = "standby"
+        } else {
+            modifiedPlatoon.state = "training"
+        }
+
+        if (modifiedPlatoon.calibre > 0 && change2 > 0) {
+            // TODO reduce the current calibre based on troops added
+        }
+
         modifiedPlanets[planetIndex] = modifiedPlanet
         modifiedPlatoons[platoonIndex] = modifiedPlatoon
     } else {
-        console.error("Cannot modify troops when equipped")
+        console.error("Cannot modify platoon troops when equipped")
     }
 
     return [modifiedPlanets ?? planets, modifiedPlatoons ?? platoons] as const
+}
+
+export const modifySuit = (
+    player: string,
+    platoons: Platoon[],
+    platoon: Platoon,
+    suit: SuitClass,
+) => {
+    let modifiedPlatoons
+
+    if (platoon.owner !== player) {
+        console.error(
+            `Platoon ${platoon.index} is not owned by player ${player}`,
+        )
+    } else if (platoon.state === "standby" || platoon.state === "training") {
+        const platoonIndex = platoons.findIndex((s) => s.id === platoon.id)
+
+        if (platoonIndex === -1) {
+            throw new Error(`Invalid platoon (${platoonIndex}) index`)
+        }
+
+        modifiedPlatoons = [...platoons]
+        const modifiedPlatoon = { ...platoons[platoonIndex] }
+
+        modifiedPlatoon.suit = suit
+
+        modifiedPlatoons[platoonIndex] = modifiedPlatoon
+    } else {
+        console.error("Cannot modify platoon suit when equipped")
+    }
+
+    return modifiedPlatoons ?? platoons
+}
+
+export const modifyWeapon = (
+    player: string,
+    platoons: Platoon[],
+    platoon: Platoon,
+    weapon: WeaponClass,
+) => {
+    let modifiedPlatoons
+
+    if (platoon.owner !== player) {
+        console.error(
+            `Platoon ${platoon.index} is not owned by player ${player}`,
+        )
+    } else if (platoon.state === "standby" || platoon.state === "training") {
+        const platoonIndex = platoons.findIndex((s) => s.id === platoon.id)
+
+        if (platoonIndex === -1) {
+            throw new Error(`Invalid platoon (${platoonIndex}) index`)
+        }
+
+        modifiedPlatoons = [...platoons]
+        const modifiedPlatoon = { ...platoons[platoonIndex] }
+
+        modifiedPlatoon.weapon = weapon
+
+        modifiedPlatoons[platoonIndex] = modifiedPlatoon
+    } else {
+        console.error("Cannot modify platoon weapon when equipped")
+    }
+
+    return modifiedPlatoons ?? platoons
 }
