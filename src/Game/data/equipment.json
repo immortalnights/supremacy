@@ -1,44 +1,44 @@
-{
-    "suit_1": {
+[
+    {
+        "id": "none",
         "type": "suit",
-        "name": "None",
         "power": 0,
         "cost": 50
     },
-    "suit_2": {
+    {
+        "id": "basic",
         "type": "suit",
-        "name": "Rocket Suit",
         "power": 1,
         "cost": 100
     },
-    "suit_3": {
+    {
+        "id": "moderate",
         "type": "suit",
-        "name": "Warrior Suit",
         "power": 2,
         "cost": 200
     },
-    "suit_4": {
+    {
+        "id": "advanced",
         "type": "suit",
-        "name": "Energy Shield",
         "power": 3,
         "cost": 295
     },
-    "weapon_1": {
+    {
+        "id": "rifle",
         "type": "weapon",
-        "name": "Rifle",
         "power": 0,
         "cost": 50
     },
-    "weapon_2": {
+    {
+        "id": "flamethrower",
         "type": "weapon",
-        "name": "Flamethrower",
         "power": 1,
         "cost": 120
     },
-    "weapon_3": {
+    {
+        "id": "mortar",
         "type": "weapon",
-        "name": "Mortar",
         "power": 2,
         "cost": 250
     }
-}
+]
