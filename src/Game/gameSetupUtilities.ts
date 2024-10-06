@@ -81,6 +81,8 @@ const initializePlatoons = (playerId: string, count: number = 24) =>
         calibre: 0,
         state: "standby",
         location: undefined,
+        suit: "none",
+        weapon: "rifle",
     }))
 
 export const initializeSinglePlayerGame = (

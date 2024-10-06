@@ -111,6 +111,10 @@ export interface Ship {
     value: number
 }
 
+export type SuitClass = "none" | "basic" | "moderate" | "advanced"
+
+export type WeaponClass = "rifle" | "flamethrower" | "mortar"
+
 export type PlatoonState = "standby" | "training" | "equipped"
 
 export type Platoon = {
@@ -120,6 +124,8 @@ export type Platoon = {
     size: number
     calibre: number
     state: PlatoonState
+    weapon: WeaponClass
+    suit: SuitClass
 } & (
     | { state: "standby" }
     | { state: "training" }
