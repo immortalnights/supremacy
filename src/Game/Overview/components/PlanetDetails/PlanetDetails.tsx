@@ -1,5 +1,6 @@
 import { ColonizedPlanet } from "Game/entities"
 import Button from "components/Button"
+import Date from "Game/components/Date"
 import taxUpIcon from "/images/tax_up.png"
 import taxDownIcon from "/images/tax_down.png"
 import Metadata, {
