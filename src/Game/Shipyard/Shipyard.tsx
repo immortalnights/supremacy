@@ -12,6 +12,7 @@ import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "./actions"
 import { useCapitalPlanet } from "../hooks"
 import Button from "components/Button"
+import { wrap } from "Game/utilities"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -85,10 +86,10 @@ export default function Shipyard() {
     const owned = useAtomValue(ownedAtom)
 
     const handlePrevious = () => {
-        setIndex((index - 1 + catalog.length) % catalog.length)
+        setIndex(wrap(index - 1, catalog.length))
     }
     const handleNext = () => {
-        setIndex((index + 1) % catalog.length)
+        setIndex(wrap(index + 1, catalog.length))
     }
     const handleBuy = () => {
         setPurchasing(true)
