@@ -8,6 +8,12 @@ export const useMoveShip = () => {
         exec("transition-ship", { ship, planet, position })
 }
 
+export const useTransferShip = () => {
+    const { exec } = useContext(CommandContext)
+    return (ship: Ship, planet: Planet) =>
+        exec("transfer-ship", { ship, planet })
+}
+
 export function useDecommission() {
     const { exec } = useContext(CommandContext)
 

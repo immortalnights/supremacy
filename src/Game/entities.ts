@@ -83,7 +83,7 @@ interface OuterSpace extends Location {
     heading: {
         from: Planet["id"]
         to: Planet["id"]
-        eat: number
+        eta: number
     }
 }
 

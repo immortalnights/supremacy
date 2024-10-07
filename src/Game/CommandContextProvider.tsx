@@ -14,6 +14,7 @@ import {
     modifyShipPassengers,
     purchaseShip,
     toggleShip,
+    transferShip,
     transitionShip,
     unloadShipCargo,
 } from "./shipCommands"
@@ -188,6 +189,15 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.ship,
                         data.planet,
                         data.position,
+                    )
+                    set(shipsAtom, modifiedShips)
+                } else if (command === "transfer-ship") {
+                    modifiedShips = transferShip(
+                        localPlayer,
+                        originalPlanets,
+                        originalShips,
+                        data.ship,
+                        data.planet,
                     )
                     set(shipsAtom, modifiedShips)
                 } else if (command === "toggle-ship") {

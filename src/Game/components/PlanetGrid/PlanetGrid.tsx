@@ -4,9 +4,9 @@ import { sessionAtom, planetsAtom } from "../../store"
 import EntityGrid from "../EntityGrid"
 
 export default function PlanetGrid({
-    onSelectPlanet,
+    onClick,
 }: {
-    onSelectPlanet: (planet: Planet) => void
+    onClick: (planet: Planet) => void
 }) {
     const { localPlayer } = useAtomValue(sessionAtom)
     const planets = useAtomValue(planetsAtom)
@@ -19,7 +19,7 @@ export default function PlanetGrid({
             entities={filteredPlanets}
             fixedPositions={true}
             localPlayer={localPlayer}
-            onClick={onSelectPlanet}
+            onClick={onClick}
         />
     )
 }

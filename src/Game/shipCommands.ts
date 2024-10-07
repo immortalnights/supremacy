@@ -473,6 +473,7 @@ export const modifyCargo = (
 }
 
 const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
+    // From : To
     orbit: ["docked", "outer-space"],
     surface: ["docked"],
     docked: ["surface", "orbit"],
@@ -625,6 +626,52 @@ export const transitionShip = (
         } catch (error) {
             console.error("Failed to transition ship", error)
         }
+    }
+
+    return modifiedShips ?? ships
+}
+
+export const transferShip = (
+    player: string,
+    planets: Planet[],
+    ships: Ship[],
+    ship: Ship,
+    targetPlanet: Planet,
+) => {
+    let modifiedShips
+    const currentLocation = ship.location
+
+    if (currentLocation.position === "orbit") {
+        if (currentLocation.planet === targetPlanet.id) {
+            console.error(
+                `Ship ${ship.name} is already at plant ${targetPlanet.name}`,
+            )
+        } else {
+            const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+            if (shipIndex === -1) {
+                throw new Error(`Invalid ship (${shipIndex}) index`)
+            }
+
+            const location: Ship["location"] = {
+                position: "outer-space",
+                heading: {
+                    from: currentLocation.planet,
+                    to: targetPlanet.id,
+                    eta: 5, // FIXME
+                },
+            }
+
+            modifiedShips = [...ships]
+            const modifiedShip = {
+                ...ships[shipIndex],
+                location,
+                active: false,
+            }
+            modifiedShips[shipIndex] = modifiedShip
+        }
+    } else {
+        console.error(`Ship ${ship.name} cannot travel when not in orbit`)
     }
 
     return modifiedShips ?? ships

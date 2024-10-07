@@ -1,15 +1,29 @@
-import { Ship } from "Game/entities"
+import { Planet, Ship } from "Game/entities"
 import Metadata from "Game/components/Metadata"
+import { useAtomValue } from "jotai"
+import { planetsAtom } from "Game/store"
 
 export default function ShipHeading({ ship }: { ship?: Ship }) {
-    let name = undefined
-    let from = undefined
-    let to = undefined
-    let eta = undefined
-    let fuels = undefined
+    const planets = useAtomValue(planetsAtom)
+
+    let name: string | undefined
+    let from: string | undefined
+    let to: string | undefined
+    let eta: number | undefined
+    let fuels: number | undefined
+    let destination: Planet | undefined
+    let source: Planet | undefined
     if (ship && ship.location.position === "outer-space") {
         ;({ name, fuels } = ship)
         ;({ from, to, eta } = ship.location.heading)
+
+        if (to) {
+            destination = planets.find((planet) => planet.id === to)
+        }
+
+        if (from) {
+            source = planets.find((planet) => planet.id === from)
+        }
     }
 
     return (
@@ -17,8 +31,8 @@ export default function ShipHeading({ ship }: { ship?: Ship }) {
             Heading
             <div>
                 <Metadata label="Ship" value={name} />
-                <Metadata label="From" value={from} />
-                <Metadata label="To" value={to} />
+                <Metadata label="From" value={source?.name} />
+                <Metadata label="To" value={destination?.name} />
                 <Metadata label="ETA" value={eta} />
                 <Metadata label="Fuel" value={fuels} />
             </div>

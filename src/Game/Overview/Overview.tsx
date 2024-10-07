@@ -208,7 +208,7 @@ export default function Overview() {
                             items={["combat", "fleet", "cargo"]}
                             direction="column"
                         />
-                        <PlanetGrid onSelectPlanet={handleSelectPlanet} />
+                        <PlanetGrid onClick={handleSelectPlanet} />
                     </div>
                 </div>
                 <div>
