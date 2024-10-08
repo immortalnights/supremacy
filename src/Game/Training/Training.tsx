@@ -8,10 +8,9 @@ import { MouseEvent, useMemo, useState } from "react"
 import { useCapitalPlanet } from "Game/hooks"
 import { useModifyPlatoonTroops, useTrainingActions } from "./actions"
 import { getModifierAmount, wrap } from "Game/utilities"
-import { Platoon, PlatoonState, SuitClass, WeaponClass } from "Game/entities"
+import { Platoon } from "Game/entities"
 import { useAtomValue } from "jotai"
 import { platoonsAtom, sessionAtom } from "../store"
-import equipment from "Game/data/equipment.json"
 import PlatoonSelector from "./components/PlatoonSelector"
 import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
@@ -78,30 +77,14 @@ function PlanetCivilians({ civilians }: { civilians: number }) {
 }
 
 export default function Training() {
-    const suits = useMemo(
-        () =>
-            equipment
-                .filter((item) => item.type === "suit")
-                .sort((a, b) => a.power - b.power),
-        [equipment],
-    )
-    const weapons = useMemo(
-        () =>
-            equipment
-                .filter((item) => item.type === "weapon")
-                .sort((a, b) => a.power - b.power),
-        [equipment],
-    )
     const { localPlayer } = useAtomValue(sessionAtom)
     const capital = useCapitalPlanet()
     const [index, setIndex] = useState(0)
     const platoon = useAtomValue(platoonsAtom).find(
         (platoon) => platoon.index === index && platoon.owner === localPlayer,
     )
-    const suit = platoon?.suit ?? "none"
-    const weapon = platoon?.weapon ?? "rifle"
 
-    const { modifySuit, modifyWeapon, equip, dismiss } = useTrainingActions()
+    const { equip, dismiss } = useTrainingActions()
 
     if (!platoon) {
         throw Error(`Failed to find platoon ${index} for ${localPlayer}`)
@@ -111,38 +94,6 @@ export default function Training() {
 
     const handleChangePlatoon = (delta: number) => {
         setIndex(wrap(index + delta, 24))
-    }
-
-    const handleNextSuit = () => {
-        if (platoon.state !== "training") {
-            const currentIndex = suits.findIndex((item) => item.id === suit)
-            const nextIndex = wrap(currentIndex + 1, suits.length)
-            modifySuit(platoon, suits[nextIndex].id as SuitClass)
-        }
-    }
-
-    const handlePreviousSuit = () => {
-        if (platoon.state !== "training") {
-            const currentIndex = suits.findIndex((item) => item.id === suit)
-            const nextIndex = wrap(currentIndex - 1, suits.length)
-            modifySuit(platoon, suits[nextIndex].id as SuitClass)
-        }
-    }
-
-    const handleNextWeapon = () => {
-        if (platoon.state !== "training") {
-            const currentIndex = weapons.findIndex((item) => item.id === weapon)
-            const nextIndex = wrap(currentIndex + 1, weapons.length)
-            modifyWeapon(platoon, weapons[nextIndex].id as WeaponClass)
-        }
-    }
-
-    const handlePreviousWeapon = () => {
-        if (platoon.state !== "training") {
-            const currentIndex = weapons.findIndex((item) => item.id === weapon)
-            const nextIndex = wrap(currentIndex - 1, weapons.length)
-            modifyWeapon(platoon, weapons[nextIndex].id as WeaponClass)
-        }
     }
 
     const handleEquipPlatoon = () => {
@@ -170,16 +121,8 @@ export default function Training() {
                 <PlanetCivilians civilians={capital.population} />
             </div>
             <div style={{ display: "flex", padding: 6 }}>
-                <SuitSelector
-                    suit={suit}
-                    onNext={handleNextSuit}
-                    onPrevious={handlePreviousSuit}
-                />
-                <WeaponSelector
-                    weapon={weapon}
-                    onNext={handleNextWeapon}
-                    onPrevious={handlePreviousWeapon}
-                />
+                <SuitSelector platoon={platoon} />
+                <WeaponSelector platoon={platoon} />
 
                 <div>
                     <div style={{ display: "flex" }}>
