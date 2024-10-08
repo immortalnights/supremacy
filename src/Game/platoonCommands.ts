@@ -205,15 +205,14 @@ export const equip = (
 
             modifiedPlanet.credits -= cost
 
-            modifiedPlatoon = {
-                ...modifiedPlatoon,
-                state: "equipped",
+            Object.assign(modifiedPlatoon, {
+                state: "equipped" as const,
                 location: {
                     planet: capital.id,
                     ship: undefined,
                     index: 0, // FIXME
                 },
-            }
+            })
         }
     }
 
