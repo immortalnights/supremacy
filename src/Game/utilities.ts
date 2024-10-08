@@ -2,6 +2,32 @@ import { MouseEvent } from "react"
 import { ColonizedPlanet, Planet, Ship } from "./entities"
 import { type Difficulty, difficulties } from "./types"
 
+export const clone = <
+    TResource extends { id: string },
+    TArray extends { id: string },
+>(
+    resource: TResource,
+    array: TArray[],
+): [TResource, TArray[]] => {
+    const index = array.findIndex((item) => item.id === resource.id)
+
+    if (index === -1) {
+        console.error(`Failed to find ${resource.id} in array`, array)
+        throw new Error(`Failed to find ${resource.id} in array`)
+    }
+
+    // Copy array
+    const clonedArray = [...array]
+
+    // Clone the resource
+    const clonedResource = { ...array[index] }
+
+    // Apply clone to array
+    clonedArray[index] = clonedResource
+
+    return [clonedResource as unknown as TResource, clonedArray] as const
+}
+
 export const random = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min) + min)
 }
