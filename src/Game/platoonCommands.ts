@@ -5,7 +5,8 @@ import {
     SuitClass,
     WeaponClass,
 } from "./entities"
-import { isColonizedPlanet } from "./utilities"
+import { calculateEquipPlatoonCost } from "./Training/utilities"
+import { clone, isColonizedPlanet } from "./utilities"
 
 // make generic and combine with Ship version?
 const canModifyPlatoonAtPlanet = (
@@ -61,7 +62,9 @@ export const modifyTroops = (
         console.error(
             `Platoon ${platoon.index} is not owned by player ${player}`,
         )
-    } else if (platoon.state === "standby" || platoon.state === "training") {
+    } else if (platoon.state === "equipped") {
+        console.error("Cannot modify platoon troops when equipped")
+    } else {
         const capital = planets
             .filter(isColonizedPlanet)
             .find((planet) => planet.owner === player && planet.capital)
@@ -112,8 +115,6 @@ export const modifyTroops = (
 
         modifiedPlanets[planetIndex] = modifiedPlanet
         modifiedPlatoons[platoonIndex] = modifiedPlatoon
-    } else {
-        console.error("Cannot modify platoon troops when equipped")
     }
 
     return [modifiedPlanets ?? planets, modifiedPlatoons ?? platoons] as const
@@ -132,18 +133,10 @@ export const modifySuit = (
             `Platoon ${platoon.index} is not owned by player ${player}`,
         )
     } else if (platoon.state === "standby" || platoon.state === "training") {
-        const platoonIndex = platoons.findIndex((s) => s.id === platoon.id)
-
-        if (platoonIndex === -1) {
-            throw new Error(`Invalid platoon (${platoonIndex}) index`)
-        }
-
-        modifiedPlatoons = [...platoons]
-        const modifiedPlatoon = { ...platoons[platoonIndex] }
+        let modifiedPlatoon
+        ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
 
         modifiedPlatoon.suit = suit
-
-        modifiedPlatoons[platoonIndex] = modifiedPlatoon
     } else {
         console.error("Cannot modify platoon suit when equipped")
     }
@@ -164,21 +157,65 @@ export const modifyWeapon = (
             `Platoon ${platoon.index} is not owned by player ${player}`,
         )
     } else if (platoon.state === "standby" || platoon.state === "training") {
-        const platoonIndex = platoons.findIndex((s) => s.id === platoon.id)
-
-        if (platoonIndex === -1) {
-            throw new Error(`Invalid platoon (${platoonIndex}) index`)
-        }
-
-        modifiedPlatoons = [...platoons]
-        const modifiedPlatoon = { ...platoons[platoonIndex] }
+        let modifiedPlatoon
+        ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
 
         modifiedPlatoon.weapon = weapon
-
-        modifiedPlatoons[platoonIndex] = modifiedPlatoon
     } else {
         console.error("Cannot modify platoon weapon when equipped")
     }
 
     return modifiedPlatoons ?? platoons
+}
+
+export const equip = (
+    player: string,
+    planets: Planet[],
+    platoons: Platoon[],
+    platoon: Platoon,
+) => {
+    let modifiedPlanets
+    let modifiedPlatoons
+
+    if (platoon.owner !== player) {
+        console.error(
+            `Platoon ${platoon.index} is not owned by player ${player}`,
+        )
+    } else if (platoon.state === "equipped") {
+    } else if (platoon.size === 0) {
+    } else {
+        const capital = planets
+            .filter(isColonizedPlanet)
+            .find((planet) => planet.owner === player && planet.capital)
+
+        if (!capital) {
+            throw new Error("Failed to find player capital")
+        }
+
+        const cost = calculateEquipPlatoonCost(platoon)
+
+        if (capital.credits < cost) {
+            throw new Error(`Insufficient credits to equip platoon`)
+        } else {
+            let modifiedPlatoon
+            ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
+
+            let modifiedPlanet
+            ;[modifiedPlanet, modifiedPlanets] = clone(capital, planets)
+
+            modifiedPlanet.credits -= cost
+
+            modifiedPlatoon = {
+                ...modifiedPlatoon,
+                state: "equipped",
+                location: {
+                    planet: capital.id,
+                    ship: undefined,
+                    index: 0, // FIXME
+                },
+            }
+        }
+    }
+
+    return [modifiedPlanets ?? planets, modifiedPlatoons ?? platoons] as const
 }
