@@ -1,17 +1,8 @@
 import Button from "../../components/Button"
 import equipPlatoon from "/images/equip.png"
 import disband from "/images/disband.png"
-import suit1 from "/images/suit_1.png"
-import suit2 from "/images/suit_2.png"
-import suit3 from "/images/suit_3.png"
-import suit4 from "/images/suit_4.gif"
-import weapon1 from "/images/weapon_1.png"
-import weapon2 from "/images/weapon_2.png"
-import weapon3 from "/images/weapon_3.png"
 import whiteUp from "/images/white_up.png"
 import whiteDown from "/images/white_down.png"
-import redLeft from "/images/red_left.png"
-import redRight from "/images/red_right.png"
 import Metadata, { MetadataValue } from "Game/components/Metadata"
 import { MouseEvent, useMemo, useState } from "react"
 import { useCapitalPlanet } from "Game/hooks"
@@ -21,22 +12,12 @@ import { Platoon, PlatoonState, SuitClass, WeaponClass } from "Game/entities"
 import { useAtomValue } from "jotai"
 import { platoonsAtom, sessionAtom } from "../store"
 import equipment from "Game/data/equipment.json"
-import { throwError } from "game-signaling-server/client"
 import PlatoonSelector from "./components/PlatoonSelector"
 import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
-
-type EquipmentType = SuitClass | WeaponClass
-
-const images: { [key in EquipmentType]: string } = {
-    none: suit1,
-    basic: suit2,
-    moderate: suit3,
-    advanced: suit4,
-    rifle: weapon1,
-    flamethrower: weapon2,
-    mortar: weapon3,
-}
+import WeaponSelector from "./components/WeaponSelector"
+import SuitSelector from "./components/SuitSelector"
+import { calculateEquipPlatoonCost } from "./utilities"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -96,82 +77,6 @@ function PlanetCivilians({ civilians }: { civilians: number }) {
     )
 }
 
-function ArmourSelector({
-    suit,
-    onPrevious,
-    onNext,
-}: {
-    suit: SuitClass
-    onPrevious: () => void
-    onNext: () => void
-}) {
-    const data =
-        equipment.find((item) => item.id === suit) ??
-        throwError(`Failed to find suit {suit}`)
-
-    return (
-        <div style={{ padding: 12 }}>
-            <div>Suit Cost: {data.cost} Cr.</div>
-            <div
-                style={{
-                    background: "black",
-                    width: 160,
-                    height: 235,
-                    margin: "2px 2px 5px",
-                }}
-            >
-                <img src={images[suit]} />
-            </div>
-            <div>
-                <Button onClick={onPrevious}>
-                    <img src={redLeft} />
-                </Button>
-                <Button onClick={onNext}>
-                    <img src={redRight} />
-                </Button>
-            </div>
-        </div>
-    )
-}
-
-function WeaponSelector({
-    weapon,
-    onPrevious,
-    onNext,
-}: {
-    weapon: WeaponClass
-    onPrevious: () => void
-    onNext: () => void
-}) {
-    const data =
-        equipment.find((item) => item.id === weapon) ??
-        throwError(`Failed to find weapon {weapon}`)
-
-    return (
-        <div style={{ padding: 12 }}>
-            <div>Weapon Cost: {data.cost} Cr.</div>
-            <div
-                style={{
-                    background: "black",
-                    width: 160,
-                    height: 235,
-                    margin: "2px 2px 5px",
-                }}
-            >
-                <img src={images[weapon]} />
-            </div>
-            <div>
-                <Button onClick={onPrevious}>
-                    <img src={redLeft} />
-                </Button>
-                <Button onClick={onNext}>
-                    <img src={redRight} />
-                </Button>
-            </div>
-        </div>
-    )
-}
-
 export default function Training() {
     const suits = useMemo(
         () =>
@@ -202,10 +107,7 @@ export default function Training() {
         throw Error(`Failed to find platoon ${index} for ${localPlayer}`)
     }
 
-    const cost =
-        platoon.size *
-        ((equipment.find((item) => item.id === platoon.suit)?.cost ?? 0) +
-            (equipment.find((item) => item.id === platoon.weapon)?.cost ?? 0))
+    const cost = useMemo(() => calculateEquipPlatoonCost(platoon), [platoon])
 
     const handleChangePlatoon = (delta: number) => {
         setIndex(wrap(index + delta, 24))
@@ -243,7 +145,11 @@ export default function Training() {
         }
     }
 
-    const handleEquipPlatoon = () => {}
+    const handleEquipPlatoon = () => {
+        if (platoon.state !== "equipped") {
+            equip(platoon)
+        }
+    }
 
     const handleDismissPlatoon = () => {}
 
@@ -264,7 +170,7 @@ export default function Training() {
                 <PlanetCivilians civilians={capital.population} />
             </div>
             <div style={{ display: "flex", padding: 6 }}>
-                <ArmourSelector
+                <SuitSelector
                     suit={suit}
                     onNext={handleNextSuit}
                     onPrevious={handlePreviousSuit}
