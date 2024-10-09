@@ -16,6 +16,7 @@ import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
+import { calculateEquipPlatoonCost } from "./utilities"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -96,6 +97,8 @@ export default function Training() {
         throw Error(`Failed to find platoon ${index} for ${localPlayer}`)
     }
 
+    const cost = calculateEquipPlatoonCost(platoon)
+
     const handleChangePlatoon = (delta: number) => {
         setIndex(wrap(index + delta, 24))
     }
@@ -163,7 +166,7 @@ export default function Training() {
                     >
                         {platoon.state === "equipped"
                             ? "Platoon equipped!"
-                            : "To equip platoon with your selected suit and weapon, will cost {cost} credits."}
+                            : `To equip platoon with your selected suit and weapon, will cost ${cost} credits.`}
                     </div>
                     <div>{/* message */}</div>
                     <div>
