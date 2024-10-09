@@ -4,19 +4,18 @@ import disband from "/images/disband.png"
 import whiteUp from "/images/white_up.png"
 import whiteDown from "/images/white_down.png"
 import Metadata, { MetadataValue } from "Game/components/Metadata"
-import { MouseEvent, useMemo, useState } from "react"
+import { MouseEvent, useState } from "react"
 import { useCapitalPlanet } from "Game/hooks"
 import { useModifyPlatoonTroops, useTrainingActions } from "./actions"
-import { getModifierAmount, wrap } from "Game/utilities"
+import { getModifierAmount, isColonizedPlanet, wrap } from "Game/utilities"
 import { Platoon } from "Game/entities"
 import { useAtomValue } from "jotai"
-import { platoonsAtom, sessionAtom } from "../store"
+import { planetsAtom, platoonsAtom, sessionAtom } from "../store"
 import PlatoonSelector from "./components/PlatoonSelector"
 import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
-import { calculateEquipPlatoonCost } from "./utilities"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -83,14 +82,19 @@ export default function Training() {
     const platoon = useAtomValue(platoonsAtom).find(
         (platoon) => platoon.index === index && platoon.owner === localPlayer,
     )
+    // FIXME use a derived atom?
+    const planet = useAtomValue(planetsAtom).find(
+        (planet) =>
+            isColonizedPlanet(planet) &&
+            platoon?.state === "equipped" &&
+            planet.id === platoon?.location.planet,
+    )
 
     const { equip, dismiss } = useTrainingActions()
 
     if (!platoon) {
         throw Error(`Failed to find platoon ${index} for ${localPlayer}`)
     }
-
-    const cost = useMemo(() => calculateEquipPlatoonCost(platoon), [platoon])
 
     const handleChangePlatoon = (delta: number) => {
         setIndex(wrap(index + delta, 24))
@@ -124,12 +128,18 @@ export default function Training() {
                 <SuitSelector platoon={platoon} />
                 <WeaponSelector platoon={platoon} />
 
-                <div>
+                <div
+                    style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        width: 240,
+                    }}
+                >
                     <div style={{ display: "flex" }}>
                         <Metadata
                             label="Location"
                             alignment="right"
-                            value={""}
+                            value={planet?.name}
                         />
                     </div>
                     <div style={{ display: "flex" }}>
@@ -143,9 +153,17 @@ export default function Training() {
                     <div style={{ display: "flex" }}>
                         <Rank state={platoon.state} calibre={platoon.calibre} />
                     </div>
-                    <div style={{ maxWidth: "240px" }}>
-                        To equip platoon with your selected suit and weapon,
-                        will cost {cost} credits.
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            height: 80,
+                        }}
+                    >
+                        {platoon.state === "equipped"
+                            ? "Platoon equipped!"
+                            : "To equip platoon with your selected suit and weapon, will cost {cost} credits."}
                     </div>
                     <div>{/* message */}</div>
                     <div>

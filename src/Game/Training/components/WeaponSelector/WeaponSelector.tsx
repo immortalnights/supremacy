@@ -54,7 +54,11 @@ export default function WeaponSelector({ platoon }: { platoon: Platoon }) {
 
     return (
         <div style={{ padding: 12 }}>
-            <div>Weapon Cost: {data.cost} Cr.</div>
+            <div>
+                {platoon.state === "equipped"
+                    ? "Carrying"
+                    : `Weapon Cost: ${data.cost} Cr.`}
+            </div>
             <div
                 style={{
                     background: "black",

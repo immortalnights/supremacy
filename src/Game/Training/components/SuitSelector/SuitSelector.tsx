@@ -56,7 +56,11 @@ export default function SuitSelector({ platoon }: { platoon: Platoon }) {
 
     return (
         <div style={{ padding: 12 }}>
-            <div>Suit Cost: {data.cost} Cr.</div>
+            <div>
+                {platoon.state === "equipped"
+                    ? "Platoon wearing"
+                    : `Suit Cost: ${data.cost} Cr.`}
+            </div>
             <div
                 style={{
                     background: "black",
