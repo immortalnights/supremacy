@@ -16,11 +16,11 @@ function Item({
     }
 
     return (
-        <Button onClick={handleClick}>
+        <Button onClick={handleClick} style={{ flexDirection: "column" }}>
             <ShipIcon ship={ship} />
-            <span style={{ display: "block", height: "1em" }}>
+            <div style={{ height: "1.4em", textTransform: "uppercase" }}>
                 {ship?.name}
-            </span>
+            </div>
         </Button>
     )
 }

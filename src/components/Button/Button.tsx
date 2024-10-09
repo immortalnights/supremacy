@@ -18,14 +18,6 @@ export default function Button({
             type={type}
             title={""}
             style={{
-                cursor: "pointer",
-                width: "auto",
-                border: "none",
-                background: "transparent",
-                textAlign: "left",
-                textTransform: "uppercase",
-                padding: 0,
-                margin: 0,
                 ...style,
             }}
             disabled={disabled}

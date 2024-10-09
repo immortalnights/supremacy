@@ -23,7 +23,12 @@ function Bay({
             <div>{number}</div>
             <div style={{ width: "6em", height: "1em" }}>
                 {ship ? (
-                    <Button onClick={handleClick}>{ship.name}</Button>
+                    <Button
+                        onClick={handleClick}
+                        style={{ textTransform: "uppercase" }}
+                    >
+                        {ship.name}
+                    </Button>
                 ) : (
                     "Bay Empty"
                 )}

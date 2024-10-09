@@ -22,7 +22,7 @@ function Cell({
                 borderBottom: `2px solid ${color}`,
                 borderRight: `2px solid ${color}`,
                 width: "6em",
-                height: "1em",
+                height: "24px",
             }}
         >
             {children}
@@ -56,7 +56,12 @@ function EntityCell<T extends Entity>({
 
     return (
         <Cell color={color}>
-            <Button onClick={handleClick}>{entity.name}</Button>
+            <Button
+                onClick={handleClick}
+                style={{ textTransform: "uppercase" }}
+            >
+                {entity.name}
+            </Button>
         </Cell>
     )
 }

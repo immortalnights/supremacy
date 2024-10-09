@@ -40,12 +40,13 @@ export default function Combat() {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
+                    gap: "4px",
                 }}
             >
                 <div style={{ display: "flex", justifyContent: "center" }}>
                     <img src={combatVictory} />
                 </div>
-                <div style={{ padding: "0 10px", flex: "1 0 auto" }}>
+                <div style={{ width: "100%" }}>
                     <div>
                         <div
                             style={{

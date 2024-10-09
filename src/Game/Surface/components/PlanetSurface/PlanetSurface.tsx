@@ -44,7 +44,7 @@ function Location({
                 {` · `}
                 <Button onClick={handleDisable}>Off</Button>
             </div>
-            <Button onClick={handleClick} style={{}}>
+            <Button onClick={handleClick} style={{ flexDirection: "column" }}>
                 <ShipIcon ship={ship} />
                 <div
                     style={{
@@ -53,8 +53,10 @@ function Location({
                         borderStyle: "solid",
                         borderColor: "#bd414b",
                         height: "1em",
-                        padding: 1,
+                        padding: "1px 0 1px 2px",
                         textTransform: "uppercase",
+                        width: "calc(100% - 4px)",
+                        lineHeight: "15px",
                     }}
                 >
                     {ship?.name}
@@ -65,8 +67,11 @@ function Location({
                         borderStyle: "solid",
                         borderColor: "#bd414b",
                         height: "1em",
-                        padding: 1,
+                        padding: "1px 0 1px 2px",
+
                         textTransform: "uppercase",
+                        width: "calc(100% - 4px)",
+                        lineHeight: "15px",
                     }}
                 >
                     {ship?.active && "Running"}

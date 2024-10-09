@@ -52,12 +52,12 @@ export default function CombatAggression({
                         <img src={blueDown} />
                     </Button>
                 </div>
-                <div>
+                <div style={{ display: "flex" }}>
                     <img src={getImage(aggression)} />
                 </div>
                 <div
                     style={{
-                        fontSize: 28,
+                        fontSize: 24,
                         fontWeight: "bold",
                         writingMode: "vertical-lr",
                         textOrientation: "upright",
