@@ -129,7 +129,7 @@ function PlanetShipOverview() {
                 break
             }
             case "surface": {
-                msg = `Ships on surface of above ${selectedPlanet?.name}`
+                msg = `Ships on surface of ${selectedPlanet?.name}`
                 break
             }
             case "docked": {
