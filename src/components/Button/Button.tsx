@@ -27,3 +27,31 @@ export default function Button({
         </button>
     )
 }
+
+export function MenuButton({
+    type = "button",
+    disabled = false,
+    onClick,
+    children,
+}: {
+    type?: HTMLButtonElement["type"]
+    disabled?: boolean
+    onClick?: MouseEventHandler
+    children: ReactNode
+}) {
+    return (
+        <Button
+            type={type}
+            onClick={onClick}
+            disabled={disabled}
+            style={{
+                padding: 8,
+                backgroundColor: "darkgray",
+                borderRadius: 6,
+                margin: 4,
+            }}
+        >
+            {children}
+        </Button>
+    )
+}

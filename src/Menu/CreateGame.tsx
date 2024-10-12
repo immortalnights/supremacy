@@ -1,4 +1,4 @@
-import Button from "components/Button"
+import { MenuButton } from "components/Button"
 import { Form, useNavigate } from "react-router-dom"
 
 // TODO Two player cards, on CPU or Remote player. No "lobby", etc.
@@ -42,10 +42,10 @@ export default function CreateGame() {
                 </div>
 
                 <div>
-                    <Button type="button" onClick={() => navigate("/")}>
+                    <MenuButton onClick={() => navigate("/")}>
                         Cancel
-                    </Button>
-                    <button type="submit">Start</button>
+                    </MenuButton>
+                    <MenuButton type="submit">Start</MenuButton>
                 </div>
             </div>
         </Form>

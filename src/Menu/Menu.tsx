@@ -2,6 +2,7 @@ import { useManager } from "webrtc-lobby-lib"
 import { useNavigate } from "react-router-dom"
 import { useMemo } from "react"
 import { LastSaveData } from "../Game/types"
+import { MenuButton } from "components/Button"
 
 export default function Main() {
     const { joinLobby } = useManager()
@@ -24,16 +25,20 @@ export default function Main() {
 
     return (
         <div>
-            <button
+            <MenuButton
                 disabled={!savedGame}
                 onClick={() =>
                     savedGame ? navigate(`/Game/${savedGame.id}/`) : undefined
                 }
             >
                 Continue
-            </button>
-            <button onClick={() => navigate("/Create")}>New Game</button>
-            <button onClick={handleMultiplayerClick}>Multiplayer</button>
+            </MenuButton>
+            <MenuButton onClick={() => navigate("/Create")}>
+                New Game
+            </MenuButton>
+            <MenuButton onClick={handleMultiplayerClick}>
+                Multiplayer
+            </MenuButton>
         </div>
     )
 }
