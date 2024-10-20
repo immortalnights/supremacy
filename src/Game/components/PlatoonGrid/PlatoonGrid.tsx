@@ -1,3 +1,4 @@
+import { getPlatoonName } from "Game/platoonUtilities"
 import { Platoon } from "../../entities"
 
 function PlatoonItem({
@@ -26,7 +27,7 @@ function PlatoonItem({
                     height: "1rem",
                 }}
             >
-                {platoon?.name}
+                {getPlatoonName(platoon)}
             </div>
             <div
                 style={{

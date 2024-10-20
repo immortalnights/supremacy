@@ -2,14 +2,7 @@ import Button from "components/Button"
 import whiteUp from "/images/white_up.png"
 import whiteDown from "/images/white_down.png"
 import { Platoon } from "Game/entities"
-import { useMemo } from "react"
-
-const suffixes = new Map([
-    ["one", "st"],
-    ["two", "nd"],
-    ["few", "rd"],
-    ["other", "th"],
-])
+import { getPlatoonName } from "Game/platoonUtilities"
 
 export default function PlatoonSelector({
     platoon,
@@ -18,16 +11,6 @@ export default function PlatoonSelector({
     platoon: Platoon
     onChangePlatoon: (delta: number) => void
 }) {
-    const ordinal = useMemo(() => {
-        const pr = new Intl.PluralRules("en-US", { type: "ordinal" })
-        const formatOrdinals = (value: number) => {
-            const rule = pr.select(value)
-            const suffix = suffixes.get(rule)
-            return `${value}${suffix}`
-        }
-        return formatOrdinals(1 + platoon.index)
-    }, [platoon])
-
     const handleNextPlatoon = () => onChangePlatoon(1)
     const handlePreviousPlatoon = () => onChangePlatoon(-1)
 
@@ -47,7 +30,7 @@ export default function PlatoonSelector({
                     width: "3em",
                 }}
             >
-                {ordinal}
+                {getPlatoonName(platoon)}
             </div>
             <div
                 style={{
