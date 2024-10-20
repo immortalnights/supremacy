@@ -1,24 +1,12 @@
-import { useAtomValue } from "jotai"
 import Metadata, { type MetadataAlignment } from "Game/components/Metadata"
-import { dateAtom } from "Game/store"
-
-const days_per_month = 60
+import { useDate } from "./useDate"
 
 export default function Date({
     alignment = "left",
 }: {
     alignment?: MetadataAlignment
 }) {
-    const date = useAtomValue(dateAtom)
+    const date = useDate()
 
-    const month = 1 + (date % days_per_month)
-    const year = 2000 + Math.floor(date / days_per_month)
-
-    return (
-        <Metadata
-            label="Date"
-            value={`${month}/${year}`}
-            alignment={alignment}
-        />
-    )
+    return <Metadata label="Date" value={date} alignment={alignment} />
 }
