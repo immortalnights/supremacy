@@ -98,6 +98,7 @@ export default function Navigation({
                 flexWrap: "wrap",
                 maxWidth: 41 * 5,
                 gap: 1,
+                margin: "auto",
             }}
         >
             {links}
