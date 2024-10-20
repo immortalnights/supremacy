@@ -25,6 +25,9 @@ export interface ColonizedPlanet extends BasePlanet, PlanetResources {
     morale: number
     growth: number
     tax: number
+    aggression: {
+        [key: string]: number
+    }
 }
 
 export type Planet = LifelessPlanet | ColonizedPlanet

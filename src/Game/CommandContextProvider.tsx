@@ -4,7 +4,7 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { Planet } from "./entities"
-import { clamp } from "./utilities"
+import { clamp, clone, isColonizedPlanet } from "./utilities"
 import { CommandContext } from "./CommandContext"
 import {
     crewShip,
@@ -71,6 +71,28 @@ const applyModifyTax = (
     return cpy
 }
 
+const modifyAggression = (
+    player: string,
+    planets: Planet[],
+    planet: Planet,
+    aggression: number,
+) => {
+    let modifiedPlanets
+    if (isColonizedPlanet(planet)) {
+        if (
+            !(player in planet.aggression) ||
+            planet.aggression[player] !== aggression
+        ) {
+            let modifiedPlanet
+            ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
+
+            modifiedPlanet.aggression[player] = clamp(aggression, 0, 100)
+        }
+    }
+
+    return modifiedPlanets ?? planets
+}
+
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
@@ -106,6 +128,14 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.newTax,
                     )
                     set(planetsAtom, modifiedPlanets)
+                } else if (command === "modify-planet-aggression") {
+                    modifiedPlanets = modifyAggression(
+                        localPlayer,
+                        originalPlanets,
+                        data.planet,
+                        data.aggression,
+                    )
+                    set(planetsAtom, modifiedPlanets)
                 } else if (command === "purchase-ship") {
                     // Purchases are (currently) only made on the capital
                     ;[modifiedPlanets, modifiedShips] = purchaseShip(
@@ -114,6 +144,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         originalShips,
                         data.blueprint,
                         data.name,
+                        "easy",
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)

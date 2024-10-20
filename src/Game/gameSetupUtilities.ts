@@ -22,17 +22,21 @@ const planetsForDifficulty: { [K in Difficulty]: number } = {
     impossible: 32,
 } as const
 
-const initializePlanetResources = (
+const initialPlanetPopulation = (difficulty: Difficulty, ai: boolean) =>
+    random(1000, 2000)
+
+const initialPlanetCredits = (difficulty: Difficulty, ai: boolean) =>
+    random(50000, 60000)
+
+const initialPlanetResources = (
     difficulty: Difficulty,
     ai: boolean,
 ): PlanetResources => {
     return {
-        credits: random(50000, 60000),
         food: random(3000, 5000),
         minerals: random(2000, 5000),
         fuels: random(2000, 5000),
         energy: random(2000, 5000),
-        population: random(1000, 2000),
     }
 }
 
@@ -40,6 +44,8 @@ const initializeCapitalPlanet = (
     name: string,
     owner: string,
     index: number,
+    population: number,
+    credits: number,
     resources: PlanetResources,
 ): ColonizedPlanet => {
     return {
@@ -49,10 +55,15 @@ const initializeCapitalPlanet = (
         type: "metropolis",
         owner: owner,
         capital: true,
+        population,
+        credits,
         ...resources,
         morale: 75,
         growth: 0,
         tax: 25,
+        aggression: {
+            [owner]: 25,
+        },
     }
 }
 
@@ -61,7 +72,9 @@ const initializeAICapitalPlanet = (difficulty: Difficulty) =>
         "Enemybase!",
         "AI",
         0,
-        initializePlanetResources(difficulty, true),
+        initialPlanetPopulation(difficulty, true),
+        initialPlanetCredits(difficulty, true),
+        initialPlanetResources(difficulty, true),
     )
 
 const generatePlanets = (count: number): Planet[] =>
@@ -98,7 +111,9 @@ export const initializeSinglePlayerGame = (
             "Homebase!",
             playerId,
             planetCount - 1,
-            initializePlanetResources(difficulty, false),
+            initialPlanetPopulation(difficulty, true),
+            initialPlanetCredits(difficulty, true),
+            initialPlanetResources(difficulty, true),
         ),
     )
 
@@ -119,16 +134,27 @@ export const initializeMultiplayerGame = (
     player2Id: string,
 ): GameData => {
     const defaultPlanets = generatePlanets(planetCount)
-    const resources = initializePlanetResources(difficulty, false)
+    const population = initialPlanetPopulation(difficulty, true)
+    const credits = initialPlanetCredits(difficulty, true)
+    const resources = initialPlanetResources(difficulty, false)
 
     defaultPlanets.unshift(
-        initializeCapitalPlanet("Homebase!", player2Id, 0, resources),
+        initializeCapitalPlanet(
+            "Homebase!",
+            player2Id,
+            0,
+            population,
+            credits,
+            resources,
+        ),
     )
-    defaultPlanets.unshift(
+    defaultPlanets.push(
         initializeCapitalPlanet(
             "Homebase!",
             player1Id,
             planetCount - 1,
+            population,
+            credits,
             resources,
         ),
     )
