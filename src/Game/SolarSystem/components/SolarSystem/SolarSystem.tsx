@@ -1,4 +1,6 @@
+import { useMemo } from "react"
 import "./styles.css"
+import { Planet } from "Game/entities"
 
 function placeItems(height: number, count: number) {
     const topSpacing = 4
@@ -43,26 +45,55 @@ function placeItems(height: number, count: number) {
     return positions
 }
 
-export default function SolarSystem({ planets = 8 }: { planets: number }) {
-    const positions = placeItems(260, planets)
-    const amplitude = 80
-    const frequency = (1 * Math.PI) / planets
+const getColor = (planet: Planet, localPlayer: string) => {
+    let color
+    if (planet.type === "lifeless") {
+        color = "white"
+    } else if (planet.owner === localPlayer) {
+        color = "green"
+    } else {
+        color = "red"
+    }
+
+    return color
+}
+
+export default function SolarSystem({
+    selected,
+    planets,
+    localPlayer,
+}: {
+    selected: number
+    planets: Planet[]
+    localPlayer: string
+}) {
+    const metrics = useMemo(() => {
+        const positions = placeItems(255, planets.length)
+        const amplitude = 80
+        const frequency = (1 * Math.PI) / planets.length
+
+        return positions.map(
+            (position, index) =>
+                ({
+                    top: `${position}px`,
+                    animationDelay: `-${Math.round(Math.random() * 100)}s`,
+                    "--orbit-speed": `${Math.round(Math.random() * 12 + 2)}s`,
+                    "--orbit-distance": `${Math.round(Math.sin(index * frequency) * amplitude + 20 * Math.random())}px`,
+                }) as React.CSSProperties,
+        )
+    }, [planets.length])
 
     return (
         <div className="solar-system">
-            {positions.map((position, index) => (
+            {metrics.map((metrics, index) => (
                 <div
                     key={`planet${index}`}
                     className="planet"
-                    style={
-                        {
-                            top: `${position}px`,
-                            animationDelay: `-${Math.round(Math.random() * 100)}s`,
-                            "--orbit-speed": `${Math.round(Math.random() * 12 + 2)}s`,
-                            "--orbit-distance": `${Math.round(Math.sin(index * frequency) * amplitude + 20 * Math.random())}px`,
-                        } as React.CSSProperties
-                    }
-                ></div>
+                    style={{
+                        ...metrics,
+                        backgroundColor: getColor(planets[index], localPlayer),
+                    }}
+                />
             ))}
         </div>
     )
