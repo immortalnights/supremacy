@@ -1,6 +1,6 @@
+import { shipInLocation } from "Game/utilities/ships"
 import { cargoTypes, ColonizedPlanet, Ship, ShipBlueprint } from "../entities"
 import { Difficulty } from "../types"
-import { shipInLocation } from "../utilities"
 
 export const canAffordShip = (
     planet: ColonizedPlanet,

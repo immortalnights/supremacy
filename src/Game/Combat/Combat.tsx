@@ -10,7 +10,10 @@ import { useModifyAggression } from "./actions"
 import { useAtomValue } from "jotai"
 import { sessionAtom } from "Game/store"
 import { clamp } from "Game/utilities"
-import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "Game/platoonUtilities"
+import {
+    platoonsOnPlanetAtom,
+    platoonsOnShipAtom,
+} from "Game/utilities/platoons"
 
 const StrengthOverview = () => {
     return (

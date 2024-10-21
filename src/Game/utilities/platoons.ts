@@ -5,8 +5,9 @@ import {
     Planet,
     Platoon,
     Ship,
-} from "./entities"
-import { platoonsAtom } from "./store"
+} from "../entities"
+import { platoonsAtom } from "../store"
+import { isColonizedPlanet } from "./planets"
 
 export const getPlatoonName = (() => {
     const suffixes = new Map([
@@ -25,31 +26,37 @@ export const getPlatoonName = (() => {
     }
 })()
 
-export function isEquipped(platoon: Platoon): platoon is EquippedPlatoon {
+export const isEquipped = (platoon: Platoon): platoon is EquippedPlatoon => {
     return platoon.state === "equipped"
 }
 
-export function isOnPlanet(
+export const isOnPlanet = (
     platoon: Platoon,
     planet?: Planet,
-): platoon is EquippedPlatoon {
+): platoon is EquippedPlatoon => {
     return (
-        platoon.state === "equipped" &&
+        isEquipped(platoon) &&
         !!platoon.location.planet &&
         platoon.location.planet === planet?.id
     )
 }
 
-export function isOnShip(
+export const isOnShip = (
     platoon: Platoon,
     ship?: Ship,
-): platoon is EquippedPlatoon {
+): platoon is EquippedPlatoon => {
     return (
-        platoon.state === "equipped" &&
+        isEquipped(platoon) &&
         !!platoon.location.ship &&
         platoon.location.ship === ship?.id
     )
 }
+
+export const findPlatoonPlanet = (planets: Planet[], platoon: Platoon) =>
+    planets.find(
+        (planet): planet is ColonizedPlanet =>
+            isColonizedPlanet(planet) && isOnPlanet(platoon, planet),
+    )
 
 export const platoonsOnPlanetAtom = atom((get) => ({
     filter: (planet?: ColonizedPlanet) =>

@@ -2,7 +2,7 @@ import Button from "components/Button"
 import whiteUp from "/images/white_up.png"
 import whiteDown from "/images/white_down.png"
 import { Platoon } from "Game/entities"
-import { getPlatoonName } from "Game/platoonUtilities"
+import { getPlatoonName } from "Game/utilities/platoons"
 
 export default function PlatoonSelector({
     platoon,

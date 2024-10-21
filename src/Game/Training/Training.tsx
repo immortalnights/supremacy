@@ -7,7 +7,7 @@ import Metadata, { MetadataValue } from "Game/components/Metadata"
 import { MouseEvent, useState } from "react"
 import { useCapitalPlanet } from "Game/hooks"
 import { useModifyPlatoonTroops, useTrainingActions } from "./actions"
-import { getModifierAmount, isColonizedPlanet, wrap } from "Game/utilities"
+import { getModifierAmount, wrap } from "Game/utilities"
 import { Platoon } from "Game/entities"
 import { useAtomValue } from "jotai"
 import { planetsAtom, platoonsAtom, sessionAtom } from "../store"
@@ -17,7 +17,7 @@ import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
 import { calculateEquipPlatoonCost } from "./utilities"
-import { isOnPlanet } from "Game/platoonUtilities"
+import { isOnPlanet } from "Game/utilities/platoons"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()

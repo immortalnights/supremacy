@@ -6,7 +6,8 @@ import {
     WeaponClass,
 } from "./entities"
 import { calculateEquipPlatoonCost } from "./Training/utilities"
-import { clone, isColonizedPlanet } from "./utilities"
+import { clone } from "./utilities"
+import { isColonizedPlanet } from "./utilities/planets"
 
 // make generic and combine with Ship version?
 const canModifyPlatoonAtPlanet = (
@@ -23,18 +24,6 @@ const canModifyPlatoonAtPlanet = (
         ok = true
     }
     return ok
-}
-
-export const getPlatoonPlanet = (planets: Planet[], platoon: Platoon) => {
-    const planet: ColonizedPlanet | undefined = planets
-        .filter(isColonizedPlanet)
-        .find(
-            (p) =>
-                platoon.state === "equipped" &&
-                p.id === platoon.location.planet,
-        )
-
-    return planet
 }
 
 const clamp = (

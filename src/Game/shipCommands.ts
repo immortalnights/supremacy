@@ -16,12 +16,10 @@ import {
     unloadCargo,
 } from "./Shipyard/utilities"
 import { Difficulty } from "./types"
-import {
-    isColonizedPlanet,
-    shipsDockedAtPlanet,
-    shipsOnPlanetSurface,
-} from "./utilities"
+import { isColonizedPlanet } from "./utilities/planets"
+import { shipsDockedAtPlanet, shipsOnPlanetSurface } from "./utilities/ships"
 
+// FIXME
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
     const planet: ColonizedPlanet | undefined = planets
         .filter(isColonizedPlanet)
@@ -108,8 +106,8 @@ export const purchaseShip = (
         // Count ships in planet docking bay
         const dockedShips = ships.filter(
             (s) =>
-                s.location.planet === capital.id &&
-                s.location.position === "docked",
+                s.location.position === "docked" &&
+                s.location.planet === capital.id,
         )
 
         if (capital.type === "lifeless") {

@@ -4,7 +4,7 @@ import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { Planet } from "./entities"
-import { clamp, clone, isColonizedPlanet } from "./utilities"
+import { clamp, clone } from "./utilities"
 import { CommandContext } from "./CommandContext"
 import {
     crewShip,
@@ -24,6 +24,7 @@ import {
     modifyWeapon,
     equip,
 } from "./platoonCommands"
+import { isColonizedPlanet } from "./utilities/planets"
 
 // FIXME move somewhere better
 const applyRenamePlanet = (

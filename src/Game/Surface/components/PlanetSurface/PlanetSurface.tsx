@@ -1,10 +1,10 @@
 import { Planet, Ship } from "Game/entities"
-import { shipInLocation } from "Game/utilities"
 import Button from "components/Button"
 import ShipIcon from "Game/components/ShipIcon"
 import { useShipsOnPlanetSurface } from "Game/hooks"
 import { useMoveShip } from "Game/actions"
 import { useEnableDisableShip } from "../../actions"
+import { shipInLocation } from "Game/utilities/ships"
 
 function Location({
     ship,

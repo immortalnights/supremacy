@@ -1,7 +1,7 @@
 import { useShipsInDockingBay } from "Game/hooks"
 import { Planet, Ship } from "Game/entities"
-import { shipInLocation } from "Game/utilities"
 import Button from "components/Button"
+import { shipInLocation } from "Game/utilities/ships"
 
 function Bay({
     number,
