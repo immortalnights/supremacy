@@ -8,6 +8,7 @@ const config = {
     tabWidth: 4,
     trailingComma: "all",
     singleQuote: false,
+    printWidth: 88,
 }
 
 export default config
