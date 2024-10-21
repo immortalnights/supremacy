@@ -1,13 +1,16 @@
 import {
     ColonizedPlanet,
+    EquippedPlatoon,
     Planet,
     Platoon,
+    Ship,
     SuitClass,
     WeaponClass,
 } from "./entities"
 import { calculateEquipPlatoonCost } from "./Training/utilities"
-import { clone } from "./utilities"
+import { clone, nextFreeIndex } from "./utilities"
 import { isColonizedPlanet } from "./utilities/planets"
+import { isEquipped, isOnPlanet, isOnShip } from "./utilities/platoons"
 
 // make generic and combine with Ship version?
 const canModifyPlatoonAtPlanet = (
@@ -26,12 +29,7 @@ const canModifyPlatoonAtPlanet = (
     return ok
 }
 
-const clamp = (
-    quantity: number,
-    value: number,
-    available: number,
-    max: number,
-) => {
+const clamp = (quantity: number, value: number, available: number, max: number) => {
     return quantity > 0
         ? Math.min(max - value, available, quantity)
         : -Math.min(value, Math.abs(quantity))
@@ -48,9 +46,7 @@ export const modifyTroops = (
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
-        console.error(
-            `Platoon ${platoon.index} is not owned by player ${player}`,
-        )
+        console.error(`Platoon ${platoon.index} is not owned by player ${player}`)
     } else if (platoon.state === "equipped") {
         console.error("Cannot modify platoon troops when equipped")
     } else {
@@ -118,9 +114,7 @@ export const modifySuit = (
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
-        console.error(
-            `Platoon ${platoon.index} is not owned by player ${player}`,
-        )
+        console.error(`Platoon ${platoon.index} is not owned by player ${player}`)
     } else if (platoon.state === "standby" || platoon.state === "training") {
         let modifiedPlatoon
         ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
@@ -142,9 +136,7 @@ export const modifyWeapon = (
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
-        console.error(
-            `Platoon ${platoon.index} is not owned by player ${player}`,
-        )
+        console.error(`Platoon ${platoon.index} is not owned by player ${player}`)
     } else if (platoon.state === "standby" || platoon.state === "training") {
         let modifiedPlatoon
         ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
@@ -167,9 +159,7 @@ export const equip = (
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
-        console.error(
-            `Platoon ${platoon.index} is not owned by player ${player}`,
-        )
+        console.error(`Platoon ${platoon.id} is not owned by player ${player}`)
     } else if (platoon.state === "equipped") {
     } else if (platoon.size === 0) {
     } else {
@@ -199,11 +189,76 @@ export const equip = (
                 location: {
                     planet: capital.id,
                     ship: undefined,
-                    index: 0, // FIXME
+                    index: nextFreeIndex(
+                        platoons.filter((p) => isOnPlanet(p, capital, true)),
+                        24,
+                    ),
                 },
             })
         }
     }
 
     return [modifiedPlanets ?? planets, modifiedPlatoons ?? platoons] as const
+}
+
+const transferPlatoon = (
+    player: string,
+    platoons: Platoon[],
+    platoon: Platoon,
+    direction: "load" | "unload",
+    target: Ship | ColonizedPlanet,
+    targetLimit: number,
+) => {
+    let modifiedPlatoons
+    if (platoon.owner !== player) {
+        console.error(`Platoon ${platoon.id} is not owned by player ${player}`)
+    } else if (platoon.state !== "equipped") {
+        console.error(`Platoon ${platoon.id} is not equipped`)
+    } else {
+        // FIXME?
+        const platoonsAtLocation = platoons.filter(
+            (platoon): platoon is EquippedPlatoon =>
+                isEquipped(platoon) &&
+                ((direction === "load" && isOnShip(platoon, target)) ||
+                    (direction === "unload" && isOnPlanet(platoon, target, true))),
+        ) as EquippedPlatoon[] // FIXME more
+
+        const nextIndex = nextFreeIndex(platoonsAtLocation, targetLimit)
+        if (nextIndex === undefined) {
+            console.error(
+                `Target location ${target.name} has no platoon capacity remaining`,
+            )
+        } else {
+            let modifiedPlatoon
+            ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
+
+            modifiedPlatoon.location = {
+                planet: direction === "unload" ? target.id : undefined,
+                ship: direction === "load" ? target.id : undefined,
+                index: nextIndex,
+            }
+        }
+    }
+
+    return modifiedPlatoons ?? platoons
+}
+
+// Load a Platoon onto the selected Ship
+export const loadPlatoon = (
+    player: string,
+    platoons: Platoon[],
+    platoon: Platoon,
+    ship: Ship,
+) => {
+    return transferPlatoon(player, platoons, platoon, "load", ship, 4)
+}
+
+// Unload a Platoon to the selected Planet
+export const unloadPlatoon = (
+    player: string,
+    platoons: Platoon[],
+    platoon: Platoon,
+    planet: ColonizedPlanet,
+) => {
+    return transferPlatoon(player, platoons, platoon, "unload", planet, 24)
 }

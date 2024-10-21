@@ -2,18 +2,15 @@ import CombatAggression from "./components/CombatAggression"
 import DockingBay from "../components/DockingBay"
 import Navigation from "../components/Navigation"
 import PlatoonGrid from "../components/PlatoonGrid"
-import { Ship } from "../entities"
+import { Platoon, Ship } from "../entities"
 import combatVictory from "/images/combat_victory.gif"
-import { useSelectedColonizedPlanet } from "../hooks"
+import { useSelectedColonizedPlanet, useSelectedShip } from "../hooks"
 import { throwError } from "game-signaling-server/client"
-import { useModifyAggression } from "./actions"
+import { useModifyAggression, useTransferPlatoon } from "./actions"
 import { useAtomValue } from "jotai"
 import { sessionAtom } from "Game/store"
 import { clamp } from "Game/utilities"
-import {
-    platoonsOnPlanetAtom,
-    platoonsOnShipAtom,
-} from "Game/utilities/platoons"
+import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "Game/utilities/platoons"
 
 const StrengthOverview = () => {
     return (
@@ -61,16 +58,35 @@ export default function Combat() {
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Combat of lifeless planet")
-    const ship: Ship | undefined = undefined
+    const [ship, setSelectedShip] = useSelectedShip()
     const aggression = planet.aggression[localPlayer] ?? 25
     const modifyAggression = useModifyAggression()
+    const [load, unload] = useTransferPlatoon()
 
     const platoonsOnPlanet = useAtomValue(platoonsOnPlanetAtom).filter(planet)
     const platoonsOnShip = useAtomValue(platoonsOnShipAtom).filter(ship)
 
+    const handleSelectShip = (ship: Ship) => {
+        setSelectedShip(ship)
+    }
+
+    const handleUnloadPlatoon = (platoon: Platoon) => {
+        if (ship) {
+            unload(platoon, planet)
+        }
+    }
+
+    // Load the platoon
+    const handleLoadPlatoon = (platoon: Platoon) => {
+        if (ship) {
+            load(platoon, ship)
+        }
+    }
+
     const handleIncreaseAggression = () => {
         modifyAggression(planet, clamp(aggression + 25, 0, 100))
     }
+
     const handleDecreaseAggression = () => {
         modifyAggression(planet, clamp(aggression - 25, 0, 100))
     }
@@ -79,14 +95,14 @@ export default function Combat() {
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
-                    <DockingBay planet={planet} onClick={() => {}} />
+                    <DockingBay planet={planet} onClick={handleSelectShip} />
                     <div>
                         <div>Ship</div>
                         <div>{ship?.name}</div>
                         <PlatoonGrid
                             platoons={platoonsOnShip}
                             size={4}
-                            onClick={() => {}}
+                            onClick={handleUnloadPlatoon}
                         />
                     </div>
                 </div>
@@ -94,7 +110,7 @@ export default function Combat() {
                 <div>
                     <PlatoonGrid
                         platoons={platoonsOnPlanet}
-                        onClick={() => {}}
+                        onClick={handleLoadPlatoon}
                     />
                 </div>
             </div>
@@ -118,13 +134,7 @@ export default function Combat() {
                     onDecrease={handleDecreaseAggression}
                 />
                 <Navigation
-                    items={[
-                        "training",
-                        "fleet",
-                        "overview",
-                        "cargo",
-                        "surface",
-                    ]}
+                    items={["training", "fleet", "overview", "cargo", "surface"]}
                 />
             </div>
         </div>

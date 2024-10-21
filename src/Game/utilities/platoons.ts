@@ -1,11 +1,5 @@
 import { atom } from "jotai"
-import {
-    ColonizedPlanet,
-    EquippedPlatoon,
-    Planet,
-    Platoon,
-    Ship,
-} from "../entities"
+import { ColonizedPlanet, EquippedPlatoon, Planet, Platoon, Ship } from "../entities"
 import { platoonsAtom } from "../store"
 import { isColonizedPlanet } from "./planets"
 
@@ -30,25 +24,30 @@ export const isEquipped = (platoon: Platoon): platoon is EquippedPlatoon => {
     return platoon.state === "equipped"
 }
 
+// Return platoons on the specified planet.
+//. If `ownerCheck` is true, only return platoons owned by the planet owner.
 export const isOnPlanet = (
     platoon: Platoon,
-    planet?: Planet,
+    planet: Pick<ColonizedPlanet, "id" | "owner">,
+    ownerCheck: boolean = false,
 ): platoon is EquippedPlatoon => {
     return (
         isEquipped(platoon) &&
         !!platoon.location.planet &&
-        platoon.location.planet === planet?.id
+        platoon.location.planet === planet.id &&
+        (!ownerCheck || platoon.owner === planet.owner)
     )
 }
 
+// Return platoons on the specified ship
 export const isOnShip = (
     platoon: Platoon,
-    ship?: Ship,
+    ship: Pick<Ship, "id" | "owner">,
 ): platoon is EquippedPlatoon => {
     return (
         isEquipped(platoon) &&
         !!platoon.location.ship &&
-        platoon.location.ship === ship?.id
+        platoon.location.ship === ship.id
     )
 }
 
@@ -60,10 +59,12 @@ export const findPlatoonPlanet = (planets: Planet[], platoon: Platoon) =>
 
 export const platoonsOnPlanetAtom = atom((get) => ({
     filter: (planet?: ColonizedPlanet) =>
-        get(platoonsAtom).filter((platoon) => isOnPlanet(platoon, planet)),
+        planet
+            ? get(platoonsAtom).filter((platoon) => isOnPlanet(platoon, planet))
+            : [],
 }))
 
 export const platoonsOnShipAtom = atom((get) => ({
     filter: (ship?: Ship) =>
-        get(platoonsAtom).filter((platoon) => isOnShip(platoon, ship)),
+        ship ? get(platoonsAtom).filter((platoon) => isOnShip(platoon, ship)) : [],
 }))

@@ -23,6 +23,8 @@ import {
     modifySuit,
     modifyWeapon,
     equip,
+    loadPlatoon,
+    unloadPlatoon,
 } from "./platoonCommands"
 import { isColonizedPlanet } from "./utilities/planets"
 
@@ -281,6 +283,24 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(platoonsAtom, modifiedPlatoons)
+                } else if (command === "load-platoon") {
+                    modifiedPlatoons = loadPlatoon(
+                        localPlayer,
+                        originalPlatoons,
+                        data.platoon,
+                        data.ship,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(platoonsAtom, modifiedPlatoons)
+                } else if (command === "unload-platoon") {
+                    modifiedPlatoons = unloadPlatoon(
+                        localPlayer,
+                        originalPlatoons,
+                        data.platoon,
+                        data.planet,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                    set(platoonsAtom, modifiedPlatoons)
                 } else {
                     console.error(`Unknown command '${command}'`)
                 }
@@ -337,9 +357,5 @@ export function CommandProvider({ children }: { children: ReactNode }) {
         [exec],
     )
 
-    return (
-        <CommandContext.Provider value={value}>
-            {children}
-        </CommandContext.Provider>
-    )
+    return <CommandContext.Provider value={value}>{children}</CommandContext.Provider>
 }
