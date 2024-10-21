@@ -17,6 +17,7 @@ import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
 import { calculateEquipPlatoonCost } from "./utilities"
+import { isOnPlanet } from "Game/platoonUtilities"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -85,10 +86,7 @@ export default function Training() {
     )
     // FIXME use a derived atom?
     const planet = useAtomValue(planetsAtom).find(
-        (planet) =>
-            isColonizedPlanet(planet) &&
-            platoon?.state === "equipped" &&
-            planet.id === platoon?.location.planet,
+        (planet) => platoon && isOnPlanet(platoon, planet),
     )
 
     const { equip, dismiss } = useTrainingActions()

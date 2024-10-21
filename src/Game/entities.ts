@@ -120,7 +120,7 @@ export type WeaponClass = "rifle" | "flamethrower" | "mortar"
 
 export type PlatoonState = "standby" | "training" | "equipped"
 
-export type Platoon = {
+interface BasePlatoon {
     id: string
     index: number
     owner: string
@@ -129,15 +129,19 @@ export type Platoon = {
     state: PlatoonState
     weapon: WeaponClass
     suit: SuitClass
-} & (
-    | { state: "standby" }
-    | { state: "training" }
-    | {
-          state: "equipped"
-          location: {
-              planet?: Planet["id"]
-              ship?: Ship["id"]
-              index?: number
-          }
-      }
-)
+}
+
+export interface StandbyPlatoon extends BasePlatoon {
+    state: "standby" | "training"
+}
+
+export interface EquippedPlatoon extends BasePlatoon {
+    state: "equipped"
+    location: {
+        planet?: Planet["id"]
+        ship?: Ship["id"]
+        index?: number
+    }
+}
+
+export type Platoon = StandbyPlatoon | EquippedPlatoon

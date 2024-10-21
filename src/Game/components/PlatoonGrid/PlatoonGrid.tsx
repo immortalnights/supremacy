@@ -1,12 +1,12 @@
 import { getPlatoonName } from "Game/platoonUtilities"
-import { Platoon } from "../../entities"
+import { EquippedPlatoon, Platoon } from "../../entities"
 
 function PlatoonItem({
     platoon,
     onClick,
 }: {
-    platoon?: Platoon
-    onClick: (platoon: Platoon) => void
+    platoon?: EquippedPlatoon
+    onClick: (platoon: EquippedPlatoon) => void
 }) {
     const handleClick = () => {
         if (platoon) {
@@ -17,14 +17,20 @@ function PlatoonItem({
     return (
         <div
             role="button"
-            style={{ display: "flex", gap: "0.25rem" }}
+            style={{
+                display: "flex",
+                gap: "0.25rem",
+                cursor: platoon ? "pointer" : "default",
+                height: "1.25em",
+                lineHeight: "1em",
+            }}
+            tabIndex={0}
             onClick={handleClick}
         >
             <div
                 style={{
                     border: "1px solid #004CAC",
                     width: "2.5rem",
-                    height: "1rem",
                 }}
             >
                 {getPlatoonName(platoon)}
@@ -33,7 +39,6 @@ function PlatoonItem({
                 style={{
                     border: "1px solid #004CAC",
                     width: "2rem",
-                    height: "1rem",
                 }}
             >
                 {platoon?.size}
@@ -47,7 +52,7 @@ export default function PlatoonGrid({
     onClick,
     size = 24,
 }: {
-    platoons: Platoon[]
+    platoons: EquippedPlatoon[]
     onClick: (platoon: Platoon) => void
     size?: number
 }) {

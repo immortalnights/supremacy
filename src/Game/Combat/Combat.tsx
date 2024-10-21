@@ -2,14 +2,15 @@ import CombatAggression from "./components/CombatAggression"
 import DockingBay from "../components/DockingBay"
 import Navigation from "../components/Navigation"
 import PlatoonGrid from "../components/PlatoonGrid"
-import { ColonizedPlanet, Ship } from "../entities"
+import { Ship } from "../entities"
 import combatVictory from "/images/combat_victory.gif"
 import { useSelectedColonizedPlanet } from "../hooks"
 import { throwError } from "game-signaling-server/client"
 import { useModifyAggression } from "./actions"
-import { atom, useAtomValue } from "jotai"
-import { platoonsAtom, sessionAtom } from "Game/store"
+import { useAtomValue } from "jotai"
+import { sessionAtom } from "Game/store"
 import { clamp } from "Game/utilities"
+import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "Game/platoonUtilities"
 
 const StrengthOverview = () => {
     return (
@@ -51,26 +52,6 @@ const StrengthOverview = () => {
         </div>
     )
 }
-
-const platoonsOnPlanetAtom = atom((get) => ({
-    filter: (planet?: ColonizedPlanet) =>
-        get(platoonsAtom).filter(
-            (platoon) =>
-                platoon.state === "equipped" &&
-                platoon.location.planet &&
-                platoon.location.planet === planet?.id,
-        ),
-}))
-
-const platoonsOnShipAtom = atom((get) => ({
-    filter: (ship?: Ship) =>
-        get(platoonsAtom).filter(
-            (platoon) =>
-                platoon.state === "equipped" &&
-                platoon.location.ship &&
-                platoon.location.ship === ship?.id,
-        ),
-}))
 
 export default function Combat() {
     const { localPlayer } = useAtomValue(sessionAtom)
