@@ -2,10 +2,7 @@ import { MouseEvent } from "react"
 import { ColonizedPlanet, Planet, Ship } from "./entities"
 import { type Difficulty, difficulties } from "./types"
 
-export const clone = <
-    TResource extends { id: string },
-    TArray extends { id: string },
->(
+export const clone = <TResource extends { id: string }, TArray extends { id: string }>(
     resource: TResource,
     array: TArray[],
 ): [TResource, TArray[]] => {
@@ -65,4 +62,20 @@ export const getModifierAmount = (event: MouseEvent, max: number = 1) => {
         amount = 1
     }
     return amount
+}
+
+export const nextFreeIndex = <T extends { location: { index: number } }>(
+    items: T[],
+    maxIndex: number,
+): number | undefined => {
+    let availableIndex
+    for (let index = 0; index < maxIndex; index++) {
+        const item = items.find((item) => item.location.index === index)
+        if (!item) {
+            availableIndex = index
+            break
+        }
+    }
+
+    return availableIndex
 }

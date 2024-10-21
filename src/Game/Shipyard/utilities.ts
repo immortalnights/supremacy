@@ -34,21 +34,3 @@ export const unloadCargo = (ship: Ship, planet: ColonizedPlanet) => {
         ship.cargo[cargo] = 0
     }
 }
-
-/**
- * @param ships
- * @param maxIndex
- * @returns -1 or 1, 2, 3
- */
-export const nextFreeIndex = (ships: Ship[], maxIndex: number): number => {
-    let availableIndex = -1
-    for (let index = 0; index < maxIndex; index++) {
-        const ship = shipInLocation(ships, index)
-        if (!ship) {
-            availableIndex = index
-            break
-        }
-    }
-
-    return availableIndex
-}
