@@ -2,13 +2,7 @@ import { Ship } from "../../entities"
 import Button from "components/Button"
 import ShipIcon from "../ShipIcon"
 
-function Item({
-    ship,
-    onClick,
-}: {
-    ship?: Ship
-    onClick: (ship: Ship) => void
-}) {
+function Item({ ship, onClick }: { ship?: Ship; onClick: (ship: Ship) => void }) {
     const handleClick = () => {
         if (ship) {
             onClick(ship)
@@ -43,20 +37,11 @@ export default function ShipLocationGrid({
             ...items,
             ...Array(remaining)
                 .fill(undefined)
-                .map((_, index) => {
-                    return (
-                        <Item
-                            key={`L${ships.length + index}`}
-                            onClick={onClick}
-                        />
-                    )
-                }),
+                .map((_, index) => (
+                    <Item key={`L${ships.length + index}`} onClick={onClick} />
+                )),
         ]
     }
 
-    return (
-        <div style={{ columnCount: 3, columnGap: 0, maxWidth: 80 * 3 }}>
-            {items}
-        </div>
-    )
+    return <div style={{ maxWidth: 240 }}>{items}</div>
 }
