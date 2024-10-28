@@ -14,8 +14,8 @@ import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
 import { CargoType, ColonizedPlanet, Ship } from "../entities"
 import { useAtomValue } from "jotai"
-import { shipsAtom } from "../store"
-import { MouseEvent, useState } from "react"
+import { sessionAtom, shipsAtom } from "../store"
+import { MouseEvent, useEffect, useState } from "react"
 import { useDecommission } from "../actions"
 import { useSelectedColonizedPlanet } from "../hooks"
 import { throwError } from "game-signaling-server/client"
@@ -27,6 +27,7 @@ import {
     useLoadPassengers,
     useUnloadShip,
 } from "./actions"
+import { isDocketAtPlanet } from "Game/utilities/ships"
 
 function CargoItem({
     cargo,
@@ -169,15 +170,13 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 }
 
 export default function Cargo() {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Cargo of lifeless planet")
-    const [selectedShipId, setSelectedShipId] = useState<string | undefined>(
-        undefined,
-    )
-    const selectedShip = useAtomValue(shipsAtom).find(
-        (s) => s.id === selectedShipId,
-    )
+    const [selectedShipId, setSelectedShipId] = useState<string | undefined>(undefined)
+    const ships = useAtomValue(shipsAtom)
+    const selectedShip = ships.find((s) => s.id === selectedShipId)
     const crewShip = useCrewShip()
     const unloadShip = useUnloadShip()
     const decommissionShip = useDecommission()
@@ -204,15 +203,23 @@ export default function Cargo() {
         }
     }
 
+    useEffect(() => {
+        if (!selectedShip) {
+            setSelectedShipId(
+                ships.filter(
+                    (ship) =>
+                        isDocketAtPlanet(ship, planet) && ship.owner === localPlayer,
+                )?.[0]?.id,
+            )
+        }
+    }, [selectedShip, ships, planet])
+
     return (
         <div style={{ display: "flex" }}>
             <div>
                 <div style={{ display: "flex" }}>
                     <div>
-                        <DockingBay
-                            planet={planet}
-                            onClick={handleSelectShip}
-                        />
+                        <DockingBay planet={planet} onClick={handleSelectShip} />
                     </div>
                     <ShipCargoDetails planet={planet} ship={selectedShip} />
                 </div>
@@ -240,22 +247,13 @@ export default function Cargo() {
                             <img src={unload} onClick={handleUnloadShip} />
                         </Button>
                         <Button>
-                            <img
-                                src={decommission}
-                                onClick={handleDecommissionShip}
-                            />
+                            <img src={decommission} onClick={handleDecommissionShip} />
                         </Button>
                     </div>
                 </div>
                 <div>
                     <Navigation
-                        items={[
-                            "fleet",
-                            "surface",
-                            "overview",
-                            "shipyard",
-                            "training",
-                        ]}
+                        items={["fleet", "surface", "overview", "shipyard", "training"]}
                     />
                 </div>
             </div>

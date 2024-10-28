@@ -8,9 +8,11 @@ import { useSelectedColonizedPlanet, useSelectedShip } from "../hooks"
 import { throwError } from "game-signaling-server/client"
 import { useModifyAggression, useTransferPlatoon } from "./actions"
 import { useAtomValue } from "jotai"
-import { sessionAtom } from "Game/store"
+import { sessionAtom, shipsAtom } from "Game/store"
 import { clamp } from "Game/utilities"
 import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "Game/utilities/platoons"
+import { useEffect, useState } from "react"
+import { isDocketAtPlanet } from "Game/utilities/ships"
 
 const StrengthOverview = () => {
     return (
@@ -58,28 +60,34 @@ export default function Combat() {
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Combat of lifeless planet")
-    const [ship, setSelectedShip] = useSelectedShip()
+    const [selectedShipId, setSelectedShipId] = useState<string | undefined>(undefined)
+    const ships = useAtomValue(shipsAtom)
+    const selectedShip = ships.find((s) => s.id === selectedShipId)
     const aggression = planet.aggression[localPlayer] ?? 25
     const modifyAggression = useModifyAggression()
     const [load, unload] = useTransferPlatoon()
 
     const platoonsOnPlanet = useAtomValue(platoonsOnPlanetAtom).filter(planet)
-    const platoonsOnShip = useAtomValue(platoonsOnShipAtom).filter(ship)
+    const platoonsOnShip = useAtomValue(platoonsOnShipAtom).filter(selectedShip)
 
     const handleSelectShip = (ship: Ship) => {
-        setSelectedShip(ship)
+        if (ship.class === "B-29 Battle Cruiser") {
+            setSelectedShipId(ship.id)
+        } else {
+            console.warn(`Ship ${ship.name} cannot carry troops`)
+        }
     }
 
     const handleUnloadPlatoon = (platoon: Platoon) => {
-        if (ship) {
+        if (selectedShip) {
             unload(platoon, planet)
         }
     }
 
     // Load the platoon
     const handleLoadPlatoon = (platoon: Platoon) => {
-        if (ship) {
-            load(platoon, ship)
+        if (selectedShip) {
+            load(platoon, selectedShip)
         }
     }
 
@@ -91,6 +99,18 @@ export default function Combat() {
         modifyAggression(planet, clamp(aggression - 25, 0, 100))
     }
 
+    // auto-select first docked ship
+    useEffect(() => {
+        if (!selectedShip) {
+            setSelectedShipId(
+                ships.filter(
+                    (ship) =>
+                        isDocketAtPlanet(ship, planet) && ship.owner === localPlayer,
+                )?.[0]?.id,
+            )
+        }
+    }, [selectedShip, ships, planet])
+
     return (
         <div style={{ display: "flex" }}>
             <div>
@@ -98,7 +118,7 @@ export default function Combat() {
                     <DockingBay planet={planet} onClick={handleSelectShip} />
                     <div>
                         <div>Ship</div>
-                        <div>{ship?.name}</div>
+                        <div>{selectedShip?.name}</div>
                         <PlatoonGrid
                             platoons={platoonsOnShip}
                             size={4}
