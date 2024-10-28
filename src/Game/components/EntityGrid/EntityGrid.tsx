@@ -56,10 +56,7 @@ function EntityCell<T extends Entity>({
 
     return (
         <Cell color={color}>
-            <Button
-                onClick={handleClick}
-                style={{ textTransform: "uppercase" }}
-            >
+            <Button onClick={handleClick} style={{ textTransform: "uppercase" }}>
                 {entity.name}
             </Button>
         </Cell>
@@ -92,7 +89,7 @@ function EntityRow<T extends Entity>({
     entities: T[]
     fixedPositions: boolean
     localPlayer?: string
-    onClick: (planet: T) => void
+    onClick: (item: T) => void
 }) {
     return (
         <tr>

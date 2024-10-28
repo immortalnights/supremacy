@@ -64,7 +64,7 @@ export const shipsDocketAtPlanetAtom = atom((get) => ({
 // Return ships on the surface of the specified planet.
 export const isOnPlanetSurface = (
     ship: Ship,
-    planet: ColonizedPlanet,
+    planet: Planet,
 ): ship is ShipOnSurface => {
     return (
         ship.position === "surface" &&

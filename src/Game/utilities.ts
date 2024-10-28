@@ -67,7 +67,7 @@ export const getModifierAmount = (event: MouseEvent, max: number = 1) => {
 export const nextFreeIndex = <T extends { location: { index: number } }>(
     items: T[],
     maxIndex: number,
-): number | undefined => {
+): number => {
     let availableIndex
     for (let index = 0; index < maxIndex; index++) {
         const item = items.find((item) => item.location.index === index)
@@ -75,6 +75,12 @@ export const nextFreeIndex = <T extends { location: { index: number } }>(
             availableIndex = index
             break
         }
+    }
+
+    // default to max, should never happen but should just result in
+    // a display issue if it does.
+    if (!availableIndex) {
+        availableIndex = maxIndex
     }
 
     return availableIndex

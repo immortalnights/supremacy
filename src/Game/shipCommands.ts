@@ -7,6 +7,10 @@ import {
     ShipBlueprint,
     CargoType,
     ShipPosition,
+    ShipInOuterSpace,
+    ShipInOrbit,
+    ShipOnSurface,
+    ShipDocked,
 } from "./entities"
 import {
     canAffordShip,
@@ -17,7 +21,7 @@ import {
 import { Difficulty } from "./types"
 import { isColonizedPlanet } from "./utilities/planets"
 import { clone, nextFreeIndex } from "./utilities"
-import { isDocketAtPlanet } from "./utilities/ships"
+import { isDocketAtPlanet, isOnPlanetSurface } from "./utilities/ships"
 
 // FIXME
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
@@ -103,9 +107,7 @@ export const purchaseShip = (
     if (index !== -1) {
         const capital = planets[index]
         // Count ships in planet docking bay
-        const dockedShips = ships.filter(
-            (s) => s.location.position === "docked" && s.location.planet === capital.id,
-        )
+        const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
 
         if (capital.type === "lifeless") {
             console.error("Cannot purchase ships on a lifeless planet")
@@ -132,7 +134,7 @@ export const purchaseShip = (
                 )
             } else {
                 const availableBayIndex = nextFreeIndex(dockedShips, 3)
-                if (availableBayIndex === -1) {
+                if (!availableBayIndex) {
                     console.assert(
                         `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
                     )
@@ -479,7 +481,7 @@ export const transitionShip = (
         }
 
         try {
-            const changes: Partial<Ship> = {}
+            let changes: Partial<Ship> = {}
             switch (targetPosition) {
                 case "docked": {
                     const planet =
@@ -495,10 +497,12 @@ export const transitionShip = (
                         throw new Error(`Planet ${planet.name} docking bays are full`)
                     } else {
                         // Any ship can dock at any planet, assuming there is space
-                        changes.location = {
+                        changes = {
                             position: "docked",
-                            planet: planet.id,
-                            index: nextFreeIndex(dockedShips, 3),
+                            location: {
+                                planet: planet.id,
+                                index: nextFreeIndex(dockedShips, 3),
+                            },
                         }
                     }
                     break
@@ -507,7 +511,9 @@ export const transitionShip = (
                     const planet =
                         planets.find((planet) => planet.id === targetPlanet.id) ??
                         throwError(`Failed to find target planet ${targetPlanet.name}`)
-                    const landedShips = shipsOnPlanetSurface(ships, planet)
+                    const landedShips = ships.filter((ship) =>
+                        isOnPlanetSurface(ship, planet),
+                    )
 
                     if (planet.type === "lifeless") {
                         throw new Error("Cannot land a ship on a lifeless planet")
@@ -521,10 +527,12 @@ export const transitionShip = (
                         )
                     } else {
                         // Any ship can dock at any planet, assuming there is space
-                        changes.location = {
+                        changes = {
                             position: "surface",
-                            planet: planet.id,
-                            index: nextFreeIndex(landedShips, 6),
+                            location: {
+                                planet: planet.id,
+                                index: nextFreeIndex(landedShips, 6),
+                            },
                         }
                     }
                     break
@@ -533,19 +541,19 @@ export const transitionShip = (
                     const planet =
                         planets.find((planet) => planet.id === targetPlanet.id) ??
                         throwError(`Failed to find target planet ${targetPlanet.name}`)
-                    const landedShips = shipsOnPlanetSurface(ships, planet)
+                    const landedShips = ships.filter((ship) =>
+                        isOnPlanetSurface(ship, planet),
+                    )
 
                     if (
-                        ship.location.position !== "docked" ||
+                        ship.position !== "docked" ||
                         ship.location.planet !== targetPlanet.id
                     ) {
                         const maybePlanet =
-                            ship.location.position !== "outer-space"
-                                ? ship.location.planet
-                                : "-"
+                            ship.position !== "outer-space" ? ship.location.planet : "-"
 
                         throw new Error(
-                            `Cannot launch a ship not currently docked at the target planet (${ship.location.position} at ${maybePlanet} target ${targetPlanet.id})`,
+                            `Cannot launch a ship not currently docked at the target planet (${ship.position} at ${maybePlanet} target ${targetPlanet.id})`,
                         )
                     } else if (landedShips.length >= 3) {
                         throw new Error(`Planet ${planet.name} docking bays are full`)
@@ -558,10 +566,12 @@ export const transitionShip = (
                             `Cannot launch ship ${ship.name} without at least 100 fuels (have ${ship.fuels})`,
                         )
                     } else {
-                        changes.fuels = ship.fuels - 100
-                        changes.location = {
+                        changes = {
+                            fuels: ship.fuels - 100,
                             position: "orbit",
-                            planet: planet.id,
+                            location: {
+                                planet: planet.id,
+                            },
                         }
                     }
                     break
@@ -573,10 +583,9 @@ export const transitionShip = (
             }
 
             modifiedShips = [...ships]
-            const modifiedShip = {
+            const modifiedShip: Ship = {
                 ...ships[shipIndex],
                 ...changes,
-                active: false,
             }
             modifiedShips[shipIndex] = modifiedShip
         } catch (error) {
@@ -591,13 +600,13 @@ export const transferShip = (
     player: string,
     planets: Planet[],
     ships: Ship[],
-    ship: Ship,
+    ship: ShipInOrbit,
     targetPlanet: Planet,
 ) => {
     let modifiedShips
     const currentLocation = ship.location
 
-    if (currentLocation.position === "orbit") {
+    if (ship.position === "orbit") {
         if (currentLocation.planet === targetPlanet.id) {
             console.error(`Ship ${ship.name} is already at plant ${targetPlanet.name}`)
         } else {
@@ -607,20 +616,15 @@ export const transferShip = (
                 throw new Error(`Invalid ship (${shipIndex}) index`)
             }
 
-            const location: Ship["location"] = {
+            modifiedShips = [...ships]
+            const modifiedShip: Ship = {
+                ...ships[shipIndex],
                 position: "outer-space",
                 heading: {
                     from: currentLocation.planet,
                     to: targetPlanet.id,
                     eta: 5, // FIXME
                 },
-            }
-
-            modifiedShips = [...ships]
-            const modifiedShip = {
-                ...ships[shipIndex],
-                location,
-                active: false,
             }
             modifiedShips[shipIndex] = modifiedShip
         }
