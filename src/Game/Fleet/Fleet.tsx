@@ -58,7 +58,7 @@ export default function Fleet() {
 
     const handleTransferShip = () => {
         if (ship) {
-            if (ship.location.position === "orbit") {
+            if (ship.position === "orbit") {
                 setIsSelectingDestination(true)
             } else {
                 console.error(`Ship ${ship.name} is not in orbit`)

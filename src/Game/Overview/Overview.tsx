@@ -106,17 +106,17 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 }
 
 function PlanetShipOverview() {
-    const [viewPosition, setViewPosition] = useState<ShipPosition>("orbit")
+    const [viewPosition, setViewPosition] =
+        useState<Exclude<ShipPosition, "outer-space">>("orbit")
     const { localPlayer } = useAtomValue(sessionAtom)
     const selectedPlanet = useAtomValue(selectedPlanetAtom)
     const ships = useAtomValue(shipsAtom)
 
     const filteredShips =
-        selectedPlanet?.type !== "lifeless" &&
-        selectedPlanet?.owner === localPlayer
+        selectedPlanet?.type !== "lifeless" && selectedPlanet?.owner === localPlayer
             ? ships.filter(
                   (ship) =>
-                      ship.location.position === viewPosition &&
+                      ship.position === viewPosition &&
                       ship.location.planet === selectedPlanet?.id,
               )
             : []
@@ -166,9 +166,7 @@ function PlanetShipOverview() {
 export default function Overview() {
     const { localPlayer } = useAtomValue(sessionAtom)
     const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
-    const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(
-        undefined,
-    )
+    const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(undefined)
     const rename = useRenamePlanet()
 
     const handleRenamePlanet = ({ name }: { name: string }) => {
