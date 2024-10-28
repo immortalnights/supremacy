@@ -10,14 +10,15 @@ import { useModifyPlatoonTroops, useTrainingActions } from "./actions"
 import { getModifierAmount, wrap } from "Game/utilities"
 import { Platoon } from "Game/entities"
 import { useAtomValue } from "jotai"
-import { planetsAtom, platoonsAtom, sessionAtom } from "../store"
+import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
 import PlatoonSelector from "./components/PlatoonSelector"
 import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
 import { calculateEquipPlatoonCost } from "./utilities"
-import { isOnPlanet } from "Game/utilities/platoons"
+import { isOnPlanet, isOnShip } from "Game/utilities/platoons"
+import { isColonizedPlanet } from "Game/utilities/planets"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -77,6 +78,23 @@ function PlanetCivilians({ civilians }: { civilians: number }) {
     )
 }
 
+function PlatoonLocation({ platoon }: { platoon: Platoon }) {
+    const planet = useAtomValue(planetsAtom).find(
+        (planet) => platoon && isColonizedPlanet(planet) && isOnPlanet(platoon, planet),
+    )
+    const ship = useAtomValue(shipsAtom).find(
+        (ship) => platoon && isOnShip(platoon, ship),
+    )
+
+    return (
+        <Metadata
+            label="Location"
+            alignment="right"
+            value={planet?.name ?? ship?.name}
+        />
+    )
+}
+
 export default function Training() {
     const { localPlayer } = useAtomValue(sessionAtom)
     const capital = useCapitalPlanet()
@@ -84,11 +102,6 @@ export default function Training() {
     const platoon = useAtomValue(platoonsAtom).find(
         (platoon) => platoon.index === index && platoon.owner === localPlayer,
     )
-    // FIXME use a derived atom?
-    const planet = useAtomValue(planetsAtom).find(
-        (planet) => platoon && isOnPlanet(platoon, planet),
-    )
-
     const { equip, dismiss } = useTrainingActions()
 
     if (!platoon) {
@@ -136,24 +149,14 @@ export default function Training() {
                         width: 240,
                     }}
                 >
-                    <div style={{ display: "flex" }}>
-                        <Metadata
-                            label="Location"
-                            alignment="right"
-                            value={planet?.name}
-                        />
-                    </div>
-                    <div style={{ display: "flex" }}>
-                        <Metadata
-                            label="Credits"
-                            alignment="right"
-                            value={capital.credits}
-                            format={Math.floor}
-                        />
-                    </div>
-                    <div style={{ display: "flex" }}>
-                        <Rank state={platoon.state} calibre={platoon.calibre} />
-                    </div>
+                    <PlatoonLocation platoon={platoon} />
+                    <Metadata
+                        label="Credits"
+                        alignment="right"
+                        value={capital.credits}
+                        format={Math.floor}
+                    />
+                    <Rank state={platoon.state} calibre={platoon.calibre} />
                     <div
                         style={{
                             display: "flex",
@@ -184,10 +187,7 @@ export default function Training() {
                     >
                         Calibre
                         <div>
-                            <Calibre
-                                state={platoon.state}
-                                calibre={platoon.calibre}
-                            />
+                            <Calibre state={platoon.state} calibre={platoon.calibre} />
                             <MetadataValue
                                 label="Calibre"
                                 value={"0"}
