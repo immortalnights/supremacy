@@ -1,7 +1,6 @@
 import { useAtomValue } from "jotai"
 import { shipsAtom } from "../store"
 import type { Planet, Ship } from "../entities"
-import { shipsDockedAtPlanet, shipsOnPlanetSurface } from "Game/utilities/ships"
 import { useCallback, useState } from "react"
 
 export const useSelectedShip = () => {
@@ -20,16 +19,4 @@ export const useSelectedShip = () => {
     )
 
     return [ship, setShip] as const
-}
-
-// replace with platoonsOnPlanetAtom like function
-export const useShipsInDockingBay = (planet: Planet) => {
-    const ships = useAtomValue(shipsAtom)
-    return shipsDockedAtPlanet(ships, planet)
-}
-
-// replace with platoonsOnPlanetAtom like function
-export const useShipsOnPlanetSurface = (planet: Planet) => {
-    const ships = useAtomValue(shipsAtom)
-    return shipsOnPlanetSurface(ships, planet)
 }

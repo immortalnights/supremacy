@@ -1,57 +1,88 @@
-import { Planet, Ship } from "Game/entities"
+import { atom } from "jotai"
+import { shipsAtom } from "Game/store"
+import {
+    ColonizedPlanet,
+    Planet,
+    Ship,
+    ShipDocked,
+    ShipInOrbit,
+    ShipInOuterSpace,
+    ShipOnSurface,
+} from "Game/entities"
 
-export const shipInLocation = (ships: Ship[], index: number) => {
-    return ships.find(
-        (ship) =>
-            !(
-                ship.location.position == "outer-space" ||
-                ship.location.position == "orbit"
-            ) && ship.location.index === index,
+// Return ships in outer space.
+export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace => {
+    return ship.position === "outer-space"
+}
+
+export const shipsInOuterSpaceAtom = atom((get) => ({
+    filter: () => get(shipsAtom).filter((ship) => isInOuterSpace(ship)),
+}))
+
+// Return ships in orbit of the specified planet.
+export const isOrbitingPlanet = (ship: Ship, planet: Planet): ship is ShipInOrbit => {
+    return (
+        ship.position === "orbit" &&
+        !!ship.location.planet &&
+        ship.location.planet === planet.id
     )
 }
 
-// replace with platoonsOnPlanetAtom like function
-export const shipsDockedAtPlanet = (
-    ships: Ship[],
-    planet: Planet,
-    sort = true,
-) => {
-    const dockedShips = ships.filter(
-        (ship) =>
-            ship.location.position === "docked" &&
-            ship.location.planet === planet.id,
+export const shipsOrbitingPlanetAtom = atom((get) => ({
+    filter: (planet?: Planet) => {
+        const ships = planet
+            ? get(shipsAtom).filter((ship) => isOrbitingPlanet(ship, planet))
+            : []
+
+        return ships
+    },
+}))
+
+// Return ships in the specified planet docking bays.
+export const isDocketAtPlanet = (ship: Ship, planet: Planet): ship is ShipDocked => {
+    return (
+        ship.position === "docked" &&
+        !!ship.location.planet &&
+        ship.location.planet === planet.id
     )
-
-    if (sort) {
-        dockedShips.sort(
-            (a, b) =>
-                (a.location.position === "docked" ? a.location.index : 0) -
-                (b.location.position === "docked" ? b.location.index : 0),
-        )
-    }
-
-    return dockedShips
 }
 
-// replace with platoonsOnPlanetAtom like function
-export const shipsOnPlanetSurface = (
-    ships: Ship[],
-    planet: Planet,
-    sort = true,
-) => {
-    const surfaceShips = ships.filter(
-        (ship) =>
-            ship.location.position === "surface" &&
-            ship.location.planet === planet.id,
+export const shipsDocketAtPlanetAtom = atom((get) => ({
+    filter: (planet?: ColonizedPlanet, sort = true) => {
+        const ships = planet
+            ? get(shipsAtom).filter((ship) => isDocketAtPlanet(ship, planet))
+            : []
+
+        if (sort) {
+            ships.sort((a, b) => a.location.index - b.location.index)
+        }
+
+        return ships
+    },
+}))
+
+// Return ships on the surface of the specified planet.
+export const isOnPlanetSurface = (
+    ship: Ship,
+    planet: ColonizedPlanet,
+): ship is ShipOnSurface => {
+    return (
+        ship.position === "surface" &&
+        !!ship.location.planet &&
+        ship.location.planet === planet.id
     )
-
-    if (sort) {
-        surfaceShips.sort(
-            (a, b) =>
-                (a.location.position === "surface" ? a.location.index : 0) -
-                (b.location.position === "surface" ? b.location.index : 0),
-        )
-    }
-
-    return surfaceShips
 }
+
+export const shipsOnPlanetSurfaceAtom = atom((get) => ({
+    filter: (planet?: ColonizedPlanet, sort = true) => {
+        const ships = planet
+            ? get(shipsAtom).filter((ship) => isOnPlanetSurface(ship, planet))
+            : []
+
+        if (sort) {
+            ships.sort((a, b) => a.location.index - b.location.index)
+        }
+
+        return ships
+    },
+}))

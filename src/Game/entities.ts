@@ -60,37 +60,7 @@ export interface ShipBlueprint {
     }
 }
 
-interface Location {
-    position: ShipPosition
-}
-
-interface InOrbit extends Location {
-    position: "orbit"
-    planet: Planet["id"]
-}
-
-interface Docked extends Location {
-    position: "docked"
-    planet: Planet["id"]
-    index: number
-}
-
-interface Surface extends Location {
-    position: "surface"
-    planet: Planet["id"]
-    index: number
-}
-
-interface OuterSpace extends Location {
-    position: "outer-space"
-    heading: {
-        from: Planet["id"]
-        to: Planet["id"]
-        eta: number
-    }
-}
-
-export interface Ship {
+interface BaseShip {
     id: string
     name: string
     class: ShipClass
@@ -109,10 +79,43 @@ export interface Ship {
     cargo: {
         [key in CargoType]: number
     }
-    location: InOrbit | Docked | Surface | OuterSpace
-    active: boolean
     value: number
 }
+
+export interface ShipInOrbit extends BaseShip {
+    position: "orbit"
+    location: {
+        planet: Planet["id"]
+    }
+}
+
+export interface ShipDocked extends BaseShip {
+    position: "docked"
+    location: {
+        planet: Planet["id"]
+        index: number
+    }
+}
+
+export interface ShipOnSurface extends BaseShip {
+    position: "surface"
+    location: {
+        planet: Planet["id"]
+        index: number
+    }
+    active: boolean
+}
+
+export interface ShipInOuterSpace extends BaseShip {
+    position: "outer-space"
+    heading: {
+        from: Planet["id"]
+        to: Planet["id"]
+        eta: number
+    }
+}
+
+export type Ship = ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace
 
 export type SuitClass = "none" | "basic" | "moderate" | "advanced"
 
@@ -140,7 +143,7 @@ export interface EquippedPlatoon extends BasePlatoon {
     location: {
         planet?: Planet["id"]
         ship?: Ship["id"]
-        index?: number
+        index: number
     }
 }
 

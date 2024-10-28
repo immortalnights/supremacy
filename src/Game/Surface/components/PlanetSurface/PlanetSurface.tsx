@@ -1,10 +1,10 @@
-import { Planet, Ship } from "Game/entities"
+import { ColonizedPlanet, Planet, Ship, ShipOnSurface } from "Game/entities"
 import Button from "components/Button"
 import ShipIcon from "Game/components/ShipIcon"
-import { useShipsOnPlanetSurface } from "Game/hooks"
 import { useMoveShip } from "Game/actions"
 import { useEnableDisableShip } from "../../actions"
-import { shipInLocation } from "Game/utilities/ships"
+import { shipsOnPlanetSurfaceAtom } from "Game/utilities/ships"
+import { useAtomValue } from "jotai"
 
 function Location({
     ship,
@@ -12,7 +12,7 @@ function Location({
     onEnable,
     onDisable,
 }: {
-    ship?: Ship
+    ship?: ShipOnSurface
     onClick: (ship: Ship) => void
     onEnable: (ship: Ship) => void
     onDisable: (ship: Ship) => void
@@ -81,8 +81,8 @@ function Location({
     )
 }
 
-export default function PlanetSurface({ planet }: { planet: Planet }) {
-    const ships = useShipsOnPlanetSurface(planet)
+export default function PlanetSurface({ planet }: { planet: ColonizedPlanet }) {
+    const ships = useAtomValue(shipsOnPlanetSurfaceAtom).filter(planet)
     const moveShipTo = useMoveShip()
     const toggleShip = useEnableDisableShip()
 
@@ -109,7 +109,7 @@ export default function PlanetSurface({ planet }: { planet: Planet }) {
             {Array(6)
                 .fill(undefined)
                 .map((_, index) => {
-                    const ship = shipInLocation(ships, index)
+                    const ship = ships.find((ship) => ship.location.index === index)
                     return (
                         <Location
                             key={`S${index}${ship?.name}`}
