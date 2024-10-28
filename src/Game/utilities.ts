@@ -79,7 +79,7 @@ export const nextFreeIndex = <T extends { location: { index: number } }>(
 
     // default to max, should never happen but should just result in
     // a display issue if it does.
-    if (!availableIndex) {
+    if (availableIndex === undefined) {
         availableIndex = maxIndex
     }
 
