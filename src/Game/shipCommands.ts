@@ -60,7 +60,7 @@ const commissionShip = (
     ship: ShipBlueprint,
     name: string,
     planet: ColonizedPlanet,
-    index: number,
+    bayIndex: number,
 ): Ship => {
     return {
         id: crypto.randomUUID(),
@@ -73,10 +73,10 @@ const commissionShip = (
         fuels: 0,
         passengers: 0,
         capacity: { ...ship.capacity },
+        position: "docked",
         location: {
             planet: planet.id,
-            position: "docked",
-            index,
+            index: bayIndex,
         },
         cargo: {
             food: 0,
@@ -84,7 +84,6 @@ const commissionShip = (
             fuels: 0,
             energy: 0,
         },
-        active: false,
         value: ship.cost.credits,
     }
 }
@@ -566,8 +565,13 @@ export const transitionShip = (
                             `Cannot launch ship ${ship.name} without at least 100 fuels (have ${ship.fuels})`,
                         )
                     } else {
+                        let modifiedFuel = ship.fuels
+                        if (ship.capacity.fuels > 0) {
+                            modifiedFuel = ship.fuels - 100
+                        }
+
                         changes = {
-                            fuels: ship.fuels - 100,
+                            fuels: modifiedFuel,
                             position: "orbit",
                             location: {
                                 planet: planet.id,
