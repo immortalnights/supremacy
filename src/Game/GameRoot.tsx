@@ -13,8 +13,8 @@ function NavigationRoot({ children }: { children: ReactNode }) {
             ev.preventDefault()
         }
         const onMouseUp = (ev: MouseEvent) => {
-            ev.preventDefault()
             if (ev.button === 2) {
+                ev.preventDefault()
                 navigate(`/Game/${id}/SolarSystem`)
             }
         }
