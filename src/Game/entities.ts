@@ -1,8 +1,10 @@
+export type PlanetType = "lifeless" | "metropolis" | "volcanic" | "dessert" | "tropical"
+
 interface BasePlanet {
     id: string
     gridIndex: number
     name: string
-    type: "lifeless" | "metropolis" | "volcanic" | "dessert" | "tropical"
+    type: PlanetType
 }
 
 export interface LifelessPlanet extends BasePlanet {
@@ -17,7 +19,7 @@ export type PlanetResources = {
 }
 
 export interface ColonizedPlanet extends BasePlanet, PlanetResources {
-    type: "metropolis" | "volcanic" | "dessert" | "tropical"
+    type: Exclude<PlanetType, "lifeless">
     owner: string
     capital: boolean
     credits: number
