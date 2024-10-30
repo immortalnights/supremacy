@@ -1,14 +1,14 @@
 import type { Meta, StoryObj } from "@storybook/react"
-import PlanetInfoGraph from "."
+import PlanetInfoGraphic from "."
 
 const meta = {
     title: "Components/Planet Info Graph",
-    component: PlanetInfoGraph,
+    component: PlanetInfoGraphic,
     parameters: {
         layout: "centered",
     },
     args: {},
-} satisfies Meta<typeof PlanetInfoGraph>
+} satisfies Meta<typeof PlanetInfoGraphic>
 
 export default meta
 type Story = StoryObj<typeof meta>

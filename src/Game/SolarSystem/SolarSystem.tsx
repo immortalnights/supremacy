@@ -4,13 +4,12 @@ import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
 import Navigation from "../components/Navigation"
 import Button from "components/Button"
 import Date from "../components/Date"
-import PlanetInfoGraph from "../components/PlanetInfoGraph"
+import PlanetInfoGraphic from "../components/PlanetInfoGraphic"
 import pauseIcon from "/images/pause.png"
 import muteIcon from "/images/mute.png"
 import systemUp from "/images/system_up.png"
 import systemDown from "/images/system_down.png"
 import systemScroll from "/images/system_scroll.png"
-import { useSelectedPlanet } from "Game/hooks"
 
 export default function SolarSystem() {
     const planets = useAtomValue(planetsAtom)
@@ -76,7 +75,7 @@ export default function SolarSystem() {
                         <div>
                             <Date />
                             {selectedPlanet && (
-                                <PlanetInfoGraph planet={selectedPlanet} />
+                                <PlanetInfoGraphic planet={selectedPlanet} />
                             )}
                         </div>
                         <div style={{ display: "flex", flexDirection: "column" }}>
