@@ -1,13 +1,12 @@
+import { DAYS_PER_YEAR } from "Game/settings"
 import { dateAtom } from "Game/store"
 import { useAtomValue } from "jotai"
-
-const days_per_month = 60
 
 export function useDate() {
     const date = useAtomValue(dateAtom)
 
-    const month = 1 + (date % days_per_month)
-    const year = 2000 + Math.floor(date / days_per_month)
+    const month = 1 + (date % DAYS_PER_YEAR)
+    const year = 2000 + Math.floor(date / DAYS_PER_YEAR)
 
     return `${month}/${year}`
 }
