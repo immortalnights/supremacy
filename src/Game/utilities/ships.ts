@@ -9,6 +9,19 @@ import {
     ShipInOuterSpace,
     ShipOnSurface,
 } from "Game/entities"
+import { DAYS_PER_YEAR } from "Game/settings"
+
+export const canPurchaseAtmos = (date: number, owned: number) => {
+    let available = true
+    if (owned > 0) {
+        available = false
+        console.error("Cannot own more than one Atmosphere Processor")
+    } else if (date < DAYS_PER_YEAR) {
+        available = false
+        console.error("Cannot purchase Atmosphere Processor yet")
+    }
+    return available
+}
 
 // Return ships in outer space.
 export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace => {

@@ -1,1 +1,2 @@
 export const PLANET_POPULATION_LIMIT = 30000
+export const DAYS_PER_YEAR = 64
