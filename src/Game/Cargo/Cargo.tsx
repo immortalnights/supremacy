@@ -148,7 +148,7 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 
     return (
         <div>
-            <MetadataValue label="Fuel" value={ship?.fuels ?? 0} />
+            <MetadataValue label="Fuel" value={ship?.fuels ?? ""} />
             <div style={{ display: "flex" }}>
                 <div
                     style={{

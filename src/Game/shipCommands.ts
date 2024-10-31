@@ -1,5 +1,5 @@
 import { throwError } from "game-signaling-server/client"
-import { PLANET_POPULATION_LIMIT } from "./settings"
+import { DAYS_PER_YEAR, PLANET_POPULATION_LIMIT } from "./settings"
 import {
     Planet,
     Ship,
@@ -7,10 +7,7 @@ import {
     ShipBlueprint,
     CargoType,
     ShipPosition,
-    ShipInOuterSpace,
     ShipInOrbit,
-    ShipOnSurface,
-    ShipDocked,
 } from "./entities"
 import {
     canAffordShip,
@@ -19,9 +16,13 @@ import {
     unloadCargo,
 } from "./Shipyard/utilities"
 import { Difficulty } from "./types"
-import { isColonizedPlanet } from "./utilities/planets"
+import { getPlayerCapital, isColonizedPlanet } from "./utilities/planets"
 import { clone, nextFreeIndex } from "./utilities"
-import { isDocketAtPlanet, isOnPlanetSurface } from "./utilities/ships"
+import {
+    canPurchaseAtmos,
+    isDocketAtPlanet,
+    isOnPlanetSurface,
+} from "./utilities/ships"
 
 // FIXME
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
@@ -62,15 +63,17 @@ const commissionShip = (
     planet: ColonizedPlanet,
     bayIndex: number,
 ): Ship => {
+    const requiredCrew = ship.requiredCrew === 0 ? "remote" : ship.requiredCrew
+    const fuels = ship.capacity.fuels === 0 ? "nuclear" : 0
     return {
         id: crypto.randomUUID(),
         name,
         description: ship.description,
         owner: planet.owner,
         class: ship.class,
-        requiredCrew: ship.requiredCrew,
+        requiredCrew,
         crew: 0,
-        fuels: 0,
+        fuels,
         passengers: 0,
         capacity: { ...ship.capacity },
         position: "docked",
@@ -95,66 +98,66 @@ export const purchaseShip = (
     blueprint: ShipBlueprint,
     name: string,
     difficulty: Difficulty,
+    date: number,
 ) => {
     let modifiedPlanets
     let modifiedShips
-    // For now, purchases always get applied to the players capital, regardless of the selected planet
-    const index = planets.findIndex(
-        (p) => p.type !== "lifeless" && p.capital && p.owner === player,
-    )
+    // Purchases always get applied to the players capital, regardless of the selected planet
+    const [capitalIndex, capital] = getPlayerCapital(planets, player)
 
-    if (index !== -1) {
-        const capital = planets[index]
-        // Count ships in planet docking bay
-        const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
+    // Count ships in planet docking bay
+    const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
 
-        if (capital.type === "lifeless") {
-            console.error("Cannot purchase ships on a lifeless planet")
-            // } else if (!planet.capital) {
-            //     console.error("Cannot purchase ships from none capital planet")
-        } else if (dockedShips.length >= 3) {
-            console.error("Cannot purchase ship, capital has no available docking bays")
-        } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
-            console.log("Cannot afford ship")
-        } else {
-            const totalOwnedShips = ships.filter(
-                (ship) => ship.owner === capital.owner,
-            ).length
-            const ownedShips = ships.filter(
-                (ship) =>
-                    ship.class === blueprint.class && ship.owner === capital.owner,
-            ).length
+    if (dockedShips.length >= 3) {
+        console.error("Cannot purchase ship, capital has no available docking bays")
+    } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
+        console.log("Cannot afford ship")
+    } else {
+        const totalOwnedShips = ships.filter(
+            (ship) => ship.owner === capital.owner,
+        ).length
+        const ownedShips = ships.filter(
+            (ship) => ship.class === blueprint.class && ship.owner === capital.owner,
+        ).length
 
-            if (totalOwnedShips > 32) {
-                console.error(`Player ${capital.owner} cannot own more than 32 ships`)
-            } else if (blueprint.class === "Atmosphere Processor" && ownedShips === 1) {
+        if (totalOwnedShips > 32) {
+            console.error(`Player ${capital.owner} cannot own more than 32 ships`)
+        } else if (
+            blueprint.class === "Atmosphere Processor" &&
+            !canPurchaseAtmos(date, ownedShips)
+        ) {
+            if (date < DAYS_PER_YEAR) {
+                console.error(
+                    "Cannot purchase Atmosphere Processor until the second year",
+                )
+            } else if (ownedShips === 1) {
                 console.error(
                     `Player ${capital.owner} cannot own more than 1 Atmosphere Processor`,
                 )
-            } else {
-                const availableBayIndex = nextFreeIndex(dockedShips, 3)
-                if (!availableBayIndex) {
-                    console.assert(
-                        `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
-                    )
-                }
-
-                modifiedPlanets = [...planets]
-                const modifiedPlanet = { ...capital }
-
-                deductShipCost(capital, blueprint.cost, difficulty)
-
-                modifiedPlanets[index] = modifiedPlanet
-
-                const newShip = commissionShip(
-                    blueprint,
-                    name,
-                    modifiedPlanet,
-                    availableBayIndex,
-                )
-                console.debug("new ship", newShip)
-                modifiedShips = [...ships, newShip]
             }
+        } else {
+            const availableBayIndex = nextFreeIndex(dockedShips, 3)
+            if (!availableBayIndex) {
+                console.assert(
+                    `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
+                )
+            }
+
+            modifiedPlanets = [...planets]
+            const modifiedPlanet = { ...capital }
+
+            deductShipCost(capital, blueprint.cost, difficulty)
+
+            modifiedPlanets[capitalIndex] = modifiedPlanet
+
+            const newShip = commissionShip(
+                blueprint,
+                name,
+                modifiedPlanet,
+                availableBayIndex,
+            )
+            console.debug("new ship", newShip)
+            modifiedShips = [...ships, newShip]
         }
     }
 
@@ -172,7 +175,9 @@ export const crewShip = (
     const planet = getShipPlanet(planets, ship)
 
     if (planet && canModifyShipAtPlanet(player, ship, planet)) {
-        if (ship.crew === ship.requiredCrew) {
+        if (ship.requiredCrew === "remote") {
+            console.warn(`Ship ${ship.name} does not require crew`)
+        } else if (ship.crew === ship.requiredCrew) {
             console.warn(`Ship ${ship.name} already has a full crew`)
         } else if (planet.population < ship.requiredCrew) {
             console.warn(
@@ -197,7 +202,7 @@ export const crewShip = (
             let modifiedShip
             ;[modifiedShip, modifiedShips] = clone(ship, ships)
 
-            modifiedShip.crew += modifiedShip.requiredCrew
+            modifiedShip.crew += ship.requiredCrew
             modifiedShips[shipIndex] = modifiedShip
         }
     }
@@ -275,8 +280,10 @@ export const decommissionShip = (
         planet.population += ship.passengers
         ship.passengers = 0
 
-        planet.fuels += ship.fuels
-        ship.fuels = 0
+        if (ship.fuels !== "nuclear") {
+            planet.fuels += ship.fuels
+            ship.fuels = 0
+        }
 
         planet.population += ship.crew
         ship.crew = 0
@@ -358,7 +365,9 @@ export const modifyShipFuel = (
     const planet = getShipPlanet(planets, ship)
 
     if (planet && canModifyShipAtPlanet(player, ship, planet)) {
-        if (quantity > 0 && ship.fuels >= ship.capacity.fuels) {
+        if (ship.fuels === "nuclear") {
+            console.warn(`Ship ${ship.name} does not require fuel`)
+        } else if (quantity > 0 && ship.fuels >= ship.capacity.fuels) {
             console.warn(`Ship ${ship.name} does not have space for more fuel`)
         } else if (quantity < 0 && ship.fuels === 0) {
             console.error(`Ship ${ship.name} does not have any fuel to unload`)
@@ -384,7 +393,7 @@ export const modifyShipFuel = (
             const modifiedShip = { ...ships[shipIndex] }
 
             modifiedPlanet.fuels -= toMove
-            modifiedShip.fuels += toMove
+            modifiedShip.fuels = ship.fuels - toMove
 
             modifiedPlanets[planetIndex] = modifiedPlanet
             modifiedShips[shipIndex] = modifiedShip
@@ -556,17 +565,20 @@ export const transitionShip = (
                         )
                     } else if (landedShips.length >= 3) {
                         throw new Error(`Planet ${planet.name} docking bays are full`)
-                    } else if (ship.crew !== ship.requiredCrew) {
+                    } else if (
+                        ship.requiredCrew !== "remote" &&
+                        ship.crew !== ship.requiredCrew
+                    ) {
                         throw new Error(
                             `Cannot launch ship ${ship.name} without full crew`,
                         )
-                    } else if (ship.capacity.fuels > 0 && ship.fuels <= 100) {
+                    } else if (ship.fuels !== "nuclear" && ship.fuels <= 100) {
                         throw new Error(
                             `Cannot launch ship ${ship.name} without at least 100 fuels (have ${ship.fuels})`,
                         )
                     } else {
                         let modifiedFuel = ship.fuels
-                        if (ship.capacity.fuels > 0) {
+                        if (ship.fuels !== "nuclear") {
                             modifiedFuel = ship.fuels - 100
                         }
 

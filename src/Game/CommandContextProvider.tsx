@@ -1,7 +1,7 @@
 import { Getter, Setter, useAtomValue } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo } from "react"
-import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
+import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { Planet } from "./entities"
 import { clamp, clone } from "./utilities"
@@ -100,6 +100,7 @@ const modifyAggression = (
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { localPlayer, host } = useAtomValue(sessionAtom)
+    const date = useAtomValue(dateAtom)
 
     const exec = useAtomCallback(
         useCallback(
@@ -148,6 +149,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.blueprint,
                         data.name,
                         "easy",
+                        date,
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)

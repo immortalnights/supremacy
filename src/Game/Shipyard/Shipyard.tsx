@@ -7,12 +7,13 @@ import carrier from "/images/ship-cargo-carrier.gif"
 import mining from "/images/ship-mining-station.gif"
 import horticultural from "/images/ship-horticultural.gif"
 import catalog from "../data/ships.json"
-import { sessionAtom, shipsAtom } from "../store"
+import { dateAtom, sessionAtom, shipsAtom } from "../store"
 import { atom, useAtomValue } from "jotai"
 import { usePurchaseShip } from "./actions"
 import { useCapitalPlanet } from "../hooks"
 import Button from "components/Button"
 import { wrap } from "Game/utilities"
+import { canPurchaseAtmos } from "Game/utilities/ships"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -51,12 +52,7 @@ function PurchaseShip({
     return (
         <div>
             <form onSubmit={handleBuy}>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={handleChange}
-                    autoFocus
-                />
+                <input type="text" value={name} onChange={handleChange} autoFocus />
                 <Button type="submit">Buy</Button>
                 <Button type="button" onClick={onCancel}>
                     Cancel
@@ -70,18 +66,18 @@ export default function Shipyard() {
     const { localPlayer } = useAtomValue(sessionAtom)
     const planet = useCapitalPlanet()
     const [index, setIndex] = useState(0)
-    const ship = catalog[index]
+    const blueprint = catalog[index] as ShipBlueprint
     const [purchasing, setPurchasing] = useState(false)
+    const date = useAtomValue(dateAtom)
     const ownedAtom = useMemo(
         () =>
             atom(
                 (get) =>
                     get(shipsAtom).filter(
-                        (s) =>
-                            s.owner === localPlayer && s.class === ship.class,
+                        (s) => s.owner === localPlayer && s.class === blueprint.class,
                     ).length,
             ),
-        [localPlayer, ship.class],
+        [localPlayer, blueprint.class],
     )
     const owned = useAtomValue(ownedAtom)
 
@@ -92,7 +88,12 @@ export default function Shipyard() {
         setIndex(wrap(index + 1, catalog.length))
     }
     const handleBuy = () => {
-        setPurchasing(true)
+        if (
+            blueprint.class !== "Atmosphere Processor" ||
+            canPurchaseAtmos(date, owned)
+        ) {
+            setPurchasing(true)
+        }
     }
     const handlePurchased = () => {
         setPurchasing(false)
@@ -104,7 +105,7 @@ export default function Shipyard() {
     return (
         <div>
             <div style={{ background: "black", width: 640, height: 282 }}>
-                <img src={images[ship.class]} />
+                <img src={images[blueprint.class]} />
             </div>
             <div>
                 <div style={{ display: "flex" }}>
@@ -117,7 +118,7 @@ export default function Shipyard() {
                     <div style={{ flexGrow: 1 }}>
                         {purchasing ? (
                             <PurchaseShip
-                                ship={ship}
+                                ship={blueprint}
                                 planet={planet}
                                 owned={owned}
                                 onPurchased={handlePurchased}
@@ -125,8 +126,8 @@ export default function Shipyard() {
                             />
                         ) : (
                             <>
-                                <div>{ship.description}</div>
-                                <div>Type: {ship.class}</div>
+                                <div>{blueprint.description}</div>
+                                <div>Type: {blueprint.class}</div>
                             </>
                         )}
                     </div>
@@ -134,12 +135,10 @@ export default function Shipyard() {
                         &gt;&gt;
                     </Button>
                 </div>
-                <div
-                    style={{ display: "flex", justifyContent: "space-around" }}
-                >
+                <div style={{ display: "flex", justifyContent: "space-around" }}>
                     <div>
                         <div>
-                            <strong>Starbase</strong>
+                            <strong>{planet.name}</strong>
                         </div>
                         <div>{Math.floor(planet.credits)}: Credits</div>
                         <div>{Math.floor(planet.minerals)}: Minerals</div>
@@ -149,19 +148,19 @@ export default function Shipyard() {
                         <div>
                             <strong>Cost</strong>
                         </div>
-                        <div>{ship.cost.credits}: Credits</div>
-                        <div>{ship.cost.minerals}: Minerals</div>
-                        <div>{ship.cost.energy}: Energy</div>
+                        <div>{blueprint.cost.credits}: Credits</div>
+                        <div>{blueprint.cost.minerals}: Minerals</div>
+                        <div>{blueprint.cost.energy}: Energy</div>
                     </div>
                     <div>
                         <div>
                             <strong>Capacity</strong>
                         </div>
-                        <div>{ship.requiredCrew}: Crew</div>
-                        <div>{ship.capacity.cargo}: Payload</div>
+                        <div>{blueprint.requiredCrew}: Crew</div>
+                        <div>{blueprint.capacity.cargo}: Payload</div>
                         <div>
-                            {ship.capacity.fuels > 0
-                                ? ship.capacity.fuels
+                            {blueprint.capacity.fuels > 0
+                                ? blueprint.capacity.fuels
                                 : "Nuclear"}
                             : Fuel
                         </div>
@@ -172,9 +171,9 @@ export default function Shipyard() {
                         </div>
                         <div>{owned}: Owned</div>
                         <div>
-                            {ship.range > 0 ? ship.range : "Infinite"}: Range
+                            {blueprint.range > 0 ? blueprint.range : "Infinite"}: Range
                         </div>
-                        <div>{ship.capacity.civilians}: Seats</div>
+                        <div>{blueprint.capacity.civilians}: Seats</div>
                     </div>
                 </div>
             </div>

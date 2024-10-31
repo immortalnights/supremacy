@@ -68,9 +68,9 @@ interface BaseShip {
     class: ShipClass
     description: string
     owner: string
-    requiredCrew: number
+    requiredCrew: number | "remote"
     crew: number
-    fuels: number
+    fuels: number | "nuclear"
     passengers: number
     capacity: {
         civilians: number
