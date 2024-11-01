@@ -1,7 +1,13 @@
 import MiniMap from "./components/SolarSystem"
 import { useAtom, useAtomValue } from "jotai"
-import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
-import Navigation from "../components/Navigation"
+import {
+    planetsAtom,
+    platoonsAtom,
+    shipsAtom,
+    selectedPlanetAtom,
+    sessionAtom,
+} from "../store"
+import Navigation, { NavigationItem } from "../components/Navigation"
 import Button from "components/Button"
 import Date from "../components/Date"
 import PlanetInfoGraphic from "../components/PlanetInfoGraphic"
@@ -10,11 +16,62 @@ import muteIcon from "/images/mute.png"
 import systemUp from "/images/system_up.png"
 import systemDown from "/images/system_down.png"
 import systemScroll from "/images/system_scroll.png"
+import { useAtomCallback } from "jotai/utils"
+import { useCallback } from "react"
+import { saveGame } from "../gameSetupUtilities"
+import { Getter } from "jotai"
+import { AtmosOnSurface, Planet, Ship } from "Game/entities"
+import { useMoveShip, useTransferShip } from "Game/actions"
+
+const useSaveGame = () => {
+    return useAtomCallback(
+        useCallback((get: Getter) => {
+            const session = get(sessionAtom)
+            const planets = get(planetsAtom)
+            const ships = get(shipsAtom)
+            const platoons = get(platoonsAtom)
+
+            saveGame(session, "paused", planets, ships, platoons)
+        }, []),
+    )
+}
+
+const useTerraformPlanet = () => {
+    const { localPlayer } = useAtomValue(sessionAtom)
+    const atmos = useAtomValue(shipsAtom).find(
+        (ship) => ship.class === "Atmosphere Processor" && ship.owner === localPlayer,
+    )
+    const move = useMoveShip()
+    const travel = useTransferShip()
+
+    const atmosOnSurface = (ship: Ship): ship is AtmosOnSurface =>
+        ship.class === "Atmosphere Processor" && ship.position === "surface"
+
+    return useCallback(
+        (planet: Planet) => {
+            if (!atmos) {
+                console.warn(`Player does not own an Atmosphere Processor`)
+            } else if (planet.type !== "lifeless") {
+                console.warn(`Planet ${planet.name} has already been terraformed`)
+            } else if (atmosOnSurface(atmos)) {
+                console.warn(
+                    `Formatting in progress, ${atmos.terraforming.remaining} days remaining, please wait`,
+                )
+            } else {
+                move(atmos, "orbit")
+                travel(atmos, planet)
+            }
+        },
+        [atmos],
+    )
+}
 
 export default function SolarSystem() {
     const planets = useAtomValue(planetsAtom)
     const { localPlayer } = useAtomValue(sessionAtom)
+    const saveGame = useSaveGame()
     const [selectedPlanet, setSelectedPlanet] = useAtom(selectedPlanetAtom)
+    const terraform = useTerraformPlanet()
 
     const handlePreviousPlanet = () => {
         let index = planets.findIndex((planet) => planet.id === selectedPlanet?.id)
@@ -25,6 +82,17 @@ export default function SolarSystem() {
         let index = planets.findIndex((planet) => planet.id === selectedPlanet?.id)
         index = (index + 1) % planets.length
         setSelectedPlanet(planets[index])
+    }
+
+    const handleActionClick = (item: NavigationItem) => {
+        if (item === "atmos") {
+            if (selectedPlanet) {
+                terraform(selectedPlanet)
+            }
+        } else if (item === "spy") {
+        } else if (item === "save") {
+            saveGame()
+        }
     }
 
     return (
@@ -49,6 +117,7 @@ export default function SolarSystem() {
                             "spy",
                             "save",
                         ]}
+                        onAction={handleActionClick}
                     />
                 </div>
                 <div>
