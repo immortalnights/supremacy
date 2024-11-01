@@ -82,16 +82,17 @@ interface BaseShip {
         [key in CargoType]: number
     }
     value: number
+    position: ShipPosition
 }
 
-export interface ShipInOrbit extends BaseShip {
+export interface ShipInOrbit {
     position: "orbit"
     location: {
         planet: Planet["id"]
     }
 }
 
-export interface ShipDocked extends BaseShip {
+export interface ShipDocked {
     position: "docked"
     location: {
         planet: Planet["id"]
@@ -99,7 +100,8 @@ export interface ShipDocked extends BaseShip {
     }
 }
 
-export interface ShipOnSurface extends BaseShip {
+export interface ShipOnSurface {
+    class: Exclude<ShipClass, "Atmosphere Processing">
     position: "surface"
     location: {
         planet: Planet["id"]
@@ -108,7 +110,7 @@ export interface ShipOnSurface extends BaseShip {
     active: boolean
 }
 
-export interface ShipInOuterSpace extends BaseShip {
+export interface ShipInOuterSpace {
     position: "outer-space"
     heading: {
         from: Planet["id"]
@@ -117,7 +119,22 @@ export interface ShipInOuterSpace extends BaseShip {
     }
 }
 
-export type Ship = ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace
+export interface AtmosOnSurface {
+    class: "Atmosphere Processor"
+    position: "surface"
+    location: {
+        planet: Planet["id"]
+        index: number
+    }
+    active: boolean
+    terraforming: {
+        duration: number
+        remaining: number
+    }
+}
+
+export type Ship = BaseShip &
+    (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace | AtmosOnSurface)
 
 export type SuitClass = "none" | "basic" | "moderate" | "advanced"
 
