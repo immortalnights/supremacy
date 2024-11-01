@@ -149,7 +149,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.blueprint,
                         data.name,
                         "easy",
-                        date,
+                        get(dateAtom),
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
