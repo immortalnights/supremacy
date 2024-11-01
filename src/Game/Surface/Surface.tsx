@@ -15,7 +15,7 @@ export default function Surface() {
 
     const handleClickDockedShip = (ship: Ship) => {
         if (ship) {
-            moveShipTo(ship, planet, "surface")
+            moveShipTo(ship, "surface")
         }
     }
 
@@ -33,10 +33,7 @@ export default function Surface() {
                         padding: "2px 0px",
                     }}
                 >
-                    <DockingBay
-                        planet={planet}
-                        onClick={handleClickDockedShip}
-                    />
+                    <DockingBay planet={planet} onClick={handleClickDockedShip} />
                     <PlanetSurface planet={planet} />
                 </div>
                 <div
@@ -47,9 +44,7 @@ export default function Surface() {
                     }}
                 >
                     <div>{/* messages */}</div>
-                    <Navigation
-                        items={["shipyard", "overview", "fleet", "cargo"]}
-                    />
+                    <Navigation items={["shipyard", "overview", "fleet", "cargo"]} />
                 </div>
             </div>
         </div>

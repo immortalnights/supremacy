@@ -228,7 +228,6 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         originalPlanets,
                         originalShips,
                         data.ship,
-                        data.planet,
                         data.position,
                     )
                     set(shipsAtom, modifiedShips)

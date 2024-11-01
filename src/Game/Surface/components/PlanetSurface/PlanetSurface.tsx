@@ -88,7 +88,7 @@ export default function PlanetSurface({ planet }: { planet: ColonizedPlanet }) {
 
     const handleShipClick = (ship: Ship) => {
         if (ship) {
-            moveShipTo(ship, planet, "docked")
+            moveShipTo(ship, "docked")
         }
     }
 

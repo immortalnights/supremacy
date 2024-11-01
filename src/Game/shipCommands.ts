@@ -126,15 +126,7 @@ export const purchaseShip = (
             blueprint.class === "Atmosphere Processor" &&
             !canPurchaseAtmos(date, ownedShips)
         ) {
-            if (date < DAYS_PER_YEAR) {
-                console.error(
-                    "Cannot purchase Atmosphere Processor until the second year",
-                )
-            } else if (ownedShips === 1) {
-                console.error(
-                    `Player ${capital.owner} cannot own more than 1 Atmosphere Processor`,
-                )
-            }
+            console.error("Cannot purchase Atmosphere Processor")
         } else {
             const availableBayIndex = nextFreeIndex(dockedShips, 3)
             if (!availableBayIndex) {
@@ -471,7 +463,6 @@ export const transitionShip = (
     planets: Planet[],
     ships: Ship[],
     ship: Ship,
-    targetPlanet: Planet,
     targetPosition: ShipPosition,
 ) => {
     let modifiedShips
@@ -488,13 +479,23 @@ export const transitionShip = (
             throw new Error(`Invalid ship (${shipIndex}) index`)
         }
 
+        let planet
+        if (
+            ship.position === "orbit" ||
+            ship.position === "docked" ||
+            ship.position === "surface"
+        ) {
+            planet = planets.find((planet) => planet.id === ship.location.planet)
+        }
+
+        if (!planet) {
+            throw new Error(`Failed to find ship planet`)
+        }
+
         try {
             let changes: Partial<Ship> = {}
             switch (targetPosition) {
                 case "docked": {
-                    const planet =
-                        planets.find((planet) => planet.id === targetPlanet.id) ??
-                        throwError(`Failed to find target planet ${targetPlanet.name}`)
                     const dockedShips = ships.filter((ship) =>
                         isDocketAtPlanet(ship, planet),
                     )
@@ -516,9 +517,6 @@ export const transitionShip = (
                     break
                 }
                 case "surface": {
-                    const planet =
-                        planets.find((planet) => planet.id === targetPlanet.id) ??
-                        throwError(`Failed to find target planet ${targetPlanet.name}`)
                     const landedShips = ships.filter((ship) =>
                         isOnPlanetSurface(ship, planet),
                     )
@@ -546,17 +544,11 @@ export const transitionShip = (
                     break
                 }
                 case "orbit": {
-                    const planet =
-                        planets.find((planet) => planet.id === targetPlanet.id) ??
-                        throwError(`Failed to find target planet ${targetPlanet.name}`)
                     const landedShips = ships.filter((ship) =>
                         isOnPlanetSurface(ship, planet),
                     )
 
-                    if (
-                        ship.position !== "docked" ||
-                        ship.location.planet !== targetPlanet.id
-                    ) {
+                    if (ship.position !== "docked") {
                         const maybePlanet =
                             ship.position !== "outer-space" ? ship.location.planet : "-"
 

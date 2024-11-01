@@ -52,7 +52,11 @@ export default function Fleet() {
 
     const handleLaunchShip = () => {
         if (ship) {
-            move(ship, planet, "orbit")
+            if (ship.class === "Atmosphere Processor") {
+                console.warn("Handle Atmosphere Processor from star map panel")
+            } else {
+                move(ship, "orbit")
+            }
         }
     }
 
@@ -68,7 +72,7 @@ export default function Fleet() {
 
     const handleDockShip = () => {
         if (ship) {
-            move(ship, planet, "docked")
+            move(ship, "docked")
         }
     }
 
