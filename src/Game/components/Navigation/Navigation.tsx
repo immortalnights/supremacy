@@ -10,11 +10,7 @@ import spyIcon from "/images/spy.png"
 import saveIcon from "/images/save.png"
 import Button from "components/Button"
 import { Link } from "react-router-dom"
-import { useAtomCallback } from "jotai/utils"
-import { useCallback } from "react"
-import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../../store"
-import { saveGame } from "../../gameSetupUtilities"
-import { Getter } from "jotai"
+import { useMemo } from "react"
 
 const linkMap = {
     overview: { to: "Overview", icon: overviewIcon },
@@ -31,64 +27,47 @@ const linkMap = {
 
 export type NavigationItem = keyof typeof linkMap
 
-const useSaveGame = () => {
-    return useAtomCallback(
-        useCallback((get: Getter) => {
-            const session = get(sessionAtom)
-            const planets = get(planetsAtom)
-            const ships = get(shipsAtom)
-            const platoons = get(platoonsAtom)
-
-            saveGame(session, "paused", planets, ships, platoons)
-        }, []),
-    )
-}
-
 export default function Navigation({
     items,
+    onAction,
     direction = "row",
 }: {
     items: NavigationItem[]
+    onAction?: (action: NavigationItem) => void
     direction?: "row" | "column"
 }) {
-    const saveGame = useSaveGame()
+    const links = useMemo(
+        () =>
+            items.map((item) => {
+                const details = linkMap[item]
+                let component
+                if ("to" in details) {
+                    component = (
+                        <Link
+                            key={item}
+                            to={`../${details.to}`}
+                            relative="route"
+                            style={{ height: 34 }}
+                        >
+                            <img alt={item} src={details.icon} style={{ height: 34 }} />
+                        </Link>
+                    )
+                } else {
+                    component = (
+                        <Button
+                            key={item}
+                            onClick={() => onAction?.(item)}
+                            style={{ width: "auto", height: 34 }}
+                        >
+                            <img alt={item} src={details.icon} style={{ height: 34 }} />
+                        </Button>
+                    )
+                }
 
-    // This is a really bad place to put this...
-    const handleActionClick = (item: NavigationItem) => {
-        console.log(item)
-        if (item === "save") {
-            saveGame()
-        }
-    }
-
-    const links = items.map((item) => {
-        const details = linkMap[item]
-        let component
-        if ("to" in details) {
-            component = (
-                <Link
-                    key={item}
-                    to={`../${details.to}`}
-                    relative="route"
-                    style={{ height: 34 }}
-                >
-                    <img alt={item} src={details.icon} style={{ height: 34 }} />
-                </Link>
-            )
-        } else {
-            component = (
-                <Button
-                    key={item}
-                    onClick={() => handleActionClick(item)}
-                    style={{ width: "auto", height: 34 }}
-                >
-                    <img alt={item} src={details.icon} style={{ height: 34 }} />
-                </Button>
-            )
-        }
-
-        return component
-    })
+                return component
+            }),
+        [onAction],
+    )
 
     return (
         <div
