@@ -22,9 +22,7 @@ export const useCapitalPlanet = () => {
 
     const capital = planets.find(
         (planet) =>
-            isColonizedPlanet(planet) &&
-            planet.capital &&
-            planet.owner === localPlayer,
+            isColonizedPlanet(planet) && planet.capital && planet.owner === localPlayer,
     )
 
     return capital && isColonizedPlanet(capital)

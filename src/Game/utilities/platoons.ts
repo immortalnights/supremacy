@@ -58,9 +58,13 @@ export const findPlatoonPlanet = (planets: Planet[], platoon: Platoon) =>
     )
 
 export const platoonsOnPlanetAtom = atom((get) => ({
-    filter: (planet?: ColonizedPlanet) =>
+    filter: (planet?: ColonizedPlanet, owner?: string) =>
         planet
-            ? get(platoonsAtom).filter((platoon) => isOnPlanet(platoon, planet))
+            ? get(platoonsAtom).filter(
+                  (platoon) =>
+                      isOnPlanet(platoon, planet) &&
+                      (!owner || platoon.owner === owner),
+              )
             : [],
 }))
 

@@ -61,9 +61,13 @@ export const isDocketAtPlanet = (ship: Ship, planet: Planet): ship is ShipDocked
 }
 
 export const shipsDocketAtPlanetAtom = atom((get) => ({
-    filter: (planet?: ColonizedPlanet, sort = true) => {
+    filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
         const ships = planet
-            ? get(shipsAtom).filter((ship) => isDocketAtPlanet(ship, planet))
+            ? get(shipsAtom).filter(
+                  (ship) =>
+                      isDocketAtPlanet(ship, planet) &&
+                      (!owner || ship.owner === owner),
+              )
             : []
 
         if (sort) {
@@ -87,9 +91,13 @@ export const isOnPlanetSurface = (
 }
 
 export const shipsOnPlanetSurfaceAtom = atom((get) => ({
-    filter: (planet?: ColonizedPlanet, sort = true) => {
+    filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
         const ships = planet
-            ? get(shipsAtom).filter((ship) => isOnPlanetSurface(ship, planet))
+            ? get(shipsAtom).filter(
+                  (ship) =>
+                      isOnPlanetSurface(ship, planet) &&
+                      (!owner || ship.owner === owner),
+              )
             : []
 
         if (sort) {
