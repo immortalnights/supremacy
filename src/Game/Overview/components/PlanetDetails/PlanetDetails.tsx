@@ -3,11 +3,8 @@ import Button from "components/Button"
 import Date from "Game/components/Date"
 import taxUpIcon from "/images/tax_up.png"
 import taxDownIcon from "/images/tax_down.png"
-import Metadata, {
-    MetadataLabel,
-    MetadataValue,
-} from "Game/components/Metadata"
-import { selectedPlanetAtom } from "Game/store"
+import Metadata, { MetadataLabel, MetadataValue } from "Game/components/Metadata"
+import { selectedPlanetAtom, sessionAtom } from "Game/store"
 import { useAtomValue } from "jotai"
 import { useAdjustTax } from "../../actions"
 
@@ -48,10 +45,7 @@ function TaxRate({
                     >
                         <img src={taxUpIcon} />
                     </Button>
-                    <Button
-                        onClick={onDecrease}
-                        style={{ border: "2px solid gold" }}
-                    >
+                    <Button onClick={onDecrease} style={{ border: "2px solid gold" }}>
                         <img src={taxDownIcon} />
                     </Button>
                 </div>
@@ -62,6 +56,7 @@ function TaxRate({
 }
 
 export default function PlanetDetails() {
+    const { localPlayer } = useAtomValue(sessionAtom)
     const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
     const adjustTax = useAdjustTax()
 
@@ -109,9 +104,7 @@ export default function PlanetDetails() {
                     <Metadata
                         label="Status"
                         value={
-                            planet.owner === "local"
-                                ? "Your Star"
-                                : "Enemy Star"
+                            planet.owner === localPlayer ? "Your Star" : "Enemy Star"
                         }
                     />
                     <Metadata
@@ -167,16 +160,8 @@ export default function PlanetDetails() {
                     value={planet.population}
                     format={Math.floor}
                 />
-                <Metadata
-                    label="Pop. Growth"
-                    value={populationGrowth}
-                    postfix="%"
-                />
-                <Metadata
-                    label="Moral"
-                    value={planet.morale.toFixed(2)}
-                    postfix="%"
-                />
+                <Metadata label="Pop. Growth" value={populationGrowth} postfix="%" />
+                <Metadata label="Moral" value={planet.morale.toFixed(2)} postfix="%" />
 
                 <TaxRate
                     value={Math.floor(planet.tax)}
