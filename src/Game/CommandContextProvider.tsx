@@ -100,7 +100,6 @@ const modifyAggression = (
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { localPlayer, host } = useAtomValue(sessionAtom)
-    const date = useAtomValue(dateAtom)
 
     const exec = useAtomCallback(
         useCallback(
