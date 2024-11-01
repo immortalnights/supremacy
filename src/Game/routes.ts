@@ -12,6 +12,11 @@ import Shipyard from "./Shipyard"
 import SolarSystem from "./SolarSystem"
 import Surface from "./Surface"
 import Training from "./Training"
+import {
+    AuthenticationWithRedirect,
+    Authentication,
+    CombatAuthentication,
+} from "./components/Authentication"
 
 export const routes = {
     path: "Game/*",
@@ -26,14 +31,11 @@ export const routes = {
                 const data = await request.formData()
 
                 return {
-                    difficulty: data
-                        .get("difficulty")
-                        ?.toString() as Difficulty,
+                    difficulty: data.get("difficulty")?.toString() as Difficulty,
                     multiplayer: data.get("multiplayer")?.toString() === "true",
                     planets: Number(data.get("planets")?.toString()),
                     player1Id: crypto.randomUUID(),
-                    player1Name:
-                        data.get("player1Name")?.toString() ?? "noname",
+                    player1Name: data.get("player1Name")?.toString() ?? "noname",
                     player2Id: data.get("player2Id")?.toString(),
                     player2Name: data.get("player2Name")?.toString(),
                 }
@@ -52,32 +54,54 @@ export const routes = {
                     Component: SolarSystem,
                 },
                 {
-                    path: "Overview",
-                    Component: Overview,
-                },
-                {
                     path: "Shipyard",
                     Component: Shipyard,
                 },
                 {
-                    path: "Fleet",
-                    Component: Fleet,
-                },
-                {
-                    path: "Combat",
-                    Component: Combat,
-                },
-                {
-                    path: "Cargo",
-                    Component: Cargo,
-                },
-                {
-                    path: "Surface",
-                    Component: Surface,
-                },
-                {
                     path: "Training",
                     Component: Training,
+                },
+
+                {
+                    Component: AuthenticationWithRedirect,
+                    children: [
+                        {
+                            path: "Overview",
+                            Component: Overview,
+                        },
+                    ],
+                },
+
+                {
+                    Component: Authentication,
+                    children: [
+                        {
+                            path: "Overview",
+                            Component: Overview,
+                        },
+                        {
+                            path: "Fleet",
+                            Component: Fleet,
+                        },
+                        {
+                            path: "Surface",
+                            Component: Surface,
+                        },
+                        {
+                            path: "Cargo",
+                            Component: Cargo,
+                        },
+                    ],
+                },
+
+                {
+                    Component: CombatAuthentication,
+                    children: [
+                        {
+                            path: "Combat",
+                            Component: Combat,
+                        },
+                    ],
                 },
             ],
         },
