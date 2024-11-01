@@ -24,6 +24,15 @@ import {
     isOnPlanetSurface,
 } from "./utilities/ships"
 
+const findShip = (ship: Ship, ships: Ship[]) => {
+    const shipIndex = ships.findIndex((s) => s.id === ship.id)
+    if (shipIndex === -1) {
+        throw new Error(`Invalid ship (${shipIndex}) index`)
+    }
+
+    return [shipIndex, ships[shipIndex]] as const
+}
+
 // FIXME
 const getShipPlanet = (planets: Planet[], ship: Ship) => {
     const planet: ColonizedPlanet | undefined = planets
@@ -462,10 +471,12 @@ export const transitionShip = (
     player: string,
     planets: Planet[],
     ships: Ship[],
-    ship: Ship,
+    shipArg: Ship,
     targetPosition: ShipPosition,
 ) => {
     let modifiedShips
+
+    const [shipIndex, ship] = findShip(shipArg, ships)
 
     const currentPosition = ship.position
     if (!transitionMatrix[currentPosition].includes(targetPosition)) {
@@ -473,12 +484,6 @@ export const transitionShip = (
             `Cannot move ship ${ship.name} from ${currentPosition} to ${targetPosition}`,
         )
     } else {
-        const shipIndex = ships.findIndex((s) => s.id === ship.id)
-
-        if (shipIndex === -1) {
-            throw new Error(`Invalid ship (${shipIndex}) index`)
-        }
-
         let planet
         if (
             ship.position === "orbit" ||
@@ -608,22 +613,19 @@ export const transferShip = (
     player: string,
     planets: Planet[],
     ships: Ship[],
-    ship: ShipInOrbit,
+    shipArg: ShipInOrbit,
     targetPlanet: Planet,
 ) => {
     let modifiedShips
+
+    const [shipIndex, ship] = findShip(shipArg, ships)
+
     const currentLocation = ship.location
 
     if (ship.position === "orbit") {
         if (currentLocation.planet === targetPlanet.id) {
             console.error(`Ship ${ship.name} is already at plant ${targetPlanet.name}`)
         } else {
-            const shipIndex = ships.findIndex((s) => s.id === ship.id)
-
-            if (shipIndex === -1) {
-                throw new Error(`Invalid ship (${shipIndex}) index`)
-            }
-
             modifiedShips = [...ships]
             const modifiedShip: Ship = {
                 ...ships[shipIndex],
