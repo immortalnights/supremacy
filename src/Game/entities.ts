@@ -1,4 +1,5 @@
-export type PlanetType = "lifeless" | "metropolis" | "volcanic" | "dessert" | "tropical"
+export const planetTypes = ["metropolis", "volcanic", "dessert", "tropical"] as const
+export type PlanetType = "lifeless" | (typeof planetTypes)[number]
 
 interface BasePlanet {
     id: string
@@ -9,6 +10,8 @@ interface BasePlanet {
 
 export interface LifelessPlanet extends BasePlanet {
     type: "lifeless"
+    terraformedType: Exclude<PlanetType, "lifeless">
+    terraformDuration: number
 }
 
 export const cargoTypes = ["food", "minerals", "fuels", "energy"] as const
@@ -115,17 +118,13 @@ export interface ShipInOuterSpace {
     heading: {
         from: Planet["id"]
         to: Planet["id"]
-        eta: number
+        duration: number
+        remaining: number
     }
 }
 
-export interface AtmosOnSurface {
+export interface Atmos {
     class: "Atmosphere Processor"
-    position: "surface"
-    location: {
-        planet: Planet["id"]
-        index: number
-    }
     active: boolean
     terraforming: {
         duration: number
@@ -133,8 +132,9 @@ export interface AtmosOnSurface {
     }
 }
 
-export type Ship = BaseShip &
-    (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace | AtmosOnSurface)
+export type Ship =
+    | (BaseShip & (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace))
+    | (BaseShip & (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace) & Atmos)
 
 export type SuitClass = "none" | "basic" | "moderate" | "advanced"
 
