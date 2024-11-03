@@ -10,12 +10,12 @@ export default function ShipHeading({ ship }: { ship?: Ship }) {
     let from: string | undefined
     let to: string | undefined
     let eta: number | undefined
-    let fuels: number | undefined
+    let fuels: number | string | undefined
     let destination: Planet | undefined
     let source: Planet | undefined
     if (ship && ship.position === "outer-space") {
         ;({ name, fuels } = ship)
-        ;({ from, to, eta } = ship.heading)
+        ;({ from, to, remaining: eta } = ship.heading)
 
         if (to) {
             destination = planets.find((planet) => planet.id === to)

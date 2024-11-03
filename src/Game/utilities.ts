@@ -29,6 +29,10 @@ export const random = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min) + min)
 }
 
+export const randomChoice = <T>(options: T[]) => {
+    return options[random(0, options.length - 1)]
+}
+
 export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value))
 }

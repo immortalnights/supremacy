@@ -13,8 +13,8 @@ import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { ColonizedPlanet, Planet, Platoon, Ship } from "./entities"
-import { calculateGrowth } from "./utilities"
 import { PLANET_POPULATION_LIMIT } from "./settings"
+import { simulatePlanets, simulatePlatoons, simulateShips } from "./logic/tick"
 
 const speedMap = {
     slow: 2,
@@ -22,81 +22,6 @@ const speedMap = {
     normal: 1,
     fast: 0.5,
 } as const
-
-// Pure simulation function
-const simulatePlatoons = (
-    platoons: Platoon[],
-    planets: Planet[],
-): [Platoon[], Planet[]] => {
-    return [platoons, planets]
-}
-
-// Pure simulation function
-const simulateShips = (
-    ships: Ship[],
-    planets: Planet[],
-): [Ship[], Planet[]] => {
-    return [ships, planets]
-}
-
-const calculateMorale = ({ morale, tax, food }: ColonizedPlanet) => {
-    if (food === 0) {
-        morale = 1
-    } else {
-        const targetMorale = 100 - tax
-        if (morale > targetMorale) {
-            morale -= 1
-        } else if (morale < targetMorale) {
-            morale += 1
-        }
-    }
-
-    return morale
-}
-
-const simulatePlanet = (planet: ColonizedPlanet): Planet => {
-    const modifiedPlanet = { ...planet }
-
-    // Consume food
-    modifiedPlanet.food = Math.max(
-        Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004),
-        0,
-    )
-    // Adjust morale
-    modifiedPlanet.morale = calculateMorale(modifiedPlanet)
-    // Adjust growth
-    modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
-    // Apply population growth
-    // eslint-disable-next-line no-constant-condition
-    if (false) {
-        modifiedPlanet.population = Math.min(
-            modifiedPlanet.population +
-                Math.floor(
-                    modifiedPlanet.population * (modifiedPlanet.growth / 100),
-                ),
-            PLANET_POPULATION_LIMIT,
-        )
-    }
-    // Collect taxes
-    // FIXME tax should only be applied every _other_ day
-    modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
-
-    return modifiedPlanet
-}
-
-// Pure simulation function
-const simulatePlanets = (planets: Planet[]): Planet[] => {
-    return planets.map((planet) => {
-        let modifiedPlanet
-        if (planet.type === "lifeless") {
-            modifiedPlanet = planet
-        } else {
-            modifiedPlanet = simulatePlanet(planet)
-        }
-
-        return modifiedPlanet
-    })
-}
 
 const useMultiplayerSync = () => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
@@ -158,16 +83,18 @@ function Simulation() {
                 ;[modifiedPlatoons, modifiedPlanets] = simulatePlatoons(
                     modifiedPlatoons,
                     modifiedPlanets,
+                    newDate,
                 )
 
                 // Ships on the planet surface effect planet resources, so resolve second
                 ;[modifiedShips, modifiedPlanets] = simulateShips(
                     modifiedShips,
                     modifiedPlanets,
+                    newDate,
                 )
 
                 // Finally resolve planets
-                modifiedPlanets = simulatePlanets(modifiedPlanets)
+                modifiedPlanets = simulatePlanets(modifiedPlanets, newDate)
 
                 // No op in single player
                 sync({

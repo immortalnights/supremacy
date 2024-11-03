@@ -1,5 +1,9 @@
 import { throwError } from "game-signaling-server/client"
-import { DAYS_PER_YEAR, PLANET_POPULATION_LIMIT } from "./settings"
+import {
+    DAYS_PER_YEAR,
+    PLANET_POPULATION_LIMIT,
+    TRAVEL_TIME_MULTIPLIER,
+} from "./settings"
 import {
     Planet,
     Ship,
@@ -633,7 +637,8 @@ export const transferShip = (
                 heading: {
                     from: currentLocation.planet,
                     to: targetPlanet.id,
-                    eta: 5, // FIXME
+                    duration: 5,
+                    remaining: TRAVEL_TIME_MULTIPLIER * 5, // FIXME
                 },
             }
             modifiedShips[shipIndex] = modifiedShip

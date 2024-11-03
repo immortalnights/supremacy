@@ -20,7 +20,7 @@ import { useAtomCallback } from "jotai/utils"
 import { useCallback } from "react"
 import { saveGame } from "../gameSetupUtilities"
 import { Getter } from "jotai"
-import { AtmosOnSurface, Planet, Ship } from "Game/entities"
+import { Atmos, Planet, Ship } from "Game/entities"
 import { useMoveShip, useTransferShip } from "Game/actions"
 
 const useSaveGame = () => {
@@ -44,7 +44,7 @@ const useTerraformPlanet = () => {
     const move = useMoveShip()
     const travel = useTransferShip()
 
-    const atmosOnSurface = (ship: Ship): ship is AtmosOnSurface =>
+    const atmosOnSurface = (ship: Ship): ship is Atmos =>
         ship.class === "Atmosphere Processor" && ship.position === "surface"
 
     return useCallback(

@@ -5,15 +5,10 @@ import {
     PlanetResources,
     Platoon,
     Ship,
+    planetTypes,
 } from "./entities"
-import {
-    Difficulty,
-    GameData,
-    GameSession,
-    LastSaveData,
-    SaveGameData,
-} from "./types"
-import { random } from "./utilities"
+import { Difficulty, GameData, GameSession, LastSaveData, SaveGameData } from "./types"
+import { random, randomChoice } from "./utilities"
 
 const planetsForDifficulty: { [K in Difficulty]: number } = {
     easy: 8,
@@ -83,6 +78,8 @@ const generatePlanets = (count: number): Planet[] =>
         gridIndex: 1 + index,
         name: "",
         type: "lifeless",
+        terraformedType: randomChoice([...planetTypes]),
+        terraformDuration: random(12, 60),
     }))
 
 const initializePlatoons = (playerId: string, count: number = 24) =>
@@ -162,10 +159,7 @@ export const initializeMultiplayerGame = (
     return {
         planets: defaultPlanets,
         ships: [],
-        platoons: [
-            ...initializePlatoons(player1Id),
-            ...initializePlatoons(player2Id),
-        ],
+        platoons: [...initializePlatoons(player1Id), ...initializePlatoons(player2Id)],
     }
 }
 
