@@ -1,0 +1,7 @@
+#screen {
+    height: 400px;
+    width: 640px;
+    border: 1px solid darkgray;
+    padding: 5px;
+    display: flex;
+}

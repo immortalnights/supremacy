@@ -13,6 +13,7 @@ import { clamp } from "Game/utilities"
 import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "Game/utilities/platoons"
 import { useEffect, useState } from "react"
 import { isDocketAtPlanet } from "Game/utilities/ships"
+import Screen from "Game/components/Screen"
 
 const StrengthOverview = () => {
     return (
@@ -112,7 +113,7 @@ export default function Combat() {
     }, [selectedShip, ships, planet])
 
     return (
-        <div style={{ display: "flex" }}>
+        <Screen>
             <div>
                 <div style={{ display: "flex" }}>
                     <DockingBay planet={planet} onClick={handleSelectShip} />
@@ -157,6 +158,6 @@ export default function Combat() {
                     items={["training", "fleet", "overview", "cargo", "surface"]}
                 />
             </div>
-        </div>
+        </Screen>
     )
 }

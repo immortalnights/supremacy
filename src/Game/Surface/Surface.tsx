@@ -6,6 +6,7 @@ import { Ship } from "Game/entities"
 import { useMoveShip } from "Game/actions"
 import { useSelectedColonizedPlanet } from "Game/hooks"
 import { throwError } from "game-signaling-server/client"
+import Screen from "Game/components/Screen"
 
 export default function Surface() {
     const planet =
@@ -20,7 +21,7 @@ export default function Surface() {
     }
 
     return (
-        <div>
+        <Screen flexDirection="column">
             <div>
                 <img src={surfaceBackground} />
             </div>
@@ -47,6 +48,6 @@ export default function Surface() {
                     <Navigation items={["shipyard", "overview", "fleet", "cargo"]} />
                 </div>
             </div>
-        </div>
+        </Screen>
     )
 }

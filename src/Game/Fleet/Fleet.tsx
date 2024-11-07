@@ -18,6 +18,7 @@ import ShipIcon from "../components/ShipIcon"
 import { useSelectedColonizedPlanet } from "../hooks"
 import { throwError } from "game-signaling-server/client"
 import PlanetGrid from "Game/components/PlanetGrid"
+import Screen from "Game/components/Screen"
 
 const useSelectedShip = (id?: Ship["id"]) => {
     let ship
@@ -92,7 +93,7 @@ export default function Fleet() {
     }
 
     return (
-        <div>
+        <Screen flexDirection="column">
             <div style={{ display: "flex" }}>
                 <DockingBay planet={planet} onClick={handleShipSelected} />
                 <div>
@@ -147,6 +148,6 @@ export default function Fleet() {
                     direction="column"
                 />
             </div>
-        </div>
+        </Screen>
     )
 }

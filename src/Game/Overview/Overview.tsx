@@ -191,7 +191,7 @@ export default function Overview() {
     }
 
     return (
-        <Screen>
+        <Screen flexDirection="column">
             <SelectedPlanet onRename={handleStartRenamePlanet} />
             <div style={{ display: "flex", flexDirection: "row" }}>
                 <div>

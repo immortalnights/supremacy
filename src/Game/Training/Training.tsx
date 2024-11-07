@@ -19,6 +19,7 @@ import SuitSelector from "./components/SuitSelector"
 import { calculateEquipPlatoonCost } from "./utilities"
 import { isOnPlanet, isOnShip } from "Game/utilities/platoons"
 import { isColonizedPlanet } from "Game/utilities/planets"
+import Screen from "Game/components/Screen"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -123,7 +124,7 @@ export default function Training() {
     const handleDismissPlatoon = () => {}
 
     return (
-        <div>
+        <Screen flexDirection="column">
             <div
                 style={{
                     display: "flex",
@@ -201,6 +202,6 @@ export default function Training() {
                     </div>
                 </div>
             </div>
-        </div>
+        </Screen>
     )
 }

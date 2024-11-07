@@ -28,6 +28,7 @@ import {
     useUnloadShip,
 } from "./actions"
 import { isDocketAtPlanet } from "Game/utilities/ships"
+import Screen from "Game/components/Screen"
 
 function CargoItem({
     cargo,
@@ -215,7 +216,7 @@ export default function Cargo() {
     }, [selectedShip, ships, planet])
 
     return (
-        <div style={{ display: "flex" }}>
+        <Screen>
             <div>
                 <div style={{ display: "flex" }}>
                     <div>
@@ -283,6 +284,6 @@ export default function Cargo() {
                     ship={selectedShip}
                 />
             </div>
-        </div>
+        </Screen>
     )
 }

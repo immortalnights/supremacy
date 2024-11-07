@@ -22,6 +22,7 @@ import { saveGame } from "../gameSetupUtilities"
 import { Getter } from "jotai"
 import { Atmos, Planet, Ship } from "Game/entities"
 import { useMoveShip, useTransferShip } from "Game/actions"
+import Screen from "Game/components/Screen"
 
 const useSaveGame = () => {
     return useAtomCallback(
@@ -96,77 +97,75 @@ export default function SolarSystem() {
     }
 
     return (
-        <div>
-            <div style={{ display: "flex" }}>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                    <MiniMap
-                        selected={planets.length - 1}
-                        planets={planets}
-                        localPlayer={localPlayer}
-                    />
-                    <Navigation
-                        items={[
-                            "overview",
-                            "shipyard",
-                            "fleet",
-                            "atmos",
-                            "training",
-                            "cargo",
-                            "surface",
-                            "combat",
-                            "spy",
-                            "save",
-                        ]}
-                        onAction={handleActionClick}
-                    />
-                </div>
-                <div>
-                    <div style={{ display: "flex", flexDirection: "row" }}>
-                        <div
-                            style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                gap: 5,
-                            }}
-                        >
-                            <Button onClick={handlePreviousPlanet}>
-                                <img src={systemUp} />
-                            </Button>
-                            <Button onClick={handleNextPlanet}>
-                                <img src={systemDown} />
-                            </Button>
-                        </div>
-                        <div>
-                            <Button onClick={() => {}}>
-                                <img src={systemScroll} />
-                            </Button>
-                        </div>
-                        <div>
-                            <Date />
-                            {selectedPlanet && (
-                                <PlanetInfoGraphic planet={selectedPlanet} />
-                            )}
-                        </div>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                            <Button onClick={() => {}}>
-                                <img src={pauseIcon} />
-                            </Button>
-                            <Button onClick={() => {}}>
-                                <img src={muteIcon} />
-                            </Button>
-                        </div>
+        <Screen>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <MiniMap
+                    selected={planets.length - 1}
+                    planets={planets}
+                    localPlayer={localPlayer}
+                />
+                <Navigation
+                    items={[
+                        "overview",
+                        "shipyard",
+                        "fleet",
+                        "atmos",
+                        "training",
+                        "cargo",
+                        "surface",
+                        "combat",
+                        "spy",
+                        "save",
+                    ]}
+                    onAction={handleActionClick}
+                />
+            </div>
+            <div>
+                <div style={{ display: "flex", flexDirection: "row" }}>
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 5,
+                        }}
+                    >
+                        <Button onClick={handlePreviousPlanet}>
+                            <img src={systemUp} />
+                        </Button>
+                        <Button onClick={handleNextPlanet}>
+                            <img src={systemDown} />
+                        </Button>
                     </div>
                     <div>
-                        <div
-                            style={{
-                                background: "black",
-                                width: 288,
-                                height: 208,
-                            }}
-                        ></div>
+                        <Button onClick={() => {}}>
+                            <img src={systemScroll} />
+                        </Button>
+                    </div>
+                    <div>
+                        <Date />
+                        {selectedPlanet && (
+                            <PlanetInfoGraphic planet={selectedPlanet} />
+                        )}
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                        <Button onClick={() => {}}>
+                            <img src={pauseIcon} />
+                        </Button>
+                        <Button onClick={() => {}}>
+                            <img src={muteIcon} />
+                        </Button>
                     </div>
                 </div>
+                <div>
+                    <div
+                        style={{
+                            background: "black",
+                            width: 288,
+                            height: 208,
+                        }}
+                    ></div>
+                </div>
             </div>
-        </div>
+        </Screen>
     )
 }

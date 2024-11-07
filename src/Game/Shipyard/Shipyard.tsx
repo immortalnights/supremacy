@@ -14,6 +14,7 @@ import { useCapitalPlanet } from "../hooks"
 import Button from "components/Button"
 import { wrap } from "Game/utilities"
 import { canPurchaseAtmos } from "Game/utilities/ships"
+import Screen from "Game/components/Screen"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -103,7 +104,7 @@ export default function Shipyard() {
     }
 
     return (
-        <div>
+        <Screen flexDirection="column">
             <div style={{ background: "black", width: 640, height: 282 }}>
                 <img src={images[blueprint.class]} />
             </div>
@@ -177,6 +178,6 @@ export default function Shipyard() {
                     </div>
                 </div>
             </div>
-        </div>
+        </Screen>
     )
 }
