@@ -9,15 +9,15 @@ function NavigationRoot({ children }: { children: ReactNode }) {
     const ref = useRef<HTMLDivElement | null>(null)
 
     useEffect(() => {
-        const onMouseDown = (ev: MouseEvent) => {
-            ev.preventDefault()
-        }
+        const onMouseDown = (_ev: MouseEvent) => {}
+
         const onMouseUp = (ev: MouseEvent) => {
             if (ev.button === 2) {
                 ev.preventDefault()
                 navigate(`/Game/${id}/SolarSystem`)
             }
         }
+
         const onContextMenu = (ev: Event) => {
             ev.preventDefault()
             return false
