@@ -1,4 +1,5 @@
 import Button from "../../components/Button"
+import Screen from "../components/Screen"
 import Navigation from "../components/Navigation"
 import PlanetDetails from "./components/PlanetDetails"
 import ShipLocationGrid from "../components/ShipLocationGrid"
@@ -20,16 +21,18 @@ import {
 } from "react"
 import { useRenamePlanet } from "./actions"
 import PlanetGrid from "../components/PlanetGrid"
+import { useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
 
 function RenamePlanet({
+    name: initialName,
     onRename,
     onCancel,
 }: {
+    name: string
     onRename: ({ name }: { name: string }) => void
     onCancel: () => void
 }) {
-    const selectedPlanet = useAtomValue(selectedPlanetAtom)
-    const [name, setName] = useState(selectedPlanet?.name ?? "")
+    const [name, setName] = useState(initialName)
 
     const handleSubmit = (ev: FormEvent<HTMLFormElement>) => {
         ev.preventDefault()
@@ -61,6 +64,7 @@ function RenamePlanet({
                     onKeyDown={handleKeyDown}
                     onChange={handleChange}
                     onFocus={handleFocus}
+                    autoComplete="off"
                 />
                 <button type="submit">Rename</button>
                 <button type="button" onClick={onCancel}>
@@ -73,19 +77,17 @@ function RenamePlanet({
 
 function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     const { localPlayer } = useAtomValue(sessionAtom)
-    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    const selectedPlanet = useSelectedColonizedPlanet()
     // const transfer = useTransferCredits()
 
     const handleStartRenamePlanet = () => {
-        if (
-            selectedPlanet?.type !== "lifeless" &&
-            selectedPlanet?.owner === localPlayer
-        ) {
+        if (selectedPlanet && selectedPlanet?.owner === localPlayer) {
             onRename(selectedPlanet)
         }
     }
+
     const handleTransferToCapital = () => {
-        if (selectedPlanet?.type !== "lifeless" && !selectedPlanet?.capital) {
+        if (selectedPlanet && !selectedPlanet.capital) {
             // transfer(selectedPlanet)
         }
     }
@@ -109,7 +111,7 @@ function PlanetShipOverview() {
     const [viewPosition, setViewPosition] =
         useState<Exclude<ShipPosition, "outer-space">>("orbit")
     const { localPlayer } = useAtomValue(sessionAtom)
-    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    const selectedPlanet = useSelectedPlanet()
     const ships = useAtomValue(shipsAtom)
 
     const filteredShips =
@@ -169,6 +171,8 @@ export default function Overview() {
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(undefined)
     const rename = useRenamePlanet()
 
+    const handleStartRenamePlanet = (planet: Planet) => setRenamingPlanet(planet)
+
     const handleRenamePlanet = ({ name }: { name: string }) => {
         if (renamePlanet) {
             rename(renamePlanet, name)
@@ -187,12 +191,13 @@ export default function Overview() {
     }
 
     return (
-        <div>
-            <SelectedPlanet onRename={(planet) => setRenamingPlanet(planet)} />
+        <Screen>
+            <SelectedPlanet onRename={handleStartRenamePlanet} />
             <div style={{ display: "flex", flexDirection: "row" }}>
                 <div>
                     {renamePlanet ? (
                         <RenamePlanet
+                            name={renamePlanet.name}
                             onRename={handleRenamePlanet}
                             onCancel={handleEndRenamePlanet}
                         />
@@ -213,6 +218,6 @@ export default function Overview() {
                     <PlanetShipOverview />
                 </div>
             </div>
-        </div>
+        </Screen>
     )
 }

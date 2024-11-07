@@ -4,9 +4,11 @@ import Date from "Game/components/Date"
 import taxUpIcon from "/images/tax_up.png"
 import taxDownIcon from "/images/tax_down.png"
 import Metadata, { MetadataLabel, MetadataValue } from "Game/components/Metadata"
-import { selectedPlanetAtom, sessionAtom } from "Game/store"
+import { sessionAtom } from "Game/store"
 import { useAtomValue } from "jotai"
 import { useAdjustTax } from "../../actions"
+import { useSelectedColonizedPlanet } from "Game/hooks"
+import { throwError } from "game-signaling-server/client"
 
 function TaxRate({
     value,
@@ -57,7 +59,7 @@ function TaxRate({
 
 export default function PlanetDetails() {
     const { localPlayer } = useAtomValue(sessionAtom)
-    const planet = useAtomValue(selectedPlanetAtom) as ColonizedPlanet
+    const planet = useSelectedColonizedPlanet() ?? throwError("Invalid selected planet")
     const adjustTax = useAdjustTax()
 
     let populationGrowth = ""
