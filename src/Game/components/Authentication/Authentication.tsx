@@ -1,14 +1,18 @@
-import { useCapitalPlanet, useSelectedColonizedPlanet } from "Game/hooks"
-import { planetsAtom, selectedPlanetAtom, sessionAtom, shipsAtom } from "Game/store"
+import {
+    useCapitalPlanet,
+    useSelectedColonizedPlanet,
+    useSelectedPlanet,
+} from "Game/hooks"
+import { selectedPlanetAtom, sessionAtom } from "Game/store"
 import { platoonsOnPlanetAtom } from "Game/utilities/platoons"
-import { shipsDocketAtPlanetAtom, shipsDocketAtPlanetAtom2 } from "Game/utilities/ships"
-import { useAtom, useAtomValue } from "jotai"
+import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
+import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 
 const useCanAccessPlanet = () => {
     const { localPlayer } = useAtomValue(sessionAtom)
-    const selectedPlanet = useAtomValue(selectedPlanetAtom)
+    const selectedPlanet = useSelectedPlanet()
     return (
         selectedPlanet &&
         selectedPlanet.type !== "lifeless" &&
@@ -36,7 +40,7 @@ const useIsPlanetContested = () => {
 export function AuthenticationWithRedirect() {
     const access = useCanAccessPlanet()
     const capital = useCapitalPlanet()
-    const [, setSelectedPlanet] = useAtom(selectedPlanetAtom)
+    const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
 
     useEffect(() => {
         if (!access && capital) {
