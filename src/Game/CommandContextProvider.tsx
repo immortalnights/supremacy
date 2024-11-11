@@ -3,8 +3,6 @@ import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { Planet } from "./entities"
-import { clamp, clone } from "./utilities"
 import { CommandContext } from "./CommandContext"
 import {
     crewShip,
@@ -26,75 +24,12 @@ import {
     loadPlatoon,
     unloadPlatoon,
 } from "./platoonCommands"
-import { isColonizedPlanet } from "./utilities/planets"
-
-// FIXME move somewhere better
-const applyRenamePlanet = (
-    player: string,
-    planets: Planet[],
-    id: string,
-    newName: string,
-) => {
-    const cpy = [...planets]
-
-    const index = cpy.findIndex((p) => p.id === id)
-    if (index !== -1) {
-        const planet = cpy[index]
-        if (planet.type !== "lifeless" && planet.owner === player) {
-            console.log(
-                `Renaming planet '${planet.name}' (${planet.id}) to '${newName}'`,
-            )
-            cpy[index] = { ...planet, name: newName }
-        }
-    }
-
-    return cpy
-}
-
-const applyModifyTax = (
-    player: string,
-    planets: Planet[],
-    id: string,
-    newTax: number,
-) => {
-    const cpy = [...planets]
-    const index = cpy.findIndex((p) => p.id === id)
-    if (index !== -1) {
-        const planet = cpy[index]
-
-        if (planet.type !== "lifeless" && planet.owner === player) {
-            const tax = clamp(newTax, 0, 100)
-            console.log(
-                `Setting planet '${planet.name}' (${planet.id}) tax to '${tax}'`,
-            )
-            cpy[index] = { ...planet, tax }
-        }
-    }
-
-    return cpy
-}
-
-const modifyAggression = (
-    player: string,
-    planets: Planet[],
-    planet: Planet,
-    aggression: number,
-) => {
-    let modifiedPlanets
-    if (isColonizedPlanet(planet)) {
-        if (
-            !(player in planet.aggression) ||
-            planet.aggression[player] !== aggression
-        ) {
-            let modifiedPlanet
-            ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
-
-            modifiedPlanet.aggression[player] = clamp(aggression, 0, 100)
-        }
-    }
-
-    return modifiedPlanets ?? planets
-}
+import {
+    applyModifyTax,
+    applyRenamePlanet,
+    modifyAggression,
+    transferCreditsToCapital,
+} from "./commands/planet"
 
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
@@ -113,6 +48,19 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                 const originalPlatoons = get(platoonsAtom)
                 let modifiedPlatoons = originalPlatoons
 
+                // How about
+                // const data = {
+                //     planets: get(planetsAtom),
+                //     ships: get(shipsAtom),
+                //     platoons: get(platoonsAtom),
+                // }
+                // const { modifiedPlanets, modifiedShips, modifiedPlanets } = callback[
+                //     command
+                // ](data, args)
+                // if (modifiedPlanets) {
+                //     set(planetsAtom, modifiedPlanets)
+                // }
+
                 if (command === "rename-planet") {
                     // Apply the change locally
                     modifiedPlanets = applyRenamePlanet(
@@ -129,6 +77,13 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         originalPlanets,
                         data.planet,
                         data.newTax,
+                    )
+                    set(planetsAtom, modifiedPlanets)
+                } else if (command === "transfer-planet-credits") {
+                    modifiedPlanets = transferCreditsToCapital(
+                        localPlayer,
+                        originalPlanets,
+                        data.planet,
                     )
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "modify-planet-aggression") {

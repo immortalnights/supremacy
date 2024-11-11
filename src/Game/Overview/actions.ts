@@ -19,3 +19,11 @@ export function useAdjustTax() {
         exec("set-planet-tax", { planet: planet.id, newTax })
     }
 }
+
+export function useTransferCredits() {
+    const { exec } = useContext(CommandContext)
+
+    return (planet: ColonizedPlanet) => {
+        exec("transfer-planet-credits", { planet: planet.id })
+    }
+}
