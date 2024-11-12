@@ -19,9 +19,13 @@ import {
     ChangeEvent,
     useMemo,
 } from "react"
-import { useRenamePlanet } from "./actions"
+import { useRenamePlanet, useTransferCredits } from "./actions"
 import PlanetGrid from "../components/PlanetGrid"
 import { useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
+import AlertDisplay from "Game/components/AlertMessages/Display"
+import Notification from "Game/components/Notification"
+import { isColonizedPlanet } from "Game/utilities/planets"
+import { useSetNotification } from "Game/components/Notification/useNotification"
 
 function RenamePlanet({
     name: initialName,
@@ -78,7 +82,7 @@ function RenamePlanet({
 function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     const { localPlayer } = useAtomValue(sessionAtom)
     const selectedPlanet = useSelectedColonizedPlanet()
-    // const transfer = useTransferCredits()
+    const transfer = useTransferCredits()
 
     const handleStartRenamePlanet = () => {
         if (selectedPlanet && selectedPlanet?.owner === localPlayer) {
@@ -88,7 +92,7 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 
     const handleTransferToCapital = () => {
         if (selectedPlanet && !selectedPlanet.capital) {
-            // transfer(selectedPlanet)
+            transfer(selectedPlanet)
         }
     }
 
@@ -170,6 +174,7 @@ export default function Overview() {
     const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(undefined)
     const rename = useRenamePlanet()
+    const notify = useSetNotification()
 
     const handleStartRenamePlanet = (planet: Planet) => setRenamingPlanet(planet)
 
@@ -185,8 +190,12 @@ export default function Overview() {
     }
 
     const handleSelectPlanet = (planet: Planet) => {
-        if (planet.type !== "lifeless" && planet.owner === localPlayer) {
-            setSelectedPlanet(planet)
+        if (isColonizedPlanet(planet)) {
+            if (planet.owner === localPlayer) {
+                setSelectedPlanet(planet)
+            } else {
+                notify("Not yours")
+            }
         }
     }
 
@@ -202,9 +211,10 @@ export default function Overview() {
                             onCancel={handleEndRenamePlanet}
                         />
                     ) : (
-                        <div style={{ background: "black", height: 32 }}>
-                            {/* messages */}
-                        </div>
+                        <>
+                            <AlertDisplay />
+                            <Notification />
+                        </>
                     )}
                     <div style={{ display: "flex", flexDirection: "row" }}>
                         <Navigation
