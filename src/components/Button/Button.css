@@ -1,0 +1,15 @@
+button {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    padding: 0;
+    display: inline-flex;
+}
+
+button:hover {
+    border-color: #646cff;
+}
+button:focus,
+button:focus-visible {
+    outline: none;
+}
