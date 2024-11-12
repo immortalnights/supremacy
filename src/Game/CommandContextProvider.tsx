@@ -1,4 +1,4 @@
-import { Getter, Setter, useAtomValue } from "jotai"
+import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo } from "react"
 import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "./store"
@@ -30,11 +30,13 @@ import {
     modifyAggression,
     transferCreditsToCapital,
 } from "./commands/planet"
+import { useSetNotification } from "./components/Notification"
 
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { localPlayer, host } = useAtomValue(sessionAtom)
+    const notify = useSetNotification()
 
     const exec = useAtomCallback(
         useCallback(
@@ -104,6 +106,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.name,
                         "easy",
                         get(dateAtom),
+                        notify,
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)

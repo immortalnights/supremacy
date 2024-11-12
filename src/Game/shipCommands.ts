@@ -112,6 +112,7 @@ export const purchaseShip = (
     name: string,
     difficulty: Difficulty,
     date: number,
+    notify: (message: string) => void,
 ) => {
     let modifiedPlanets
     let modifiedShips
@@ -122,6 +123,7 @@ export const purchaseShip = (
     const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
 
     if (dockedShips.length >= 3) {
+        notify(`There is no room in the docking bays on ${capital.name}`)
         console.error("Cannot purchase ship, capital has no available docking bays")
     } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
         console.log("Cannot afford ship")
@@ -139,6 +141,7 @@ export const purchaseShip = (
             blueprint.class === "Atmosphere Processor" &&
             !canPurchaseAtmos(date, ownedShips)
         ) {
+            notify("Cannot purchase Atmosphere Processor yet")
             console.error("Cannot purchase Atmosphere Processor")
         } else {
             const availableBayIndex = nextFreeIndex(dockedShips, 3)
@@ -161,7 +164,7 @@ export const purchaseShip = (
                 modifiedPlanet,
                 availableBayIndex,
             )
-            console.debug("new ship", newShip)
+            notify("This ship has been transferred into a docking bay")
             modifiedShips = [...ships, newShip]
         }
     }
