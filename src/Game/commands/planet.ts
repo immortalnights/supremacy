@@ -1,7 +1,8 @@
-import { ColonizedPlanet, Planet } from "Game/entities"
+import { NotifyCallback } from "Game/components/Notification/useNotification"
+import { Planet } from "Game/entities"
 import { clamp, clone } from "Game/utilities"
 import {
-    getColonizedPlanet,
+    getPlayerPlanets,
     getPlayerCapital,
     isColonizedPlanet,
 } from "Game/utilities/planets"
@@ -76,31 +77,40 @@ export const modifyAggression = (
 export const transferCreditsToCapital = (
     player: string,
     planets: Planet[],
-    selectedPlanet: ColonizedPlanet,
+    notify: NotifyCallback,
 ) => {
-    const planet = getColonizedPlanet(planets, selectedPlanet)
-    const [, capital] = getPlayerCapital(planets, player)
+    const ownedPlanets = getPlayerPlanets(planets, player)
+    const [, capital] = getPlayerCapital(ownedPlanets, player)
     let modifiedPlanets
 
-    if (!planet) {
-        throw new Error(`Failed to find planet`)
-    }
     if (!capital) {
         throw new Error(`Failed to find player capital`)
     }
 
-    if (planet.capital) {
-        console.debug(`Cannot transfer credits from the capital`)
-    } else if (planet.owner !== player) {
-        console.error(`Cannot transfer credits from an enemy planet`)
+    if (ownedPlanets.length <= 1) {
+        console.debug(`Player has no other planets to transfer credits from`)
+        notify("You have no other planets")
     } else {
         let modifiedPlanet
         let modifiedCapital
-        ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
-        ;[modifiedCapital, modifiedPlanets] = clone(capital, modifiedPlanets)
 
-        modifiedCapital.credits += modifiedPlanet.credits
-        modifiedPlanet.credits = 0
+        let transferred = 0
+
+        modifiedPlanets = planets
+        for (let planet of ownedPlanets) {
+            if (!planet.capital) {
+                ;[modifiedPlanet, modifiedPlanets] = clone(planet, modifiedPlanets)
+                transferred += modifiedPlanet.credits
+                modifiedPlanet.credits = 0
+            }
+        }
+
+        ;[modifiedCapital, modifiedPlanets] = clone(capital, modifiedPlanets)
+        modifiedCapital.credits += transferred
+        notify(`All credits sent to ${capital.name}`)
+        console.debug(
+            `Transferred ${transferred} from ${ownedPlanets.length - 1} planets to player capital`,
+        )
     }
 
     return modifiedPlanets ?? planets

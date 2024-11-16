@@ -1,5 +1,11 @@
 import { ColonizedPlanet, Planet } from "Game/entities"
 
+export const getPlayerPlanets = (planets: Planet[], player: string) => {
+    return planets.filter(
+        (planet) => isColonizedPlanet(planet) && planet.owner === player,
+    ) as ColonizedPlanet[]
+}
+
 export const getPlayerCapital = (planets: Planet[], player: string) => {
     const index = planets.findIndex(
         (p) => isColonizedPlanet(p) && p.capital && p.owner === player,

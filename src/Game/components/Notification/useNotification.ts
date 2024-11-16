@@ -2,7 +2,9 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { notificationAtom } from "./store"
 
-export const useSetNotification = () => {
+export type NotifyCallback = (message: string) => void
+
+export const useSetNotification = (): NotifyCallback => {
     const duration = 3000
     const setNotification = useSetAtom(notificationAtom)
     const timeout = useRef<number | undefined>()

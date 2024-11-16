@@ -85,7 +85,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     modifiedPlanets = transferCreditsToCapital(
                         localPlayer,
                         originalPlanets,
-                        data.planet,
+                        notify,
                     )
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "modify-planet-aggression") {

@@ -9,7 +9,7 @@ import orbitingIcon from "/images/orbiting.png"
 import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
 import { useAtomValue, useSetAtom } from "jotai"
-import { selectedPlanetAtom, sessionAtom, shipsAtom } from "../store"
+import { planetsAtom, selectedPlanetAtom, sessionAtom, shipsAtom } from "../store"
 import { Planet, ShipPosition } from "../entities"
 import {
     FormEvent,
@@ -81,8 +81,10 @@ function RenamePlanet({
 
 function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     const { localPlayer } = useAtomValue(sessionAtom)
+    const planets = useAtomValue(planetsAtom)
     const selectedPlanet = useSelectedColonizedPlanet()
     const transfer = useTransferCredits()
+    const notify = useSetNotification()
 
     const handleStartRenamePlanet = () => {
         if (selectedPlanet && selectedPlanet?.owner === localPlayer) {
@@ -91,8 +93,16 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     }
 
     const handleTransferToCapital = () => {
-        if (selectedPlanet && !selectedPlanet.capital) {
-            transfer(selectedPlanet)
+        const otherPlanets = planets.filter(
+            (planet) =>
+                isColonizedPlanet(planet) &&
+                planet.owner === localPlayer &&
+                !planet.capital,
+        )
+        if (otherPlanets.length === 0) {
+            notify("You have no other planets")
+        } else {
+            transfer()
         }
     }
 

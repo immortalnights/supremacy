@@ -23,7 +23,7 @@ export function useAdjustTax() {
 export function useTransferCredits() {
     const { exec } = useContext(CommandContext)
 
-    return (planet: ColonizedPlanet) => {
-        exec("transfer-planet-credits", { planet: planet.id })
+    return () => {
+        exec("transfer-planet-credits", {})
     }
 }
