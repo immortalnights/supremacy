@@ -9,38 +9,97 @@ import ShipDetails from "./components/ShipDetails"
 import ShipHeading from "./components/ShipHeading"
 import Navigation from "../components/Navigation"
 import { useAtomValue } from "jotai"
-import { shipsAtom } from "../store"
-import { Planet, Ship } from "../entities"
+import { planetsAtom, shipsAtom } from "../store"
+import { ColonizedPlanet, Planet, Ship } from "../entities"
 import FleetGrid from "../components/FleetGrid"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useMoveShip, useDecommission, useTransferShip } from "../actions"
 import ShipIcon from "../components/ShipIcon"
 import { useSelectedColonizedPlanet } from "../hooks"
 import { throwError } from "game-signaling-server/client"
 import PlanetGrid from "Game/components/PlanetGrid"
 import Screen from "Game/components/Screen"
+import Notification, { useSetNotification } from "Game/components/Notification"
+import { isColonizedPlanet } from "Game/utilities/planets"
+import { assertNever } from "utilities"
 
-const useSelectedShip = (id?: Ship["id"]) => {
-    let ship
-    const ships = useAtomValue(shipsAtom)
-    if (id) {
-        ship = ships.find((item) => item.id === id)
+const getPlanet = (planets: Planet[], id: string) => {
+    const planet = planets.find((planet) => planet.id === id)
+    if (!planet) {
+        throw new Error(`Failed to find planet ${id}`)
     }
-    return ship
+    return planet
+}
+
+const getShipPositionMessage = (ship: Ship, planets: Planet[]) => {
+    let message: string = ""
+    const position = ship.position
+    switch (position) {
+        case "docked": {
+            const planet = getPlanet(planets, ship.location.planet)
+            message = `${ship.name} is in a docking bay on ${planet.name}`
+            break
+        }
+        case "orbit": {
+            const planet = getPlanet(planets, ship.location.planet)
+            message = `${ship.name} is in orbit above ${planet.name}`
+            break
+        }
+        case "outer-space": {
+            const destination = getPlanet(planets, ship.heading.to)
+            if (destination && isColonizedPlanet(destination)) {
+                message = `${ship.name} is is transit to  ${destination.name}: ETA ${ship.heading.remaining}`
+            }
+            break
+        }
+        case "surface": {
+            const planet = getPlanet(planets, ship.location.planet)
+            message = `${ship.name} is on the surface of ${planet.name}`
+            break
+        }
+        default: {
+            assertNever(position)
+        }
+    }
+
+    return message
+}
+
+const useSelectedShip = () => {
+    const ships = useAtomValue(shipsAtom)
+    const planets = useAtomValue(planetsAtom)
+    const [selectedShip, setSelectedShip] = useState<Ship["id"] | undefined>()
+    let ship: Ship | undefined
+    if (selectedShip) {
+        ship = ships.find((item) => item.id === selectedShip)
+    }
+    const notify = useSetNotification()
+
+    useEffect(() => {
+        if (ship) {
+            notify(getShipPositionMessage(ship, planets))
+        }
+    }, [ship, ship?.position])
+
+    return [ship, setSelectedShip] as const
 }
 
 export default function Fleet() {
+    const [ship, setSelectedShip] = useSelectedShip()
+    const planets = useAtomValue(planetsAtom)
+
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Fleet of lifeless planet")
-    const [selectedShip, setSelectedShip] = useState<Ship["id"] | undefined>()
-    const ship = useSelectedShip(selectedShip)
+
     const [isSelectingDestination, setIsSelectingDestination] = useState(false)
     const move = useMoveShip()
     const travel = useTransferShip()
     const decommission = useDecommission()
+    const notify = useSetNotification()
 
     const handleShipSelected = (ship: Ship) => {
+        notify(getShipPositionMessage(ship, planets))
         setSelectedShip(ship.id)
     }
 
@@ -53,20 +112,18 @@ export default function Fleet() {
 
     const handleLaunchShip = () => {
         if (ship) {
-            if (ship.class === "Atmosphere Processor") {
-                console.warn("Handle Atmosphere Processor from star map panel")
-            } else {
-                move(ship, "orbit")
-            }
+            move(ship, "orbit")
         }
+        setIsSelectingDestination(false)
     }
 
     const handleTransferShip = () => {
         if (ship) {
             if (ship.position === "orbit") {
+                notify("Select planet to travel to", { timeout: false })
                 setIsSelectingDestination(true)
             } else {
-                console.error(`Ship ${ship.name} is not in orbit`)
+                notify(`Ship ${ship.name} is not in orbit`)
             }
         }
     }
@@ -75,15 +132,19 @@ export default function Fleet() {
         if (ship) {
             move(ship, "docked")
         }
+        setIsSelectingDestination(false)
     }
 
     const handleDecommissionShip = () => {
         if (ship) {
             decommission(ship)
         }
+        setIsSelectingDestination(false)
     }
 
     const handleRenameShip = () => {}
+
+    useEffect(() => {}, [ship?.position])
 
     let grid
     if (isSelectingDestination) {
@@ -134,7 +195,7 @@ export default function Fleet() {
                 </div>
             </div>
             <div>
-                <div style={{ background: "black", height: 64 }}></div>
+                <Notification />
             </div>
             <div style={{ display: "flex", flexDirection: "row" }}>
                 <Navigation
