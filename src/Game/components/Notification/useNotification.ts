@@ -1,4 +1,4 @@
-import { useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { notificationAtom } from "./store"
 
@@ -6,9 +6,10 @@ export type NotifyCallback = (message: string) => void
 
 export const useSetNotification = (): NotifyCallback => {
     const duration = 3000
-    const setNotification = useSetAtom(notificationAtom)
+    const [notification, setNotification] = useAtom(notificationAtom)
     const timeout = useRef<number | undefined>()
 
+    // clear the notification if the hook unmounts
     useEffect(() => {
         return () => {
             setNotification(null)
@@ -19,20 +20,33 @@ export const useSetNotification = (): NotifyCallback => {
         }
     }, [])
 
-    const notify = useCallback((message: string) => {
-        setNotification(message)
-
+    // clear the notification after a set timeout
+    useEffect(() => {
         if (timeout.current) {
             window.clearTimeout(timeout.current)
         }
 
-        timeout.current = window.setTimeout(
-            () => {
-                console.log("timeout")
+        if (notification) {
+            timeout.current = window.setTimeout(() => {
                 setNotification(null)
-            },
-            1000 + 50 * message.length,
-        )
+            }, duration)
+        }
+    }, [notification])
+
+    const notify = useCallback((message: string) => {
+        setNotification(message)
+
+        // if (timeout.current) {
+        //     window.clearTimeout(timeout.current)
+        // }
+
+        // timeout.current = window.setTimeout(
+        //     () => {
+        //         console.log("timeout")
+        //         // setNotification(null)
+        //     },
+        //     1000 + 50 * message.length,
+        // )
     }, [])
 
     return notify
@@ -45,7 +59,6 @@ export const useNotification = () => {
 export const useClearNotification = () => {
     const setNotification = useSetAtom(notificationAtom)
     return () => {
-        console.log("clear")
         setNotification(null)
     }
 }
