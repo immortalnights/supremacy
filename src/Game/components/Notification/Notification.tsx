@@ -1,25 +1,23 @@
-import TypewriterComponent from "typewriter-effect"
-import { useClearNotification, useNotification } from "./useNotification"
-import { ReactNode } from "react"
+import { useNotification } from "./useNotification"
 
-export default function Notification({ fallback = null }: { fallback?: ReactNode }) {
+export default function Notification() {
     const notification = useNotification()
-    const clear = useClearNotification()
 
-    return notification ? (
-        <TypewriterComponent
-            options={{
-                delay: 25,
-                deleteSpeed: 1,
+    return (
+        <div
+            style={{
+                backgroundColor: "black",
+                minHeight: "1.5em",
             }}
-            onInit={(tw) => {
-                tw.typeString(notification)
-                    .start()
-                    .pauseFor(2000)
-                    .callFunction(() => clear())
-            }}
-        />
-    ) : (
-        (fallback ?? <div>&nbsp;</div>)
+        >
+            <div
+                style={{
+                    transition: "opacity 1s",
+                    opacity: notification ? 1 : 0,
+                }}
+            >
+                {notification}
+            </div>
+        </div>
     )
 }
