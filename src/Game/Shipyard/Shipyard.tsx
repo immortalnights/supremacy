@@ -16,7 +16,13 @@ import { wrap } from "Game/utilities"
 import { canPurchaseAtmos, shipsDocketAtPlanetAtom } from "Game/utilities/ships"
 import Screen from "Game/components/Screen"
 import Notification from "Game/components/Notification"
-import { useSetNotification } from "Game/components/Notification/useNotification"
+import {
+    useNotification,
+    useSetNotification,
+} from "Game/components/Notification/useNotification"
+import previousIcon from "/images/blue_previous.png"
+import buyIcon from "/images/blue_buy.png"
+import nextIcon from "/images/blue_next.png"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -53,15 +59,31 @@ function PurchaseShip({
     }
 
     return (
-        <div>
-            <form onSubmit={handleBuy}>
-                <input type="text" value={name} onChange={handleChange} autoFocus />
+        <form onSubmit={handleBuy}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: 5,
+                }}
+            >
+                <label>
+                    Name:
+                    <input
+                        type="text"
+                        value={name}
+                        onChange={handleChange}
+                        autoFocus
+                        style={{ margin: 5 }}
+                    />
+                </label>
                 <Button type="submit">Buy</Button>
                 <Button type="button" onClick={onCancel}>
                     Cancel
                 </Button>
-            </form>
-        </div>
+            </div>
+        </form>
     )
 }
 
@@ -76,28 +98,49 @@ const useOwnedShipCount = (player: string, shipClass: ShipClass) => {
             ),
         [player, shipClass],
     )
-    const owned = useAtomValue(ownedAtom)
-
-    return owned
+    return useAtomValue(ownedAtom)
 }
 
-export default function Shipyard() {
+function Details({ blueprint }: { blueprint: ShipBlueprint }) {
+    const notification = useNotification()
+    const [alert] = useState(false)
+
+    return (
+        <div style={{ textAlign: "left", fontSize: "75%" }}>
+            {notification ? <Notification /> : <div>{blueprint.description}</div>}
+
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                Type: {blueprint.class}{" "}
+                {alert ? <div>** Incoming Message **</div> : null}
+            </div>
+        </div>
+    )
+}
+
+function Controls({
+    planet,
+    blueprint,
+    onChange,
+}: {
+    planet: ColonizedPlanet
+    blueprint: ShipBlueprint
+    onChange: (change: -1 | 1) => void
+}) {
     const { localPlayer } = useAtomValue(sessionAtom)
-    const planet = useCapitalPlanet()
-    const [index, setIndex] = useState(0)
-    const blueprint = catalog[index] as ShipBlueprint
     const [purchasing, setPurchasing] = useState(false)
-    const date = useAtomValue(dateAtom)
     const owned = useOwnedShipCount(localPlayer, blueprint?.class)
-    const notify = useSetNotification()
     const dockedShips = useAtomValue(shipsDocketAtPlanetAtom).filter(planet)
+    const date = useAtomValue(dateAtom)
+    const notify = useSetNotification()
 
     const handlePrevious = () => {
-        setIndex(wrap(index - 1, catalog.length))
+        setPurchasing(false)
+        onChange(-1)
     }
 
     const handleNext = () => {
-        setIndex(wrap(index + 1, catalog.length))
+        setPurchasing(false)
+        onChange(1)
     }
 
     const handleBuy = () => {
@@ -107,7 +150,10 @@ export default function Shipyard() {
         ) {
         } else if (dockedShips.length >= 3) {
             notify(`There is no room in the docking bays on ${planet.name}`)
+        } else if (planet.credits < blueprint.cost.credits) {
+            notify(`You do not have enough credits`)
         } else {
+            notify("This ship has been transferred into a docking bay")
             setPurchasing(true)
         }
     }
@@ -121,39 +167,67 @@ export default function Shipyard() {
     }
 
     return (
+        <div style={{ display: "flex", alignItems: "center" }}>
+            <Button
+                onClick={handlePrevious}
+                style={{ margin: "0 1px 0 0", display: "flex" }}
+            >
+                <img src={previousIcon} alt="Previous" />
+            </Button>
+            <Button onClick={handleBuy} style={{ margin: 1, display: "flex" }}>
+                <img src={buyIcon} alt="Buy" />
+            </Button>
+            <div style={{ flexGrow: 1, padding: "0 4px" }}>
+                {purchasing ? (
+                    <PurchaseShip
+                        ship={blueprint}
+                        planet={planet}
+                        owned={owned}
+                        onPurchased={handlePurchased}
+                        onCancel={handleCancel}
+                    />
+                ) : (
+                    <Details blueprint={blueprint} />
+                )}
+            </div>
+            <Button
+                onClick={handleNext}
+                style={{ margin: "0 0 0 1px", display: "flex" }}
+            >
+                <img src={nextIcon} alt="Next" />
+            </Button>
+        </div>
+    )
+}
+
+export default function Shipyard() {
+    const { localPlayer } = useAtomValue(sessionAtom)
+    const planet = useCapitalPlanet()
+    const [index, setIndex] = useState(0)
+    const blueprint = catalog[index] as ShipBlueprint
+    const owned = useOwnedShipCount(localPlayer, blueprint?.class)
+
+    const handleChangeIndex = (change: number) => {
+        setIndex(wrap(index + change, catalog.length))
+    }
+
+    return (
         <Screen flexDirection="column">
-            <div style={{ background: "black", width: 640, height: 282 }}>
+            <div
+                style={{
+                    background: "black",
+                    width: 640,
+                    height: 282,
+                    flexShrink: 0,
+                }}
+            >
                 <img src={images[blueprint.class]} />
             </div>
-            <div style={{ display: "flex" }}>
-                <Button onClick={handlePrevious} style={{ padding: 5 }}>
-                    &lt;&lt;
-                </Button>
-                <Button style={{ padding: 5 }} onClick={handleBuy}>
-                    Buy
-                </Button>
-                <div style={{ flexGrow: 1 }}>
-                    {purchasing ? (
-                        <PurchaseShip
-                            ship={blueprint}
-                            planet={planet}
-                            owned={owned}
-                            onPurchased={handlePurchased}
-                            onCancel={handleCancel}
-                        />
-                    ) : (
-                        <div style={{ textAlign: "left" }}>
-                            <Notification
-                                fallback={<div>{blueprint.description}</div>}
-                            />
-                            <div>Type: {blueprint.class}</div>
-                        </div>
-                    )}
-                </div>
-                <Button onClick={handleNext} style={{ padding: 5 }}>
-                    &gt;&gt;
-                </Button>
-            </div>
+            <Controls
+                planet={planet}
+                blueprint={blueprint}
+                onChange={handleChangeIndex}
+            />
             <div style={{ display: "flex", justifyContent: "space-around" }}>
                 <div>
                     <div>
@@ -167,9 +241,39 @@ export default function Shipyard() {
                     <div>
                         <strong>Cost</strong>
                     </div>
-                    <div>{blueprint.cost.credits}: Credits</div>
-                    <div>{blueprint.cost.minerals}: Minerals</div>
-                    <div>{blueprint.cost.energy}: Energy</div>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: 140,
+                            gap: 5,
+                        }}
+                    >
+                        <div>{blueprint.cost.credits}</div>
+                        <div>:Credits</div>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: 140,
+                            gap: 5,
+                        }}
+                    >
+                        <div>{blueprint.cost.minerals}</div>
+                        <div>:Minerals</div>
+                    </div>
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            width: 140,
+                            gap: 5,
+                        }}
+                    >
+                        <div>{blueprint.cost.energy}</div>
+                        <div>:Energy</div>
+                    </div>
                 </div>
                 <div>
                     <div>
