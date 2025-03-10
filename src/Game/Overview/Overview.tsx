@@ -22,7 +22,7 @@ import {
 import { useRenamePlanet, useTransferCredits } from "./actions"
 import PlanetGrid from "../components/PlanetGrid"
 import { useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
-import AlertDisplay from "Game/components/AlertMessages/Display"
+// import AlertDisplay from "Game/components/AlertMessages/Display"
 import Notification from "Game/components/Notification"
 import { isColonizedPlanet } from "Game/utilities/planets"
 import { useSetNotification } from "Game/components/Notification/useNotification"
@@ -222,7 +222,7 @@ export default function Overview() {
                         />
                     ) : (
                         <>
-                            <AlertDisplay />
+                            {/* <AlertDisplay /> */}
                             <Notification />
                         </>
                     )}
