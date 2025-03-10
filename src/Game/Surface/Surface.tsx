@@ -12,11 +12,11 @@ export default function Surface() {
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Surface of lifeless planet")
-    const moveShipTo = useMoveShip()
+    const move = useMoveShip()
 
     const handleClickDockedShip = (ship: Ship) => {
         if (ship) {
-            moveShipTo(ship, "surface")
+            move(ship, "surface")
         }
     }
 

@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
 import { shipsAtom } from "../store"
-import type { Planet, Ship } from "../entities"
+import type { Ship } from "../entities"
 import { useCallback, useState } from "react"
 
 export const useSelectedShip = () => {

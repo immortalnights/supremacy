@@ -26,6 +26,7 @@ import {
     canPurchaseAtmos,
     isDocketAtPlanet,
     isOnPlanetSurface,
+    transitionMatrix,
 } from "./utilities/ships"
 
 const findShip = (ship: Ship, ships: Ship[]) => {
@@ -464,14 +465,6 @@ export const modifyCargo = (
     }
 
     return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
-}
-
-const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
-    // From : To
-    orbit: ["docked", "outer-space"],
-    surface: ["docked"],
-    docked: ["surface", "orbit"],
-    "outer-space": ["orbit"],
 }
 
 export const transitionShip = (

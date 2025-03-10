@@ -123,7 +123,7 @@ const simulateTravel = (ship: Ship): Ship => {
 
 // Pure simulation function
 export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet[]] => {
-    console.log(`Simulating ${ships.length} ships`)
+    // console.log(`Simulating ${ships.length} ships`)
     const getPlanet = (ship: Ship) =>
         ship.position !== "outer-space"
             ? modifiedPlanets.find((planet) => planet.id === ship.location.planet)

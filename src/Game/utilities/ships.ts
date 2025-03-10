@@ -8,17 +8,27 @@ import {
     ShipInOrbit,
     ShipInOuterSpace,
     ShipOnSurface,
+    ShipPosition,
 } from "Game/entities"
 import { DAYS_PER_YEAR } from "Game/settings"
 
+export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
+    // From : To
+    orbit: ["docked", "outer-space"],
+    surface: ["docked"],
+    docked: ["surface", "orbit"],
+    "outer-space": ["orbit"],
+}
+
 export const canPurchaseAtmos = (date: number, owned: number) => {
     let available = true
-    if (owned > 0) {
+    if (date < 5) {
+        // DAYS_PER_YEAR) {
+        available = false
+        console.error(`Cannot purchase Atmosphere Processor yet (${date})`)
+    } else if (owned > 0) {
         available = false
         console.error("Cannot own more than one Atmosphere Processor")
-    } else if (date < DAYS_PER_YEAR) {
-        available = false
-        console.error("Cannot purchase Atmosphere Processor yet")
     }
     return available
 }

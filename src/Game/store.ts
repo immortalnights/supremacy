@@ -4,9 +4,7 @@ import { GameSession } from "./types"
 
 export const store = createStore()
 
-export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">(
-    "paused",
-)
+export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">("paused")
 export const sessionAtom = atom<GameSession | undefined>(undefined)
 export const dateAtom = atom<number>(0)
 export const planetsAtom = atom<Planet[]>([])
@@ -27,15 +25,12 @@ export const selectedPlanetAtom = atom<
 
         if (planetId) {
             planet = planets.find((p) => p.id === planetId)
-            console.debug("User selected planet", planetId, planet)
+            // console.debug("User selected planet", planetId, planet)
         } else {
             planet = planets.find(
-                (p) =>
-                    p.type !== "lifeless" &&
-                    p.owner === localPlayer &&
-                    p.capital,
+                (p) => p.type !== "lifeless" && p.owner === localPlayer && p.capital,
             )
-            console.debug("Default selected planet", planet)
+            // console.debug("Default selected planet", planet)
         }
 
         return planet
