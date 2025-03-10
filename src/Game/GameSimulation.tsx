@@ -104,6 +104,17 @@ function Simulation() {
                     platoons: modifiedPlatoons,
                 })
 
+                // if (ai) {
+                //     // The AI knows of the state of all planets, but should only know resources for it's own
+                //     const filteredPlanets = modifiedPlanets.filter(() => true)
+                //     // The AI knows about own ships, and enemy ships located in orbit or in the docking bays of owned planets
+                //     const filteredShips = modifiedShips.filter(() => true)
+                //     // The AI knows about own platoons and enemy platoons on it's planets
+                //     const filteredPlatoons = modifiedPlatoons.filter(() => true)
+
+                //     ai.process(filteredPlanets, filteredShips, filteredPlatoons)
+                // }
+
                 set(dateAtom, newDate)
                 set(planetsAtom, modifiedPlanets)
                 set(shipsAtom, modifiedShips)
