@@ -6,7 +6,6 @@ export default function Notification() {
     return (
         <div
             style={{
-                backgroundColor: "black",
                 minHeight: "1.5em",
             }}
         >
