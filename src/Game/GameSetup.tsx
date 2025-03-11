@@ -7,9 +7,9 @@ import {
     shipsAtom,
     platoonsAtom,
 } from "./store"
-import { GameConfiguration, GameData, GameSession } from "./types"
+import { GameConfiguration, GameData, GameSession } from "Supremacy/types"
 import { Navigate } from "react-router-dom"
-import { Platoon, Ship } from "./entities"
+import { Platoon, Ship } from "Supremacy/entities"
 import {
     DataChannelMessageHandler,
     useManager,
@@ -21,7 +21,7 @@ import {
     initializeMultiplayerGame,
     initializeSinglePlayerGame,
     saveGame,
-} from "./gameSetupUtilities"
+} from "Supremacy/setup"
 
 type SetupState =
     | "initializing"
@@ -31,12 +31,7 @@ type SetupState =
     | "ready"
     | "error"
 
-const useMultiplayer2 = ({
-    onReady,
-}: {
-    onReady: () => void
-    onError: () => void
-}) => {
+const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void }) => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { player: localPlayer, game } = useManager()
     const [session, setSession] = useAtom(sessionAtom)
@@ -150,11 +145,7 @@ const useMultiplayer2 = ({
                 break
             }
             case "creating": {
-                if (
-                    localPlayer?.host &&
-                    session?.player1?.id &&
-                    session?.player2?.id
-                ) {
+                if (localPlayer?.host && session?.player1?.id && session?.player2?.id) {
                     const data = initializeMultiplayerGame(
                         "easy",
                         8,
@@ -234,13 +225,7 @@ export default function GameSetup() {
                     localPlayer: playerId,
                 } satisfies GameSession
 
-                saveGame(
-                    sessionData,
-                    "paused",
-                    data.planets,
-                    data.ships,
-                    data.platoons,
-                )
+                saveGame(sessionData, "paused", data.planets, data.ships, data.platoons)
 
                 hydrateAtoms(data)
                 setSession(sessionData)

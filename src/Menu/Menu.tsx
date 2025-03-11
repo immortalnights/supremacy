@@ -1,7 +1,7 @@
 import { useManager } from "webrtc-lobby-lib"
 import { useNavigate } from "react-router-dom"
 import { useMemo } from "react"
-import { LastSaveData } from "../Game/types"
+import { LastSaveData } from "Supremacy/types"
 import { MenuButton } from "components/Button"
 
 export default function Main() {
@@ -33,12 +33,8 @@ export default function Main() {
             >
                 Continue
             </MenuButton>
-            <MenuButton onClick={() => navigate("/Create")}>
-                New Game
-            </MenuButton>
-            <MenuButton onClick={handleMultiplayerClick}>
-                Multiplayer
-            </MenuButton>
+            <MenuButton onClick={() => navigate("/Create")}>New Game</MenuButton>
+            <MenuButton onClick={handleMultiplayerClick}>Multiplayer</MenuButton>
         </div>
     )
 }

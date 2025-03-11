@@ -1,6 +1,13 @@
 import { atom, createStore } from "jotai"
-import type { Planet, Ship, Platoon } from "./entities"
-import { GameSession } from "./types"
+import type { Planet, Ship, Platoon, ColonizedPlanet } from "Supremacy/entities"
+import { isOnPlanet, isOnShip } from "Supremacy/platoons"
+import {
+    isDocketAtPlanet,
+    isInOuterSpace,
+    isOnPlanetSurface,
+    isOrbitingPlanet,
+} from "Supremacy/ships"
+import { GameSession } from "Supremacy/types"
 
 export const store = createStore()
 
@@ -42,3 +49,69 @@ export const selectedPlanetAtom = atom<
 )
 export const shipsAtom = atom<Ship[]>([])
 export const platoonsAtom = atom<Platoon[]>([])
+
+export const shipsInOuterSpaceAtom = atom((get) => ({
+    filter: () => get(shipsAtom).filter((ship) => isInOuterSpace(ship)),
+}))
+
+export const shipsOrbitingPlanetAtom = atom((get) => ({
+    filter: (planet?: Planet) => {
+        const ships = planet
+            ? get(shipsAtom).filter((ship) => isOrbitingPlanet(ship, planet))
+            : []
+
+        return ships
+    },
+}))
+
+export const shipsDocketAtPlanetAtom = atom((get) => ({
+    filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
+        const ships = planet
+            ? get(shipsAtom).filter(
+                  (ship) =>
+                      isDocketAtPlanet(ship, planet) &&
+                      (!owner || ship.owner === owner),
+              )
+            : []
+
+        if (sort) {
+            ships.sort((a, b) => a.location.index - b.location.index)
+        }
+
+        return ships
+    },
+}))
+
+export const shipsOnPlanetSurfaceAtom = atom((get) => ({
+    filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
+        const ships = planet
+            ? get(shipsAtom).filter(
+                  (ship) =>
+                      isOnPlanetSurface(ship, planet) &&
+                      (!owner || ship.owner === owner),
+              )
+            : []
+
+        if (sort) {
+            ships.sort((a, b) => a.location.index - b.location.index)
+        }
+
+        return ships
+    },
+}))
+
+export const platoonsOnPlanetAtom = atom((get) => ({
+    filter: (planet?: ColonizedPlanet, owner?: string) =>
+        planet
+            ? get(platoonsAtom).filter(
+                  (platoon) =>
+                      isOnPlanet(platoon, planet) &&
+                      (!owner || platoon.owner === owner),
+              )
+            : [],
+}))
+
+export const platoonsOnShipAtom = atom((get) => ({
+    filter: (ship?: Ship) =>
+        ship ? get(platoonsAtom).filter((platoon) => isOnShip(platoon, ship)) : [],
+}))

@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
 import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
-import type { ColonizedPlanet, Planet } from "../entities"
+import type { ColonizedPlanet, Planet } from "Supremacy/entities"
 import { throwError } from "game-signaling-server/client"
 
 const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>

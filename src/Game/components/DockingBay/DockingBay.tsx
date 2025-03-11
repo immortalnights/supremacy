@@ -1,4 +1,4 @@
-import { ColonizedPlanet, Planet, Ship } from "Game/entities"
+import { ColonizedPlanet, Planet, Ship } from "Supremacy/entities"
 import Button from "components/Button"
 import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
 import { useAtomValue } from "jotai"

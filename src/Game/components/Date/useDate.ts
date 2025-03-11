@@ -1,4 +1,4 @@
-import { DAYS_PER_YEAR } from "Game/settings"
+import { DAYS_PER_YEAR } from "Supremacy/consts"
 import { dateAtom } from "Game/store"
 import { useAtomValue } from "jotai"
 

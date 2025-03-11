@@ -1,7 +1,7 @@
 import { useAtom } from "jotai"
 import { useCallback, useState, useEffect } from "react"
 import { useParams, Navigate } from "react-router-dom"
-import { Ship, Platoon } from "./entities"
+import { Ship, Platoon } from "Supremacy/entities"
 import {
     sessionAtom,
     store,
@@ -11,8 +11,8 @@ import {
     shipsAtom,
     platoonsAtom,
 } from "./store"
-import { GameData } from "./types"
-import { loadSavedGame } from "./gameSetupUtilities"
+import { GameData } from "Supremacy/types"
+import { loadSavedGame } from "Supremacy/setup"
 
 export default function GameSessionBoundary() {
     const { id } = useParams()
@@ -24,9 +24,7 @@ export default function GameSessionBoundary() {
         store.set(shipsAtom, [] as Ship[])
         store.set(platoonsAtom, [] as Platoon[])
     }, [])
-    const [state, setState] = useState<"loading" | "ready" | "failed">(
-        "loading",
-    )
+    const [state, setState] = useState<"loading" | "ready" | "failed">("loading")
 
     useEffect(() => {
         if (id) {

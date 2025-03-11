@@ -8,13 +8,13 @@ import {
     shipsAtom,
     simulationSpeedAtom,
 } from "./store"
-import { CommandProvider } from "./CommandContextProvider"
+import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { ColonizedPlanet, Planet, Platoon, Ship } from "./entities"
-import { PLANET_POPULATION_LIMIT } from "./settings"
-import { simulatePlanets, simulatePlatoons, simulateShips } from "./logic/tick"
+import { ColonizedPlanet, Planet, Platoon, Ship } from "Supremacy/entities"
+import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
+import { simulatePlanets, simulatePlatoons, simulateShips } from "Supremacy/tick"
 
 const speedMap = {
     slow: 2,
