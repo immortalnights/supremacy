@@ -1,7 +1,6 @@
 import { Planet, Platoon, Ship } from "./entities"
 
-export const difficulties = ["easy", "medium", "hard", "impossible"] as const
-
+export const difficulties = ["Easy", "Normal", "Hard"] as const
 export type Difficulty = (typeof difficulties)[number]
 
 export interface GameData {

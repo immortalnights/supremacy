@@ -54,7 +54,7 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
                     if (name === "session-synchronization") {
                         setSession({
                             id: game ?? "unknown",
-                            difficulty: "easy",
+                            difficulty: "Easy",
                             multiplayer: true,
                             host: localPlayer?.host,
                             localPlayer: localPlayer.id,
@@ -151,7 +151,7 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
             case "creating": {
                 if (localPlayer?.host && session?.player1?.id && session?.player2?.id) {
                     const data = initializeMultiplayerGame(
-                        "easy",
+                        "Easy",
                         8,
                         session?.player1?.id,
                         session?.player2?.id,

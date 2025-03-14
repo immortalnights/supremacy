@@ -9,8 +9,8 @@ import {
 } from "./entities"
 import { clamp, throwError } from "./utilities"
 import { assertNever } from "../utilities"
+import { Difficulty } from "./types"
 
-export type Difficulty = "Easy" | "Normal" | "Hard"
 export type PlayerAI = false | "Easy" | "Normal" | "Hard" | "Elite"
 
 export interface PlayerConfiguration {
@@ -23,7 +23,6 @@ export interface PlayerConfiguration {
 export interface GameConfiguration {
     seed?: string
     name: string
-    planetCount: number
     difficulty: Difficulty
 }
 
@@ -56,6 +55,12 @@ const difficultyPercentage = (difficulty: Difficulty) => {
     return pc ?? 1
 }
 
+const planetsForDifficulty: { [K in Difficulty]: number } = {
+    Easy: 8,
+    Normal: 16,
+    Hard: 32,
+} as const
+
 /**
  *
  */
@@ -67,7 +72,7 @@ export const setup = (
     const rnd = random.clone()
     rnd.use(config.seed ?? Date.now())
 
-    const planetCount = clamp(config.planetCount, 3, 64)
+    const planetCount = planetsForDifficulty[config.difficulty] // clamp(config.planetCount, 3, 64)
 
     const id = crypto.randomUUID()
     const planets: Planet[] = generatePlanets(planetCount, rnd)

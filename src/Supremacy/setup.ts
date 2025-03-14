@@ -11,10 +11,9 @@ import { Difficulty, GameData, GameSession, LastSaveData, SaveGameData } from ".
 import { random, randomChoice } from "./utilities"
 
 const planetsForDifficulty: { [K in Difficulty]: number } = {
-    easy: 8,
-    medium: 16,
-    hard: 32,
-    impossible: 32,
+    Easy: 8,
+    Normal: 16,
+    Hard: 32,
 } as const
 
 const initialPlanetPopulation = (difficulty: Difficulty, ai: boolean) =>

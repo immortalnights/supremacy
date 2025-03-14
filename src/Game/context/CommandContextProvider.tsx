@@ -110,7 +110,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         originalShips,
                         data.blueprint,
                         data.name,
-                        "easy",
+                        "Easy",
                         get(dateAtom),
                         notify,
                     )

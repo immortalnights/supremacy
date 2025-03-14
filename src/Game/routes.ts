@@ -1,6 +1,7 @@
 import { RouteObject } from "react-router-dom"
 import { Difficulty, GameConfiguration } from "Supremacy/types"
 import GameSetup from "./GameSetup"
+import Setup from "./components/Setup"
 import { GameSimulation } from "./GameSimulation"
 import GameSessionBoundary from "./GameSessionBoundary"
 import GameRoot from "./components/Root"
@@ -40,7 +41,7 @@ export const routes = {
                     player2Name: data.get("player2Name")?.toString(),
                 }
             },
-            Component: GameSetup,
+            Component: Setup,
         },
         {
             path: ":id",

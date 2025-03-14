@@ -13,20 +13,15 @@ export default function CreateGame() {
 
                 <div>
                     <label>Name</label>
-                    <input
-                        type="text"
-                        name="player1Name"
-                        defaultValue="Local Player"
-                    />
+                    <input type="text" name="player1Name" defaultValue="Local Player" />
                 </div>
 
                 <div>
                     <label>Difficulty</label>
                     <select name="difficulty">
-                        <option value="easy">Easy</option>
-                        <option value="medium">Medium</option>
-                        <option value="hard">Hard</option>
-                        <option value="impossible">Impossible</option>
+                        <option value="Easy">Easy</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Hard">Hard</option>
                     </select>
                 </div>
 
@@ -42,9 +37,7 @@ export default function CreateGame() {
                 </div>
 
                 <div>
-                    <MenuButton onClick={() => navigate("/")}>
-                        Cancel
-                    </MenuButton>
+                    <MenuButton onClick={() => navigate("/")}>Cancel</MenuButton>
                     <MenuButton type="submit">Start</MenuButton>
                 </div>
             </div>
