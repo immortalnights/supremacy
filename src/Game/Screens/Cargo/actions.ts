@@ -1,6 +1,6 @@
 import { useContext } from "react"
 import { CommandContext } from "../../context/CommandContext"
-import { CargoType, Ship } from "Supremacy/entities"
+import { Resource, Ship } from "Supremacy/entities"
 
 export function useCrewShip() {
     const { exec } = useContext(CommandContext)
@@ -41,10 +41,10 @@ export function useLoadFuel() {
 export function useLoadCargo() {
     const { exec } = useContext(CommandContext)
 
-    const load = (ship: Ship, cargo: CargoType, quantity: number) =>
+    const load = (ship: Ship, cargo: Resource, quantity: number) =>
         exec("load-cargo", { ship, cargo, quantity })
 
-    const unload = (ship: Ship, cargo: CargoType, quantity: number) =>
+    const unload = (ship: Ship, cargo: Resource, quantity: number) =>
         exec("unload-cargo", { ship, cargo, quantity })
 
     return [load, unload]

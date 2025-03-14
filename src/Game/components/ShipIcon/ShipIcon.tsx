@@ -1,4 +1,4 @@
-import { Ship } from "../../entities"
+import { Ship } from "Supremacy/entities"
 import emptyIcon from "/images/empty.png"
 import atmosIcon from "/images/atmos_icon.png"
 import battleIcon from "/images/battle_icon.png"

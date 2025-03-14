@@ -1,6 +1,6 @@
 import { Provider, useAtomValue } from "jotai"
 import { Outlet, useNavigate } from "react-router-dom"
-import { sessionAtom, store } from "./store"
+import { sessionAtom, store } from "../store"
 import { ReactNode, Suspense, useEffect, useRef } from "react"
 
 function NavigationRoot({ children }: { children: ReactNode }) {

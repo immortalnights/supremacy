@@ -24,7 +24,7 @@ import { throwError } from "game-signaling-server/client"
 import PlanetGrid from "Game/components/PlanetGrid"
 import Screen from "Game/components/Screen"
 import Notification, { useSetNotification } from "Game/components/Notification"
-import { isColonizedPlanet } from "Supremacy/planets"
+import { isColonizedPlanet } from "Supremacy/entities"
 import { assertNever } from "utilities"
 
 const getPlanet = (planets: Planet[], id: string) => {
@@ -124,7 +124,7 @@ export default function Fleet() {
     const handleTransferShip = () => {
         if (ship) {
             if (ship.position === "orbit") {
-                notify("Select planet to travel to", { timeout: false })
+                notify("Select planet to travel to")
                 setIsSelectingDestination(true)
             } else {
                 notify(`Ship ${ship.name} is not in orbit`)

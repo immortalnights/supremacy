@@ -9,7 +9,7 @@ const meta = {
         layout: "centered",
     },
     args: {
-        onClick: fn(),
+        onAction: fn(),
     },
 } satisfies Meta<typeof Navigation>
 

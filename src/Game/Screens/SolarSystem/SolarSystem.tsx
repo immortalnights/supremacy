@@ -23,6 +23,7 @@ import { Atmos, Planet, Ship } from "Supremacy/entities"
 import Screen from "Game/components/Screen"
 import { saveGame } from "Supremacy/setup"
 import { useMoveShip, useTransferShip } from "Game/hooks"
+import { useSession } from "Game/hooks/session"
 
 const useSaveGame = () => {
     return useAtomCallback(
@@ -32,13 +33,17 @@ const useSaveGame = () => {
             const ships = get(shipsAtom)
             const platoons = get(platoonsAtom)
 
+            if (!session) {
+                throw new Error("Invalid session, unable to save")
+            }
+
             saveGame(session, "paused", planets, ships, platoons)
         }, []),
     )
 }
 
 const useTerraformPlanet = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const atmos = useAtomValue(shipsAtom).find(
         (ship) => ship.class === "Atmosphere Processor" && ship.owner === localPlayer,
     )
@@ -69,7 +74,7 @@ const useTerraformPlanet = () => {
 
 export default function SolarSystem() {
     const planets = useAtomValue(planetsAtom)
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const saveGame = useSaveGame()
     const [selectedPlanet, setSelectedPlanet] = useAtom(selectedPlanetAtom)
     const terraform = useTerraformPlanet()

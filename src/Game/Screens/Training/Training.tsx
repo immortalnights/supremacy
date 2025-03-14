@@ -8,7 +8,7 @@ import { MouseEvent, useState } from "react"
 import { useCapitalPlanet } from "Game/hooks"
 import { useModifyPlatoonTroops, useTrainingActions } from "./actions"
 import { getModifierAmount, wrap } from "Game/utilities"
-import { Platoon } from "Supremacy/entities"
+import { type Platoon, isColonizedPlanet } from "Supremacy/entities"
 import { useAtomValue } from "jotai"
 import { planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../../store"
 import PlatoonSelector from "./components/PlatoonSelector"
@@ -16,9 +16,9 @@ import Rank from "./components/Rank"
 import Calibre from "./components/Calibre"
 import WeaponSelector from "./components/WeaponSelector"
 import SuitSelector from "./components/SuitSelector"
-import { isOnPlanet, isOnShip } from "Supremacy/platoons"
-import { isColonizedPlanet } from "Supremacy/planets"
+import { calculateEquipPlatoonCost, isOnPlanet, isOnShip } from "Supremacy/platoons"
 import Screen from "Game/components/Screen"
+import { useSession } from "Game/hooks/session"
 
 function PlatoonTroops({ platoon }: { platoon: Platoon }) {
     const modifyTroops = useModifyPlatoonTroops()
@@ -96,7 +96,7 @@ function PlatoonLocation({ platoon }: { platoon: Platoon }) {
 }
 
 export default function Training() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const capital = useCapitalPlanet()
     const [index, setIndex] = useState(0)
     const platoon = useAtomValue(platoonsAtom).find(

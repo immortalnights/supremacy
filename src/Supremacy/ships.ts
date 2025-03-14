@@ -8,15 +8,21 @@ import {
     Ship,
     ColonizedPlanet,
     ShipBlueprint,
-    CargoType,
+    Resource,
     ShipPosition,
     type ShipInOrbit,
-    cargoTypes,
+    resourceTypes,
     type ShipDocked,
     type ShipInOuterSpace,
+    ShipOnSurface,
+    isDocketAtPlanet,
+    isOnPlanetSurface,
+    isColonizedPlanet,
+    isAtmos,
+    Atmos,
 } from "./entities"
 import { Difficulty } from "./types"
-import { getPlayerCapital, isColonizedPlanet } from "./planets"
+import { getPlayerCapital } from "./planets"
 import { clone, nextFreeIndex } from "./utilities"
 
 export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
@@ -38,41 +44,6 @@ export const canPurchaseAtmos = (date: number, owned: number) => {
         console.error("Cannot own more than one Atmosphere Processor")
     }
     return available
-}
-
-// Return ships in outer space.
-export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace => {
-    return ship.position === "outer-space"
-}
-
-// Return ships in orbit of the specified planet.
-export const isOrbitingPlanet = (ship: Ship, planet: Planet): ship is ShipInOrbit => {
-    return (
-        ship.position === "orbit" &&
-        !!ship.location.planet &&
-        ship.location.planet === planet.id
-    )
-}
-
-// Return ships in the specified planet docking bays.
-export const isDocketAtPlanet = (ship: Ship, planet: Planet): ship is ShipDocked => {
-    return (
-        ship.position === "docked" &&
-        !!ship.location.planet &&
-        ship.location.planet === planet.id
-    )
-}
-
-// Return ships on the surface of the specified planet.
-export const isOnPlanetSurface = (
-    ship: Ship,
-    planet: Planet,
-): ship is ShipOnSurface => {
-    return (
-        ship.position === "surface" &&
-        !!ship.location.planet &&
-        ship.location.planet === planet.id
-    )
 }
 
 export const canAffordShip = (
@@ -102,7 +73,7 @@ export const getShipCurrentCargoAmount = (ship: Ship) =>
 
 //* Assumes both ship and planet are mutable */
 export const unloadCargo = (ship: Ship, planet: ColonizedPlanet) => {
-    for (const cargo of cargoTypes) {
+    for (const cargo of resourceTypes) {
         planet[cargo] += ship.cargo[cargo]
         ship.cargo[cargo] = 0
     }
@@ -496,7 +467,7 @@ export const modifyCargo = (
     planets: Planet[],
     ships: Ship[],
     ship: Ship,
-    cargo: CargoType,
+    cargo: Resource,
     quantity: number,
 ) => {
     let modifiedPlanets
@@ -553,7 +524,7 @@ export const transitionShip = (
     shipArg: Ship,
     targetPosition: ShipPosition,
 ) => {
-    let modifiedShips
+    let modifiedShips: Ship[] | undefined
 
     const [shipIndex, ship] = findShip(shipArg, ships)
 
@@ -637,7 +608,7 @@ export const transitionShip = (
                             ship.position !== "outer-space" ? ship.location.planet : "-"
 
                         throw new Error(
-                            `Cannot launch a ship not currently docked at the target planet (${ship.position} at ${maybePlanet} target ${targetPlanet.id})`,
+                            `Cannot launch a ship not currently docked at the target planet (${ship.position} at ${maybePlanet})`,
                         )
                     } else if (landedShips.length >= 3) {
                         throw new Error(`Planet ${planet.name} docking bays are full`)
@@ -675,10 +646,20 @@ export const transitionShip = (
             }
 
             modifiedShips = [...ships]
-            const modifiedShip: Ship = {
-                ...ships[shipIndex],
-                ...changes,
+            let modifiedShip
+
+            if (isAtmos(ship)) {
+                modifiedShip = {
+                    ...ship,
+                    ...changes,
+                } as Atmos
+            } else {
+                modifiedShip = {
+                    ...ship,
+                    ...changes,
+                } as Ship
             }
+
             modifiedShips[shipIndex] = modifiedShip
         } catch (error) {
             console.error("Failed to transition ship", error)
@@ -699,9 +680,8 @@ export const transferShip = (
 
     const [shipIndex, ship] = findShip(shipArg, ships)
 
-    const currentLocation = ship.location
-
     if (ship.position === "orbit") {
+        const currentLocation = ship.location
         if (currentLocation.planet === targetPlanet.id) {
             console.error(`Ship ${ship.name} is already at plant ${targetPlanet.name}`)
         } else {

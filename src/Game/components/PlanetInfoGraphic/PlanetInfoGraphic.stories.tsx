@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import PlanetInfoGraphic from "."
+import { lifelessPlanet } from "test/mockData/planets"
 
 const meta = {
     title: "Components/Planet Info Graph",
@@ -15,11 +16,6 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
     args: {
-        planet: {
-            id: "1",
-            name: "",
-            type: "lifeless",
-            gridIndex: 0,
-        },
+        planet: lifelessPlanet,
     },
 }

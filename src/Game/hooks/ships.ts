@@ -2,8 +2,8 @@ import { useAtomValue } from "jotai"
 import { shipsAtom } from "../store"
 import type { Planet, Ship, ShipPosition } from "Supremacy/entities"
 import { useCallback, useContext, useState } from "react"
-import { useSetNotification } from "Game/Screens/components/Notification"
 import { CommandContext } from "Game/context/CommandContext"
+import { useSetNotification } from "Game/components/Notification"
 
 export const useSelectedShip = () => {
     const [selectedShip, setSelectedShip] = useState<Ship["id"] | undefined>()

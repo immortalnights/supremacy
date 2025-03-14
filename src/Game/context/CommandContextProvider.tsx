@@ -32,6 +32,7 @@ import {
 } from "Supremacy/planets"
 import { useSetNotification } from "../components/Notification"
 import { Platoon } from "Supremacy/entities"
+import { useSession } from "Game/hooks/session"
 
 const isPlatoon = (obj: unknown): obj is Platoon => {
     return Boolean(obj && typeof obj === "object" && "id" in obj)
@@ -40,12 +41,12 @@ const isPlatoon = (obj: unknown): obj is Platoon => {
 // FIXME this needs to work for none mp!
 export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { localPlayer, host } = useAtomValue(sessionAtom)
+    const { localPlayer, host } = useSession()
     const notify = useSetNotification()
 
     const exec = useAtomCallback(
         useCallback(
-            (get: Getter, set: Setter, command: string, data: object) => {
+            (get: Getter, set: Setter, command: string, data: any) => {
                 console.log("exec", command, data)
 
                 const originalPlanets = get(planetsAtom)
@@ -90,7 +91,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     modifiedPlanets = transferCreditsToCapital(
                         localPlayer,
                         originalPlanets,
-                        notify,
+                        // notify,
                     )
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "modify-planet-aggression") {
@@ -289,7 +290,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
     )
 
     const update = useAtomCallback(
-        useCallback((get: Getter, set: Setter, data: object) => {
+        useCallback((get: Getter, set: Setter, data: any) => {
             set(planetsAtom, data.planets)
             set(shipsAtom, data.ships)
             set(platoonsAtom, data.platoons)
@@ -297,7 +298,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
     )
 
     useEffect(() => {
-        const peerMessageHandler = (peer, { name, body }) => {
+        const peerMessageHandler = (peer: unknown, { name, body }: any) => {
             console.log(`${host ? "Host" : "Player"} received`, name, body)
             // Action from none host player
             if (name === "player-action") {

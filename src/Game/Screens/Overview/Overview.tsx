@@ -10,7 +10,7 @@ import landedIcon from "/images/landed.png"
 import dockedIcon from "/images/docked.png"
 import { useAtomValue, useSetAtom } from "jotai"
 import { planetsAtom, selectedPlanetAtom, sessionAtom, shipsAtom } from "../../store"
-import { Planet, ShipPosition } from "Supremacy/entities"
+import { isColonizedPlanet, Planet, ShipPosition } from "Supremacy/entities"
 import {
     FormEvent,
     KeyboardEvent,
@@ -24,8 +24,8 @@ import PlanetGrid from "../../components/PlanetGrid"
 import { useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
 // import AlertDisplay from "Game/components/AlertMessages/Display"
 import Notification from "Game/components/Notification"
-import { isColonizedPlanet } from "Supremacy/planets"
 import { useSetNotification } from "Game/components/Notification/useNotification"
+import { useSession } from "Game/hooks/session"
 
 function RenamePlanet({
     name: initialName,
@@ -80,7 +80,7 @@ function RenamePlanet({
 }
 
 function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planets = useAtomValue(planetsAtom)
     const selectedPlanet = useSelectedColonizedPlanet()
     const transfer = useTransferCredits()
@@ -124,7 +124,7 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 function PlanetShipOverview() {
     const [viewPosition, setViewPosition] =
         useState<Exclude<ShipPosition, "outer-space">>("orbit")
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const selectedPlanet = useSelectedPlanet()
     const ships = useAtomValue(shipsAtom)
 
@@ -180,7 +180,7 @@ function PlanetShipOverview() {
 }
 
 export default function Overview() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const setSelectedPlanet = useSetAtom(selectedPlanetAtom)
     const [renamePlanet, setRenamingPlanet] = useState<Planet | undefined>(undefined)
     const rename = useRenamePlanet()

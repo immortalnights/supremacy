@@ -8,6 +8,7 @@ import { useAtomValue } from "jotai"
 import { useAdjustTax } from "../../actions"
 import { useSelectedColonizedPlanet } from "Game/hooks"
 import { throwError } from "game-signaling-server/client"
+import { useSession } from "Game/hooks/session"
 
 function TaxRate({
     value,
@@ -57,7 +58,7 @@ function TaxRate({
 }
 
 export default function PlanetDetails() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planet = useSelectedColonizedPlanet() ?? throwError("Invalid selected planet")
     const adjustTax = useAdjustTax()
 

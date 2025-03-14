@@ -37,6 +37,7 @@ export const Default: Story = {
 export const Empty: Story = {
     args: {
         label: "Label",
+        value: "",
     },
 }
 
@@ -52,5 +53,6 @@ export const DoubleLabel: Story = {
     ],
     args: {
         label: "Label",
+        value: "",
     },
 }

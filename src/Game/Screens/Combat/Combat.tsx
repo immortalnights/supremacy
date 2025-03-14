@@ -2,7 +2,7 @@ import CombatAggression from "./components/CombatAggression"
 import DockingBay from "../../components/DockingBay"
 import Navigation from "../../components/Navigation"
 import PlatoonGrid from "../../components/PlatoonGrid"
-import { Platoon, Ship } from "Supremacy/entities"
+import { isDocketAtPlanet, Platoon, Ship } from "Supremacy/entities"
 import combatVictory from "/images/combat_victory.gif"
 import { useSelectedColonizedPlanet, useSelectedShip } from "../../hooks"
 import { throwError } from "game-signaling-server/client"
@@ -12,8 +12,8 @@ import { sessionAtom, shipsAtom } from "Game/store"
 import { clamp } from "Supremacy/utilities"
 import { platoonsOnPlanetAtom, platoonsOnShipAtom } from "../../store"
 import { useEffect, useState } from "react"
-import { isDocketAtPlanet } from "Supremacy/ships"
 import Screen from "Game/components/Screen"
+import { useSession } from "Game/hooks/session"
 
 const StrengthOverview = () => {
     return (
@@ -57,7 +57,7 @@ const StrengthOverview = () => {
 }
 
 export default function Combat() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Combat of lifeless planet")

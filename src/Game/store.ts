@@ -1,26 +1,32 @@
 import { atom, createStore } from "jotai"
-import type { Planet, Ship, Platoon, ColonizedPlanet } from "Supremacy/entities"
-import { isOnPlanet, isOnShip } from "Supremacy/platoons"
 import {
+    type Planet,
+    type Ship,
+    type Platoon,
+    type ColonizedPlanet,
     isDocketAtPlanet,
     isInOuterSpace,
     isOnPlanetSurface,
     isOrbitingPlanet,
-} from "Supremacy/ships"
+    isDocked,
+    ShipOnSurface,
+    isOnSurface,
+    ShipDocked,
+    EquippedPlatoon,
+} from "Supremacy/entities"
+import { isOnPlanet, isOnShip } from "Supremacy/platoons"
 import { GameSession } from "Supremacy/types"
 
 export const store = createStore()
 
 export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">("paused")
-export const sessionAtom = atom<GameSession | undefined>(undefined)
+export const sessionAtom = atom<GameSession>()
 export const dateAtom = atom<number>(0)
 export const planetsAtom = atom<Planet[]>([])
 const userSelectedPlanetIdAtom = atom<string | undefined>(undefined)
-export const selectedPlanetAtom = atom<
-    Planet | undefined | Promise<Planet | undefined>
->(
+export const selectedPlanetAtom = atom(
     async (get) => {
-        const { localPlayer } = get(sessionAtom)
+        const session = get(sessionAtom)
         const planetId = get(userSelectedPlanetIdAtom)
         let planets = get(planetsAtom)
 
@@ -35,14 +41,17 @@ export const selectedPlanetAtom = atom<
             // console.debug("User selected planet", planetId, planet)
         } else {
             planet = planets.find(
-                (p) => p.type !== "lifeless" && p.owner === localPlayer && p.capital,
+                (p) =>
+                    p.type !== "lifeless" &&
+                    p.owner === session?.localPlayer &&
+                    p.capital,
             )
             // console.debug("Default selected planet", planet)
         }
 
         return planet
     },
-    (_get, set, planet) => {
+    (_get, set, planet: Planet) => {
         console.debug("User selected planet", planet.id)
         set(userSelectedPlanetIdAtom, planet.id)
     },
@@ -67,8 +76,8 @@ export const shipsOrbitingPlanetAtom = atom((get) => ({
 export const shipsDocketAtPlanetAtom = atom((get) => ({
     filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
         const ships = planet
-            ? get(shipsAtom).filter(
-                  (ship) =>
+            ? get(shipsAtom).filter<ShipDocked>(
+                  (ship): ship is ShipDocked =>
                       isDocketAtPlanet(ship, planet) &&
                       (!owner || ship.owner === owner),
               )
@@ -86,7 +95,7 @@ export const shipsOnPlanetSurfaceAtom = atom((get) => ({
     filter: (planet?: ColonizedPlanet, owner?: string, sort = true) => {
         const ships = planet
             ? get(shipsAtom).filter(
-                  (ship) =>
+                  (ship): ship is ShipOnSurface =>
                       isOnPlanetSurface(ship, planet) &&
                       (!owner || ship.owner === owner),
               )
@@ -103,8 +112,8 @@ export const shipsOnPlanetSurfaceAtom = atom((get) => ({
 export const platoonsOnPlanetAtom = atom((get) => ({
     filter: (planet?: ColonizedPlanet, owner?: string) =>
         planet
-            ? get(platoonsAtom).filter(
-                  (platoon) =>
+            ? get(platoonsAtom).filter<EquippedPlatoon>(
+                  (platoon): platoon is EquippedPlatoon =>
                       isOnPlanet(platoon, planet) &&
                       (!owner || platoon.owner === owner),
               )
@@ -113,5 +122,9 @@ export const platoonsOnPlanetAtom = atom((get) => ({
 
 export const platoonsOnShipAtom = atom((get) => ({
     filter: (ship?: Ship) =>
-        ship ? get(platoonsAtom).filter((platoon) => isOnShip(platoon, ship)) : [],
+        ship
+            ? get(platoonsAtom).filter<EquippedPlatoon>((platoon) =>
+                  isOnShip(platoon, ship),
+              )
+            : [],
 }))

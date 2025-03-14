@@ -12,11 +12,11 @@ import unload from "/images/unload.png"
 import decommission from "/images/decommission2.png"
 import loadCargo from "/images/load_cargo.png"
 import unloadCargo from "/images/unload_cargo.png"
-import { CargoType, ColonizedPlanet, Ship } from "Supremacy/entities"
+import { Resource, ColonizedPlanet, Ship, isDocketAtPlanet } from "Supremacy/entities"
 import { useAtomValue } from "jotai"
 import { sessionAtom, shipsAtom } from "../../store"
 import { MouseEvent, useEffect, useState } from "react"
-import { useSelectedColonizedPlanet } from "../../hooks"
+import { useDecommission, useSelectedColonizedPlanet } from "../../hooks"
 import { throwError } from "game-signaling-server/client"
 import { getModifierAmount } from "../../utilities"
 import {
@@ -26,8 +26,8 @@ import {
     useLoadPassengers,
     useUnloadShip,
 } from "./actions"
-import { isDocketAtPlanet } from "Supremacy/ships"
 import Screen from "Game/components/Screen"
+import { useSession } from "Game/hooks/session"
 
 function CargoItem({
     cargo,
@@ -35,7 +35,7 @@ function CargoItem({
     planet,
     ship,
 }: {
-    cargo: CargoType
+    cargo: Resource
     label: string
     planet: ColonizedPlanet
     ship?: Ship
@@ -170,7 +170,7 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 }
 
 export default function Cargo() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planet =
         useSelectedColonizedPlanet() ??
         throwError("Cannot view Cargo of lifeless planet")

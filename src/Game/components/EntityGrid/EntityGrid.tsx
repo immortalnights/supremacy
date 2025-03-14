@@ -30,7 +30,7 @@ function Cell({
     )
 }
 
-function EntityCell<T extends Entity>({
+function EntityCell<T extends { name: string; owner?: string }>({
     entity,
     localPlayer,
     onClick,
@@ -104,7 +104,8 @@ function EntityRow<T extends Entity>({
                     return entity ? (
                         <EntityCell
                             key={`cell-${row}-${col}`}
-                            entity={entity}
+                            // FIXME
+                            entity={entity as T}
                             localPlayer={localPlayer}
                             onClick={onClick}
                         />

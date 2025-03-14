@@ -1,6 +1,6 @@
 import { ColonizedPlanet, Planet, Ship } from "Supremacy/entities"
 import Button from "components/Button"
-import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
+import { shipsDocketAtPlanetAtom } from "../../store"
 import { useAtomValue } from "jotai"
 
 function Bay({

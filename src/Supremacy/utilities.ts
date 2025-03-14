@@ -1,5 +1,3 @@
-import { ColonizedPlanet } from "./entities"
-
 export function throwError(...args: ConstructorParameters<typeof Error>): never {
     throw new Error(...args)
 }
@@ -59,8 +57,4 @@ export const nextFreeIndex = <T extends { location: { index: number } }>(
     }
 
     return availableIndex
-}
-
-export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
-    return morale * 0.33 - tax * 0.5
 }

@@ -1,6 +1,13 @@
 export const planetTypes = ["metropolis", "volcanic", "dessert", "tropical"] as const
 export type PlanetType = "lifeless" | (typeof planetTypes)[number]
 
+export const resourceTypes = ["food", "minerals", "fuels", "energy"] as const
+export type Resource = (typeof resourceTypes)[number]
+
+export type ResourceQuantities = {
+    [key in Resource]: number
+}
+
 interface BasePlanet {
     id: string
     gridIndex: number
@@ -14,14 +21,7 @@ export interface LifelessPlanet extends BasePlanet {
     terraformDuration: number
 }
 
-export const cargoTypes = ["food", "minerals", "fuels", "energy"] as const
-export type CargoType = (typeof cargoTypes)[number]
-
-export type PlanetResources = {
-    [key in CargoType]: number
-}
-
-export interface ColonizedPlanet extends BasePlanet, PlanetResources {
+export interface ColonizedPlanet extends BasePlanet, ResourceQuantities {
     type: Exclude<PlanetType, "lifeless">
     owner: string
     capital: boolean
@@ -52,6 +52,7 @@ export interface ShipBlueprint {
     description: string
     shortName: string
     requiredCrew: number
+    range: number
     capacity: {
         civilians: number
         cargo: number
@@ -59,9 +60,9 @@ export interface ShipBlueprint {
         platoons: number
     }
     cost: {
-        credits: 975
-        energy: 92
-        minerals: 7
+        credits: number
+        energy: number
+        minerals: number
     }
 }
 
@@ -81,21 +82,19 @@ interface BaseShip {
         fuels: number
         platoons: number
     }
-    cargo: {
-        [key in CargoType]: number
-    }
+    cargo: ResourceQuantities
     value: number
     position: ShipPosition
 }
 
-export interface ShipInOrbit {
+export interface ShipInOrbit extends BaseShip {
     position: "orbit"
     location: {
         planet: Planet["id"]
     }
 }
 
-export interface ShipDocked {
+export interface ShipDocked extends BaseShip {
     position: "docked"
     location: {
         planet: Planet["id"]
@@ -103,8 +102,7 @@ export interface ShipDocked {
     }
 }
 
-export interface ShipOnSurface {
-    class: Exclude<ShipClass, "Atmosphere Processing">
+export interface ShipOnSurface extends BaseShip {
     position: "surface"
     location: {
         planet: Planet["id"]
@@ -113,7 +111,7 @@ export interface ShipOnSurface {
     active: boolean
 }
 
-export interface ShipInOuterSpace {
+export interface ShipInOuterSpace extends BaseShip {
     position: "outer-space"
     heading: {
         from: Planet["id"]
@@ -123,18 +121,15 @@ export interface ShipInOuterSpace {
     }
 }
 
-export interface Atmos {
+export type Ship = ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace | Atmos
+
+export type Atmos = BaseShip & {
     class: "Atmosphere Processor"
-    active: boolean
     terraforming: {
         duration: number
         remaining: number
     }
-}
-
-export type Ship =
-    | (BaseShip & (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace))
-    | (BaseShip & (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace) & Atmos)
+} & (ShipInOrbit | ShipDocked | ShipOnSurface | ShipInOuterSpace)
 
 export type SuitClass = "none" | "basic" | "moderate" | "advanced"
 
@@ -167,3 +162,38 @@ export interface EquippedPlatoon extends BasePlatoon {
 }
 
 export type Platoon = StandbyPlatoon | EquippedPlatoon
+
+// Type utilities
+export const isLifelessPlanet = (planet: Planet): planet is LifelessPlanet =>
+    planet.type === "lifeless"
+
+export const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
+    planet.type !== "lifeless"
+
+export const isShip = (obj: unknown): obj is Ship =>
+    Boolean(obj && typeof obj === "object" && "id" in obj && "class" in obj)
+
+export const isAtmos = (ship: Ship): ship is Atmos =>
+    ship.class === "Atmosphere Processor"
+
+export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace =>
+    ship.position === "outer-space"
+
+export const isInOrbit = (ship: Ship): ship is ShipInOrbit => ship.position === "orbit"
+
+export const isOrbitingPlanet = (ship: Ship, planet: Planet): ship is ShipInOrbit =>
+    isInOrbit(ship) && ship.location.planet === planet.id
+
+export const isDocked = (ship: Ship): ship is ShipDocked =>
+    ship.position === "docked" && !!ship.location.planet
+
+export const isDocketAtPlanet = (ship: Ship, planet: Planet): ship is ShipDocked =>
+    isDocked(ship) && ship.location.planet === planet.id
+
+export const isOnSurface = (ship: Ship): ship is ShipOnSurface =>
+    ship.position === "surface"
+
+export const isOnPlanetSurface = (ship: Ship, planet: Planet): ship is ShipOnSurface =>
+    isOnSurface(ship) && ship.location.planet === planet.id
+
+const modifyShip = (ship: Atmos): Ship => ({ ...ship })

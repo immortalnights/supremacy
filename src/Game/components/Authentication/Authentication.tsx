@@ -3,15 +3,19 @@ import {
     useSelectedColonizedPlanet,
     useSelectedPlanet,
 } from "Game/hooks"
-import { selectedPlanetAtom, sessionAtom } from "Game/store"
-import { platoonsOnPlanetAtom } from "Game/utilities/platoons"
-import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
+import { useSession } from "Game/hooks/session"
+import {
+    platoonsOnPlanetAtom,
+    selectedPlanetAtom,
+    sessionAtom,
+    shipsDocketAtPlanetAtom,
+} from "Game/store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 
 const useCanAccessPlanet = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const selectedPlanet = useSelectedPlanet()
     return (
         selectedPlanet &&
@@ -21,7 +25,7 @@ const useCanAccessPlanet = () => {
 }
 
 const useIsPlanetContested = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const selectedPlanet = useSelectedColonizedPlanet()
     const ships = useAtomValue(shipsDocketAtPlanetAtom).filter(
         selectedPlanet,

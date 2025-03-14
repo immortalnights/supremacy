@@ -8,23 +8,11 @@ type MetadataValueType = {
     postfix?: string
     textAlign?: TextAlignment
     style?: React.CSSProperties
-} & (
-    | {
-          value?: undefined
-          format?: unknown
-          defaultValue?: undefined
-      }
-    | {
-          value?: number
-          format?: (val: number) => number
-          defaultValue?: number
-      }
-    | {
-          value?: string
-          format?: (val: string) => string
-          defaultValue?: string
-      }
-)
+} & {
+    value?: string | number
+    format?: ((val: string) => string) | ((val: number) => number)
+    defaultValue?: string | number
+}
 
 export function MetadataValue({
     label,
@@ -36,10 +24,9 @@ export function MetadataValue({
     style,
 }: MetadataValueType) {
     const actualValue = value ?? defaultValue
+    // FIXME
     const displayValue =
-        format instanceof Function && actualValue
-            ? format(actualValue)
-            : actualValue
+        format && actualValue ? format(actualValue as never) : actualValue
 
     return (
         <div

@@ -2,7 +2,7 @@ import {
     Planet,
     LifelessPlanet,
     ColonizedPlanet,
-    PlanetResources,
+    ResourceQuantities,
     Platoon,
     Ship,
     planetTypes,
@@ -26,7 +26,7 @@ const initialPlanetCredits = (difficulty: Difficulty, ai: boolean) =>
 const initialPlanetResources = (
     difficulty: Difficulty,
     ai: boolean,
-): PlanetResources => {
+): ResourceQuantities => {
     return {
         food: random(3000, 5000),
         minerals: random(2000, 5000),
@@ -41,7 +41,7 @@ const initializeCapitalPlanet = (
     index: number,
     population: number,
     credits: number,
-    resources: PlanetResources,
+    resources: ResourceQuantities,
 ): ColonizedPlanet => {
     return {
         id: crypto.randomUUID(),

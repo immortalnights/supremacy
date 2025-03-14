@@ -6,34 +6,18 @@ import { dateAtom } from "../../store"
 import { useHydrateAtoms } from "jotai/utils"
 import { ReactNode } from "react"
 
-const HydrateAtoms = ({
-    initialValues,
-    children,
-}: {
-    initialValues: Parameters<typeof useHydrateAtoms>[0]
-    children: ReactNode
-}) => {
-    useHydrateAtoms(initialValues)
+const HydrateAtoms = ({ value, children }: { value: number; children: ReactNode }) => {
+    useHydrateAtoms([[dateAtom, value]] as const)
     return children
 }
 
-const TestProvider = ({
-    initialValues,
-    children,
-}: {
-    initialValues: Parameters<typeof useHydrateAtoms>[0]
-    children: ReactNode
-}) => (
-    <Provider>
-        <HydrateAtoms initialValues={initialValues}>{children}</HydrateAtoms>
-    </Provider>
-)
-
 const DateProvider = ({ value = 0 }: { value?: number }) => {
     return (
-        <TestProvider initialValues={[[dateAtom, value]]}>
-            <Date />
-        </TestProvider>
+        <Provider>
+            <HydrateAtoms value={value}>
+                <Date />
+            </HydrateAtoms>
+        </Provider>
     )
 }
 
@@ -44,5 +28,5 @@ test("render basic date", () => {
 
 test("render basic date", () => {
     render(<DateProvider value={200} />)
-    expect(screen.getByLabelText("Date").textContent).toEqual("21/2003")
+    expect(screen.getByLabelText("Date").textContent).toEqual("9/2003")
 })

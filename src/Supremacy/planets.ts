@@ -1,6 +1,10 @@
 // import { NotifyCallback } from "Game/components/Notification/useNotification"
-import { ColonizedPlanet, Planet } from "./entities"
+import { ColonizedPlanet, isColonizedPlanet, Planet } from "./entities"
 import { clamp, clone } from "./utilities"
+
+export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
+    return morale * 0.33 - tax * 0.5
+}
 
 export const getPlayerPlanets = (planets: Planet[], player: string) => {
     return planets.filter(
@@ -26,9 +30,6 @@ export const getColonizedPlanet = (planets: Planet[], planetOrId: Planet | strin
         (p): p is ColonizedPlanet => p.id === id && isColonizedPlanet(p),
     )
 }
-
-export const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
-    planet.type !== "lifeless"
 
 export const applyRenamePlanet = (
     player: string,

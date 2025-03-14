@@ -22,12 +22,11 @@ export const StartingPlanets: Story = {
             { id: "A", name: "EnemyBase", owner: "remote", gridIndex: 0 },
             { id: "B", name: "Starbase!", owner: "local", gridIndex: 31 },
         ],
-        useTeamColors: true,
     },
 }
 
 export const NoPlanets: Story = {
-    args: { entities: [], useTeamColors: true },
+    args: { entities: [] },
 }
 
 export const FullPlanets: Story = {
@@ -40,7 +39,6 @@ export const FullPlanets: Story = {
                 owner: "local",
                 gridIndex: index,
             })),
-        useTeamColors: true,
     },
 }
 
@@ -50,6 +48,5 @@ export const Ships: Story = {
             { id: "A", name: "Mining1", owner: "local", gridIndex: 0 },
             { id: "B", name: "Mining2", owner: "local", gridIndex: 1 },
         ],
-        useTeamColors: false,
     },
 }

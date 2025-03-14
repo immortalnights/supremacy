@@ -23,6 +23,7 @@ import {
 import previousIcon from "/images/blue_previous.png"
 import buyIcon from "/images/blue_buy.png"
 import nextIcon from "/images/blue_next.png"
+import { useSession } from "Game/hooks/session"
 
 const images: { [key in ShipClass]: string } = {
     "B-29 Battle Cruiser": battleship,
@@ -126,7 +127,7 @@ function Controls({
     blueprint: ShipBlueprint
     onChange: (change: -1 | 1) => void
 }) {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const [purchasing, setPurchasing] = useState(false)
     const owned = useOwnedShipCount(localPlayer, blueprint?.class)
     const dockedShips = useAtomValue(shipsDocketAtPlanetAtom).filter(planet)
@@ -201,7 +202,7 @@ function Controls({
 }
 
 export default function Shipyard() {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planet = useCapitalPlanet()
     const [index, setIndex] = useState(0)
     const blueprint = catalog[index] as ShipBlueprint

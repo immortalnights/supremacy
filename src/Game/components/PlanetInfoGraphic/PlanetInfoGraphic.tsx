@@ -1,4 +1,4 @@
-import { Planet, PlanetType } from "../../entities"
+import { Planet, PlanetType } from "Supremacy/entities"
 import starbase from "/images/planet_starbase.gif"
 import metropolis from "/images/planet_metropolis.gif"
 import dessert from "/images/planet_dessert.gif"
@@ -8,6 +8,7 @@ import terraforming from "/images/planet_terraforming.gif"
 import { ReactNode } from "react"
 import { useAtomValue } from "jotai"
 import { sessionAtom } from "Game/store"
+import { useSession } from "Game/hooks/session"
 
 const planetImage: { [key in PlanetType]: string } = {
     lifeless: lifeless,
@@ -18,7 +19,7 @@ const planetImage: { [key in PlanetType]: string } = {
 }
 
 export default function PlanetInfoGraph({ planet }: { planet: Planet }) {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
 
     let name
     let img: ReactNode = null

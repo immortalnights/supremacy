@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import { fn } from "@storybook/test"
 import DockingBay from "."
+import { colonizedPlanet } from "test/mockData/planets"
 
 const meta = {
     title: "Components/Docking Bay",
@@ -18,64 +19,16 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
     args: {
-        planet: { id: 31, name: "Starbase!", owner: "local" },
-        ships: [
-            {
-                id: "zero",
-                name: "zero",
-                owner: "local",
-                location: {
-                    planet: 31,
-                    position: "docked",
-                    index: 1,
-                },
-                active: false,
-            },
-        ],
+        planet: colonizedPlanet,
     },
 }
 
 export const Empty: Story = {
-    args: { planet: { id: 31, name: "Starbase!", owner: "local" }, ships: [] },
+    args: { planet: colonizedPlanet },
 }
 
 export const Complete: Story = {
     args: {
-        planet: { id: 31, name: "Starbase!", owner: "local" },
-        ships: [
-            {
-                id: "zero",
-                name: "zero",
-                owner: "local",
-                location: {
-                    planet: 31,
-                    position: "docked",
-                    index: 1,
-                },
-                active: false,
-            },
-            {
-                id: "one",
-                name: "one",
-                owner: "local",
-                location: {
-                    planet: 31,
-                    position: "docked",
-                    index: 2,
-                },
-                active: false,
-            },
-            {
-                id: "two",
-                name: "two",
-                owner: "local",
-                location: {
-                    planet: 31,
-                    position: "docked",
-                    index: 3,
-                },
-                active: false,
-            },
-        ],
+        planet: colonizedPlanet,
     },
 }

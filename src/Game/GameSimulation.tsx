@@ -15,6 +15,7 @@ import { usePeerConnection } from "webrtc-lobby-lib"
 import { ColonizedPlanet, Planet, Platoon, Ship } from "Supremacy/entities"
 import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
 import { simulatePlanets, simulatePlatoons, simulateShips } from "Supremacy/tick"
+import { useSession } from "./hooks/session"
 
 const speedMap = {
     slow: 2,
@@ -25,13 +26,13 @@ const speedMap = {
 
 const useMultiplayerSync = () => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { host, multiplayer } = useAtomValue(sessionAtom)
+    const { host, multiplayer } = useSession()
 
     useEffect(() => {
         let peerMessageHandler
 
         if (multiplayer) {
-            peerMessageHandler = (_peer, { _name, _body }) => {}
+            peerMessageHandler = (peer: unknown, { name, body }: any) => {}
         } else {
             peerMessageHandler = () => {}
         }
@@ -83,18 +84,21 @@ function Simulation() {
                 ;[modifiedPlatoons, modifiedPlanets] = simulatePlatoons(
                     modifiedPlatoons,
                     modifiedPlanets,
-                    newDate,
+                    // newDate,
                 )
 
                 // Ships on the planet surface effect planet resources, so resolve second
                 ;[modifiedShips, modifiedPlanets] = simulateShips(
                     modifiedShips,
                     modifiedPlanets,
-                    newDate,
+                    // newDate,
                 )
 
                 // Finally resolve planets
-                modifiedPlanets = simulatePlanets(modifiedPlanets, newDate)
+                modifiedPlanets = simulatePlanets(
+                    modifiedPlanets,
+                    // newDate
+                )
 
                 // No op in single player
                 sync({

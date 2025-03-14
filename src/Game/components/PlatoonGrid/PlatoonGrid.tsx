@@ -1,5 +1,5 @@
-import { getPlatoonName } from "Game/utilities/platoons"
-import { EquippedPlatoon, Platoon } from "../../entities"
+import { getPlatoonName } from "Supremacy/platoons"
+import { EquippedPlatoon, Platoon } from "Supremacy/entities"
 
 function PlatoonItem({
     platoon,

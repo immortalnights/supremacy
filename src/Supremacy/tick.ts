@@ -1,7 +1,17 @@
-import { ColonizedPlanet, LifelessPlanet, Planet, Platoon, Ship } from "./entities"
-import { calculateGrowth } from "./utilities"
+import {
+    Atmos,
+    ColonizedPlanet,
+    LifelessPlanet,
+    Planet,
+    Platoon,
+    Ship,
+    ShipInOrbit,
+    ShipInOuterSpace,
+    ShipOnSurface,
+} from "./entities"
 import { PLANET_POPULATION_LIMIT } from "./consts"
-import { isColonizedPlanet } from "./planets"
+import { isColonizedPlanet } from "./entities"
+import { calculateGrowth } from "./planets"
 
 // Pure simulation function
 export const simulatePlatoons = (
@@ -65,41 +75,31 @@ const gatherEnergy = (ship: Ship, planet?: Planet) => {
     return [modifiedShip, modifiedPlanet] as const
 }
 
-const terraformPlanet = (ship: Ship, planet?: Planet) => {
-    let modifiedShip
+const terraformPlanet = (ship: Atmos, planet: LifelessPlanet) => {
+    let modifiedShip = { ...ship } as Atmos & ShipOnSurface
     let modifiedPlanet
-    if (
-        ship.class === "Atmosphere Processor" &&
-        planet?.type === "lifeless" &&
-        ship.position === "surface"
-    ) {
-        modifiedShip = { ...ship }
-        if (ship.terraforming.remaining === 0) {
-            modifiedPlanet = {
-                id: planet.id,
-                gridIndex: planet.gridIndex,
-                name: "unnamed", // FIXME
-                type: planet.terraformedType,
-                owner: ship.owner,
-                capital: false,
-                credits: 0,
-                food: 0,
-                minerals: 0,
-                fuels: 0,
-                energy: 0,
-                population: 2000, // FIXME
-                morale: 75,
-                growth: 0,
-                tax: 25,
-                aggression: {},
-            } as ColonizedPlanet
-            modifiedShip.active = false
-            modifiedShip.terraforming = undefined
-        } else {
-            modifiedShip.terraforming.remaining -= 1
-        }
+    if (ship.terraforming.remaining === 0) {
+        modifiedPlanet = {
+            id: planet.id,
+            gridIndex: planet.gridIndex,
+            name: "unnamed", // FIXME
+            type: planet.terraformedType,
+            owner: ship.owner,
+            capital: false,
+            credits: 0,
+            food: 0,
+            minerals: 0,
+            fuels: 0,
+            energy: 0,
+            population: 2000, // FIXME
+            morale: 75,
+            growth: 0,
+            tax: 25,
+            aggression: {},
+        } as ColonizedPlanet
+        modifiedShip.active = false
     } else {
-        modifiedShip = ship
+        modifiedShip.terraforming.remaining -= 1
     }
 
     return [modifiedShip, modifiedPlanet] as const
@@ -131,7 +131,7 @@ export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet
 
     const modifiedPlanets = [...planets]
     const modifiedShips = ships.map((ship) => {
-        let modifiedShip: Ship | undefined = ship
+        let modifiedShip: Ship = ship
         let modifiedPlanet: Planet | undefined
         switch (ship.class) {
             case "B-29 Battle Cruiser": {
@@ -146,21 +146,49 @@ export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet
             }
             case "Atmosphere Processor": {
                 const planet = getPlanet(modifiedShip)
-                ;[modifiedShip, modifiedPlanet] = terraformPlanet(modifiedShip, planet)
-                modifiedShip = simulateTravel(modifiedShip)
 
-                // Atmos automatically lands on the destination planet
                 if (
-                    modifiedShip?.position === "orbit" &&
-                    modifiedShip.heading.to === modifiedShip.location.planet
+                    planet?.type === "lifeless" &&
+                    ship.position === "surface" &&
+                    ship.active
                 ) {
-                    const terraformPlanet = getPlanet(modifiedShip)
-                    modifiedShip.position = "surface"
-                    modifiedShip.terraforming = {
-                        duration: terraformPlanet.terraformDuration,
-                        remaining: terraformPlanet.terraformDuration,
+                    ;[modifiedShip, modifiedPlanet] = terraformPlanet(
+                        modifiedShip as Atmos,
+                        planet,
+                    )
+                } else if (ship.position === "outer-space") {
+                    modifiedShip = simulateTravel(modifiedShip) as Atmos
+                    // Atmos automatically lands on the destination planet
+                    if (modifiedShip.position === "orbit") {
+                        const terraformPlanet = getPlanet(modifiedShip)
+
+                        if (!terraformPlanet) {
+                            throw new Error(
+                                `Failed to find planet ${modifiedShip.location.planet} which ship is orbiting`,
+                            )
+                        }
+
+                        let terraforming
+                        if (terraformPlanet.type === "lifeless") {
+                            terraforming = {
+                                duration: terraformPlanet.terraformDuration,
+                                remaining: terraformPlanet.terraformDuration,
+                            }
+                        }
+
+                        modifiedShip = {
+                            ...modifiedShip,
+                            position: "surface",
+                            location: {
+                                planet: terraformPlanet.id,
+                                index: 0,
+                            },
+                            terraforming,
+                            active: !!terraforming,
+                        }
                     }
                 }
+
                 break
             }
             case "Cargo Store / Carrier": {

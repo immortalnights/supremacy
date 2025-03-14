@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react"
 import ShipDetails from "."
+import { dockedShip } from "test/mockData/ships"
 
 const meta = {
     title: "Components/Ship Details",
@@ -15,20 +16,7 @@ type Story = StoryObj<typeof meta>
 
 export const Default: Story = {
     args: {
-        ship: {
-            id: "zero",
-            name: "zero",
-            owner: "local",
-            class: "Class Unknown",
-            crew: 0,
-            fuels: 0,
-            location: {
-                planet: 31,
-                position: "landed",
-                index: 1,
-            },
-            active: true,
-        },
+        ship: dockedShip,
     },
 }
 

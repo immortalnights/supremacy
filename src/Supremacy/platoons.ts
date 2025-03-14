@@ -6,9 +6,9 @@ import {
     Ship,
     SuitClass,
     WeaponClass,
+    isColonizedPlanet,
 } from "./entities"
 import { clone, nextFreeIndex } from "./utilities"
-import { isColonizedPlanet } from "./planets"
 import equipment from "./data/equipment.json"
 
 export const calculateEquipPlatoonCost = (platoon: Platoon) =>
@@ -25,7 +25,7 @@ export const getPlatoonName = (() => {
     ])
 
     const pr = new Intl.PluralRules("en-US", { type: "ordinal" })
-    return (platoon?: EquippedPlatoon) => {
+    return (platoon?: Platoon) => {
         const value = (platoon?.index ?? 0) + 1
         const rule = pr.select(value)
         const suffix = suffixes.get(rule)

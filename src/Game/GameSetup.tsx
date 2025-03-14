@@ -53,7 +53,7 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
                     console.debug("Host received message", name)
                     if (name === "session-synchronization") {
                         setSession({
-                            id: game,
+                            id: game ?? "unknown",
                             difficulty: "easy",
                             multiplayer: true,
                             host: localPlayer?.host,
@@ -62,7 +62,9 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
                                 id: localPlayer.id,
                                 name: localPlayer.name,
                             },
-                            player2: body.player2,
+                            player2: (body as any).player2,
+                            created: "",
+                            playtime: 0,
                         })
                         setState("creating")
                     } else if (name === "initialize-synchronization-complete") {
@@ -76,16 +78,18 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
                     console.debug("Client received message", name)
                     if (name === "session-synchronization") {
                         setSession({
-                            id: game,
-                            difficulty: body.difficulty,
+                            id: game ?? "unknown",
+                            difficulty: (body as any).difficulty,
                             multiplayer: true,
                             host: localPlayer?.host,
                             localPlayer: localPlayer?.id,
-                            player1: body.player1,
+                            player1: (body as any).player1,
                             player2: {
                                 id: localPlayer?.id,
                                 name: localPlayer?.name,
                             },
+                            created: "",
+                            playtime: 0,
                         })
                         setState("waiting")
                     } else if (name === "initial-game-data") {

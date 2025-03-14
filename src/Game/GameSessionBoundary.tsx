@@ -1,5 +1,5 @@
 import { useAtom } from "jotai"
-import { useCallback, useState, useEffect } from "react"
+import { useCallback, useState, useEffect, lazy } from "react"
 import { useParams, Navigate } from "react-router-dom"
 import { Ship, Platoon } from "Supremacy/entities"
 import {
