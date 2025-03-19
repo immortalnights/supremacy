@@ -201,16 +201,21 @@ function Controls({
     )
 }
 
+const useShipBlueprint = () => {
+    const [index, setIndex] = useState(0)
+    const blueprint = catalog[index] as ShipBlueprint
+    const handleChangeIndex = useCallback((change: number) => {
+        setIndex(wrap(index + change, catalog.length))
+    }, [])
+
+    return { blueprint, handleChangeIndex }
+}
+
 export default function Shipyard() {
     const { localPlayer } = useSession()
     const planet = useCapitalPlanet()
-    const [index, setIndex] = useState(0)
-    const blueprint = catalog[index] as ShipBlueprint
+    const { blueprint, handleChangeIndex } = useShipBlueprint()
     const owned = useOwnedShipCount(localPlayer, blueprint?.class)
-
-    const handleChangeIndex = (change: number) => {
-        setIndex(wrap(index + change, catalog.length))
-    }
 
     return (
         <Screen flexDirection="column">
