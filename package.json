@@ -12,7 +12,9 @@
         "check": "tsc",
         "preview": "vite preview",
         "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build"
+        "build-storybook": "storybook build",
+        "run:simulation": "node --experimental-strip-types ./simulator.ts",
+        "build:simulation": "npx esbuild --format=cjs --platform=node --bundle --tsconfig=./tsconfig.node.json --out-extension:.js=.js --outfile=./Supremacy.cjs ./src/Supremacy/index.ts"
     },
     "dependencies": {
         "game-signaling-server": "github:immortalnights/game-signaling-server#v0.1.1",
