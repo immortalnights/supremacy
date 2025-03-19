@@ -23,7 +23,7 @@ import {
 } from "./entities"
 import { Difficulty } from "./types"
 import { getPlayerCapital } from "./planets"
-import { clone, nextFreeIndex } from "./utilities"
+import { clone, nextFreeIndex, throwError } from "./utilities"
 
 export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
     // From : To
@@ -34,15 +34,18 @@ export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
 }
 
 export const canPurchaseAtmos = (date: number, owned: number) => {
-    let available = true
-    if (date < 5) {
-        // DAYS_PER_YEAR) {
-        available = false
+    // Unlock on the first day of the second year
+    const unlock_day = import.meta.env.MODE === "development" ? 1 : 1 + DAYS_PER_YEAR
+    let available = false
+
+    if (date < unlock_day) {
         console.error(`Cannot purchase Atmosphere Processor yet (${date})`)
     } else if (owned > 0) {
-        available = false
         console.error("Cannot own more than one Atmosphere Processor")
+    } else {
+        available = true
     }
+
     return available
 }
 
@@ -51,16 +54,49 @@ export const canAffordShip = (
     cost: ShipBlueprint["cost"],
     difficulty: Difficulty,
 ): boolean => {
-    return planet.credits >= cost.credits
+    let canAfford = true
+    if (planet.credits < cost.credits) {
+        canAfford = false
+        // console.error(
+        //     `Cannot afford ship, missing ${cost.credits} credits (have ${planet.credits})`,
+        // )
+    }
+
+    if (difficulty === "Normal" || difficulty === "Hard") {
+        if (planet.energy < cost.energy) {
+            canAfford = false
+            // console.error(
+            //     `Cannot afford ship, missing ${cost.energy} energy (have ${planet.energy})`,
+            // )
+        }
+    }
+
+    if (difficulty === "Hard") {
+        if (planet.minerals < cost.minerals) {
+            canAfford = false
+            // console.error(
+            //     `Cannot afford ship, missing ${cost.minerals} minerals (have ${planet.minerals})`,
+            // )
+        }
+    }
+
+    return canAfford
 }
 
-//* Assumes both planet are mutable */
 export const deductShipCost = (
     planet: ColonizedPlanet,
     cost: ShipBlueprint["cost"],
     difficulty: Difficulty,
 ): ColonizedPlanet => {
-    planet.credits -= cost.credits
+    planet.credits = Math.max(planet.credits - cost.credits, 0)
+
+    if (difficulty === "Normal" || difficulty === "Hard") {
+        planet.energy = Math.max(planet.energy - cost.energy, 0)
+    }
+
+    if (difficulty === "Hard") {
+        planet.minerals = Math.max(planet.minerals - cost.minerals, 0)
+    }
 
     return planet
 }
@@ -105,13 +141,11 @@ const getShipPlanet = (planets: Planet[], ship: Ship) => {
     return planet
 }
 
-const canModifyShipAtPlanet = (
-    player: string,
-    ship: Ship,
-    planet: ColonizedPlanet,
-): boolean => {
+const canModifyShipAtPlanet = (player: string, ship: Ship, planet: Planet): boolean => {
     let ok = false
-    if (planet.owner !== player) {
+    if (planet.type === "lifeless") {
+        console.error(`Planet ${planet.name} is lifeless`)
+    } else if (planet.owner !== player) {
         console.error(`Planet ${planet.name} is not owned by player ${player}`)
     } else if (ship.owner !== player) {
         console.error(`Ship ${ship.name} is not owned by player ${player}`)
@@ -155,26 +189,16 @@ const commissionShip = (
     }
 }
 
-export const purchaseShip = (
-    player: string,
-    planets: Planet[],
+export const canPurchaseShip = (
+    capital: ColonizedPlanet,
     ships: Ship[],
     blueprint: ShipBlueprint,
-    name: string,
-    difficulty: Difficulty,
     date: number,
-    notify: (message: string) => void,
+    difficulty: Difficulty,
 ) => {
-    let modifiedPlanets
-    let modifiedShips
-    // Purchases always get applied to the players capital, regardless of the selected planet
-    const [capitalIndex, capital] = getPlayerCapital(planets, player)
-
-    // Count ships in planet docking bay
+    let canPurchase = false
     const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
-
     if (dockedShips.length >= 3) {
-        notify(`There is no room in the docking bays on ${capital.name}`)
         console.error("Cannot purchase ship, capital has no available docking bays")
     } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
         console.log("Cannot afford ship")
@@ -192,35 +216,86 @@ export const purchaseShip = (
             blueprint.class === "Atmosphere Processor" &&
             !canPurchaseAtmos(date, ownedShips)
         ) {
-            notify("Cannot purchase Atmosphere Processor yet")
             console.error("Cannot purchase Atmosphere Processor")
         } else {
-            const availableBayIndex = nextFreeIndex(dockedShips, 3)
-            if (!availableBayIndex) {
-                console.assert(
-                    `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
-                )
-            }
-
-            modifiedPlanets = [...planets]
-            const modifiedPlanet = { ...capital }
-
-            deductShipCost(capital, blueprint.cost, difficulty)
-
-            modifiedPlanets[capitalIndex] = modifiedPlanet
-
-            const newShip = commissionShip(
-                blueprint,
-                name,
-                modifiedPlanet,
-                availableBayIndex,
-            )
-            notify("This ship has been transferred into a docking bay")
-            modifiedShips = [...ships, newShip]
+            canPurchase = true
         }
     }
 
+    return canPurchase
+}
+
+export const purchaseShip = (
+    player: string,
+    planets: Planet[],
+    ships: Ship[],
+    blueprint: ShipBlueprint,
+    name: string,
+    date: number,
+    difficulty: Difficulty,
+) => {
+    let modifiedPlanets
+    let modifiedShips
+    // Purchases always get applied to the players capital, regardless of the selected planet
+    const [capitalIndex, capital] = getPlayerCapital(planets, player)
+
+    // Count ships in planet docking bay
+    const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
+
+    if (canPurchaseShip(capital, ships, blueprint, date, difficulty)) {
+        const availableBayIndex = nextFreeIndex(dockedShips, 3)
+        if (!availableBayIndex) {
+            console.assert(
+                `Failed to identify free location index for ${capital.id} with ships ${dockedShips}`,
+            )
+        }
+
+        modifiedPlanets = [...planets]
+        const modifiedPlanet = { ...capital }
+
+        deductShipCost(modifiedPlanet, blueprint.cost, difficulty)
+
+        modifiedPlanets[capitalIndex] = modifiedPlanet
+
+        const newShip = commissionShip(
+            blueprint,
+            name,
+            modifiedPlanet,
+            availableBayIndex,
+        )
+        modifiedShips = [...ships, newShip]
+    }
+
     return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
+}
+
+export const canCrewShip = (player: string, ship: Ship, planet: Planet) => {
+    let canCrew = false
+
+    if (canModifyShipAtPlanet(player, ship, planet)) {
+        const p = planet as ColonizedPlanet
+
+        if (ship.position !== "docked") {
+            console.warn(`Ship '${ship.name}' is not docked`)
+        } else if (ship.requiredCrew === "remote") {
+            console.warn(`Ship '${ship.name}' does not require crew`)
+        } else if (ship.crew === ship.requiredCrew) {
+            console.warn(`Ship '${ship.name}' already has a full crew`)
+        } else if (p.population < ship.requiredCrew) {
+            console.warn(
+                `Planet '${planet.name}' does not have the required population to crew '${ship.name}' (${p.population} of ${ship.requiredCrew})`,
+            )
+        } else {
+            // Assumes the ship is at the planet
+            if (ship.location.planet !== planet.id) {
+                throw new Error(`Ship '${ship.name}' is not at planet '${planet.name}'`)
+            }
+
+            canCrew = true
+        }
+    }
+
+    return canCrew
 }
 
 export const crewShip = (
@@ -231,39 +306,30 @@ export const crewShip = (
 ) => {
     let modifiedPlanets
     let modifiedShips
-    const planet = getShipPlanet(planets, ship)
+    const planet =
+        getShipPlanet(planets, ship) ?? throwError("Failed to find ship planet")
 
-    if (planet && canModifyShipAtPlanet(player, ship, planet)) {
-        if (ship.requiredCrew === "remote") {
-            console.warn(`Ship ${ship.name} does not require crew`)
-        } else if (ship.crew === ship.requiredCrew) {
-            console.warn(`Ship ${ship.name} already has a full crew`)
-        } else if (planet.population < ship.requiredCrew) {
-            console.warn(
-                `Planet ${planet.name} does not have the required population to crew ${ship.name} (${planet.population}/${ship.requiredCrew})`,
+    if (canCrewShip(player, ship, planet) && ship.requiredCrew !== "remote") {
+        const planetIndex = planets.indexOf(planet)
+        const shipIndex = ships.findIndex((s) => s.id === ship.id)
+
+        if (planetIndex === -1 || shipIndex === -1) {
+            throw new Error(
+                `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
             )
-        } else {
-            const planetIndex = planets.indexOf(planet)
-            const shipIndex = ships.findIndex((s) => s.id === ship.id)
-
-            if (planetIndex === -1 || shipIndex === -1) {
-                throw new Error(
-                    `Invalid planet (${planetIndex}) or ship (${shipIndex}) index`,
-                )
-            }
-
-            let modifiedPlanet
-            ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
-
-            modifiedPlanet.population -= ship.requiredCrew
-            modifiedPlanets[planetIndex] = modifiedPlanet
-
-            let modifiedShip
-            ;[modifiedShip, modifiedShips] = clone(ship, ships)
-
-            modifiedShip.crew += ship.requiredCrew
-            modifiedShips[shipIndex] = modifiedShip
         }
+
+        let modifiedPlanet
+        ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
+
+        modifiedPlanet.population -= ship.requiredCrew
+        modifiedPlanets[planetIndex] = modifiedPlanet
+
+        let modifiedShip
+        ;[modifiedShip, modifiedShips] = clone(ship, ships)
+
+        modifiedShip.crew += ship.requiredCrew
+        modifiedShips[shipIndex] = modifiedShip
     }
 
     return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
