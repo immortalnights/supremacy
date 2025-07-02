@@ -21,8 +21,8 @@ function Cell({
             style={{
                 borderBottom: `2px solid ${color}`,
                 borderRight: `2px solid ${color}`,
-                width: "6em",
-                height: "24px",
+                height: "16px",
+                overflow: "hidden",
             }}
         >
             {children}
@@ -56,7 +56,15 @@ function EntityCell<T extends { name: string; owner?: string }>({
 
     return (
         <Cell color={color}>
-            <Button onClick={handleClick} style={{ textTransform: "uppercase" }}>
+            <Button
+                onClick={handleClick}
+                style={{
+                    fontFamily: "monospace",
+                    fontSize: "13px",
+                    display: "block",
+                    textTransform: "uppercase",
+                }}
+            >
                 {entity.name}
             </Button>
         </Cell>
@@ -132,7 +140,14 @@ export default function EntityGrid<T extends Entity>({
     const columns = 4
 
     return (
-        <table style={{ userSelect: "none" }}>
+        <table
+            style={{
+                tableLayout: "fixed",
+                userSelect: "none",
+                flexGrow: 1,
+                width: "100%",
+            }}
+        >
             <tbody>
                 {Array(rows)
                     .fill(undefined)

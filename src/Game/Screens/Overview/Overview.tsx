@@ -107,8 +107,8 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
     }
 
     return (
-        <div style={{ display: "flex" }}>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", gap: 2 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <Button onClick={handleStartRenamePlanet}>
                     <img src={renameIcon} />
                 </Button>
@@ -213,7 +213,7 @@ export default function Overview() {
         <Screen flexDirection="column">
             <SelectedPlanet onRename={handleStartRenamePlanet} />
             <div style={{ display: "flex", flexDirection: "row" }}>
-                <div>
+                <div style={{ flex: 1 }}>
                     {renamePlanet ? (
                         <RenamePlanet
                             name={renamePlanet.name}
@@ -234,7 +234,7 @@ export default function Overview() {
                         <PlanetGrid onClick={handleSelectPlanet} />
                     </div>
                 </div>
-                <div>
+                <div style={{}}>
                     <PlanetShipOverview />
                 </div>
             </div>

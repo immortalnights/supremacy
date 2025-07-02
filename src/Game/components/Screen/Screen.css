@@ -1,6 +1,7 @@
 #screen {
-    height: 400px;
-    width: 640px;
+    height: calc(400px - 10px);
+    width: calc(640px - 10px);
+    background-color: black;
     border: 1px solid darkgray;
     padding: 5px;
     display: flex;

@@ -32,11 +32,14 @@ export function MetadataValue({
         <div
             aria-labelledby={`${label}-label`}
             style={{
-                border: "1px solid lightgray",
+                fontFamily: "monospace",
+                fontSize: "13px",
+                border: "1px solid darkgray",
                 width: textAlign === "center" ? "auto" : 80,
-                height: "1.5em",
+                // height: "1em",
+                lineHeight: "1em",
                 textAlign,
-                padding: "1px 8px",
+                padding: "0px 8px",
                 whiteSpace: "nowrap",
                 textOverflow: "ellipsis",
                 overflow: "hidden",
@@ -61,6 +64,8 @@ export function MetadataLabel({
         <label
             id={`${label}-label`}
             style={{
+                fontSize: "13px",
+                lineHeight: "1em",
                 width: 80,
                 textAlign,
             }}

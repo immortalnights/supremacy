@@ -30,7 +30,7 @@ function TaxRate({
             }}
         >
             <MetadataValue label={label} value={value} postfix="%" />
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 6, alignItems: "center", width: 80 }}>
                 <div
                     style={{
                         display: "flex",
@@ -81,8 +81,8 @@ export default function PlanetDetails() {
         <div
             style={{
                 display: "flex",
-                justifyContent: "space-between",
-                width: 400,
+                justifyContent: "space-around",
+                flex: 1,
             }}
         >
             <div
@@ -90,7 +90,6 @@ export default function PlanetDetails() {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "space-between",
-                    width: "100%",
                 }}
             >
                 <div
@@ -154,7 +153,7 @@ export default function PlanetDetails() {
                 style={{
                     display: "flex",
                     flexDirection: "column",
-                    width: "100%",
+                    flexBasis: 1.2,
                 }}
             >
                 <Metadata
