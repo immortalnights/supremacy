@@ -1,6 +1,35 @@
 import { Planet, Platoon, Ship } from "./entities"
 
-export const difficulties = ["Easy", "Normal", "Hard"] as const
+export type PlayerAI = false | "Easy" | "Normal" | "Hard" | "Elite"
+
+export interface PlayerConfiguration {
+    id: string
+    name: string
+    host: boolean
+    ai: PlayerAI
+}
+
+export interface GameConfiguration {
+    seed?: string
+    name: string
+    difficulty: Difficulty
+}
+
+export interface GameState {
+    id: string
+    name: string
+    seed: string
+    difficulty: Difficulty
+    date: number
+    players: PlayerConfiguration[]
+    planets: Planet[]
+    ships: Ship[]
+    platoons: Platoon[]
+}
+
+// ---
+
+export const difficulties = ["Easy", "Normal", "Hard", "Custom"] as const
 export type Difficulty = (typeof difficulties)[number]
 
 export interface GameData {
@@ -12,16 +41,6 @@ export interface GameData {
 export interface PlayerInfo {
     id: string
     name: string
-}
-
-export interface GameConfiguration {
-    difficulty: Difficulty
-    planets: number
-    multiplayer: boolean
-    player1Id: string
-    player1Name: string
-    player2Id: string | undefined
-    player2Name: string | undefined
 }
 
 export interface GameSession {
