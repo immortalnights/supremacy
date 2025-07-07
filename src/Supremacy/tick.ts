@@ -12,6 +12,7 @@ import {
 import { PLANET_POPULATION_LIMIT } from "./consts"
 import { isColonizedPlanet } from "./entities"
 import { calculateGrowth } from "./planets"
+import type { GameState } from "./types"
 
 // Pure simulation function
 export const simulatePlatoons = (
@@ -241,16 +242,16 @@ const calculateMorale = ({ morale, tax, food }: ColonizedPlanet) => {
 const simulatePlanet = (planet: ColonizedPlanet): Planet => {
     const modifiedPlanet = { ...planet }
 
-    // Consume food
-    modifiedPlanet.food = Math.max(
-        Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004),
-        0,
-    )
     // Adjust morale
     modifiedPlanet.morale = calculateMorale(modifiedPlanet)
     // Adjust growth
     modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
     // Apply population growth
+    // Consume food
+    modifiedPlanet.food = Math.max(
+        Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004),
+        0,
+    )
     // eslint-disable-next-line no-constant-condition
     if (false) {
         modifiedPlanet.population = Math.min(
@@ -278,4 +279,8 @@ export const simulatePlanets = (planets: Planet[]): Planet[] => {
 
         return modifiedPlanet
     })
+}
+
+export const tick = (state: GameState): GameState => {
+    return { ...state }
 }
