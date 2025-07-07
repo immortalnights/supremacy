@@ -1,4 +1,4 @@
-import { setup } from "Supremacy"
+import { setup } from "./setup2"
 import { test, expect, describe } from "vitest"
 
 test("test basic multiplayer setup", () => {
@@ -21,6 +21,7 @@ test("test basic multiplayer setup", () => {
         },
     )
 
+    expect(state.date).toBe(1)
     expect(state.planets).toHaveLength(8)
     expect(state.ships).toHaveLength(0)
     expect(state.platoons).toHaveLength(48)
