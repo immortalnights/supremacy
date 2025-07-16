@@ -1,15 +1,42 @@
 // import { NotifyCallback } from "Game/components/Notification/useNotification"
+import { colonizedPlanet } from "test/mockData/planets"
 import { ColonizedPlanet, isColonizedPlanet, Planet } from "./entities"
 import { clamp, clone } from "./utilities"
+import { C } from "vitest/dist/chunks/environment.C5eAp3K6.js"
 
 export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
     return morale * 0.33 - tax * 0.5
 }
 
-export const getPlayerPlanets = (planets: Planet[], player: string) => {
+export const filter = (
+    planets: Planet[],
+    criteria: { player?: string; capital?: boolean; colonized?: boolean },
+): ColonizedPlanet[] => {
     return planets.filter(
-        (planet) => isColonizedPlanet(planet) && planet.owner === player,
-    ) as ColonizedPlanet[]
+        (planet): planet is ColonizedPlanet =>
+            isColonizedPlanet(planet) &&
+            (!criteria.player || planet.owner === criteria.player) &&
+            (!criteria.capital || planet.capital),
+    )
+}
+
+export const find = (
+    planets: Planet[],
+    criteria: { capital?: string; colonized?: boolean },
+): ColonizedPlanet | undefined => {
+    return planets.find(
+        (planet): planet is ColonizedPlanet =>
+            isColonizedPlanet(planet) &&
+            (!criteria.capital || planet.capital) &&
+            (!criteria.colonized || !planet.capital),
+    )
+}
+
+export const getPlayerPlanets = (
+    planets: Planet[],
+    player: string,
+): ColonizedPlanet[] => {
+    return filter(planets, { player })
 }
 
 export const getPlayerCapital = (planets: Planet[], player: string) => {

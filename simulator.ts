@@ -1,6 +1,6 @@
-import { setup } from "./Supremacy.cjs"
+import { setup, tick } from "./Supremacy.cjs"
 
-const state = setup(
+const pvpState = setup(
     {
         seed: "test1",
         name: "Test Game",
@@ -21,4 +21,34 @@ const state = setup(
     },
 )
 
-console.log("Game setup complete")
+console.log("Player vs Player game setup complete")
+
+// TODO simulate until end game.
+// FIXME End game is specifically domination, not elimination, so PvP never ends.
+
+let eveState = setup(
+    {
+        seed: "test1",
+        name: "Test Game",
+        planetCount: 8,
+        difficulty: "Easy",
+    },
+    {
+        id: "player1",
+        name: "Player 1",
+        host: true,
+        ai: "easy",
+    },
+    {
+        id: "player1",
+        name: "Player 1",
+        host: false,
+        ai: "easy",
+    },
+)
+
+// TODO simulate until end game.
+// FIXME End game condition is not implemented yet, so simulate 100 ticks instead
+// while (eveState.date < 100) {
+//     eveState = tick(eveState)
+// }

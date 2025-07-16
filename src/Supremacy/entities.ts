@@ -81,8 +81,8 @@ interface BaseShip {
         cargo: number
         fuels: number
         platoons: number
-    }
-    cargo: ResourceQuantities
+    } // null
+    cargo: ResourceQuantities // | null
     value: number
     position: ShipPosition
 }
