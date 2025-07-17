@@ -148,5 +148,6 @@ export const setup = (
         planets,
         ships,
         platoons,
+        speed: "Paused",
     }
 }

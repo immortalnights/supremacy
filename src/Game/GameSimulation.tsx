@@ -1,21 +1,15 @@
 import { Getter, Setter, useAtom, useAtomValue } from "jotai"
 import { Outlet } from "react-router-dom"
-import {
-    dateAtom,
-    planetsAtom,
-    platoonsAtom,
-    sessionAtom,
-    shipsAtom,
-    simulationSpeedAtom,
-} from "./store"
+import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulationSpeedAtom } from "./store"
 import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { ColonizedPlanet, Planet, Platoon, Ship } from "Supremacy/entities"
 import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
-import { simulatePlanets, simulatePlatoons, simulateShips } from "Supremacy/tick"
+import { GameState, play } from "Supremacy"
 import { useSession } from "./hooks/session"
+import { gameStateAtom } from "./store"
 
 const speedMap = {
     slow: 2,
@@ -45,12 +39,7 @@ const useMultiplayerSync = () => {
     }, [multiplayer, subscribe, unsubscribe])
 
     const sync = useCallback(
-        (changes: {
-            date: number
-            planets: Planet[]
-            ships: Ship[]
-            platoons: Platoon[]
-        }) => {
+        (changes: { date: number; planets: Planet[]; ships: Ship[]; platoons: Platoon[] }) => {
             if (host && multiplayer) {
                 send("update-world", { ...changes })
             }
@@ -61,7 +50,7 @@ const useMultiplayerSync = () => {
     return sync
 }
 
-function Simulation() {
+function Simulation1() {
     const sync = useMultiplayerSync()
     const [speed, setSpeed] = useAtom(simulationSpeedAtom)
     const tickTime = useMemo(() => 1000 * speedMap[speed], [speed])
@@ -143,6 +132,33 @@ function Simulation() {
     useEffect(() => {
         setSpeed("normal")
     }, [setSpeed])
+
+    return null
+}
+
+export function Simulation() {
+    console.log("Starting game loop...")
+    const [gameState, setGameState] = useAtom(gameStateAtom)
+
+    useEffect(() => {
+        if (!gameState) return
+
+        const control = { timer: undefined, stop: false }
+
+        // FIXME Need to setGameState, but it causes re-render
+        play(gameState, [], control, undefined)
+            .then(() => {
+                console.log("Game loop finished")
+            })
+            .catch((err) => {
+                console.error("Error during game loop:", err)
+            })
+
+        return () => {
+            control.stop = true
+            // Optionally trigger save here
+        }
+    }, [gameState, setGameState])
 
     return null
 }

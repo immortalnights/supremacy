@@ -3,36 +3,32 @@ import Screen from "./Screen"
 import { GameConfiguration, GameSession } from "#Supremacy/types"
 import { useCallback, useEffect, useState } from "react"
 import { GameState, setup } from "#Supremacy/index"
-import {
-    dateAtom,
-    planetsAtom,
-    platoonsAtom,
-    sessionAtom,
-    shipsAtom,
-    store,
-} from "Game/store"
+import { dateAtom, gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, store } from "Game/store"
 import { useAtom, useAtomValue } from "jotai"
 import { Planet, Platoon, Ship } from "#Supremacy/entities"
 
 const useHydrateAtoms = () => {
-    return useCallback(
-        ({
+    return useCallback(({ planets, ships, platoons }: { planets: Planet[]; ships: Ship[]; platoons: Platoon[] }) => {
+        // store.set(simulationSpeedAtom, "normal")
+        store.set(dateAtom, 0)
+        // store.set(planetsAtom, planets)
+        // store.set(shipsAtom, ships)
+        // store.set(platoonsAtom, platoons)
+
+        let configuration = {}
+        store.set(gameStateAtom, {
+            id: crypto.randomUUID(),
+            name: configuration?.name ?? "New Game",
+            seed: configuration?.seed ?? crypto.randomUUID(),
+            difficulty: configuration?.difficulty ?? "Easy",
+            date: 0,
+            players: [],
             planets,
             ships,
             platoons,
-        }: {
-            planets: Planet[]
-            ships: Ship[]
-            platoons: Platoon[]
-        }) => {
-            // store.set(simulationSpeedAtom, "normal")
-            store.set(dateAtom, 0)
-            store.set(planetsAtom, planets)
-            store.set(shipsAtom, ships)
-            store.set(platoonsAtom, platoons)
-        },
-        [],
-    )
+            speed: "Paused",
+        })
+    }, [])
 }
 
 const useSetupSinglePlayer = () => {

@@ -12,13 +12,10 @@ import {
 import { PLANET_POPULATION_LIMIT } from "./consts"
 import { isColonizedPlanet } from "./entities"
 import { calculateGrowth } from "./planets"
-import type { GameState } from "./types"
+import type { GameAction, GameState } from "./types"
 
 // Pure simulation function
-export const simulatePlatoons = (
-    platoons: Platoon[],
-    planets: Planet[],
-): [Platoon[], Planet[]] => {
+export const simulatePlatoons = (platoons: Platoon[], planets: Planet[]): [Platoon[], Planet[]] => {
     return [platoons, planets]
 }
 
@@ -148,15 +145,8 @@ export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet
             case "Atmosphere Processor": {
                 const planet = getPlanet(modifiedShip)
 
-                if (
-                    planet?.type === "lifeless" &&
-                    ship.position === "surface" &&
-                    ship.active
-                ) {
-                    ;[modifiedShip, modifiedPlanet] = terraformPlanet(
-                        modifiedShip as Atmos,
-                        planet,
-                    )
+                if (planet?.type === "lifeless" && ship.position === "surface" && ship.active) {
+                    ;[modifiedShip, modifiedPlanet] = terraformPlanet(modifiedShip as Atmos, planet)
                 } else if (ship.position === "outer-space") {
                     modifiedShip = simulateTravel(modifiedShip) as Atmos
                     // Atmos automatically lands on the destination planet
@@ -198,10 +188,7 @@ export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet
             }
             case "Core Mining Station": {
                 const planet = getPlanet(ship)
-                ;[modifiedShip, modifiedPlanet] = gatherFuelAndMinerals(
-                    modifiedShip,
-                    planet,
-                )
+                ;[modifiedShip, modifiedPlanet] = gatherFuelAndMinerals(modifiedShip, planet)
                 modifiedShip = simulateTravel(modifiedShip)
                 break
             }
@@ -248,15 +235,11 @@ const simulatePlanet = (planet: ColonizedPlanet): Planet => {
     modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
     // Apply population growth
     // Consume food
-    modifiedPlanet.food = Math.max(
-        Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004),
-        0,
-    )
+    modifiedPlanet.food = Math.max(Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004), 0)
     // eslint-disable-next-line no-constant-condition
     if (false) {
         modifiedPlanet.population = Math.min(
-            modifiedPlanet.population +
-                Math.floor(modifiedPlanet.population * (modifiedPlanet.growth / 100)),
+            modifiedPlanet.population + Math.floor(modifiedPlanet.population * (modifiedPlanet.growth / 100)),
             PLANET_POPULATION_LIMIT,
         )
     }
@@ -281,6 +264,80 @@ export const simulatePlanets = (planets: Planet[]): Planet[] => {
     })
 }
 
+/**
+ * Modify game state by simulating one tick
+ */
 export const tick = (state: GameState): GameState => {
     return { ...state }
 }
+
+export const play = async (
+    initialState: GameState,
+    actionQueue: GameAction[],
+    control: { timer?: number; stop?: boolean },
+    onStateChange?: (state: GameState) => void,
+) => {
+    let state = initialState
+    state.speed = "Normal"
+
+    let tickCount = 0
+    return new Promise<void>((resolve) => {
+        const speedIntervals: Record<GameState["speed"], number> = {
+            Paused: Infinity,
+            Slow: 2000,
+            Normal: 1000,
+            Fast: 500,
+            Turbo: 100,
+        }
+
+        let lastTickTime = performance.now()
+        let lastAIActionTime = performance.now()
+        const aiActionInterval = 3000
+
+        const gameLoop = () => {
+            const now = performance.now()
+
+            // Process all queued actions (human + AI)
+            while (actionQueue.length > 0) {
+                const action = actionQueue.shift()
+                if (action) state = action(state)
+            }
+
+            // Game tick
+            const tickInterval = speedIntervals[state.speed]
+            if (state.speed !== "Paused" && now - lastTickTime >= tickInterval) {
+                tickCount++
+                // console.log("Game tick", tickCount)
+                state = tick(state)
+                lastTickTime = now
+            }
+
+            // AI actions
+            if (now - lastAIActionTime >= aiActionInterval) {
+                for (const player of state.players) {
+                    if (player.ai) {
+                        console.log("AI tick")
+                        // Example: actionQueue.push(someAIAction)
+                    }
+                }
+                lastAIActionTime = now
+            }
+
+            if (!control.stop) {
+                control.timer = window.setTimeout(gameLoop, 1000 / 60)
+            } else {
+                if (control.timer) {
+                    window.clearTimeout(control.timer)
+                    control.timer = undefined
+                }
+                resolve()
+            }
+
+            onStateChange?.(state)
+        }
+
+        window.setTimeout(gameLoop, 0)
+    })
+}
+
+export default await play
