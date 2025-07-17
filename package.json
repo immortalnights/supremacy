@@ -7,7 +7,7 @@
         "dev": "vite",
         "test": "vitest",
         "build": "tsc && vite build",
-        "format": "prettier --list-different .",
+        "format": "prettier --write .",
         "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
         "check": "tsc",
         "preview": "vite preview",

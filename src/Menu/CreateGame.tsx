@@ -27,13 +27,7 @@ export default function CreateGame() {
 
                 <div>
                     <label>Planets</label>
-                    <input
-                        type="number"
-                        name="planets"
-                        max={32}
-                        min={2}
-                        defaultValue={8}
-                    />
+                    <input type="number" name="planets" max={32} min={2} defaultValue={8} />
                 </div>
 
                 <div>

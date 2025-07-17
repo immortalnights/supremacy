@@ -102,17 +102,8 @@ export default function PlanetDetails() {
                 >
                     <Metadata label="Planet" value={planet.name} />
                     <Date />
-                    <Metadata
-                        label="Status"
-                        value={
-                            planet.owner === localPlayer ? "Your Star" : "Enemy Star"
-                        }
-                    />
-                    <Metadata
-                        label="Credits"
-                        value={planet.credits}
-                        format={Math.floor}
-                    />
+                    <Metadata label="Status" value={planet.owner === localPlayer ? "Your Star" : "Enemy Star"} />
+                    <Metadata label="Credits" value={planet.credits} format={Math.floor} />
                 </div>
                 <div
                     style={{
@@ -122,30 +113,10 @@ export default function PlanetDetails() {
                         marginTop: 8,
                     }}
                 >
-                    <Metadata
-                        label="Food"
-                        value={planet.food}
-                        format={Math.floor}
-                        postfix=".T"
-                    />
-                    <Metadata
-                        label="Minerals"
-                        value={planet.minerals}
-                        format={Math.floor}
-                        postfix=".T"
-                    />
-                    <Metadata
-                        label="Fuels"
-                        value={planet.fuels}
-                        format={Math.floor}
-                        postfix=".T"
-                    />
-                    <Metadata
-                        label="Energy"
-                        value={planet.energy}
-                        format={Math.floor}
-                        postfix=".T"
-                    />
+                    <Metadata label="Food" value={planet.food} format={Math.floor} postfix=".T" />
+                    <Metadata label="Minerals" value={planet.minerals} format={Math.floor} postfix=".T" />
+                    <Metadata label="Fuels" value={planet.fuels} format={Math.floor} postfix=".T" />
+                    <Metadata label="Energy" value={planet.energy} format={Math.floor} postfix=".T" />
                 </div>
             </div>
 
@@ -156,11 +127,7 @@ export default function PlanetDetails() {
                     flexBasis: 1.2,
                 }}
             >
-                <Metadata
-                    label="Population"
-                    value={planet.population}
-                    format={Math.floor}
-                />
+                <Metadata label="Population" value={planet.population} format={Math.floor} />
                 <Metadata label="Pop. Growth" value={populationGrowth} postfix="%" />
                 <Metadata label="Moral" value={planet.morale.toFixed(2)} postfix="%" />
 

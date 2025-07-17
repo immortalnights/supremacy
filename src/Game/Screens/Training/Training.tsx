@@ -82,17 +82,9 @@ function PlatoonLocation({ platoon }: { platoon: Platoon }) {
     const planet = useAtomValue(planetsAtom).find(
         (planet) => platoon && isColonizedPlanet(planet) && isOnPlanet(platoon, planet),
     )
-    const ship = useAtomValue(shipsAtom).find(
-        (ship) => platoon && isOnShip(platoon, ship),
-    )
+    const ship = useAtomValue(shipsAtom).find((ship) => platoon && isOnShip(platoon, ship))
 
-    return (
-        <Metadata
-            label="Location"
-            alignment="right"
-            value={planet?.name ?? ship?.name}
-        />
-    )
+    return <Metadata label="Location" alignment="right" value={planet?.name ?? ship?.name} />
 }
 
 export default function Training() {
@@ -131,10 +123,7 @@ export default function Training() {
                     justifyContent: "space-around",
                 }}
             >
-                <PlatoonSelector
-                    platoon={platoon}
-                    onChangePlatoon={handleChangePlatoon}
-                />
+                <PlatoonSelector platoon={platoon} onChangePlatoon={handleChangePlatoon} />
                 <PlatoonTroops platoon={platoon} />
                 <PlanetCivilians civilians={capital.population} />
             </div>
@@ -150,12 +139,7 @@ export default function Training() {
                     }}
                 >
                     <PlatoonLocation platoon={platoon} />
-                    <Metadata
-                        label="Credits"
-                        alignment="right"
-                        value={capital.credits}
-                        format={Math.floor}
-                    />
+                    <Metadata label="Credits" alignment="right" value={capital.credits} format={Math.floor} />
                     <Rank state={platoon.state} calibre={platoon.calibre} />
                     <div
                         style={{

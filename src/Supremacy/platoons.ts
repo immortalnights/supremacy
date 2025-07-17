@@ -53,29 +53,15 @@ export const isOnPlanet = (
 }
 
 // Return platoons on the specified ship
-export const isOnShip = (
-    platoon: Platoon,
-    ship: Pick<Ship, "id" | "owner">,
-): platoon is EquippedPlatoon => {
-    return (
-        isEquipped(platoon) &&
-        !!platoon.location.ship &&
-        platoon.location.ship === ship.id
-    )
+export const isOnShip = (platoon: Platoon, ship: Pick<Ship, "id" | "owner">): platoon is EquippedPlatoon => {
+    return isEquipped(platoon) && !!platoon.location.ship && platoon.location.ship === ship.id
 }
 
 export const findPlatoonPlanet = (planets: Planet[], platoon: Platoon) =>
-    planets.find(
-        (planet): planet is ColonizedPlanet =>
-            isColonizedPlanet(planet) && isOnPlanet(platoon, planet),
-    )
+    planets.find((planet): planet is ColonizedPlanet => isColonizedPlanet(planet) && isOnPlanet(platoon, planet))
 
 // make generic and combine with Ship version?
-const canModifyPlatoonAtPlanet = (
-    player: string,
-    platoon: Platoon,
-    planet: ColonizedPlanet,
-): boolean => {
+const canModifyPlatoonAtPlanet = (player: string, platoon: Platoon, planet: ColonizedPlanet): boolean => {
     let ok = false
     if (planet.owner !== player) {
         console.error(`Planet ${planet.name} is not owned by player ${player}`)
@@ -88,9 +74,7 @@ const canModifyPlatoonAtPlanet = (
 }
 
 const clamp = (quantity: number, value: number, available: number, max: number) => {
-    return quantity > 0
-        ? Math.min(max - value, available, quantity)
-        : -Math.min(value, Math.abs(quantity))
+    return quantity > 0 ? Math.min(max - value, available, quantity) : -Math.min(value, Math.abs(quantity))
 }
 
 export const modifyTroops = (
@@ -108,9 +92,7 @@ export const modifyTroops = (
     } else if (platoon.state === "equipped") {
         console.error("Cannot modify platoon troops when equipped")
     } else {
-        const capital = planets
-            .filter(isColonizedPlanet)
-            .find((planet) => planet.owner === player && planet.capital)
+        const capital = planets.filter(isColonizedPlanet).find((planet) => planet.owner === player && planet.capital)
 
         if (!capital) {
             throw new Error("Failed to find player capital")
@@ -120,9 +102,7 @@ export const modifyTroops = (
         const platoonIndex = platoons.findIndex((s) => s.id === platoon.id)
 
         if (planetIndex === -1 || platoonIndex === -1) {
-            throw new Error(
-                `Invalid planet (${planetIndex}) or platoon (${platoonIndex}) index`,
-            )
+            throw new Error(`Invalid planet (${planetIndex}) or platoon (${platoonIndex}) index`)
         }
 
         const change =
@@ -163,12 +143,7 @@ export const modifyTroops = (
     return [modifiedPlanets ?? planets, modifiedPlatoons ?? platoons] as const
 }
 
-export const modifySuit = (
-    player: string,
-    platoons: Platoon[],
-    platoon: Platoon,
-    suit: SuitClass,
-) => {
+export const modifySuit = (player: string, platoons: Platoon[], platoon: Platoon, suit: SuitClass) => {
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
@@ -185,12 +160,7 @@ export const modifySuit = (
     return modifiedPlatoons ?? platoons
 }
 
-export const modifyWeapon = (
-    player: string,
-    platoons: Platoon[],
-    platoon: Platoon,
-    weapon: WeaponClass,
-) => {
+export const modifyWeapon = (player: string, platoons: Platoon[], platoon: Platoon, weapon: WeaponClass) => {
     let modifiedPlatoons
 
     if (platoon.owner !== player) {
@@ -207,12 +177,7 @@ export const modifyWeapon = (
     return modifiedPlatoons ?? platoons
 }
 
-export const equip = (
-    player: string,
-    planets: Planet[],
-    platoons: Platoon[],
-    platoon: Platoon,
-) => {
+export const equip = (player: string, planets: Planet[], platoons: Platoon[], platoon: Platoon) => {
     let modifiedPlanets
     let modifiedPlatoons
 
@@ -221,9 +186,7 @@ export const equip = (
     } else if (platoon.state === "equipped") {
     } else if (platoon.size === 0) {
     } else {
-        const capital = planets
-            .filter(isColonizedPlanet)
-            .find((planet) => planet.owner === player && planet.capital)
+        const capital = planets.filter(isColonizedPlanet).find((planet) => planet.owner === player && planet.capital)
 
         if (!capital) {
             throw new Error("Failed to find player capital")
@@ -283,9 +246,7 @@ const transferPlatoon = (
 
         const nextIndex = nextFreeIndex(platoonsAtLocation, targetLimit)
         if (nextIndex === undefined) {
-            console.error(
-                `Target location ${target.name} has no platoon capacity remaining`,
-            )
+            console.error(`Target location ${target.name} has no platoon capacity remaining`)
         } else {
             let modifiedPlatoon
             ;[modifiedPlatoon, modifiedPlatoons] = clone(platoon, platoons)
@@ -302,21 +263,11 @@ const transferPlatoon = (
 }
 
 // Load a Platoon onto the selected Ship
-export const loadPlatoon = (
-    player: string,
-    platoons: Platoon[],
-    platoon: Platoon,
-    ship: Ship,
-) => {
+export const loadPlatoon = (player: string, platoons: Platoon[], platoon: Platoon, ship: Ship) => {
     return transferPlatoon(player, platoons, platoon, "load", ship, 4)
 }
 
 // Unload a Platoon to the selected Planet
-export const unloadPlatoon = (
-    player: string,
-    platoons: Platoon[],
-    platoon: Platoon,
-    planet: ColonizedPlanet,
-) => {
+export const unloadPlatoon = (player: string, platoons: Platoon[], platoon: Platoon, planet: ColonizedPlanet) => {
     return transferPlatoon(player, platoons, platoon, "unload", planet, 24)
 }

@@ -1,12 +1,6 @@
 import MiniMap from "./components/SolarSystem"
 import { useAtom, useAtomValue } from "jotai"
-import {
-    planetsAtom,
-    platoonsAtom,
-    shipsAtom,
-    selectedPlanetAtom,
-    sessionAtom,
-} from "../../store"
+import { planetsAtom, platoonsAtom, shipsAtom, selectedPlanetAtom, sessionAtom } from "../../store"
 import Navigation, { NavigationItem } from "../../components/Navigation"
 import Button from "components/Button"
 import Date from "../../components/Date"
@@ -60,9 +54,7 @@ const useTerraformPlanet = () => {
             } else if (planet.type !== "lifeless") {
                 console.warn(`Planet ${planet.name} has already been terraformed`)
             } else if (atmosOnSurface(atmos)) {
-                console.warn(
-                    `Formatting in progress, ${atmos.terraforming.remaining} days remaining, please wait`,
-                )
+                console.warn(`Formatting in progress, ${atmos.terraforming.remaining} days remaining, please wait`)
             } else {
                 move(atmos, "orbit")
                 travel(atmos, planet)
@@ -104,11 +96,7 @@ export default function SolarSystem() {
     return (
         <Screen>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <MiniMap
-                    selected={planets.length - 1}
-                    planets={planets}
-                    localPlayer={localPlayer}
-                />
+                <MiniMap selected={planets.length - 1} planets={planets} localPlayer={localPlayer} />
                 <Navigation
                     items={[
                         "overview",
@@ -148,9 +136,7 @@ export default function SolarSystem() {
                     </div>
                     <div>
                         <Date />
-                        {selectedPlanet && (
-                            <PlanetInfoGraphic planet={selectedPlanet} />
-                        )}
+                        {selectedPlanet && <PlanetInfoGraphic planet={selectedPlanet} />}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column" }}>
                         <Button onClick={() => {}}>

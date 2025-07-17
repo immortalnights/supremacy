@@ -8,9 +8,7 @@ import { throwError } from "game-signaling-server/client"
 import Screen from "Game/components/Screen"
 
 export default function Surface() {
-    const planet =
-        useSelectedColonizedPlanet() ??
-        throwError("Cannot view Surface of lifeless planet")
+    const planet = useSelectedColonizedPlanet() ?? throwError("Cannot view Surface of lifeless planet")
     const move = useMoveShip()
 
     const handleClickDockedShip = (ship: Ship) => {

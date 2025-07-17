@@ -43,22 +43,13 @@ export default function Navigation({
                 let component
                 if ("to" in details) {
                     component = (
-                        <Link
-                            key={item}
-                            to={`../${details.to}`}
-                            relative="route"
-                            style={{ height: 34 }}
-                        >
+                        <Link key={item} to={`../${details.to}`} relative="route" style={{ height: 34 }}>
                             <img alt={item} src={details.icon} style={{ height: 34 }} />
                         </Link>
                     )
                 } else {
                     component = (
-                        <Button
-                            key={item}
-                            onClick={() => onAction?.(item)}
-                            style={{ width: "auto", height: 34 }}
-                        >
+                        <Button key={item} onClick={() => onAction?.(item)} style={{ width: "auto", height: 34 }}>
                             <img alt={item} src={details.icon} style={{ height: 34 }} />
                         </Button>
                     )

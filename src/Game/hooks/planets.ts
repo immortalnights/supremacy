@@ -4,8 +4,7 @@ import type { ColonizedPlanet, Planet } from "Supremacy/entities"
 import { throwError } from "game-signaling-server/client"
 import { useSession } from "./session"
 
-const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
-    planet.type !== "lifeless"
+const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet => planet.type !== "lifeless"
 
 export const useSelectedPlanet = () => {
     const planet = useAtomValue(selectedPlanetAtom)
@@ -22,11 +21,8 @@ export const useCapitalPlanet = () => {
     const planets = useAtomValue(planetsAtom)
 
     const capital = planets.find(
-        (planet) =>
-            isColonizedPlanet(planet) && planet.capital && planet.owner === localPlayer,
+        (planet) => isColonizedPlanet(planet) && planet.capital && planet.owner === localPlayer,
     )
 
-    return capital && isColonizedPlanet(capital)
-        ? capital
-        : throwError("Failed to find capital planet")
+    return capital && isColonizedPlanet(capital) ? capital : throwError("Failed to find capital planet")
 }

@@ -14,12 +14,7 @@ import { planetsAtom, shipsAtom } from "../../store"
 import { ColonizedPlanet, Planet, Ship } from "Supremacy/entities"
 import FleetGrid from "../../components/FleetGrid"
 import ShipIcon from "../../components/ShipIcon"
-import {
-    useDecommission,
-    useMoveShip,
-    useSelectedColonizedPlanet,
-    useTransferShip,
-} from "../../hooks"
+import { useDecommission, useMoveShip, useSelectedColonizedPlanet, useTransferShip } from "../../hooks"
 import { throwError } from "game-signaling-server/client"
 import PlanetGrid from "Game/components/PlanetGrid"
 import Screen from "Game/components/Screen"
@@ -92,9 +87,7 @@ export default function Fleet() {
     const [ship, setSelectedShip] = useSelectedShip()
     const planets = useAtomValue(planetsAtom)
 
-    const planet =
-        useSelectedColonizedPlanet() ??
-        throwError("Cannot view Fleet of lifeless planet")
+    const planet = useSelectedColonizedPlanet() ?? throwError("Cannot view Fleet of lifeless planet")
 
     const [isSelectingDestination, setIsSelectingDestination] = useState(false)
     const move = useMoveShip()
@@ -202,16 +195,10 @@ export default function Fleet() {
                 <Notification />
             </div>
             <div style={{ display: "flex", flexDirection: "row" }}>
-                <Navigation
-                    items={["combat", "shipyard", "cargo"]}
-                    direction="column"
-                />
+                <Navigation items={["combat", "shipyard", "cargo"]} direction="column" />
                 {grid}
                 <ShipHeading ship={ship} />
-                <Navigation
-                    items={["surface", "overview", "training"]}
-                    direction="column"
-                />
+                <Navigation items={["surface", "overview", "training"]} direction="column" />
             </div>
         </Screen>
     )

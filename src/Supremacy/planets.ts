@@ -32,17 +32,12 @@ export const find = (
     )
 }
 
-export const getPlayerPlanets = (
-    planets: Planet[],
-    player: string,
-): ColonizedPlanet[] => {
+export const getPlayerPlanets = (planets: Planet[], player: string): ColonizedPlanet[] => {
     return filter(planets, { player })
 }
 
 export const getPlayerCapital = (planets: Planet[], player: string) => {
-    const index = planets.findIndex(
-        (p) => isColonizedPlanet(p) && p.capital && p.owner === player,
-    )
+    const index = planets.findIndex((p) => isColonizedPlanet(p) && p.capital && p.owner === player)
 
     if (index === -1) {
         throw new Error(`Failed to find capital planet for player ${player}`)
@@ -53,26 +48,17 @@ export const getPlayerCapital = (planets: Planet[], player: string) => {
 
 export const getColonizedPlanet = (planets: Planet[], planetOrId: Planet | string) => {
     const id = typeof planetOrId === "string" ? planetOrId : planetOrId.id
-    return planets.find(
-        (p): p is ColonizedPlanet => p.id === id && isColonizedPlanet(p),
-    )
+    return planets.find((p): p is ColonizedPlanet => p.id === id && isColonizedPlanet(p))
 }
 
-export const applyRenamePlanet = (
-    player: string,
-    planets: Planet[],
-    id: string,
-    newName: string,
-) => {
+export const applyRenamePlanet = (player: string, planets: Planet[], id: string, newName: string) => {
     const cpy = [...planets]
 
     const index = cpy.findIndex((p) => p.id === id)
     if (index !== -1) {
         const planet = cpy[index]
         if (planet.type !== "lifeless" && planet.owner === player) {
-            console.log(
-                `Renaming planet '${planet.name}' (${planet.id}) to '${newName}'`,
-            )
+            console.log(`Renaming planet '${planet.name}' (${planet.id}) to '${newName}'`)
             cpy[index] = { ...planet, name: newName }
         }
     }
@@ -80,12 +66,7 @@ export const applyRenamePlanet = (
     return cpy
 }
 
-export const applyModifyTax = (
-    player: string,
-    planets: Planet[],
-    id: string,
-    newTax: number,
-) => {
+export const applyModifyTax = (player: string, planets: Planet[], id: string, newTax: number) => {
     const cpy = [...planets]
     const index = cpy.findIndex((p) => p.id === id)
     if (index !== -1) {
@@ -93,9 +74,7 @@ export const applyModifyTax = (
 
         if (planet.type !== "lifeless" && planet.owner === player) {
             const tax = clamp(newTax, 0, 100)
-            console.log(
-                `Setting planet '${planet.name}' (${planet.id}) tax to '${tax}'`,
-            )
+            console.log(`Setting planet '${planet.name}' (${planet.id}) tax to '${tax}'`)
             cpy[index] = { ...planet, tax }
         }
     }
@@ -103,18 +82,10 @@ export const applyModifyTax = (
     return cpy
 }
 
-export const modifyAggression = (
-    player: string,
-    planets: Planet[],
-    planet: Planet,
-    aggression: number,
-) => {
+export const modifyAggression = (player: string, planets: Planet[], planet: Planet, aggression: number) => {
     let modifiedPlanets
     if (isColonizedPlanet(planet)) {
-        if (
-            !(player in planet.aggression) ||
-            planet.aggression[player] !== aggression
-        ) {
+        if (!(player in planet.aggression) || planet.aggression[player] !== aggression) {
             let modifiedPlanet
             ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
 
@@ -159,9 +130,7 @@ export const transferCreditsToCapital = (
         ;[modifiedCapital, modifiedPlanets] = clone(capital, modifiedPlanets)
         modifiedCapital.credits += transferred
         // notify(`All credits sent to ${capital.name}`)
-        console.debug(
-            `Transferred ${transferred} from ${ownedPlanets.length - 1} planets to player capital`,
-        )
+        console.debug(`Transferred ${transferred} from ${ownedPlanets.length - 1} planets to player capital`)
     }
 
     return modifiedPlanets ?? planets

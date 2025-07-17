@@ -16,10 +16,7 @@ import { wrap } from "Game/utilities"
 import { canPurchaseAtmos } from "Supremacy/ships"
 import Screen from "Game/components/Screen"
 import Notification from "Game/components/Notification"
-import {
-    useNotification,
-    useSetNotification,
-} from "Game/components/Notification/useNotification"
+import { useNotification, useSetNotification } from "Game/components/Notification/useNotification"
 import previousIcon from "/images/blue_previous.png"
 import buyIcon from "/images/blue_buy.png"
 import nextIcon from "/images/blue_next.png"
@@ -71,13 +68,7 @@ function PurchaseShip({
             >
                 <label>
                     Name:
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={handleChange}
-                        autoFocus
-                        style={{ margin: 5 }}
-                    />
+                    <input type="text" value={name} onChange={handleChange} autoFocus style={{ margin: 5 }} />
                 </label>
                 <Button type="submit">Buy</Button>
                 <Button type="button" onClick={onCancel}>
@@ -90,13 +81,7 @@ function PurchaseShip({
 
 const useOwnedShipCount = (player: string, shipClass: ShipClass) => {
     const ownedAtom = useMemo(
-        () =>
-            atom(
-                (get) =>
-                    get(shipsAtom).filter(
-                        (s) => s.owner === player && s.class === shipClass,
-                    ).length,
-            ),
+        () => atom((get) => get(shipsAtom).filter((s) => s.owner === player && s.class === shipClass).length),
         [player, shipClass],
     )
     return useAtomValue(ownedAtom)
@@ -111,8 +96,7 @@ function Details({ blueprint }: { blueprint: ShipBlueprint }) {
             {notification ? <Notification /> : <div>{blueprint.description}</div>}
 
             <div style={{ display: "flex", justifyContent: "space-between" }}>
-                Type: {blueprint.class}{" "}
-                {alert ? <div>** Incoming Message **</div> : null}
+                Type: {blueprint.class} {alert ? <div>** Incoming Message **</div> : null}
             </div>
         </div>
     )
@@ -145,10 +129,7 @@ function Controls({
     }
 
     const handleBuy = () => {
-        if (
-            blueprint.class === "Atmosphere Processor" &&
-            !canPurchaseAtmos(date, owned)
-        ) {
+        if (blueprint.class === "Atmosphere Processor" && !canPurchaseAtmos(date, owned)) {
         } else if (dockedShips.length >= 3) {
             notify(`There is no room in the docking bays on ${planet.name}`)
         } else if (planet.credits < blueprint.cost.credits) {
@@ -169,10 +150,7 @@ function Controls({
 
     return (
         <div style={{ display: "flex", alignItems: "center" }}>
-            <Button
-                onClick={handlePrevious}
-                style={{ margin: "0 1px 0 0", display: "flex" }}
-            >
+            <Button onClick={handlePrevious} style={{ margin: "0 1px 0 0", display: "flex" }}>
                 <img src={previousIcon} alt="Previous" />
             </Button>
             <Button onClick={handleBuy} style={{ margin: 1, display: "flex" }}>
@@ -191,10 +169,7 @@ function Controls({
                     <Details blueprint={blueprint} />
                 )}
             </div>
-            <Button
-                onClick={handleNext}
-                style={{ margin: "0 0 0 1px", display: "flex" }}
-            >
+            <Button onClick={handleNext} style={{ margin: "0 0 0 1px", display: "flex" }}>
                 <img src={nextIcon} alt="Next" />
             </Button>
         </div>
@@ -229,11 +204,7 @@ export default function Shipyard() {
             >
                 <img src={images[blueprint.class]} />
             </div>
-            <Controls
-                planet={planet}
-                blueprint={blueprint}
-                onChange={handleChangeIndex}
-            />
+            <Controls planet={planet} blueprint={blueprint} onChange={handleChangeIndex} />
             <div style={{ display: "flex", justifyContent: "space-around" }}>
                 <div>
                     <div>
@@ -287,21 +258,14 @@ export default function Shipyard() {
                     </div>
                     <div>{blueprint.requiredCrew}: Crew</div>
                     <div>{blueprint.capacity.cargo}: Payload</div>
-                    <div>
-                        {blueprint.capacity.fuels > 0
-                            ? blueprint.capacity.fuels
-                            : "Nuclear"}
-                        : Fuel
-                    </div>
+                    <div>{blueprint.capacity.fuels > 0 ? blueprint.capacity.fuels : "Nuclear"}: Fuel</div>
                 </div>
                 <div>
                     <div>
                         <strong>Data</strong>
                     </div>
                     <div>{owned}: Owned</div>
-                    <div>
-                        {blueprint.range > 0 ? blueprint.range : "Infinite"}: Range
-                    </div>
+                    <div>{blueprint.range > 0 ? blueprint.range : "Infinite"}: Range</div>
                     <div>{blueprint.capacity.civilians}: Seats</div>
                 </div>
             </div>

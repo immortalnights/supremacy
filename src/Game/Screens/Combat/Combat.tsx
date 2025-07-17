@@ -58,9 +58,7 @@ const StrengthOverview = () => {
 
 export default function Combat() {
     const { localPlayer } = useSession()
-    const planet =
-        useSelectedColonizedPlanet() ??
-        throwError("Cannot view Combat of lifeless planet")
+    const planet = useSelectedColonizedPlanet() ?? throwError("Cannot view Combat of lifeless planet")
     const [selectedShipId, setSelectedShipId] = useState<string | undefined>(undefined)
     const ships = useAtomValue(shipsAtom)
     const selectedShip = ships.find((s) => s.id === selectedShipId)
@@ -104,10 +102,7 @@ export default function Combat() {
     useEffect(() => {
         if (!selectedShip) {
             setSelectedShipId(
-                ships.filter(
-                    (ship) =>
-                        isDocketAtPlanet(ship, planet) && ship.owner === localPlayer,
-                )?.[0]?.id,
+                ships.filter((ship) => isDocketAtPlanet(ship, planet) && ship.owner === localPlayer)?.[0]?.id,
             )
         }
     }, [selectedShip, ships, planet])
@@ -120,19 +115,12 @@ export default function Combat() {
                     <div>
                         <div>Ship</div>
                         <div>{selectedShip?.name}</div>
-                        <PlatoonGrid
-                            platoons={platoonsOnShip}
-                            size={4}
-                            onClick={handleUnloadPlatoon}
-                        />
+                        <PlatoonGrid platoons={platoonsOnShip} size={4} onClick={handleUnloadPlatoon} />
                     </div>
                 </div>
                 <div>{/* messages */}</div>
                 <div>
-                    <PlatoonGrid
-                        platoons={platoonsOnPlanet}
-                        onClick={handleLoadPlatoon}
-                    />
+                    <PlatoonGrid platoons={platoonsOnPlanet} onClick={handleLoadPlatoon} />
                 </div>
             </div>
             <div></div>
@@ -154,9 +142,7 @@ export default function Combat() {
                     onIncrease={handleIncreaseAggression}
                     onDecrease={handleDecreaseAggression}
                 />
-                <Navigation
-                    items={["training", "fleet", "overview", "cargo", "surface"]}
-                />
+                <Navigation items={["training", "fleet", "overview", "cargo", "surface"]} />
             </div>
         </Screen>
     )

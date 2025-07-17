@@ -229,10 +229,7 @@ test("simulate terraforming", () => {
 
     const ticks = atmos.terraforming.remaining + 1
     for (let i = 0; i < ticks; i++) {
-        ;[modifiedShips, modifiedPlanets] = simulateShips(
-            modifiedShips,
-            modifiedPlanets,
-        )
+        ;[modifiedShips, modifiedPlanets] = simulateShips(modifiedShips, modifiedPlanets)
     }
 
     const modifiedPlanet = modifiedPlanets[0]

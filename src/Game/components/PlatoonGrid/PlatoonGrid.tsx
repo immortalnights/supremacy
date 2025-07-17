@@ -1,13 +1,7 @@
 import { getPlatoonName } from "Supremacy/platoons"
 import { EquippedPlatoon, Platoon } from "Supremacy/entities"
 
-function PlatoonItem({
-    platoon,
-    onClick,
-}: {
-    platoon?: EquippedPlatoon
-    onClick: (platoon: EquippedPlatoon) => void
-}) {
+function PlatoonItem({ platoon, onClick }: { platoon?: EquippedPlatoon; onClick: (platoon: EquippedPlatoon) => void }) {
     const handleClick = () => {
         if (platoon) {
             onClick(platoon)
@@ -70,17 +64,9 @@ export default function PlatoonGrid({
             {Array(size)
                 .fill(undefined)
                 .map((_, index) => {
-                    const platoon = platoons.find(
-                        (item) => index === item.location.index,
-                    )
+                    const platoon = platoons.find((item) => index === item.location.index)
 
-                    return (
-                        <PlatoonItem
-                            key={`platoon-${index}`}
-                            platoon={platoon}
-                            onClick={onClick}
-                        />
-                    )
+                    return <PlatoonItem key={`platoon-${index}`} platoon={platoon} onClick={onClick} />
                 })}
         </div>
     )

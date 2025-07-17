@@ -1,10 +1,5 @@
 import { RouterProvider } from "react-router-dom"
-import {
-    ManagerProvider,
-    PeerConnectionProvider,
-    WebSocketConnectionState,
-    WebSocketProvider,
-} from "webrtc-lobby-lib"
+import { ManagerProvider, PeerConnectionProvider, WebSocketConnectionState, WebSocketProvider } from "webrtc-lobby-lib"
 import { router } from "./router"
 import "./App.css"
 import { ReactNode, StrictMode } from "react"

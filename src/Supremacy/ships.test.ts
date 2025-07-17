@@ -9,162 +9,118 @@ import {
     crewShip,
 } from "./ships"
 import catalog from "Supremacy/data/ships.json"
-import {
-    ColonizedPlanet,
-    Ship,
-    ShipBlueprint,
-    ShipDocked,
-    ShipInOrbit,
-    ShipOnSurface,
-    ShipPosition,
-} from "./entities"
+import { ColonizedPlanet, Ship, ShipBlueprint, ShipDocked, ShipInOrbit, ShipOnSurface, ShipPosition } from "./entities"
 import { Difficulty } from "./types"
 import { DAYS_PER_YEAR } from "./consts"
 
-describe.each(catalog.map((blueprint) => blueprint.class))(
-    "check ship %s",
-    (shipClass) => {
-        describe.each([["Easy"], ["Normal"], ["Hard"]])(
-            "difficulty %s",
-            (difficultyStr) => {
-                const difficulty = difficultyStr as Difficulty
-                const credits = 100000
-                const energy = 100000
-                const minerals = 100000
+describe.each(catalog.map((blueprint) => blueprint.class))("check ship %s", (shipClass) => {
+    describe.each([["Easy"], ["Normal"], ["Hard"]])("difficulty %s", (difficultyStr) => {
+        const difficulty = difficultyStr as Difficulty
+        const credits = 100000
+        const energy = 100000
+        const minerals = 100000
 
-                const makeCapital = (): ColonizedPlanet => {
-                    return {
-                        id: "capital",
-                        gridIndex: 0,
-                        name: "Capital",
-                        type: "metropolis",
-                        owner: "player1",
-                        population: 0,
-                        capital: true,
-                        morale: 100,
-                        growth: 0,
-                        tax: 0,
-                        food: 0,
-                        credits,
-                        minerals,
-                        energy,
-                        fuels: 10000,
-                        aggression: {},
-                    }
-                }
+        const makeCapital = (): ColonizedPlanet => {
+            return {
+                id: "capital",
+                gridIndex: 0,
+                name: "Capital",
+                type: "metropolis",
+                owner: "player1",
+                population: 0,
+                capital: true,
+                morale: 100,
+                growth: 0,
+                tax: 0,
+                food: 0,
+                credits,
+                minerals,
+                energy,
+                fuels: 10000,
+                aggression: {},
+            }
+        }
 
-                const blueprint = catalog.find(
-                    (b) => b.class === shipClass,
-                ) as ShipBlueprint
+        const blueprint = catalog.find((b) => b.class === shipClass) as ShipBlueprint
 
-                test(`can afford ${shipClass}`, () => {
-                    const capital = makeCapital()
+        test(`can afford ${shipClass}`, () => {
+            const capital = makeCapital()
 
-                    expect(canAffordShip(capital, blueprint.cost, difficulty)).toBe(
-                        true,
-                    )
+            expect(canAffordShip(capital, blueprint.cost, difficulty)).toBe(true)
 
-                    capital.minerals = 0
-                    expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
-                    expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(true)
-                    expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(true)
+            capital.minerals = 0
+            expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
+            expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(true)
+            expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(true)
 
-                    capital.energy = 0
-                    expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
-                    expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(false)
-                    expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(true)
+            capital.energy = 0
+            expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
+            expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(false)
+            expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(true)
 
-                    capital.credits = 0
-                    expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
-                    expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(false)
-                    expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(false)
-                })
+            capital.credits = 0
+            expect(canAffordShip(capital, blueprint.cost, "Hard")).toBe(false)
+            expect(canAffordShip(capital, blueprint.cost, "Normal")).toBe(false)
+            expect(canAffordShip(capital, blueprint.cost, "Easy")).toBe(false)
+        })
 
-                test(`can purchase ${shipClass}`, () => {
-                    const capital = makeCapital()
-                    const blueprint = catalog.find(
-                        (b) => b.class === shipClass,
-                    ) as ShipBlueprint
+        test(`can purchase ${shipClass}`, () => {
+            const capital = makeCapital()
+            const blueprint = catalog.find((b) => b.class === shipClass) as ShipBlueprint
 
-                    const modifiedCapital = deductShipCost(
-                        capital,
-                        blueprint.cost,
-                        difficulty,
-                    )
-                    expect(modifiedCapital.credits).toEqual(
-                        credits - blueprint.cost.credits,
-                    )
+            const modifiedCapital = deductShipCost(capital, blueprint.cost, difficulty)
+            expect(modifiedCapital.credits).toEqual(credits - blueprint.cost.credits)
 
-                    if (difficulty === "Normal" || difficulty === "Hard") {
-                        expect(modifiedCapital.energy).toEqual(
-                            energy - blueprint.cost.energy,
-                        )
-                    }
+            if (difficulty === "Normal" || difficulty === "Hard") {
+                expect(modifiedCapital.energy).toEqual(energy - blueprint.cost.energy)
+            }
 
-                    if (difficulty === "Hard") {
-                        expect(modifiedCapital.minerals).toEqual(
-                            minerals - blueprint.cost.minerals,
-                        )
-                    }
-                })
+            if (difficulty === "Hard") {
+                expect(modifiedCapital.minerals).toEqual(minerals - blueprint.cost.minerals)
+            }
+        })
 
-                test(`commission ${shipClass}`, () => {
-                    const capital = makeCapital()
-                    const ships: Ship[] = []
+        test(`commission ${shipClass}`, () => {
+            const capital = makeCapital()
+            const ships: Ship[] = []
 
-                    expect(
-                        canPurchaseShip(
-                            capital,
-                            ships,
-                            blueprint,
-                            1 + DAYS_PER_YEAR,
-                            difficulty,
-                        ),
-                    ).toBe(true)
+            expect(canPurchaseShip(capital, ships, blueprint, 1 + DAYS_PER_YEAR, difficulty)).toBe(true)
 
-                    const name = "new ship"
-                    const [modifiedPlanets, modifiedShips] = purchaseShip(
-                        capital.owner,
-                        [capital],
-                        ships,
-                        blueprint,
-                        name,
-                        1 + DAYS_PER_YEAR,
-                        difficulty,
-                    )
+            const name = "new ship"
+            const [modifiedPlanets, modifiedShips] = purchaseShip(
+                capital.owner,
+                [capital],
+                ships,
+                blueprint,
+                name,
+                1 + DAYS_PER_YEAR,
+                difficulty,
+            )
 
-                    const modifiedCapital = modifiedPlanets[0] as ColonizedPlanet
+            const modifiedCapital = modifiedPlanets[0] as ColonizedPlanet
 
-                    expect(capital).not.toBe(modifiedCapital)
+            expect(capital).not.toBe(modifiedCapital)
 
-                    // Cost has been deducted
-                    expect(modifiedCapital.credits).toEqual(
-                        credits - blueprint.cost.credits,
-                    )
+            // Cost has been deducted
+            expect(modifiedCapital.credits).toEqual(credits - blueprint.cost.credits)
 
-                    if (difficulty === "Normal" || difficulty === "Hard") {
-                        expect(modifiedCapital.energy).toEqual(
-                            energy - blueprint.cost.energy,
-                        )
-                    }
+            if (difficulty === "Normal" || difficulty === "Hard") {
+                expect(modifiedCapital.energy).toEqual(energy - blueprint.cost.energy)
+            }
 
-                    if (difficulty === "Hard") {
-                        expect(modifiedCapital.minerals).toEqual(
-                            minerals - blueprint.cost.minerals,
-                        )
-                    }
+            if (difficulty === "Hard") {
+                expect(modifiedCapital.minerals).toEqual(minerals - blueprint.cost.minerals)
+            }
 
-                    // Ship has been added
-                    expect(modifiedShips.length).toEqual(1)
-                    const newShip = modifiedShips[0]
-                    expect(newShip.name).toEqual(name)
-                    expect(newShip.position).toEqual("docked")
-                    expect((newShip as ShipDocked).location.planet).toEqual(capital.id)
-                })
-            },
-        )
-    },
-)
+            // Ship has been added
+            expect(modifiedShips.length).toEqual(1)
+            const newShip = modifiedShips[0]
+            expect(newShip.name).toEqual(name)
+            expect(newShip.position).toEqual("docked")
+            expect((newShip as ShipDocked).location.planet).toEqual(capital.id)
+        })
+    })
+})
 
 test("can purchase Atmosphere ship (date and quantity checks)", () => {
     // To soon
@@ -178,10 +134,7 @@ test("can purchase Atmosphere ship (date and quantity checks)", () => {
 describe("ship crew", () => {
     const player = "player1"
 
-    const makeShip = <T extends BaseShip>(
-        position: ShipPosition,
-        location: T["location"],
-    ): T => {
+    const makeShip = <T extends BaseShip>(position: ShipPosition, location: T["location"]): T => {
         return {
             id: "ship",
             name: "ship",
@@ -272,12 +225,7 @@ describe("ship crew", () => {
         const planets = [capital]
         const ships = [dockedShip]
 
-        const [modifiedPlanets, modifiedShips] = crewShip(
-            player,
-            planets,
-            ships,
-            dockedShip,
-        )
+        const [modifiedPlanets, modifiedShips] = crewShip(player, planets, ships, dockedShip)
 
         expect(modifiedPlanets).toBe(planets)
         expect(modifiedShips).toBe(ships)
@@ -291,21 +239,14 @@ describe("ship crew", () => {
         const planets = [capital]
         const ships = [dockedShip]
 
-        const [modifiedPlanets, modifiedShips] = crewShip(
-            player,
-            planets,
-            ships,
-            dockedShip,
-        )
+        const [modifiedPlanets, modifiedShips] = crewShip(player, planets, ships, dockedShip)
 
         expect(modifiedPlanets).not.toBe(planets)
         expect(modifiedShips).not.toBe(ships)
 
         const modifiedCapital = modifiedPlanets[0] as ColonizedPlanet
 
-        expect(modifiedCapital.population).toBe(
-            originalPopulation - dockedShip.requiredCrew,
-        )
+        expect(modifiedCapital.population).toBe(originalPopulation - dockedShip.requiredCrew)
         expect(modifiedShips[0].crew).toBe(dockedShip.requiredCrew)
     })
 })

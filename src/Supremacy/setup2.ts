@@ -8,13 +8,7 @@ import {
     planetTypes,
 } from "./entities"
 import { throwError } from "./utilities"
-import type {
-    PlayerAI,
-    Difficulty,
-    GameConfiguration,
-    PlayerConfiguration,
-    GameState,
-} from "./types"
+import type { PlayerAI, Difficulty, GameConfiguration, PlayerConfiguration, GameState } from "./types"
 
 // Maps the difficulty to the number of planets
 const planetsForDifficulty: { [K in Difficulty]: number } = {
@@ -38,20 +32,13 @@ const generatePlanets = (count: number, rnd: Random) => {
         gridIndex: 1 + index,
         name: "",
         type: "lifeless",
-        terraformedType:
-            rnd.choice([...planetTypes]) ??
-            throwError("Failed to choose random planet type"),
+        terraformedType: rnd.choice([...planetTypes]) ?? throwError("Failed to choose random planet type"),
         terraformDuration: rnd.int(12, 60),
     }))
 }
 
 // Initializes a capital planet for the player
-const initializeCapitalPlanet = (
-    owner: string,
-    ai: PlayerAI,
-    difficulty: Difficulty,
-    rnd: Random,
-): ColonizedPlanet => {
+const initializeCapitalPlanet = (owner: string, ai: PlayerAI, difficulty: Difficulty, rnd: Random): ColonizedPlanet => {
     const multiplier = ai ? 1 : difficultyPercentage[difficulty]
     const population = rnd.int(1000, 2000) * multiplier
     const credits = rnd.int(50000, 60000) * multiplier
@@ -115,26 +102,13 @@ export const setup = (
     const planets: Planet[] = generatePlanets(planetCount, rnd)
     const ships: Ship[] = []
     // Platoons are pre-created for simplicity
-    const platoons: Platoon[] = [
-        ...initializePlatoons(player1.id),
-        ...initializePlatoons(player2.id),
-    ]
+    const platoons: Platoon[] = [...initializePlatoons(player1.id), ...initializePlatoons(player2.id)]
 
-    const player1Capital = initializeCapitalPlanet(
-        player1.id,
-        player1.ai,
-        config.difficulty,
-        rnd,
-    )
+    const player1Capital = initializeCapitalPlanet(player1.id, player1.ai, config.difficulty, rnd)
     player1Capital.name = player1.ai ? "Enemy Base 1" : "Homebase"
     planets.unshift(player1Capital)
 
-    const player2Capital = initializeCapitalPlanet(
-        player2.id,
-        player2.ai,
-        config.difficulty,
-        rnd,
-    )
+    const player2Capital = initializeCapitalPlanet(player2.id, player2.ai, config.difficulty, rnd)
     player2Capital.name = player2.ai ? "Enemy Base 2" : "Homebase"
     planets.push(player2Capital)
 

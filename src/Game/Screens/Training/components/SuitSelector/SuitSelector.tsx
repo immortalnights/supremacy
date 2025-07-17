@@ -22,15 +22,10 @@ const images: { [key in SuitClass]: string } = {
 export default function SuitSelector({ platoon }: { platoon: Platoon }) {
     const { modifySuit } = useTrainingActions()
 
-    const data =
-        equipment.find((item) => item.id === platoon.suit) ??
-        throwError(`Failed to find suit {suit}`)
+    const data = equipment.find((item) => item.id === platoon.suit) ?? throwError(`Failed to find suit {suit}`)
 
     const suits = useMemo(
-        () =>
-            equipment
-                .filter((item) => item.type === "suit")
-                .sort((a, b) => a.power - b.power),
+        () => equipment.filter((item) => item.type === "suit").sort((a, b) => a.power - b.power),
         [equipment],
     )
 
@@ -52,11 +47,7 @@ export default function SuitSelector({ platoon }: { platoon: Platoon }) {
 
     return (
         <div style={{ padding: 12 }}>
-            <div>
-                {platoon.state === "equipped"
-                    ? "Platoon wearing"
-                    : `Suit Cost: ${data.cost} Cr.`}
-            </div>
+            <div>{platoon.state === "equipped" ? "Platoon wearing" : `Suit Cost: ${data.cost} Cr.`}</div>
             <div
                 style={{
                     background: "black",

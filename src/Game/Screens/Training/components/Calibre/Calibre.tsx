@@ -12,13 +12,7 @@ const calibre = {
     slow: training_slow,
 }
 
-export default function Calibre({
-    state,
-    calibre: value,
-}: {
-    state: PlatoonState
-    calibre: number
-}) {
+export default function Calibre({ state, calibre: value }: { state: PlatoonState; calibre: number }) {
     let src
     if (state === "standby") {
         src = calibre.paused

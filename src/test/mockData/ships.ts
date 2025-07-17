@@ -1,10 +1,4 @@
-import {
-    Atmos,
-    ShipDocked,
-    ShipInOrbit,
-    ShipInOuterSpace,
-    ShipOnSurface,
-} from "Supremacy/entities"
+import { Atmos, ShipDocked, ShipInOrbit, ShipInOuterSpace, ShipOnSurface } from "Supremacy/entities"
 import { colonizedPlanet } from "./planets"
 
 const baseShip = {

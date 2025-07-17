@@ -9,12 +9,5 @@ export default function PlanetGrid({ onClick }: { onClick: (planet: Planet) => v
     const planets = useAtomValue(planetsAtom)
     const filteredPlanets = planets.filter((planet) => planet.type !== "lifeless")
 
-    return (
-        <EntityGrid
-            entities={filteredPlanets}
-            fixedPositions={true}
-            localPlayer={localPlayer}
-            onClick={onClick}
-        />
-    )
+    return <EntityGrid entities={filteredPlanets} fixedPositions={true} localPlayer={localPlayer} onClick={onClick} />
 }

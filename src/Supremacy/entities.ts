@@ -164,34 +164,28 @@ export interface EquippedPlatoon extends BasePlatoon {
 export type Platoon = StandbyPlatoon | EquippedPlatoon
 
 // Type utilities
-export const isLifelessPlanet = (planet: Planet): planet is LifelessPlanet =>
-    planet.type === "lifeless"
+export const isLifelessPlanet = (planet: Planet): planet is LifelessPlanet => planet.type === "lifeless"
 
-export const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
-    planet.type !== "lifeless"
+export const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet => planet.type !== "lifeless"
 
 export const isShip = (obj: unknown): obj is Ship =>
     Boolean(obj && typeof obj === "object" && "id" in obj && "class" in obj)
 
-export const isAtmos = (ship: Ship): ship is Atmos =>
-    ship.class === "Atmosphere Processor"
+export const isAtmos = (ship: Ship): ship is Atmos => ship.class === "Atmosphere Processor"
 
-export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace =>
-    ship.position === "outer-space"
+export const isInOuterSpace = (ship: Ship): ship is ShipInOuterSpace => ship.position === "outer-space"
 
 export const isInOrbit = (ship: Ship): ship is ShipInOrbit => ship.position === "orbit"
 
 export const isOrbitingPlanet = (ship: Ship, planet: Planet): ship is ShipInOrbit =>
     isInOrbit(ship) && ship.location.planet === planet.id
 
-export const isDocked = (ship: Ship): ship is ShipDocked =>
-    ship.position === "docked" && !!ship.location.planet
+export const isDocked = (ship: Ship): ship is ShipDocked => ship.position === "docked" && !!ship.location.planet
 
 export const isDocketAtPlanet = (ship: Ship, planet: Planet): ship is ShipDocked =>
     isDocked(ship) && ship.location.planet === planet.id
 
-export const isOnSurface = (ship: Ship): ship is ShipOnSurface =>
-    ship.position === "surface"
+export const isOnSurface = (ship: Ship): ship is ShipOnSurface => ship.position === "surface"
 
 export const isOnPlanetSurface = (ship: Ship, planet: Planet): ship is ShipOnSurface =>
     isOnSurface(ship) && ship.location.planet === planet.id

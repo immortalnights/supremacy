@@ -1,35 +1,14 @@
 import { useActionData } from "react-router-dom"
-import {
-    store,
-    sessionAtom,
-    dateAtom,
-    planetsAtom,
-    shipsAtom,
-    platoonsAtom,
-} from "./store"
+import { store, sessionAtom, dateAtom, planetsAtom, shipsAtom, platoonsAtom } from "./store"
 import { GameConfiguration, GameData, GameSession } from "Supremacy/types"
 import { Navigate } from "react-router-dom"
 import { Platoon, Ship } from "Supremacy/entities"
-import {
-    DataChannelMessageHandler,
-    useManager,
-    usePeerConnection,
-} from "webrtc-lobby-lib"
+import { DataChannelMessageHandler, useManager, usePeerConnection } from "webrtc-lobby-lib"
 import { useCallback, useEffect, useState } from "react"
 import { useAtom } from "jotai"
-import {
-    initializeMultiplayerGame,
-    initializeSinglePlayerGame,
-    saveGame,
-} from "Supremacy/setup"
+import { initializeMultiplayerGame, initializeSinglePlayerGame, saveGame } from "Supremacy/setup"
 
-type SetupState =
-    | "initializing"
-    | "synchronizing"
-    | "creating"
-    | "waiting"
-    | "ready"
-    | "error"
+type SetupState = "initializing" | "synchronizing" | "creating" | "waiting" | "ready" | "error"
 
 const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void }) => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
@@ -110,16 +89,7 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
                 unsubscribe(peerMessageHandler)
             }
         }
-    }, [
-        localPlayer,
-        subscribe,
-        unsubscribe,
-        send,
-        setSession,
-        game,
-        hydrateAtoms,
-        onReady,
-    ])
+    }, [localPlayer, subscribe, unsubscribe, send, setSession, game, hydrateAtoms, onReady])
 
     useEffect(() => {
         switch (state) {
@@ -150,12 +120,7 @@ const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void
             }
             case "creating": {
                 if (localPlayer?.host && session?.player1?.id && session?.player2?.id) {
-                    const data = initializeMultiplayerGame(
-                        "Easy",
-                        8,
-                        session?.player1?.id,
-                        session?.player2?.id,
-                    )
+                    const data = initializeMultiplayerGame("Easy", 8, session?.player1?.id, session?.player2?.id)
                     hydrateAtoms(data)
                     send("initial-game-data", data)
                     setState("waiting")
@@ -208,11 +173,7 @@ export default function GameSetup() {
                 setup()
             } else {
                 const playerId = configuration.player1Id
-                const data = initializeSinglePlayerGame(
-                    configuration.difficulty,
-                    configuration.planets,
-                    playerId,
-                )
+                const data = initializeSinglePlayerGame(configuration.difficulty, configuration.planets, playerId)
 
                 const sessionData = {
                     id: crypto.randomUUID(),

@@ -19,13 +19,7 @@ import { MouseEvent, useEffect, useState } from "react"
 import { useDecommission, useSelectedColonizedPlanet } from "../../hooks"
 import { throwError } from "game-signaling-server/client"
 import { getModifierAmount } from "../../utilities"
-import {
-    useCrewShip,
-    useLoadCargo,
-    useLoadFuel,
-    useLoadPassengers,
-    useUnloadShip,
-} from "./actions"
+import { useCrewShip, useLoadCargo, useLoadFuel, useLoadPassengers, useUnloadShip } from "./actions"
 import Screen from "Game/components/Screen"
 import { useSession } from "Game/hooks/session"
 
@@ -73,13 +67,7 @@ function CargoItem({
     )
 }
 
-function ShipCargoDetails({
-    ship,
-    planet: { population },
-}: {
-    ship?: Ship
-    planet: ColonizedPlanet
-}) {
+function ShipCargoDetails({ ship, planet: { population } }: { ship?: Ship; planet: ColonizedPlanet }) {
     const totalCargo = ship ? 0 : undefined
     return (
         <div>
@@ -171,9 +159,7 @@ function ShipFuel({ ship }: { ship?: Ship }) {
 
 export default function Cargo() {
     const { localPlayer } = useSession()
-    const planet =
-        useSelectedColonizedPlanet() ??
-        throwError("Cannot view Cargo of lifeless planet")
+    const planet = useSelectedColonizedPlanet() ?? throwError("Cannot view Cargo of lifeless planet")
     const [selectedShipId, setSelectedShipId] = useState<string | undefined>(undefined)
     const ships = useAtomValue(shipsAtom)
     const selectedShip = ships.find((s) => s.id === selectedShipId)
@@ -206,10 +192,7 @@ export default function Cargo() {
     useEffect(() => {
         if (!selectedShip) {
             setSelectedShipId(
-                ships.filter(
-                    (ship) =>
-                        isDocketAtPlanet(ship, planet) && ship.owner === localPlayer,
-                )?.[0]?.id,
+                ships.filter((ship) => isDocketAtPlanet(ship, planet) && ship.owner === localPlayer)?.[0]?.id,
             )
         }
     }, [selectedShip, ships, planet])
@@ -232,11 +215,7 @@ export default function Cargo() {
                             <ShipFuel ship={selectedShip} />
                         </div>
                         <div>
-                            <Metadata
-                                label="Class"
-                                alignment="right"
-                                value={selectedShip?.class ?? ""}
-                            />
+                            <Metadata label="Class" alignment="right" value={selectedShip?.class ?? ""} />
                         </div>
                     </div>
                     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -252,36 +231,14 @@ export default function Cargo() {
                     </div>
                 </div>
                 <div>
-                    <Navigation
-                        items={["fleet", "surface", "overview", "shipyard", "training"]}
-                    />
+                    <Navigation items={["fleet", "surface", "overview", "shipyard", "training"]} />
                 </div>
             </div>
             <div style={{ display: "flex" }}>
-                <CargoItem
-                    cargo="food"
-                    label="Food"
-                    planet={planet}
-                    ship={selectedShip}
-                />
-                <CargoItem
-                    cargo="minerals"
-                    label="Minerals"
-                    planet={planet}
-                    ship={selectedShip}
-                />
-                <CargoItem
-                    cargo="fuels"
-                    label="Fuels"
-                    planet={planet}
-                    ship={selectedShip}
-                />
-                <CargoItem
-                    cargo="energy"
-                    label="Energy"
-                    planet={planet}
-                    ship={selectedShip}
-                />
+                <CargoItem cargo="food" label="Food" planet={planet} ship={selectedShip} />
+                <CargoItem cargo="minerals" label="Minerals" planet={planet} ship={selectedShip} />
+                <CargoItem cargo="fuels" label="Fuels" planet={planet} ship={selectedShip} />
+                <CargoItem cargo="energy" label="Energy" planet={planet} ship={selectedShip} />
             </div>
         </Screen>
     )

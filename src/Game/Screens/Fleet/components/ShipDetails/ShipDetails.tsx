@@ -11,15 +11,8 @@ export default function ShipDetails({ ship }: { ship?: Ship }) {
                     <Date alignment="right" />
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                    <Metadata
-                        label="Crew"
-                        value={ship?.requiredCrew === "remote" ? "Remote" : ship?.crew}
-                    />
-                    <Metadata
-                        label="Fuel"
-                        value={ship?.fuels}
-                        postfix={ship?.fuels !== "nuclear" ? "T." : ""}
-                    />
+                    <Metadata label="Crew" value={ship?.requiredCrew === "remote" ? "Remote" : ship?.crew} />
+                    <Metadata label="Fuel" value={ship?.fuels} postfix={ship?.fuels !== "nuclear" ? "T." : ""} />
                 </div>
             </div>
 

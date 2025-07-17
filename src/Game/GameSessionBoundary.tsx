@@ -2,15 +2,7 @@ import { useAtom } from "jotai"
 import { useCallback, useState, useEffect, lazy } from "react"
 import { useParams, Navigate } from "react-router-dom"
 import { Ship, Platoon } from "Supremacy/entities"
-import {
-    sessionAtom,
-    store,
-    simulationSpeedAtom,
-    dateAtom,
-    planetsAtom,
-    shipsAtom,
-    platoonsAtom,
-} from "./store"
+import { sessionAtom, store, simulationSpeedAtom, dateAtom, planetsAtom, shipsAtom, platoonsAtom } from "./store"
 import { GameData } from "Supremacy/types"
 import { loadSavedGame } from "Supremacy/setup"
 

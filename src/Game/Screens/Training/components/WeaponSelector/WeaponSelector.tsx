@@ -20,15 +20,10 @@ const images: { [key in WeaponClass]: string } = {
 export default function WeaponSelector({ platoon }: { platoon: Platoon }) {
     const { modifyWeapon } = useTrainingActions()
 
-    const data =
-        equipment.find((item) => item.id === platoon.weapon) ??
-        throwError(`Failed to find weapon {weapon}`)
+    const data = equipment.find((item) => item.id === platoon.weapon) ?? throwError(`Failed to find weapon {weapon}`)
 
     const weapons = useMemo(
-        () =>
-            equipment
-                .filter((item) => item.type === "weapon")
-                .sort((a, b) => a.power - b.power),
+        () => equipment.filter((item) => item.type === "weapon").sort((a, b) => a.power - b.power),
         [equipment],
     )
 
@@ -50,11 +45,7 @@ export default function WeaponSelector({ platoon }: { platoon: Platoon }) {
 
     return (
         <div style={{ padding: 12 }}>
-            <div>
-                {platoon.state === "equipped"
-                    ? "Carrying"
-                    : `Weapon Cost: ${data.cost} Cr.`}
-            </div>
+            <div>{platoon.state === "equipped" ? "Carrying" : `Weapon Cost: ${data.cost} Cr.`}</div>
             <div
                 style={{
                     background: "black",

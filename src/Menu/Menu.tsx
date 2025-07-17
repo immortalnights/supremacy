@@ -27,9 +27,7 @@ export default function Main() {
         <div>
             <MenuButton
                 disabled={!savedGame}
-                onClick={() =>
-                    savedGame ? navigate(`/Game/${savedGame.id}/`) : undefined
-                }
+                onClick={() => (savedGame ? navigate(`/Game/${savedGame.id}/`) : undefined)}
             >
                 Continue
             </MenuButton>

@@ -13,11 +13,7 @@ import Shipyard from "./Screens/Shipyard"
 import SolarSystem from "./Screens/SolarSystem"
 import Surface from "./Screens/Surface"
 import Training from "./Screens/Training"
-import {
-    AuthenticationWithRedirect,
-    Authentication,
-    CombatAuthentication,
-} from "./components/Authentication"
+import { AuthenticationWithRedirect, Authentication, CombatAuthentication } from "./components/Authentication"
 
 export const routes = {
     path: "Game/*",

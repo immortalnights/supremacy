@@ -25,13 +25,7 @@ const findRank = (value: number) => {
     return ranks[matchingKey as keyof typeof ranks]
 }
 
-export default function Rank({
-    state,
-    calibre,
-}: {
-    state: PlatoonState
-    calibre: number
-}) {
+export default function Rank({ state, calibre }: { state: PlatoonState; calibre: number }) {
     const rank = state !== "standby" ? findRank(calibre) : ""
 
     return <Metadata label="Rank" alignment="right" value={rank} />

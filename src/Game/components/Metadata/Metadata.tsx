@@ -25,8 +25,7 @@ export function MetadataValue({
 }: MetadataValueType) {
     const actualValue = value ?? defaultValue
     // FIXME
-    const displayValue =
-        format && actualValue ? format(actualValue as never) : actualValue
+    const displayValue = format && actualValue ? format(actualValue as never) : actualValue
 
     return (
         <div
@@ -53,13 +52,7 @@ export function MetadataValue({
     )
 }
 
-export function MetadataLabel({
-    label,
-    textAlign,
-}: {
-    label: string
-    textAlign?: MetadataAlignment
-}) {
+export function MetadataLabel({ label, textAlign }: { label: string; textAlign?: MetadataAlignment }) {
     return (
         <label
             id={`${label}-label`}
@@ -88,13 +81,7 @@ export default function Metadata({
     alignment?: MetadataAlignment
     style?: CSSProperties
 }) {
-    const value = (
-        <MetadataValue
-            label={label}
-            {...rest}
-            textAlign={alignment === "left" ? "right" : "left"}
-        />
-    )
+    const value = <MetadataValue label={label} {...rest} textAlign={alignment === "left" ? "right" : "left"} />
 
     return (
         <div

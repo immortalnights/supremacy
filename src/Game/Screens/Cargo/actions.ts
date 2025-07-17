@@ -17,11 +17,9 @@ export function useUnloadShip() {
 export function useLoadPassengers() {
     const { exec } = useContext(CommandContext)
 
-    const load = (ship: Ship, quantity: number) =>
-        exec("modify-passengers", { ship, quantity })
+    const load = (ship: Ship, quantity: number) => exec("modify-passengers", { ship, quantity })
 
-    const unload = (ship: Ship, quantity: number) =>
-        exec("modify-passengers", { ship, quantity })
+    const unload = (ship: Ship, quantity: number) => exec("modify-passengers", { ship, quantity })
 
     return [load, unload]
 }
@@ -29,11 +27,9 @@ export function useLoadPassengers() {
 export function useLoadFuel() {
     const { exec } = useContext(CommandContext)
 
-    const load = (ship: Ship, quantity: number) =>
-        exec("modify-fuel", { ship, quantity })
+    const load = (ship: Ship, quantity: number) => exec("modify-fuel", { ship, quantity })
 
-    const unload = (ship: Ship, quantity: number) =>
-        exec("modify-fuel", { ship, quantity })
+    const unload = (ship: Ship, quantity: number) => exec("modify-fuel", { ship, quantity })
 
     return [load, unload]
 }
@@ -41,11 +37,9 @@ export function useLoadFuel() {
 export function useLoadCargo() {
     const { exec } = useContext(CommandContext)
 
-    const load = (ship: Ship, cargo: Resource, quantity: number) =>
-        exec("load-cargo", { ship, cargo, quantity })
+    const load = (ship: Ship, cargo: Resource, quantity: number) => exec("load-cargo", { ship, cargo, quantity })
 
-    const unload = (ship: Ship, cargo: Resource, quantity: number) =>
-        exec("unload-cargo", { ship, cargo, quantity })
+    const unload = (ship: Ship, cargo: Resource, quantity: number) => exec("unload-cargo", { ship, cargo, quantity })
 
     return [load, unload]
 }

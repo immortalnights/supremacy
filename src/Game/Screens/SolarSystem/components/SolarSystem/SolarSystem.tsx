@@ -26,10 +26,7 @@ function placeItems(height: number, count: number) {
     // Place additional items
     let currentPos = topSpacing + actualSpacing
     for (let i = 0; i < actualCount - 2; i++) {
-        const realPos = Math.max(
-            currentPos + Math.random() * (actualSpacing - 3) - actualSpacing / 2,
-            minSpacing,
-        )
+        const realPos = Math.max(currentPos + Math.random() * (actualSpacing - 3) - actualSpacing / 2, minSpacing)
         positions.push(Math.round(realPos))
         currentPos += actualSpacing
     }

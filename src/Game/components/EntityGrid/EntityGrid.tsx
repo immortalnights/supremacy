@@ -8,13 +8,7 @@ type Entity = {
     gridIndex?: number
 }
 
-function Cell({
-    color = "#715fc3",
-    children,
-}: {
-    color?: string
-    children?: ReactNode
-}) {
+function Cell({ color = "#715fc3", children }: { color?: string; children?: ReactNode }) {
     return (
         <td
             // key={entity?.id ??}
@@ -105,9 +99,7 @@ function EntityRow<T extends Entity>({
                 .fill(undefined)
                 .map((_, col) => {
                     const index = col + row * 4
-                    const entity = fixedPositions
-                        ? gridEntity(entities, index)
-                        : entities[index]
+                    const entity = fixedPositions ? gridEntity(entities, index) : entities[index]
 
                     return entity ? (
                         <EntityCell

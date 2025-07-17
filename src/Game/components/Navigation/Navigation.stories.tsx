@@ -18,17 +18,6 @@ type Story = StoryObj<typeof meta>
 
 export const Overview: Story = {
     args: {
-        items: [
-            "overview",
-            "shipyard",
-            "fleet",
-            "atmos",
-            "training",
-            "cargo",
-            "surface",
-            "combat",
-            "spy",
-            "save",
-        ],
+        items: ["overview", "shipyard", "fleet", "atmos", "training", "cargo", "surface", "combat", "spy", "save"],
     },
 }

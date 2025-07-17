@@ -37,10 +37,7 @@ export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value))
 }
 
-export const nextFreeIndex = <T extends { location: { index: number } }>(
-    items: T[],
-    maxIndex: number,
-): number => {
+export const nextFreeIndex = <T extends { location: { index: number } }>(items: T[], maxIndex: number): number => {
     let availableIndex
     for (let index = 0; index < maxIndex; index++) {
         const item = items.find((item) => item.location.index === index)

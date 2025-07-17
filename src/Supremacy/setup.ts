@@ -1,25 +1,12 @@
-import {
-    Planet,
-    LifelessPlanet,
-    ColonizedPlanet,
-    ResourceQuantities,
-    Platoon,
-    Ship,
-    planetTypes,
-} from "./entities"
+import { Planet, LifelessPlanet, ColonizedPlanet, ResourceQuantities, Platoon, Ship, planetTypes } from "./entities"
 import { Difficulty, GameData, GameSession, LastSaveData, SaveGameData } from "./types"
 import { random, randomChoice } from "./utilities"
 
-const initialPlanetPopulation = (difficulty: Difficulty, ai: boolean) =>
-    random(1000, 2000)
+const initialPlanetPopulation = (difficulty: Difficulty, ai: boolean) => random(1000, 2000)
 
-const initialPlanetCredits = (difficulty: Difficulty, ai: boolean) =>
-    random(50000, 60000)
+const initialPlanetCredits = (difficulty: Difficulty, ai: boolean) => random(50000, 60000)
 
-const initialPlanetResources = (
-    difficulty: Difficulty,
-    ai: boolean,
-): ResourceQuantities => {
+const initialPlanetResources = (difficulty: Difficulty, ai: boolean): ResourceQuantities => {
     return {
         food: random(3000, 5000),
         minerals: random(2000, 5000),
@@ -88,11 +75,7 @@ const initializePlatoons = (playerId: string, count: number = 24) =>
         weapon: "rifle",
     }))
 
-export const initializeSinglePlayerGame = (
-    difficulty: Difficulty,
-    planetCount: number,
-    playerId: string,
-): GameData => {
+export const initializeSinglePlayerGame = (difficulty: Difficulty, planetCount: number, playerId: string): GameData => {
     const defaultPlanets = generatePlanets(planetCount)
 
     defaultPlanets.unshift(initializeAICapitalPlanet(difficulty))
@@ -128,25 +111,9 @@ export const initializeMultiplayerGame = (
     const credits = initialPlanetCredits(difficulty, true)
     const resources = initialPlanetResources(difficulty, false)
 
-    defaultPlanets.unshift(
-        initializeCapitalPlanet(
-            "Homebase!",
-            player2Id,
-            0,
-            population,
-            credits,
-            resources,
-        ),
-    )
+    defaultPlanets.unshift(initializeCapitalPlanet("Homebase!", player2Id, 0, population, credits, resources))
     defaultPlanets.push(
-        initializeCapitalPlanet(
-            "Homebase!",
-            player1Id,
-            planetCount - 1,
-            population,
-            credits,
-            resources,
-        ),
+        initializeCapitalPlanet("Homebase!", player1Id, planetCount - 1, population, credits, resources),
     )
 
     return {

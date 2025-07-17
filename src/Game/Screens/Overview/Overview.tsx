@@ -11,14 +11,7 @@ import dockedIcon from "/images/docked.png"
 import { useAtomValue, useSetAtom } from "jotai"
 import { planetsAtom, selectedPlanetAtom, sessionAtom, shipsAtom } from "../../store"
 import { isColonizedPlanet, Planet, ShipPosition } from "Supremacy/entities"
-import {
-    FormEvent,
-    KeyboardEvent,
-    FocusEvent,
-    useState,
-    ChangeEvent,
-    useMemo,
-} from "react"
+import { FormEvent, KeyboardEvent, FocusEvent, useState, ChangeEvent, useMemo } from "react"
 import { useRenamePlanet, useTransferCredits } from "./actions"
 import PlanetGrid from "../../components/PlanetGrid"
 import { useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
@@ -94,10 +87,7 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 
     const handleTransferToCapital = () => {
         const otherPlanets = planets.filter(
-            (planet) =>
-                isColonizedPlanet(planet) &&
-                planet.owner === localPlayer &&
-                !planet.capital,
+            (planet) => isColonizedPlanet(planet) && planet.owner === localPlayer && !planet.capital,
         )
         if (otherPlanets.length === 0) {
             notify("You have no other planets")
@@ -122,19 +112,14 @@ function SelectedPlanet({ onRename }: { onRename: (planet: Planet) => void }) {
 }
 
 function PlanetShipOverview() {
-    const [viewPosition, setViewPosition] =
-        useState<Exclude<ShipPosition, "outer-space">>("orbit")
+    const [viewPosition, setViewPosition] = useState<Exclude<ShipPosition, "outer-space">>("orbit")
     const { localPlayer } = useSession()
     const selectedPlanet = useSelectedPlanet()
     const ships = useAtomValue(shipsAtom)
 
     const filteredShips =
         selectedPlanet?.type !== "lifeless" && selectedPlanet?.owner === localPlayer
-            ? ships.filter(
-                  (ship) =>
-                      ship.position === viewPosition &&
-                      ship.location.planet === selectedPlanet?.id,
-              )
+            ? ships.filter((ship) => ship.position === viewPosition && ship.location.planet === selectedPlanet?.id)
             : []
 
     const message = useMemo(() => {
@@ -227,10 +212,7 @@ export default function Overview() {
                         </>
                     )}
                     <div style={{ display: "flex", flexDirection: "row" }}>
-                        <Navigation
-                            items={["combat", "fleet", "cargo"]}
-                            direction="column"
-                        />
+                        <Navigation items={["combat", "fleet", "cargo"]} direction="column" />
                         <PlanetGrid onClick={handleSelectPlanet} />
                     </div>
                 </div>
