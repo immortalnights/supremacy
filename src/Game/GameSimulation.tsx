@@ -1,5 +1,5 @@
 import { Getter, Setter, useAtom, useAtomValue } from "jotai"
-import { Outlet } from "react-router-dom"
+import { Outlet, useNavigate } from "react-router-dom"
 import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulationSpeedAtom } from "./store"
 import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
@@ -164,13 +164,28 @@ export function Simulation() {
 }
 
 export function GameSimulation() {
-    const session = useAtomValue(sessionAtom)
+    // Might have a Game state, loaded from local storage, but wont have a Session state.
+    const state = useAtomValue(gameStateAtom)
+    const [session, setSession] = useAtom(sessionAtom)
 
-    if (!session) {
-        throw Error("Missing session data!")
+    if (state && !session) {
+        // FIXME duplicated in Setup
+        setSession({
+            id: crypto.randomUUID(),
+            multiplayer: false,
+            host: true,
+            difficulty: state.difficulty,
+            created: new Date().toISOString(),
+            playtime: 0,
+            player1: { ...state.players[0] },
+            player2: { ...state.players[0] },
+            localPlayer: state.players[0].id,
+        })
     }
 
-    return (
+    console.log("GameSimulation", state, session)
+
+    return session ? (
         <>
             {/* <Provider store={store}> */}
             <Simulation />
@@ -179,5 +194,5 @@ export function GameSimulation() {
             </CommandProvider>
             {/* </Provider> */}
         </>
-    )
+    ) : null
 }

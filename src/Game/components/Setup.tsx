@@ -1,11 +1,17 @@
 import { Navigate, useActionData } from "react-router-dom"
 import Screen from "./Screen"
-import { GameConfiguration, GameSession } from "#Supremacy/types"
 import { useCallback, useEffect, useState } from "react"
-import { GameState, setup } from "#Supremacy/index"
+import {
+    type GameState,
+    setup,
+    type Planet,
+    type Platoon,
+    type Ship,
+    type GameConfiguration,
+    type GameSession,
+} from "Supremacy"
 import { dateAtom, gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, store } from "Game/store"
-import { useAtom, useAtomValue } from "jotai"
-import { Planet, Platoon, Ship } from "#Supremacy/entities"
+import { useAtom, useSetAtom, useAtomValue } from "jotai"
 
 const useHydrateAtoms = () => {
     return useCallback(({ planets, ships, platoons }: { planets: Planet[]; ships: Ship[]; platoons: Platoon[] }) => {
@@ -77,9 +83,10 @@ const useSetupSinglePlayer = () => {
 export default function Setup() {
     // FIXME need to update types
     const configuration = useActionData() as GameConfiguration | undefined
-    const session = useAtomValue(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom)
     const [progress, setProgress] = useState<"Loading" | "Ready">("Loading")
     const setupSinglePlayer = useSetupSinglePlayer()
+    const setGameState = useSetAtom(gameStateAtom)
 
     console.debug("Game configuration", configuration)
 
@@ -88,8 +95,42 @@ export default function Setup() {
         if (!configuration) {
             console.error("Invalid or missing game configuration")
         } else if (configuration.multiplayer) {
+            // TODO
         } else {
-            setupSinglePlayer(configuration)
+            // setupSinglePlayer(configuration)
+            const state = setup(
+                {
+                    seed: Math.random().toString(),
+                    name: "Single Player Game", // configuration.name,
+                    difficulty: configuration.difficulty,
+                },
+                {
+                    id: configuration.player1Id,
+                    name: configuration.player1Name,
+                    host: true,
+                    ai: false,
+                },
+                {
+                    id: crypto.randomUUID(),
+                    name: `AI ${configuration.difficulty}`,
+                    host: false,
+                    ai: "Easy",
+                },
+            )
+            // FIXME is state needed?
+            setSession({
+                id: crypto.randomUUID(),
+                multiplayer: false,
+                host: true,
+                difficulty: state.difficulty,
+                created: new Date().toISOString(),
+                playtime: 0,
+                player1: { ...state.players[0] },
+                player2: { ...state.players[0] },
+                localPlayer: state.players[0].id,
+            })
+
+            setGameState(state)
             setProgress("Ready")
         }
     }, [])

@@ -5,7 +5,7 @@ import { useAtomValue } from "jotai"
 export function useDate() {
     const date = useAtomValue(dateAtom)
 
-    const month = 1 + (date % DAYS_PER_YEAR)
+    const month = date % DAYS_PER_YEAR
     const year = 2000 + Math.floor(date / DAYS_PER_YEAR)
 
     return `${month}/${year}`

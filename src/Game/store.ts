@@ -1,4 +1,5 @@
 import { atom, createStore } from "jotai"
+import { atomWithStorage } from "jotai/utils"
 import {
     type Planet,
     type Ship,
@@ -18,30 +19,24 @@ import { isOnPlanet, isOnShip } from "Supremacy/platoons"
 import { GameSession, GameState } from "Supremacy/types"
 
 export const store = createStore()
+
+export const gameStateAtom = atomWithStorage<GameState | null>("last-saved-game", null, undefined, { getOnInit: true })
+export const dateAtom = atom((get) => get(gameStateAtom)?.date ?? -1)
 export const planetsAtom = atom((get) => get(gameStateAtom)?.planets ?? [])
 export const shipsAtom = atom((get) => get(gameStateAtom)?.ships ?? [])
 export const platoonsAtom = atom((get) => get(gameStateAtom)?.platoons ?? [])
 export const playersAtom = atom((get) => get(gameStateAtom)?.players ?? [])
+export const simulationSpeedAtom = atom((get) => get(gameStateAtom)?.speed ?? "Normal")
 
-export const gameStateAtom = atom<GameState>()
-
-export const simulationSpeedAtom = atom<"slow" | "paused" | "normal" | "fast">("paused")
 export const sessionAtom = atom<GameSession>()
-export const dateAtom = atom<number>(0)
-// export const planetsAtom = atom<Planet[]>([])
 const userSelectedPlanetIdAtom = atom<string | undefined>(undefined)
 export const selectedPlanetAtom = atom(
-    async (get) => {
+    (get) => {
         const session = get(sessionAtom)
         const planetId = get(userSelectedPlanetIdAtom)
         let planets = get(planetsAtom)
 
         let planet
-        if (planets instanceof Promise) {
-            console.debug("waiting for planets!")
-            planets = await planets
-        }
-
         if (planetId) {
             planet = planets.find((p) => p.id === planetId)
             // console.debug("User selected planet", planetId, planet)
@@ -57,8 +52,6 @@ export const selectedPlanetAtom = atom(
         set(userSelectedPlanetIdAtom, planet.id)
     },
 )
-// export const shipsAtom = atom<Ship[]>([])
-// export const platoonsAtom = atom<Platoon[]>([])
 
 export const shipsInOuterSpaceAtom = atom((get) => ({
     filter: () => get(shipsAtom).filter((ship) => isInOuterSpace(ship)),

@@ -8,7 +8,7 @@ import { Navigate, Outlet } from "react-router-dom"
 const useCanAccessPlanet = () => {
     const { localPlayer } = useSession()
     const selectedPlanet = useSelectedPlanet()
-    return selectedPlanet && selectedPlanet.type !== "lifeless" && selectedPlanet.owner === localPlayer
+    return localPlayer && selectedPlanet && selectedPlanet.type !== "lifeless" && selectedPlanet.owner === localPlayer
 }
 
 const useIsPlanetContested = () => {
@@ -19,7 +19,7 @@ const useIsPlanetContested = () => {
 
     // A side effect is that the player is immediately navigated away
     // from a contested planet as soon as it becomes none contested.
-    return ships.length > 0 || platoons.length > 0
+    return localPlayer && (ships.length > 0 || platoons.length > 0)
 }
 
 export function AuthenticationWithRedirect() {

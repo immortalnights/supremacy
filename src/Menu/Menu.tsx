@@ -1,22 +1,13 @@
 import { useManager } from "webrtc-lobby-lib"
 import { useNavigate } from "react-router-dom"
-import { useMemo } from "react"
-import { LastSaveData } from "Supremacy/types"
 import { MenuButton } from "components/Button"
+import { useAtomValue } from "jotai"
+import { gameStateAtom } from "Game/store"
 
 export default function Main() {
     const { joinLobby } = useManager()
     const navigate = useNavigate()
-    const savedGame = useMemo((): LastSaveData | undefined => {
-        const lastSave = localStorage.getItem("last-save")
-        let data
-
-        if (lastSave) {
-            data = JSON.parse(lastSave) as LastSaveData
-        }
-
-        return data
-    }, [])
+    const savedGame = useAtomValue(gameStateAtom)
 
     const handleMultiplayerClick = async () => {
         await joinLobby()
