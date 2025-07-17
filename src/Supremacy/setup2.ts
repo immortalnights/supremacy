@@ -104,12 +104,15 @@ export const setup = (
     // Platoons are pre-created for simplicity
     const platoons: Platoon[] = [...initializePlatoons(player1.id), ...initializePlatoons(player2.id)]
 
+    let aiIndex = 0
+
     const player1Capital = initializeCapitalPlanet(player1.id, player1.ai, config.difficulty, rnd)
-    player1Capital.name = player1.ai ? "Enemy Base 1" : "Homebase"
+    player1Capital.name = player1.ai ? `EnemyBase${++aiIndex}` : "Homebase"
     planets.unshift(player1Capital)
 
     const player2Capital = initializeCapitalPlanet(player2.id, player2.ai, config.difficulty, rnd)
-    player2Capital.name = player2.ai ? "Enemy Base 2" : "Homebase"
+    player2Capital.name = player2.ai ? `EnemyBase${++aiIndex}` : "Homebase"
+    player2Capital.gridIndex = planets.length
     planets.push(player2Capital)
 
     return {
@@ -122,6 +125,6 @@ export const setup = (
         planets,
         ships,
         platoons,
-        speed: "Paused",
+        speed: "Normal",
     }
 }
