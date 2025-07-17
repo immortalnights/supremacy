@@ -1,6 +1,5 @@
 import { RouteObject } from "react-router-dom"
 import { Difficulty, GameConfiguration } from "Supremacy/types"
-import GameSetup from "./GameSetup"
 import Setup from "./components/Setup"
 import { GameSimulation } from "./GameSimulation"
 import GameSessionBoundary from "./GameSessionBoundary"
@@ -43,7 +42,7 @@ export const routes = {
             path: ":id",
             // Simulation is here
             Component: GameSimulation,
-            ErrorBoundary: GameSessionBoundary,
+            // ErrorBoundary: GameSessionBoundary,
             children: [
                 {
                     index: true,
