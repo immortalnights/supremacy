@@ -1,5 +1,7 @@
 import { Planet, Platoon, Ship } from "./entities"
 
+export type GameAction = (state: GameState) => GameState
+
 export type PlayerAI = false | "Easy" | "Normal" | "Hard" | "Elite"
 
 export interface PlayerConfiguration {
@@ -25,6 +27,8 @@ export interface GameState {
     planets: Planet[]
     ships: Ship[]
     platoons: Platoon[]
+    // Turbo is not available to typical players, but used for testing.
+    speed: "Paused" | "Slow" | "Normal" | "Fast" | "Turbo"
 }
 
 // ---
