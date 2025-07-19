@@ -1,6 +1,6 @@
-import { Getter, Setter, useAtom, useAtomValue } from "jotai"
+import { Getter, Setter, useAtom, useAtomValue, useSetAtom } from "jotai"
 import { Outlet, useNavigate } from "react-router-dom"
-import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulationSpeedAtom } from "./store"
+import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulationSpeedAtom, store } from "./store"
 import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
@@ -10,13 +10,7 @@ import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
 import { GameState, play } from "Supremacy"
 import { useSession } from "./hooks/session"
 import { gameStateAtom } from "./store"
-
-const speedMap = {
-    slow: 2,
-    paused: 0,
-    normal: 1,
-    fast: 0.5,
-} as const
+import { useCommandContext } from "./context/CommandContext"
 
 const useMultiplayerSync = () => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
@@ -138,7 +132,10 @@ function Simulation1() {
 
 export function Simulation() {
     console.log("Starting game loop...")
-    const [gameState, setGameState] = useAtom(gameStateAtom)
+    const gameState = store.get(gameStateAtom)
+    // const gameState = useAtomValue(gameStateAtom)
+    const setGameState = useSetAtom(gameStateAtom)
+    const { queue } = useCommandContext()
 
     useEffect(() => {
         if (!gameState) return
@@ -146,7 +143,7 @@ export function Simulation() {
         const control = { timer: undefined, stop: false }
 
         // FIXME Need to setGameState, but it causes re-render
-        play(gameState, [], control, undefined)
+        play(gameState, queue, control, setGameState)
             .then(() => {
                 console.log("Game loop finished")
             })
@@ -158,41 +155,24 @@ export function Simulation() {
             control.stop = true
             // Optionally trigger save here
         }
-    }, [gameState, setGameState])
+    }, [])
 
     return null
 }
 
 export function GameSimulation() {
     // Might have a Game state, loaded from local storage, but wont have a Session state.
-    const state = useAtomValue(gameStateAtom)
-    const [session, setSession] = useAtom(sessionAtom)
 
-    if (state && !session) {
-        // FIXME duplicated in Setup
-        setSession({
-            id: crypto.randomUUID(),
-            multiplayer: false,
-            host: true,
-            difficulty: state.difficulty,
-            created: new Date().toISOString(),
-            playtime: 0,
-            player1: { ...state.players[0] },
-            player2: { ...state.players[0] },
-            localPlayer: state.players[0].id,
-        })
-    }
+    // console.log("GameSimulation", state, session)
 
-    console.log("GameSimulation", state, session)
-
-    return session ? (
+    return (
         <>
             {/* <Provider store={store}> */}
-            <Simulation />
             <CommandProvider>
+                <Simulation />
                 <Outlet />
             </CommandProvider>
             {/* </Provider> */}
         </>
-    ) : null
+    )
 }

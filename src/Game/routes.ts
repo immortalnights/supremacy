@@ -39,63 +39,69 @@ export const routes = {
             Component: Setup,
         },
         {
+            Component: GameSessionBoundary,
             path: ":id",
-            // Simulation is here
-            Component: GameSimulation,
-            // ErrorBoundary: GameSessionBoundary,
             children: [
                 {
-                    index: true,
-                    path: "SolarSystem",
-                    Component: SolarSystem,
-                },
-                {
-                    path: "Shipyard",
-                    Component: Shipyard,
-                },
-                {
-                    path: "Training",
-                    Component: Training,
-                },
-
-                {
-                    Component: AuthenticationWithRedirect,
+                    path: "",
+                    // Simulation is here
+                    Component: GameSimulation,
+                    // ErrorBoundary: GameSessionBoundary,
                     children: [
                         {
-                            path: "Overview",
-                            Component: Overview,
+                            index: true,
+                            path: "SolarSystem",
+                            Component: SolarSystem,
                         },
-                    ],
-                },
+                        {
+                            path: "Shipyard",
+                            Component: Shipyard,
+                        },
+                        {
+                            path: "Training",
+                            Component: Training,
+                        },
 
-                {
-                    Component: Authentication,
-                    children: [
                         {
-                            path: "Overview",
-                            Component: Overview,
+                            Component: AuthenticationWithRedirect,
+                            children: [
+                                {
+                                    path: "Overview",
+                                    Component: Overview,
+                                },
+                            ],
                         },
-                        {
-                            path: "Fleet",
-                            Component: Fleet,
-                        },
-                        {
-                            path: "Surface",
-                            Component: Surface,
-                        },
-                        {
-                            path: "Cargo",
-                            Component: Cargo,
-                        },
-                    ],
-                },
 
-                {
-                    Component: CombatAuthentication,
-                    children: [
                         {
-                            path: "Combat",
-                            Component: Combat,
+                            Component: Authentication,
+                            children: [
+                                {
+                                    path: "Overview",
+                                    Component: Overview,
+                                },
+                                {
+                                    path: "Fleet",
+                                    Component: Fleet,
+                                },
+                                {
+                                    path: "Surface",
+                                    Component: Surface,
+                                },
+                                {
+                                    path: "Cargo",
+                                    Component: Cargo,
+                                },
+                            ],
+                        },
+
+                        {
+                            Component: CombatAuthentication,
+                            children: [
+                                {
+                                    path: "Combat",
+                                    Component: Combat,
+                                },
+                            ],
                         },
                     ],
                 },

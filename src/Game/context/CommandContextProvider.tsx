@@ -1,9 +1,9 @@
 import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
-import { ReactNode, useCallback, useEffect, useMemo } from "react"
+import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
 import { usePeerConnection } from "webrtc-lobby-lib"
-import { CommandContext } from "./CommandContext"
+import { CommandContext, ExecFn } from "./CommandContext"
 import {
     crewShip,
     decommissionShip,
@@ -21,6 +21,7 @@ import { applyModifyTax, applyRenamePlanet, modifyAggression, transferCreditsToC
 import { useSetNotification } from "../components/Notification"
 import { Platoon } from "Supremacy/entities"
 import { useSession } from "Game/hooks/session"
+import { Action, actionHandlers, ActionObject, ActionPayloads, GameAction, translateAction } from "#Supremacy/actions"
 
 const isPlatoon = (obj: unknown): obj is Platoon => {
     return Boolean(obj && typeof obj === "object" && "id" in obj)
@@ -31,8 +32,27 @@ export function CommandProvider({ children }: { children: ReactNode }) {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { localPlayer, host } = useSession()
     const notify = useSetNotification()
+    const eventQueue = useRef<GameAction[]>([])
 
-    const exec = useAtomCallback(
+    const exec = useCallback<ExecFn>(
+        (command, data) => {
+            if (host) {
+                // Queue local player action
+                console.log(`Queue local player action ${command}`, data)
+                // TODO validate before queuing? Even thought the UI already has...
+                eventQueue.current.push(translateAction({ type: command, payload: data, playerId: localPlayer }))
+            } else {
+                console.log(`Send remote player action ${command}`, data)
+                send("player-action", {
+                    command,
+                    data,
+                })
+            }
+        },
+        [host, send, localPlayer, eventQueue],
+    )
+
+    const execOLD = useAtomCallback(
         useCallback(
             (get: Getter, set: Setter, command: string, data: any) => {
                 console.log("exec", command, data)
@@ -238,7 +258,10 @@ export function CommandProvider({ children }: { children: ReactNode }) {
             console.log(`${host ? "Host" : "Player"} received`, name, body)
             // Action from none host player
             if (name === "player-action") {
-                exec(body.command, body.data)
+                // FIXME validate the data
+                const { command, data } = body
+                console.log(`Queue local player action ${command}`, data)
+                eventQueue.current.push(translateAction({ type: command, payload: data, playerId: localPlayer }))
             } else if (name === "update-world") {
                 update(body)
             }
@@ -249,13 +272,14 @@ export function CommandProvider({ children }: { children: ReactNode }) {
         return () => {
             unsubscribe(peerMessageHandler)
         }
-    }, [host, exec, update, send, subscribe, unsubscribe])
+    }, [host, update, send, subscribe, unsubscribe, eventQueue])
 
     const value = useMemo(
         () => ({
+            queue: eventQueue.current,
             exec,
         }),
-        [exec],
+        [eventQueue, exec],
     )
 
     return <CommandContext.Provider value={value}>{children}</CommandContext.Provider>

@@ -1,7 +1,5 @@
 import { Planet, Platoon, Ship } from "./entities"
 
-export type GameAction = (state: GameState) => GameState
-
 export type PlayerAI = false | "Easy" | "Normal" | "Hard" | "Elite"
 
 export interface PlayerConfiguration {

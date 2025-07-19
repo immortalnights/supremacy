@@ -298,9 +298,13 @@ export const play = async (
             const now = performance.now()
 
             // Process all queued actions (human + AI)
-            while (actionQueue.length > 0) {
-                const action = actionQueue.shift()
-                if (action) state = action(state)
+            if (actionQueue.length > 0) {
+                state = { ...state }
+                while (actionQueue.length > 0) {
+                    const action = actionQueue.shift()
+                    console.log("Processing action", action)
+                    if (action) state = action(state)
+                }
             }
 
             // Game tick
