@@ -1,7 +1,7 @@
 import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
-import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
+import { dateAtom, gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { CommandContext, ExecFn } from "./CommandContext"
 import {
@@ -247,9 +247,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
 
     const update = useAtomCallback(
         useCallback((get: Getter, set: Setter, data: any) => {
-            set(planetsAtom, data.planets)
-            set(shipsAtom, data.ships)
-            set(platoonsAtom, data.platoons)
+            set(gameStateAtom, data)
         }, []),
     )
 

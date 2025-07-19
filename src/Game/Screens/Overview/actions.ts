@@ -11,7 +11,7 @@ export function useRenamePlanet() {
 
     return (planet: Planet, name: string) => {
         if (canRenamePlanet(localPlayer, planet, name)) {
-            exec("rename-planet", { id: planet.id, newName: name })
+            exec("rename-planet", { id: planet.id, name: name })
         } else {
             console.warn("Cannot rename planet", planet.id, "to", name)
         }
@@ -23,7 +23,7 @@ export function useAdjustTax() {
 
     return (planet: ColonizedPlanet, change: number) => {
         const newTax = clamp(planet.tax + change, 0, 100)
-        exec("set-planet-tax", { planet: planet.id, newTax })
+        exec("set-planet-tax", { id: planet.id, tax: newTax })
     }
 }
 

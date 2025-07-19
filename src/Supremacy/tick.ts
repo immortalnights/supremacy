@@ -12,7 +12,8 @@ import {
 import { PLANET_POPULATION_LIMIT } from "./consts"
 import { isColonizedPlanet } from "./entities"
 import { calculateGrowth } from "./planets"
-import type { GameAction, GameState } from "./types"
+import type { GameState } from "./types"
+import { GameAction } from "./actions"
 
 // Pure simulation function
 export const simulatePlatoons = (platoons: Platoon[], planets: Planet[]): [Platoon[], Planet[]] => {

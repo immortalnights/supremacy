@@ -1,34 +1,35 @@
-import { canRenamePlanet, applyRenamePlanet } from "./actions/planet"
+import { canRenamePlanet, applyRenamePlanet, canModifyTax, applyModifyTax } from "./actions/planet"
+import { ColonizedPlanet, isColonizedPlanet } from "./entities"
 import { GameState } from "./types"
 
 export type GameAction = (state: GameState) => GameState
 
 export interface ActionPayloads {
-    "rename-planet": { id: string; newName: string }
-    "set-planet-tax": { planetId: string; tax: number }
+    "rename-planet": { id: string; name: string }
+    "set-planet-tax": { id: string; tax: number }
     "transfer-planet-credits": {
-        fromPlanetId: string
-        toPlanetId: string
+        fromid: string
+        toid: string
         amount: number
     }
-    "modify-planet-aggression": { planetId: string; aggression: number }
-    "purchase-ship": { shipType: string; planetId: string }
-    "crew-ship": { shipId: string; crew: number }
-    "unload-ship": { shipId: string }
-    "decommission-ship": { shipId: string }
-    "modify-passengers": { shipId: string; passengers: number }
-    "modify-fuel": { shipId: string; fuel: number }
-    "load-cargo": { shipId: string; cargoType: string; amount: number }
-    "unload-cargo": { shipId: string; cargoType: string; amount: number }
-    "transition-ship": { shipId: string; destination: string }
-    "transfer-ship": { shipId: string; toPlayerId: string }
-    "toggle-ship": { shipId: string }
-    "modify-platoon-troops": { platoonId: string; troops: number }
-    "modify-platoon-suit": { platoonId: string; suitType: string }
-    "modify-platoon-weapon": { platoonId: string; weaponType: string }
-    "equip-platoon": { platoonId: string; equipment: string }
-    "load-platoon": { platoonId: string; shipId: string }
-    "unload-platoon": { platoonId: string; shipId: string }
+    "modify-planet-aggression": { id: string; aggression: number }
+    "purchase-ship": { shipType: string; id: string }
+    "crew-ship": { id: string; crew: number }
+    "unload-ship": { id: string }
+    "decommission-ship": { id: string }
+    "modify-passengers": { id: string; passengers: number }
+    "modify-fuel": { id: string; fuel: number }
+    "load-cargo": { id: string; cargoType: string; amount: number }
+    "unload-cargo": { id: string; cargoType: string; amount: number }
+    "transition-ship": { id: string; destination: string }
+    "transfer-ship": { id: string; planetId: string }
+    "toggle-ship": { id: string }
+    "modify-platoon-troops": { id: string; troops: number }
+    "modify-platoon-suit": { id: string; suitType: string }
+    "modify-platoon-weapon": { id: string; weaponType: string }
+    "equip-platoon": { id: string; equipment: string }
+    "load-platoon": { id: string; shipId: string }
+    "unload-platoon": { id: string; shipId: string }
 }
 
 export type Action = keyof ActionPayloads
@@ -56,176 +57,205 @@ type ActionHandler<T extends Action = Action> = {
     apply: (action: ActionObject<T>, state: GameState) => GameState
 }
 
+type ArrayKeys<T> = {
+    [K in keyof T]: T[K] extends Array<any> ? K : never
+}[keyof T]
+
+type ArrayElement<T> = T extends (infer U)[] ? U : never
+
+// Helper function to apply changes to the game state
+const apply = <K extends ArrayKeys<GameState>>(
+    state: GameState,
+    key: K,
+    value: ArrayElement<GameState[K]>,
+): GameState => {
+    const cpy = [...state[key]]
+    const index = cpy.findIndex((item) => item.id === value.id)
+    if (index !== -1) {
+        cpy[index] = value
+    } else {
+        console.error(`Item with id ${value.id} not found in ${key}`)
+    }
+    return {
+        ...state,
+        [key]: cpy,
+    }
+}
+
 export const actionHandlers: {
     [K in Action]: ActionHandler<K>
 } = {
     "rename-planet": {
         validate: (action, state) => {
             const planet = state.planets.find((p) => p.id === action.payload.id)
-            return !!planet && canRenamePlanet(action.playerId, planet, action.payload.newName)
+            return !!planet && canRenamePlanet(action.playerId, planet, action.payload.name)
         },
         apply: (action, state) => {
-            state.planets = applyRenamePlanet(state.planets, action.payload.id, action.payload.newName)
-            return state
+            const planet = state.planets.find((p) => p.id === action.payload.id) as ColonizedPlanet
+            const modifiedPlanet = applyRenamePlanet(planet, action.payload.name)
+            return apply(state, "planets", modifiedPlanet)
         },
     },
     "set-planet-tax": {
-        validate: function (action: ActionObject<"set-planet-tax">, state: GameState): boolean {
-            throw new Error("Function not implemented.")
+        validate: function (action, state): boolean {
+            const planet = state.planets.find((p) => p.id === action.payload.id)
+            return !!planet && canModifyTax(action.playerId, planet, action.payload.tax)
         },
-        apply: function (action: ActionObject<"set-planet-tax">, state: GameState): GameState {
-            throw new Error("Function not implemented.")
+        apply: function (action, state): GameState {
+            const planet = state.planets.find((p) => p.id === action.payload.id) as ColonizedPlanet
+            const modifiedPlanet = applyModifyTax(planet, action.payload.tax)
+            return apply(state, "planets", modifiedPlanet)
         },
     },
     "transfer-planet-credits": {
-        validate: function (action: ActionObject<"transfer-planet-credits">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"transfer-planet-credits">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-planet-aggression": {
-        validate: function (action: ActionObject<"modify-planet-aggression">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-planet-aggression">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "purchase-ship": {
-        validate: function (action: ActionObject<"purchase-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"purchase-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "crew-ship": {
-        validate: function (action: ActionObject<"crew-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"crew-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "unload-ship": {
-        validate: function (action: ActionObject<"unload-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"unload-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "decommission-ship": {
-        validate: function (action: ActionObject<"decommission-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"decommission-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-passengers": {
-        validate: function (action: ActionObject<"modify-passengers">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-passengers">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-fuel": {
-        validate: function (action: ActionObject<"modify-fuel">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-fuel">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "load-cargo": {
-        validate: function (action: ActionObject<"load-cargo">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"load-cargo">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "unload-cargo": {
-        validate: function (action: ActionObject<"unload-cargo">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"unload-cargo">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "transition-ship": {
-        validate: function (action: ActionObject<"transition-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"transition-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "transfer-ship": {
-        validate: function (action: ActionObject<"transfer-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"transfer-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "toggle-ship": {
-        validate: function (action: ActionObject<"toggle-ship">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"toggle-ship">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-platoon-troops": {
-        validate: function (action: ActionObject<"modify-platoon-troops">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-platoon-troops">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-platoon-suit": {
-        validate: function (action: ActionObject<"modify-platoon-suit">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-platoon-suit">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "modify-platoon-weapon": {
-        validate: function (action: ActionObject<"modify-platoon-weapon">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"modify-platoon-weapon">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "equip-platoon": {
-        validate: function (action: ActionObject<"equip-platoon">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"equip-platoon">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "load-platoon": {
-        validate: function (action: ActionObject<"load-platoon">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"load-platoon">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
     "unload-platoon": {
-        validate: function (action: ActionObject<"unload-platoon">, state: GameState): boolean {
+        validate: function (action, state): boolean {
             throw new Error("Function not implemented.")
         },
-        apply: function (action: ActionObject<"unload-platoon">, state: GameState): GameState {
+        apply: function (action, state): GameState {
             throw new Error("Function not implemented.")
         },
     },
