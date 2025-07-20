@@ -136,6 +136,7 @@ export function Simulation() {
     // const gameState = useAtomValue(gameStateAtom)
     const setGameState = useSetAtom(gameStateAtom)
     const { queue } = useCommandContext()
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (!gameState) return
@@ -146,6 +147,7 @@ export function Simulation() {
         play(gameState, queue, control, setGameState)
             .then(() => {
                 console.log("Game loop finished")
+                navigate("/Game/Ended", { replace: true })
             })
             .catch((err) => {
                 console.error("Error during game loop:", err)

@@ -1,6 +1,9 @@
 import { canRenamePlanet, applyRenamePlanet, canModifyTax, applyModifyTax } from "./actions/planet"
-import { ColonizedPlanet, isColonizedPlanet } from "./entities"
+import { applyPurchaseShip, canPurchaseShip } from "./actions/ships"
+import { getShipBlueprint } from "./data/ships"
+import { ColonizedPlanet, ShipClass, ShipDocked } from "./entities"
 import { GameState } from "./types"
+import { nextFreeIndex } from "./utilities"
 
 export type GameAction = (state: GameState) => GameState
 
@@ -13,7 +16,7 @@ export interface ActionPayloads {
         amount: number
     }
     "modify-planet-aggression": { id: string; aggression: number }
-    "purchase-ship": { shipType: string; id: string }
+    "purchase-ship": { class: ShipClass; name: string }
     "crew-ship": { id: string; crew: number }
     "unload-ship": { id: string }
     "decommission-ship": { id: string }
@@ -23,7 +26,7 @@ export interface ActionPayloads {
     "unload-cargo": { id: string; cargoType: string; amount: number }
     "transition-ship": { id: string; destination: string }
     "transfer-ship": { id: string; planetId: string }
-    "toggle-ship": { id: string }
+    "toggle-ship": { id: string; active?: boolean }
     "modify-platoon-troops": { id: string; troops: number }
     "modify-platoon-suit": { id: string; suitType: string }
     "modify-platoon-weapon": { id: string; weaponType: string }
@@ -82,6 +85,18 @@ const apply = <K extends ArrayKeys<GameState>>(
     }
 }
 
+// Helper function to append to the game state
+const append = <K extends ArrayKeys<GameState>>(
+    state: GameState,
+    key: K,
+    value: ArrayElement<GameState[K]>,
+): GameState => {
+    return {
+        ...state,
+        [key]: [...state[key], value],
+    }
+}
+
 export const actionHandlers: {
     [K in Action]: ActionHandler<K>
 } = {
@@ -125,10 +140,54 @@ export const actionHandlers: {
     },
     "purchase-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.owner === action.playerId && p.capital,
+            )
+            const ownedShips = state.ships.filter(
+                (ship) => ship.owner === action.playerId && ship.position === "docked",
+            )
+            const blueprint = getShipBlueprint(action.payload.class)
+
+            return (
+                !!planet &&
+                canPurchaseShip(action.playerId, planet, ownedShips, blueprint, state.date, state.difficulty)
+            )
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.owner === action.playerId && p.capital,
+            )
+            if (!planet) {
+                throw new Error(`No capital planet found for player ${action.playerId}`)
+            }
+
+            const ownedShips = state.ships.filter(
+                (ship) => ship.owner === action.playerId && ship.position === "docked",
+            )
+            const ownedShipsOfClass = ownedShips.filter((ship) => ship.class === action.payload.class).length
+            const dockedShips = ownedShips.filter(
+                (ship): ship is ShipDocked => ship.position === "docked" && ship.location.planet === planet.id,
+            )
+            console.debug(`Owned ships ${ownedShips.length}; docked ships ${dockedShips.length}`)
+            const availableBayIndex = nextFreeIndex(dockedShips, 3)
+            if (availableBayIndex === undefined) {
+                throw Error(`Failed to identify free location index for ${planet.id} with ships ${dockedShips.length}`)
+            }
+            const blueprint = getShipBlueprint(action.payload.class)
+
+            const payload = action.payload
+            const [modifiedPlanet, modifiedShip] = applyPurchaseShip(
+                planet,
+                availableBayIndex,
+                blueprint,
+                payload.name || `${blueprint.shortName}${ownedShipsOfClass + 1}`,
+                state.date,
+                state.difficulty,
+            )
+
+            state = apply(state, "planets", modifiedPlanet)
+            state = append(state, "ships", modifiedShip)
+            return state
         },
     },
     "crew-ship": {

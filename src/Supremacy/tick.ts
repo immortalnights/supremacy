@@ -1,285 +1,71 @@
-import {
-    Atmos,
-    ColonizedPlanet,
-    LifelessPlanet,
-    Planet,
-    Platoon,
-    Ship,
-    ShipInOrbit,
-    ShipInOuterSpace,
-    ShipOnSurface,
-} from "./entities"
-import { PLANET_POPULATION_LIMIT } from "./consts"
+import { ColonizedPlanet } from "./entities"
 import { isColonizedPlanet } from "./entities"
-import { calculateGrowth } from "./planets"
 import type { GameState } from "./types"
-import { GameAction } from "./actions"
-
-// Pure simulation function
-export const simulatePlatoons = (platoons: Platoon[], planets: Planet[]): [Platoon[], Planet[]] => {
-    return [platoons, planets]
-}
-
-const gatherFood = (ship: Ship, planet?: Planet) => {
-    let modifiedShip = ship
-    let modifiedPlanet
-    if (planet && isColonizedPlanet(planet)) {
-        if (ship.position === "surface" && ship.active) {
-            if (planet.energy > 1) {
-                modifiedPlanet = {
-                    ...planet,
-                    energy: planet.energy - 1,
-                    food: planet.food + 12,
-                } satisfies ColonizedPlanet
-            } else {
-                modifiedShip = { ...ship, active: false }
-            }
-        }
-    }
-
-    return [modifiedShip, modifiedPlanet] as const
-}
-
-const gatherFuelAndMinerals = (ship: Ship, planet?: Planet) => {
-    let modifiedShip = ship
-    let modifiedPlanet
-    if (planet && isColonizedPlanet(planet)) {
-        if (ship.position === "surface" && ship.active) {
-            if (planet.energy > 1) {
-                modifiedPlanet = {
-                    ...planet,
-                    energy: planet.energy - 1,
-                    fuels: planet.fuels + 7,
-                    minerals: planet.minerals + 2,
-                } satisfies ColonizedPlanet
-            } else {
-                modifiedShip = { ...ship, active: false }
-            }
-        }
-    }
-
-    return [modifiedShip, modifiedPlanet] as const
-}
-
-const gatherEnergy = (ship: Ship, planet?: Planet) => {
-    let modifiedShip = ship
-    let modifiedPlanet
-    if (planet && isColonizedPlanet(planet) && ship.position === "orbit") {
-        modifiedPlanet = { ...planet, energy: planet.energy + 6 }
-        modifiedShip = ship
-    } else {
-        modifiedShip = ship
-    }
-
-    return [modifiedShip, modifiedPlanet] as const
-}
-
-const terraformPlanet = (ship: Atmos, planet: LifelessPlanet) => {
-    let modifiedShip = { ...ship } as Atmos & ShipOnSurface
-    let modifiedPlanet
-    if (ship.terraforming.remaining === 0) {
-        modifiedPlanet = {
-            id: planet.id,
-            gridIndex: planet.gridIndex,
-            name: "unnamed", // FIXME
-            type: planet.terraformedType,
-            owner: ship.owner,
-            capital: false,
-            credits: 0,
-            food: 0,
-            minerals: 0,
-            fuels: 0,
-            energy: 0,
-            population: 2000, // FIXME
-            morale: 75,
-            growth: 0,
-            tax: 25,
-            aggression: {},
-        } as ColonizedPlanet
-        modifiedShip.active = false
-    } else {
-        modifiedShip.terraforming.remaining -= 1
-    }
-
-    return [modifiedShip, modifiedPlanet] as const
-}
-
-const simulateTravel = (ship: Ship): Ship => {
-    let modifiedShip
-    if (ship.position === "outer-space") {
-        const destination = ship.heading.to
-
-        modifiedShip = {
-            ...ship,
-            position: "orbit" as const,
-            location: { planet: destination },
-        }
-    } else {
-        modifiedShip = ship
-    }
-    return modifiedShip
-}
-
-// Pure simulation function
-export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet[]] => {
-    // console.log(`Simulating ${ships.length} ships`)
-    const getPlanet = (ship: Ship) =>
-        ship.position !== "outer-space"
-            ? modifiedPlanets.find((planet) => planet.id === ship.location.planet)
-            : undefined
-
-    const modifiedPlanets = [...planets]
-    const modifiedShips = ships.map((ship) => {
-        let modifiedShip: Ship = ship
-        let modifiedPlanet: Planet | undefined
-        switch (ship.class) {
-            case "B-29 Battle Cruiser": {
-                modifiedShip = simulateTravel(modifiedShip)
-                break
-            }
-            case "Solar-Satellite Generator": {
-                const planet = getPlanet(modifiedShip)
-                ;[modifiedShip, modifiedPlanet] = gatherEnergy(modifiedShip, planet)
-                modifiedShip = simulateTravel(modifiedShip)
-                break
-            }
-            case "Atmosphere Processor": {
-                const planet = getPlanet(modifiedShip)
-
-                if (planet?.type === "lifeless" && ship.position === "surface" && ship.active) {
-                    ;[modifiedShip, modifiedPlanet] = terraformPlanet(modifiedShip as Atmos, planet)
-                } else if (ship.position === "outer-space") {
-                    modifiedShip = simulateTravel(modifiedShip) as Atmos
-                    // Atmos automatically lands on the destination planet
-                    if (modifiedShip.position === "orbit") {
-                        const terraformPlanet = getPlanet(modifiedShip)
-
-                        if (!terraformPlanet) {
-                            throw new Error(
-                                `Failed to find planet ${modifiedShip.location.planet} which ship is orbiting`,
-                            )
-                        }
-
-                        let terraforming
-                        if (terraformPlanet.type === "lifeless") {
-                            terraforming = {
-                                duration: terraformPlanet.terraformDuration,
-                                remaining: terraformPlanet.terraformDuration,
-                            }
-                        }
-
-                        modifiedShip = {
-                            ...modifiedShip,
-                            position: "surface",
-                            location: {
-                                planet: terraformPlanet.id,
-                                index: 0,
-                            },
-                            terraforming,
-                            active: !!terraforming,
-                        }
-                    }
-                }
-
-                break
-            }
-            case "Cargo Store / Carrier": {
-                modifiedShip = simulateTravel(modifiedShip)
-                break
-            }
-            case "Core Mining Station": {
-                const planet = getPlanet(ship)
-                ;[modifiedShip, modifiedPlanet] = gatherFuelAndMinerals(modifiedShip, planet)
-                modifiedShip = simulateTravel(modifiedShip)
-                break
-            }
-            case "Horticultural Station": {
-                const planet = getPlanet(ship)
-                ;[modifiedShip, modifiedPlanet] = gatherFood(modifiedShip, planet)
-                modifiedShip = simulateTravel(modifiedShip)
-                break
-            }
-        }
-
-        if (modifiedPlanet) {
-            const index = planets.findIndex((planet) => planet.id === modifiedPlanet.id)
-            modifiedPlanets[index] = modifiedPlanet
-        }
-
-        return modifiedShip
-    })
-
-    return [modifiedShips, modifiedPlanets] as const
-}
-
-const calculateMorale = ({ morale, tax, food }: ColonizedPlanet) => {
-    if (food === 0) {
-        morale = 1
-    } else {
-        const targetMorale = 100 - tax
-        if (morale > targetMorale) {
-            morale -= 1
-        } else if (morale < targetMorale) {
-            morale += 1
-        }
-    }
-
-    return morale
-}
-
-const simulatePlanet = (planet: ColonizedPlanet): Planet => {
-    const modifiedPlanet = { ...planet }
-
-    // Adjust morale
-    modifiedPlanet.morale = calculateMorale(modifiedPlanet)
-    // Adjust growth
-    modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
-    // Apply population growth
-    // Consume food
-    modifiedPlanet.food = Math.max(Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004), 0)
-    // eslint-disable-next-line no-constant-condition
-    if (false) {
-        modifiedPlanet.population = Math.min(
-            modifiedPlanet.population + Math.floor(modifiedPlanet.population * (modifiedPlanet.growth / 100)),
-            PLANET_POPULATION_LIMIT,
-        )
-    }
-    // Collect taxes
-    // FIXME tax should only be applied every _other_ day
-    modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
-
-    return modifiedPlanet
-}
-
-// Pure simulation function
-export const simulatePlanets = (planets: Planet[]): Planet[] => {
-    return planets.map((planet) => {
-        let modifiedPlanet
-        if (planet.type === "lifeless") {
-            modifiedPlanet = planet
-        } else {
-            modifiedPlanet = simulatePlanet(planet)
-        }
-
-        return modifiedPlanet
-    })
-}
+import { GameAction, translateAction } from "./actions"
+import { processAI } from "./ai"
+import { simulatePlanets } from "./simulate"
 
 /**
  * Modify game state by simulating one tick
  */
-export const tick = (state: GameState): GameState => {
-    return { ...state }
+export const tick = (initialState: GameState): GameState => {
+    let state = { ...initialState }
+
+    state.planets = simulatePlanets([...state.planets])
+
+    // Check win/loose conditions
+    // For each player,
+    // Check that they own all their capital
+    // Check that they have available population
+    const eliminated = state.players.filter((player) => {
+        const ownedPlanets = state.planets.filter(
+            (planet) => planet.type !== "lifeless" && planet.owner === player.id,
+        ) as ColonizedPlanet[]
+        const ownedShips = state.ships.filter((ship) => ship.owner === player.id)
+        const ownedPlatoons = state.platoons.filter((platoon) => platoon.owner === player.id)
+
+        const hasCapital = ownedPlanets.some((planet) => planet.capital)
+        const hasPopulationOnPlanets = ownedPlanets.reduce((sum, planet) => sum + planet.population, 0) > 0
+        const hasPopulationInShips = ownedShips.reduce((sum, ship) => sum + ship.crew + ship.passengers, 0) > 0
+        const hasPopulationInPlatoons = ownedPlatoons.reduce((sum, platoon) => sum + platoon.size, 0) > 0
+
+        let eliminated = false
+        if (!hasCapital) {
+            // Player is eliminated
+            eliminated = true
+            console.log(`Player ${player.name} (${player.id}) has last their capital and is eliminated`)
+        } else if (!hasPopulationOnPlanets && !hasPopulationInShips && !hasPopulationInPlatoons) {
+            // Player is eliminated
+            eliminated = true
+            console.log(`Player ${player.name} (${player.id}) has no population left and is eliminated`)
+        }
+
+        return eliminated
+    })
+
+    if (eliminated.length > 0) {
+        state.players = [...state.players].map((player) => {
+            let modifiedPlayer
+            if (eliminated.some((e) => e.id === player.id)) {
+                modifiedPlayer = { ...player, eliminated: true }
+            }
+            return modifiedPlayer || player
+        })
+    }
+
+    return state
 }
 
 export const play = async (
     initialState: GameState,
     actionQueue: GameAction[],
-    control: { timer?: number; stop?: boolean },
+    control: { timer?: number | NodeJS.Timeout; stop?: boolean },
     onStateChange?: (state: GameState) => void,
 ) => {
     let state = initialState
-    state.speed = "Normal"
+    if (state.speed === "Paused") {
+        state.speed = "Normal"
+    }
 
     let tickCount = 0
     return new Promise<void>((resolve) => {
@@ -293,7 +79,9 @@ export const play = async (
 
         let lastTickTime = performance.now()
         let lastAIActionTime = performance.now()
-        const aiActionInterval = 3000
+        const aiActionInterval = speedIntervals[state.speed] * 3
+        let lastSummaryTime = performance.now()
+        const summaryInterval = 10000
 
         const gameLoop = () => {
             const now = performance.now()
@@ -303,7 +91,7 @@ export const play = async (
                 state = { ...state }
                 while (actionQueue.length > 0) {
                     const action = actionQueue.shift()
-                    console.log("Processing action", action)
+                    console.debug("Processing action", action)
                     if (action) state = action(state)
                 }
             }
@@ -312,7 +100,7 @@ export const play = async (
             const tickInterval = speedIntervals[state.speed]
             if (state.speed !== "Paused" && now - lastTickTime >= tickInterval) {
                 tickCount++
-                // console.log("Game tick", tickCount)
+                // console.log("Game tick", tickCount, now - lastTickTime)
                 state = tick(state)
                 lastTickTime = now
             }
@@ -321,18 +109,39 @@ export const play = async (
             if (now - lastAIActionTime >= aiActionInterval) {
                 for (const player of state.players) {
                     if (player.ai) {
-                        console.log("AI tick")
-                        // Example: actionQueue.push(someAIAction)
+                        console.debug(`Processing AI actions for ${player.name} (${player.id})`)
+                        const action = processAI(
+                            { id: player.id, difficulty: player.ai },
+                            state.planets,
+                            state.ships,
+                            state.platoons,
+                        )
+
+                        if (action) {
+                            console.debug("AI action:", action)
+                            actionQueue.push(translateAction(action))
+                        }
                     }
                 }
                 lastAIActionTime = now
             }
 
-            if (!control.stop) {
-                control.timer = window.setTimeout(gameLoop, 1000 / 60)
+            if (now - lastSummaryTime >= summaryInterval) {
+                const colonizedPlanets = state.planets.filter(isColonizedPlanet)
+                const population = colonizedPlanets.reduce((sum, planet) => sum + planet.population, 0)
+
+                console.debug(
+                    `Game Summary: Date: ${state.date}, Planets: ${colonizedPlanets.length}, Population: ${population}`,
+                )
+
+                lastSummaryTime = now
+            }
+
+            if (state.players.every((player) => !player.eliminated) && !control.stop) {
+                control.timer = setTimeout(gameLoop, 1000 / 60)
             } else {
                 if (control.timer) {
-                    window.clearTimeout(control.timer)
+                    clearTimeout(control.timer)
                     control.timer = undefined
                 }
                 resolve()
@@ -341,7 +150,7 @@ export const play = async (
             onStateChange?.(state)
         }
 
-        window.setTimeout(gameLoop, 0)
+        setTimeout(gameLoop, 0)
     })
 }
 

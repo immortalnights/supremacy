@@ -37,7 +37,10 @@ export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value))
 }
 
-export const nextFreeIndex = <T extends { location: { index: number } }>(items: T[], maxIndex: number): number => {
+export const nextFreeIndex = <T extends { location: { index: number } }>(
+    items: T[],
+    maxIndex: number,
+): number | undefined => {
     let availableIndex
     for (let index = 0; index < maxIndex; index++) {
         const item = items.find((item) => item.location.index === index)
@@ -45,12 +48,6 @@ export const nextFreeIndex = <T extends { location: { index: number } }>(items: 
             availableIndex = index
             break
         }
-    }
-
-    // default to max, should never happen but should just result in
-    // a display issue if it does.
-    if (availableIndex === undefined) {
-        availableIndex = maxIndex
     }
 
     return availableIndex

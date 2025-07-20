@@ -1,12 +1,13 @@
 import { Planet, Platoon, Ship } from "./entities"
 
-export type PlayerAI = false | "Easy" | "Normal" | "Hard" | "Elite"
+export type AIDifficulty = "Easy" | "Normal" | "Hard" | "Elite"
 
-export interface PlayerConfiguration {
+export interface Player {
     id: string
     name: string
     host: boolean
-    ai: PlayerAI
+    ai: AIDifficulty | false
+    eliminated: boolean
 }
 
 export interface GameConfiguration {
@@ -21,7 +22,7 @@ export interface GameState {
     seed: string
     difficulty: Difficulty
     date: number
-    players: PlayerConfiguration[]
+    players: Player[]
     planets: Planet[]
     ships: Ship[]
     platoons: Platoon[]

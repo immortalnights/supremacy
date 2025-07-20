@@ -13,6 +13,7 @@ import SolarSystem from "./Screens/SolarSystem"
 import Surface from "./Screens/Surface"
 import Training from "./Screens/Training"
 import { AuthenticationWithRedirect, Authentication, CombatAuthentication } from "./components/Authentication"
+import GameEnded from "./GameEnded"
 
 export const routes = {
     path: "Game/*",
@@ -39,8 +40,8 @@ export const routes = {
             Component: Setup,
         },
         {
-            Component: GameSessionBoundary,
             path: ":id",
+            Component: GameSessionBoundary,
             children: [
                 {
                     path: "",
@@ -106,6 +107,10 @@ export const routes = {
                     ],
                 },
             ],
+        },
+        {
+            path: "Ended",
+            Component: GameEnded,
         },
     ],
 } satisfies RouteObject

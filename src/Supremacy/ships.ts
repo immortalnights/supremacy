@@ -29,74 +29,6 @@ export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
     "outer-space": ["orbit"],
 }
 
-export const canPurchaseAtmos = (date: number, owned: number) => {
-    // Unlock on the first day of the second year
-    const unlock_day = import.meta.env.MODE === "development" ? 1 : 1 + DAYS_PER_YEAR
-    let available = false
-
-    if (date < unlock_day) {
-        console.error(`Cannot purchase Atmosphere Processor yet (${date})`)
-    } else if (owned > 0) {
-        console.error("Cannot own more than one Atmosphere Processor")
-    } else {
-        available = true
-    }
-
-    return available
-}
-
-export const canAffordShip = (
-    planet: ColonizedPlanet,
-    cost: ShipBlueprint["cost"],
-    difficulty: Difficulty,
-): boolean => {
-    let canAfford = true
-    if (planet.credits < cost.credits) {
-        canAfford = false
-        // console.error(
-        //     `Cannot afford ship, missing ${cost.credits} credits (have ${planet.credits})`,
-        // )
-    }
-
-    if (difficulty === "Normal" || difficulty === "Hard") {
-        if (planet.energy < cost.energy) {
-            canAfford = false
-            // console.error(
-            //     `Cannot afford ship, missing ${cost.energy} energy (have ${planet.energy})`,
-            // )
-        }
-    }
-
-    if (difficulty === "Hard") {
-        if (planet.minerals < cost.minerals) {
-            canAfford = false
-            // console.error(
-            //     `Cannot afford ship, missing ${cost.minerals} minerals (have ${planet.minerals})`,
-            // )
-        }
-    }
-
-    return canAfford
-}
-
-export const deductShipCost = (
-    planet: ColonizedPlanet,
-    cost: ShipBlueprint["cost"],
-    difficulty: Difficulty,
-): ColonizedPlanet => {
-    planet.credits = Math.max(planet.credits - cost.credits, 0)
-
-    if (difficulty === "Normal" || difficulty === "Hard") {
-        planet.energy = Math.max(planet.energy - cost.energy, 0)
-    }
-
-    if (difficulty === "Hard") {
-        planet.minerals = Math.max(planet.minerals - cost.minerals, 0)
-    }
-
-    return planet
-}
-
 export const getShipCurrentCargoAmount = (ship: Ship) =>
     Object.entries(ship.cargo).reduce((prevValue, [_cargo, quantity]) => prevValue + quantity, 0)
 
@@ -142,101 +74,6 @@ const canModifyShipAtPlanet = (player: string, ship: Ship, planet: Planet): bool
         ok = true
     }
     return ok
-}
-
-const commissionShip = (ship: ShipBlueprint, name: string, planet: ColonizedPlanet, bayIndex: number): Ship => {
-    const requiredCrew = ship.requiredCrew === 0 ? "remote" : ship.requiredCrew
-    const fuels = ship.capacity.fuels === 0 ? "nuclear" : 0
-    return {
-        id: crypto.randomUUID(),
-        name,
-        description: ship.description,
-        owner: planet.owner,
-        class: ship.class,
-        requiredCrew,
-        crew: 0,
-        fuels,
-        passengers: 0,
-        capacity: { ...ship.capacity },
-        position: "docked",
-        location: {
-            planet: planet.id,
-            index: bayIndex,
-        },
-        cargo: {
-            food: 0,
-            minerals: 0,
-            fuels: 0,
-            energy: 0,
-        },
-        value: ship.cost.credits,
-    }
-}
-
-export const canPurchaseShip = (
-    capital: ColonizedPlanet,
-    ships: Ship[],
-    blueprint: ShipBlueprint,
-    date: number,
-    difficulty: Difficulty,
-) => {
-    let canPurchase = false
-    const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
-    if (dockedShips.length >= 3) {
-        console.error("Cannot purchase ship, capital has no available docking bays")
-    } else if (!canAffordShip(capital, blueprint.cost, difficulty)) {
-        console.log("Cannot afford ship")
-    } else {
-        const totalOwnedShips = ships.filter((ship) => ship.owner === capital.owner).length
-        const ownedShips = ships.filter((ship) => ship.class === blueprint.class && ship.owner === capital.owner).length
-
-        if (totalOwnedShips > 32) {
-            console.error(`Player ${capital.owner} cannot own more than 32 ships`)
-        } else if (blueprint.class === "Atmosphere Processor" && !canPurchaseAtmos(date, ownedShips)) {
-            console.error("Cannot purchase Atmosphere Processor")
-        } else {
-            canPurchase = true
-        }
-    }
-
-    return canPurchase
-}
-
-export const purchaseShip = (
-    player: string,
-    planets: Planet[],
-    ships: Ship[],
-    blueprint: ShipBlueprint,
-    name: string,
-    date: number,
-    difficulty: Difficulty,
-) => {
-    let modifiedPlanets
-    let modifiedShips
-    // Purchases always get applied to the players capital, regardless of the selected planet
-    const [capitalIndex, capital] = getPlayerCapital(planets, player)
-
-    // Count ships in planet docking bay
-    const dockedShips = ships.filter((ship) => isDocketAtPlanet(ship, capital))
-
-    if (canPurchaseShip(capital, ships, blueprint, date, difficulty)) {
-        const availableBayIndex = nextFreeIndex(dockedShips, 3)
-        if (!availableBayIndex) {
-            console.assert(`Failed to identify free location index for ${capital.id} with ships ${dockedShips}`)
-        }
-
-        modifiedPlanets = [...planets]
-        const modifiedPlanet = { ...capital }
-
-        deductShipCost(modifiedPlanet, blueprint.cost, difficulty)
-
-        modifiedPlanets[capitalIndex] = modifiedPlanet
-
-        const newShip = commissionShip(blueprint, name, modifiedPlanet, availableBayIndex)
-        modifiedShips = [...ships, newShip]
-    }
-
-    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
 }
 
 export const canCrewShip = (player: string, ship: Ship, planet: Planet) => {
@@ -547,7 +384,7 @@ export const transitionShip = (
                             position: "docked",
                             location: {
                                 planet: planet.id,
-                                index: nextFreeIndex(dockedShips, 3),
+                                index: !nextFreeIndex(dockedShips, 3),
                             },
                         }
                     }

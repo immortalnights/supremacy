@@ -8,7 +8,7 @@ import {
     planetTypes,
 } from "./entities"
 import { throwError } from "./utilities"
-import type { PlayerAI, Difficulty, GameConfiguration, PlayerConfiguration, GameState } from "./types"
+import type { AIDifficulty, Difficulty, GameConfiguration, Player, GameState } from "./types"
 
 // Maps the difficulty to the number of planets
 const planetsForDifficulty: { [K in Difficulty]: number } = {
@@ -31,14 +31,19 @@ const generatePlanets = (count: number, rnd: Random) => {
         id: crypto.randomUUID(),
         gridIndex: 1 + index,
         name: "",
-        type: "lifeless",
+        type: "lifeless" as const,
         terraformedType: rnd.choice([...planetTypes]) ?? throwError("Failed to choose random planet type"),
         terraformDuration: rnd.int(12, 60),
     }))
 }
 
 // Initializes a capital planet for the player
-const initializeCapitalPlanet = (owner: string, ai: PlayerAI, difficulty: Difficulty, rnd: Random): ColonizedPlanet => {
+const initializeCapitalPlanet = (
+    owner: string,
+    ai: AIDifficulty,
+    difficulty: Difficulty,
+    rnd: Random,
+): ColonizedPlanet => {
     const multiplier = ai ? 1 : difficultyPercentage[difficulty]
     const population = rnd.int(1000, 2000) * multiplier
     const credits = rnd.int(50000, 60000) * multiplier
@@ -49,9 +54,9 @@ const initializeCapitalPlanet = (owner: string, ai: PlayerAI, difficulty: Diffic
 
     return {
         id: crypto.randomUUID(),
-        name: "",
+        name: "Capital",
         gridIndex: 0,
-        type: "metropolis",
+        type: "metropolis" as const,
         owner: owner,
         capital: true,
         population,
@@ -87,11 +92,7 @@ const initializePlatoons = (owner: string, count: number = 24) => {
 /**
  *
  */
-export const setup = (
-    config: GameConfiguration,
-    player1: PlayerConfiguration,
-    player2: PlayerConfiguration,
-): GameState => {
+export const setup = (config: GameConfiguration, player1: Player, player2: Player): GameState => {
     const seed = config.seed ?? crypto.randomUUID()
     const rnd = random.clone()
     rnd.use(seed)
@@ -104,14 +105,12 @@ export const setup = (
     // Platoons are pre-created for simplicity
     const platoons: Platoon[] = [...initializePlatoons(player1.id), ...initializePlatoons(player2.id)]
 
-    let aiIndex = 0
-
     const player1Capital = initializeCapitalPlanet(player1.id, player1.ai, config.difficulty, rnd)
-    player1Capital.name = player1.ai ? `EnemyBase${++aiIndex}` : "Homebase"
+    player1Capital.name = player1.ai ? `EnemyBaseA` : "Homebase"
     planets.unshift(player1Capital)
 
     const player2Capital = initializeCapitalPlanet(player2.id, player2.ai, config.difficulty, rnd)
-    player2Capital.name = player2.ai ? `EnemyBase${++aiIndex}` : "Homebase"
+    player2Capital.name = player2.ai ? `EnemyBaseB` : "Homebase"
     player2Capital.gridIndex = planets.length
     planets.push(player2Capital)
 

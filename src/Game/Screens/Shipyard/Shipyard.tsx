@@ -1,19 +1,19 @@
 import { FormEvent, useCallback, useMemo, useState } from "react"
 import { ColonizedPlanet, ShipBlueprint, ShipClass } from "Supremacy/entities"
+import { canPurchaseAtmos } from "Supremacy/ships"
+import { blueprints } from "Supremacy/data/ships"
 import battleship from "/images/ship-battle-cruiser.gif"
 import solar from "/images/ship-solar-satellite.gif"
 import atmos from "/images/ship-atmosphere-processor.gif"
 import carrier from "/images/ship-cargo-carrier.gif"
 import mining from "/images/ship-mining-station.gif"
 import horticultural from "/images/ship-horticultural.gif"
-import catalog from "Supremacy/data/ships.json"
 import { dateAtom, sessionAtom, shipsAtom, shipsDocketAtPlanetAtom } from "../../store"
 import { atom, useAtomValue, useSetAtom } from "jotai"
 import { usePurchaseShip } from "./actions"
 import { useCapitalPlanet } from "../../hooks"
 import Button from "components/Button"
 import { wrap } from "Game/utilities"
-import { canPurchaseAtmos } from "Supremacy/ships"
 import Screen from "Game/components/Screen"
 import Notification from "Game/components/Notification"
 import { useNotification, useSetNotification } from "Game/components/Notification/useNotification"
@@ -178,9 +178,9 @@ function Controls({
 
 const useShipBlueprint = () => {
     const [index, setIndex] = useState(0)
-    const blueprint = catalog[index] as ShipBlueprint
+    const blueprint = blueprints[index]
     const handleChangeIndex = useCallback((change: number) => {
-        setIndex(wrap(index + change, catalog.length))
+        setIndex(wrap(index + change, blueprints.length))
     }, [])
 
     return { blueprint, handleChangeIndex }

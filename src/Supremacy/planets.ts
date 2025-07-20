@@ -1,12 +1,6 @@
 // import { NotifyCallback } from "Game/components/Notification/useNotification"
-import { colonizedPlanet } from "test/mockData/planets"
 import { ColonizedPlanet, isColonizedPlanet, Planet } from "./entities"
 import { clamp, clone } from "./utilities"
-import { C } from "vitest/dist/chunks/environment.C5eAp3K6.js"
-
-export const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
-    return morale * 0.33 - tax * 0.5
-}
 
 export const filter = (
     planets: Planet[],
