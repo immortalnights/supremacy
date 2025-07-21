@@ -20,6 +20,7 @@ import {
 import { Difficulty } from "./types"
 import { getPlayerCapital } from "./planets"
 import { clone, nextFreeIndex, throwError } from "./utilities"
+import { canModifyShipAtPlanet } from "./actions/ships"
 
 export const transitionMatrix: { [key in ShipPosition]: ShipPosition[] } = {
     // From : To
@@ -60,78 +61,6 @@ const getShipPlanet = (planets: Planet[], ship: Ship) => {
     }
 
     return planet
-}
-
-const canModifyShipAtPlanet = (player: string, ship: Ship, planet: Planet): boolean => {
-    let ok = false
-    if (planet.type === "lifeless") {
-        console.error(`Planet ${planet.name} is lifeless`)
-    } else if (planet.owner !== player) {
-        console.error(`Planet ${planet.name} is not owned by player ${player}`)
-    } else if (ship.owner !== player) {
-        console.error(`Ship ${ship.name} is not owned by player ${player}`)
-    } else {
-        ok = true
-    }
-    return ok
-}
-
-export const canCrewShip = (player: string, ship: Ship, planet: Planet) => {
-    let canCrew = false
-
-    if (canModifyShipAtPlanet(player, ship, planet)) {
-        const p = planet as ColonizedPlanet
-
-        if (ship.position !== "docked") {
-            console.warn(`Ship '${ship.name}' is not docked`)
-        } else if (ship.requiredCrew === "remote") {
-            console.warn(`Ship '${ship.name}' does not require crew`)
-        } else if (ship.crew === ship.requiredCrew) {
-            console.warn(`Ship '${ship.name}' already has a full crew`)
-        } else if (p.population < ship.requiredCrew) {
-            console.warn(
-                `Planet '${planet.name}' does not have the required population to crew '${ship.name}' (${p.population} of ${ship.requiredCrew})`,
-            )
-        } else {
-            // Assumes the ship is at the planet
-            if (ship.location.planet !== planet.id) {
-                throw new Error(`Ship '${ship.name}' is not at planet '${planet.name}'`)
-            }
-
-            canCrew = true
-        }
-    }
-
-    return canCrew
-}
-
-export const crewShip = (player: string, planets: Planet[], ships: Ship[], ship: Ship) => {
-    let modifiedPlanets
-    let modifiedShips
-    const planet = getShipPlanet(planets, ship) ?? throwError("Failed to find ship planet")
-
-    if (canCrewShip(player, ship, planet) && ship.requiredCrew !== "remote") {
-        const planetIndex = planets.indexOf(planet)
-        const shipIndex = ships.findIndex((s) => s.id === ship.id)
-
-        if (planetIndex === -1 || shipIndex === -1) {
-            throw new Error(`Invalid planet (${planetIndex}) or ship (${shipIndex}) index`)
-        }
-
-        let modifiedPlanet
-        ;[modifiedPlanet, modifiedPlanets] = clone(planet, planets)
-
-        modifiedPlanet.population -= ship.requiredCrew
-        modifiedPlanets[planetIndex] = modifiedPlanet
-
-        let modifiedShip
-        ;[modifiedShip, modifiedShips] = clone(ship, ships)
-
-        modifiedShip.crew += ship.requiredCrew
-        modifiedShips[shipIndex] = modifiedShip
-    }
-
-    return [modifiedPlanets ?? planets, modifiedShips ?? ships] as const
 }
 
 /**

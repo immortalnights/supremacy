@@ -1,9 +1,16 @@
-import { canRenamePlanet, applyRenamePlanet, canModifyTax, applyModifyTax } from "./actions/planet"
-import { applyPurchaseShip, canPurchaseShip } from "./actions/ships"
+import {
+    canRenamePlanet,
+    applyRenamePlanet,
+    canModifyTax,
+    applyModifyTax,
+    applyPurchaseShip,
+    canPurchaseShip,
+    canCrewShip,
+    applyCrewShip,
+} from "./actions/index"
 import { getShipBlueprint } from "./data/ships"
 import { ColonizedPlanet, ShipClass, ShipDocked } from "./entities"
 import { GameState } from "./types"
-import { nextFreeIndex } from "./utilities"
 
 export type GameAction = (state: GameState) => GameState
 
@@ -124,22 +131,23 @@ export const actionHandlers: {
     },
     "transfer-planet-credits": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transfer-planet-credits'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transfer-planet-credits'.")
         },
     },
     "modify-planet-aggression": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-planet-aggression'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-planet-aggression'.")
         },
     },
     "purchase-ship": {
         validate: function (action, state): boolean {
+            // Purchases happen at the capital, only
             const planet = state.planets.find(
                 (p): p is ColonizedPlanet => p.type !== "lifeless" && p.owner === action.playerId && p.capital,
             )
@@ -148,10 +156,7 @@ export const actionHandlers: {
             )
             const blueprint = getShipBlueprint(action.payload.class)
 
-            return (
-                !!planet &&
-                canPurchaseShip(action.playerId, planet, ownedShips, blueprint, state.date, state.difficulty)
-            )
+            return !!planet && canPurchaseShip(planet, ownedShips, blueprint, state.date, state.difficulty)
         },
         apply: function (action, state): GameState {
             const planet = state.planets.find(
@@ -164,23 +169,15 @@ export const actionHandlers: {
             const ownedShips = state.ships.filter(
                 (ship) => ship.owner === action.playerId && ship.position === "docked",
             )
-            const ownedShipsOfClass = ownedShips.filter((ship) => ship.class === action.payload.class).length
-            const dockedShips = ownedShips.filter(
-                (ship): ship is ShipDocked => ship.position === "docked" && ship.location.planet === planet.id,
-            )
-            console.debug(`Owned ships ${ownedShips.length}; docked ships ${dockedShips.length}`)
-            const availableBayIndex = nextFreeIndex(dockedShips, 3)
-            if (availableBayIndex === undefined) {
-                throw Error(`Failed to identify free location index for ${planet.id} with ships ${dockedShips.length}`)
-            }
+
             const blueprint = getShipBlueprint(action.payload.class)
 
             const payload = action.payload
             const [modifiedPlanet, modifiedShip] = applyPurchaseShip(
                 planet,
-                availableBayIndex,
+                ownedShips,
                 blueprint,
-                payload.name || `${blueprint.shortName}${ownedShipsOfClass + 1}`,
+                payload.name,
                 state.date,
                 state.difficulty,
             )
@@ -192,130 +189,149 @@ export const actionHandlers: {
     },
     "crew-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            const ship = state.ships.find((s) => s.id === action.payload.id)
+            // Planet the ship is located at
+            const planet = state.planets.find((p) => ship?.position !== "outer-space" && p.id === ship?.location.planet)
+
+            return !!ship && !!planet && canCrewShip(action.playerId, ship, planet)
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            const ship = state.ships.find((s) => s.id === action.payload.id)
+            if (!ship) {
+                throw new Error(`Ship not found for id ${action.payload.id}`)
+            }
+
+            // Planet the ship is located at
+            const planet = state.planets.find((p) => ship?.position !== "outer-space" && p.id === ship?.location.planet)
+            if (!planet) {
+                throw new Error(`Planet not found for ship ${ship.id}`)
+            }
+
+            const [modifiedPlanet, modifiedShip] = applyCrewShip(action.playerId, ship, planet)
+
+            state = apply(state, "planets", modifiedPlanet)
+            state = apply(state, "ships", modifiedShip)
+            return state
         },
     },
     "unload-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-ship'.")
         },
     },
     "decommission-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'decommission-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'decommission-ship'.")
         },
     },
     "modify-passengers": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-passengers'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-passengers'.")
         },
     },
     "modify-fuel": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-fuel'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-fuel'.")
         },
     },
     "load-cargo": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'load-cargo'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'load-cargo'.")
         },
     },
     "unload-cargo": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-cargo'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-cargo'.")
         },
     },
     "transition-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transition-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transition-ship'.")
         },
     },
     "transfer-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transfer-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'transfer-ship'.")
         },
     },
     "toggle-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'toggle-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'toggle-ship'.")
         },
     },
     "modify-platoon-troops": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-troops'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-troops'.")
         },
     },
     "modify-platoon-suit": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-suit'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-suit'.")
         },
     },
     "modify-platoon-weapon": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-weapon'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'modify-platoon-weapon'.")
         },
     },
     "equip-platoon": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'equip-platoon'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'equip-platoon'.")
         },
     },
     "load-platoon": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'load-platoon'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'load-platoon'.")
         },
     },
     "unload-platoon": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-platoon'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented.")
+            throw new Error("Function not implemented 'unload-platoon'.")
         },
     },
 }

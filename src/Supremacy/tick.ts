@@ -91,7 +91,7 @@ export const play = async (
                 state = { ...state }
                 while (actionQueue.length > 0) {
                     const action = actionQueue.shift()
-                    console.debug("Processing action", action)
+                    console.debug("Processing action")
                     if (action) state = action(state)
                 }
             }
