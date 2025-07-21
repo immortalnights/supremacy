@@ -51,7 +51,7 @@ const manageHorticulturalStations = (
         }
     } else if (shipToTransition) {
         action = {
-            type: "transition-ship",
+            type: "reposition-ship",
             payload: {
                 id: shipToTransition.id,
                 destination: "surface",

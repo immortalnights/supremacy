@@ -28,7 +28,7 @@ export const useMoveShip = () => {
     const { exec } = useContext(CommandContext)
 
     const execute = (ship: Ship, position: ShipPosition) => {
-        exec("transition-ship", { ship, position })
+        exec("reposition-ship", { ship, position })
     }
 
     return (ship: Ship, targetPosition: ShipPosition) => {

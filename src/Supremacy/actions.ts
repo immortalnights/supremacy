@@ -7,9 +7,11 @@ import {
     canPurchaseShip,
     canCrewShip,
     applyCrewShip,
+    canRepositionShip,
+    applyRepositionShip,
 } from "./actions/index"
 import { getShipBlueprint } from "./data/ships"
-import { ColonizedPlanet, ShipClass, ShipDocked } from "./entities"
+import { ColonizedPlanet, Ship, ShipClass, ShipDocked, ShipPosition } from "./entities"
 import { GameState } from "./types"
 
 export type GameAction = (state: GameState) => GameState
@@ -31,7 +33,7 @@ export interface ActionPayloads {
     "modify-fuel": { id: string; fuel: number }
     "load-cargo": { id: string; cargoType: string; amount: number }
     "unload-cargo": { id: string; cargoType: string; amount: number }
-    "transition-ship": { id: string; destination: string }
+    "reposition-ship": { id: string; destination: ShipPosition }
     "transfer-ship": { id: string; planetId: string }
     "toggle-ship": { id: string; active?: boolean }
     "modify-platoon-troops": { id: string; troops: number }
@@ -102,6 +104,25 @@ const append = <K extends ArrayKeys<GameState>>(
         ...state,
         [key]: [...state[key], value],
     }
+}
+
+// Helper function to find a ship by it's ID and owner and the planet it's located at
+const getShipAndPlanet = (state: GameState, player: string, shipId: string): [Ship, ColonizedPlanet] => {
+    const ship = state.ships.find((s) => s.id === shipId && s.owner === player)
+    if (!ship) {
+        throw new Error(`Ship not found for id ${shipId}`)
+    }
+
+    // Planet the ship is located at (ownership isn't checked as some actions can be performed on enemy planets)
+    const planet = state.planets.find(
+        (p): p is ColonizedPlanet =>
+            ship?.position !== "outer-space" && p.id === ship?.location.planet && p.type !== "lifeless",
+    )
+    if (!planet) {
+        throw new Error(`Planet not found for ship ${ship.id}`)
+    }
+
+    return [ship, planet] as const
 }
 
 export const actionHandlers: {
@@ -189,25 +210,14 @@ export const actionHandlers: {
     },
     "crew-ship": {
         validate: function (action, state): boolean {
-            const ship = state.ships.find((s) => s.id === action.payload.id)
-            // Planet the ship is located at
-            const planet = state.planets.find((p) => ship?.position !== "outer-space" && p.id === ship?.location.planet)
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
 
-            return !!ship && !!planet && canCrewShip(action.playerId, ship, planet)
+            return !!ship && !!planet && canCrewShip(ship, planet)
         },
         apply: function (action, state): GameState {
-            const ship = state.ships.find((s) => s.id === action.payload.id)
-            if (!ship) {
-                throw new Error(`Ship not found for id ${action.payload.id}`)
-            }
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
 
-            // Planet the ship is located at
-            const planet = state.planets.find((p) => ship?.position !== "outer-space" && p.id === ship?.location.planet)
-            if (!planet) {
-                throw new Error(`Planet not found for ship ${ship.id}`)
-            }
-
-            const [modifiedPlanet, modifiedShip] = applyCrewShip(action.playerId, ship, planet)
+            const [modifiedPlanet, modifiedShip] = applyCrewShip(ship, planet)
 
             state = apply(state, "planets", modifiedPlanet)
             state = apply(state, "ships", modifiedShip)
@@ -262,12 +272,23 @@ export const actionHandlers: {
             throw new Error("Function not implemented 'unload-cargo'.")
         },
     },
-    "transition-ship": {
+    "reposition-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'transition-ship'.")
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
+            const shipsAtPlanet = state.ships.filter(
+                (ship) => ship.position !== "outer-space" && ship.location.planet === planet.id,
+            )
+
+            return !!ship && !!planet && canRepositionShip(ship, planet, shipsAtPlanet, action.payload.destination)
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'transition-ship'.")
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
+            const shipsAtPlanet = state.ships.filter(
+                (ship) => ship.position !== "outer-space" && ship.location.planet === planet.id,
+            )
+
+            const modifiedShip = applyRepositionShip(ship, planet, shipsAtPlanet, action.payload.destination)
+            return apply(state, "ships", modifiedShip)
         },
     },
     "transfer-ship": {
