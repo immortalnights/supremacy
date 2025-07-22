@@ -1,5 +1,5 @@
 import { setup, play } from "./Supremacy.mjs"
-import type { GameState, GameConfiguration, Player } from "./src/Supremacy/types"
+import type { GameState, GameConfiguration, HumanPlayer, BotPlayer } from "./src/Supremacy/types"
 import type { GameAction } from "./src/Supremacy/actions"
 
 // const pvpState = setup(
@@ -38,16 +38,18 @@ let eveState: GameState = setup(
         id: "player1",
         name: "Player 1",
         host: true,
-        ai: "Easy",
+        bot: true,
+        difficulty: "Easy",
         eliminated: false,
-    } satisfies Player,
+    } satisfies BotPlayer,
     {
         id: "player2",
         name: "Player 2",
         host: false,
-        ai: "Easy",
+        bot: true,
+        difficulty: "Easy",
         eliminated: false,
-    } satisfies Player,
+    } satisfies BotPlayer,
 )
 
 eveState.speed = "Turbo"

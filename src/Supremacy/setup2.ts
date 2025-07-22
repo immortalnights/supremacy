@@ -8,7 +8,7 @@ import {
     planetTypes,
 } from "./entities"
 import { throwError } from "./utilities"
-import type { AIDifficulty, Difficulty, GameConfiguration, Player, GameState } from "./types"
+import type { Difficulty, GameConfiguration, Player, GameState } from "./types"
 
 // Maps the difficulty to the number of planets
 const planetsForDifficulty: { [K in Difficulty]: number } = {
@@ -38,13 +38,8 @@ const generatePlanets = (count: number, rnd: Random) => {
 }
 
 // Initializes a capital planet for the player
-const initializeCapitalPlanet = (
-    owner: string,
-    ai: AIDifficulty,
-    difficulty: Difficulty,
-    rnd: Random,
-): ColonizedPlanet => {
-    const multiplier = ai ? 1 : difficultyPercentage[difficulty]
+const initializeCapitalPlanet = (owner: string, bot: boolean, difficulty: Difficulty, rnd: Random): ColonizedPlanet => {
+    const multiplier = bot ? 1 : difficultyPercentage[difficulty]
     const population = rnd.int(1000, 2000) * multiplier
     const credits = rnd.int(50000, 60000) * multiplier
     const food = rnd.int(3000, 5000) * multiplier
@@ -105,12 +100,12 @@ export const setup = (config: GameConfiguration, player1: Player, player2: Playe
     // Platoons are pre-created for simplicity
     const platoons: Platoon[] = [...initializePlatoons(player1.id), ...initializePlatoons(player2.id)]
 
-    const player1Capital = initializeCapitalPlanet(player1.id, player1.ai, config.difficulty, rnd)
-    player1Capital.name = player1.ai ? `EnemyBaseA` : "Homebase"
+    const player1Capital = initializeCapitalPlanet(player1.id, player1.bot, config.difficulty, rnd)
+    player1Capital.name = player1.bot ? `EnemyBaseA` : "Homebase"
     planets.unshift(player1Capital)
 
-    const player2Capital = initializeCapitalPlanet(player2.id, player2.ai, config.difficulty, rnd)
-    player2Capital.name = player2.ai ? `EnemyBaseB` : "Homebase"
+    const player2Capital = initializeCapitalPlanet(player2.id, player2.bot, config.difficulty, rnd)
+    player2Capital.name = player2.bot ? `EnemyBaseB` : "Homebase"
     player2Capital.gridIndex = planets.length
     planets.push(player2Capital)
 

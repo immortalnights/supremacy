@@ -1,14 +1,24 @@
-import { Planet, Platoon, Ship } from "./entities"
+import type { Planet, Platoon, Ship } from "./entities"
+import type { BotDifficulty } from "./bot/types"
 
-export type AIDifficulty = "Easy" | "Normal" | "Hard" | "Elite"
-
-export interface Player {
+interface Player {
     id: string
     name: string
     host: boolean
-    ai: AIDifficulty | false
     eliminated: boolean
+    bot: true | false
 }
+
+export interface HumanPlayer extends Player {
+    bot: false
+}
+
+export interface BotPlayer extends Player {
+    bot: true
+    difficulty: BotDifficulty
+}
+
+export type AnyPlayer = HumanPlayer | BotPlayer
 
 export interface GameConfiguration {
     seed?: string
@@ -22,7 +32,7 @@ export interface GameState {
     seed: string
     difficulty: Difficulty
     date: number
-    players: Player[]
+    players: AnyPlayer[]
     planets: Planet[]
     ships: Ship[]
     platoons: Platoon[]

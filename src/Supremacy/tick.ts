@@ -2,8 +2,8 @@ import { ColonizedPlanet } from "./entities"
 import { isColonizedPlanet } from "./entities"
 import type { GameState } from "./types"
 import { GameAction, translateAction } from "./actions"
-import { processAI } from "./ai"
 import { simulatePlanets } from "./simulate"
+import { processBot } from "./bot/cpu"
 
 /**
  * Modify game state by simulating one tick
@@ -26,7 +26,8 @@ export const tick = (initialState: GameState): GameState => {
 
         const hasCapital = ownedPlanets.some((planet) => planet.capital)
         const hasPopulationOnPlanets = ownedPlanets.reduce((sum, planet) => sum + planet.population, 0) > 0
-        const hasPopulationInShips = ownedShips.reduce((sum, ship) => sum + ship.crew + ship.passengers, 0) > 0
+        // Crew is not counted
+        const hasPopulationInShips = ownedShips.reduce((sum, ship) => sum + ship.passengers, 0) > 0
         const hasPopulationInPlatoons = ownedPlatoons.reduce((sum, platoon) => sum + platoon.size, 0) > 0
 
         let eliminated = false
@@ -78,15 +79,15 @@ export const play = async (
         }
 
         let lastTickTime = performance.now()
-        let lastAIActionTime = performance.now()
-        const aiActionInterval = speedIntervals[state.speed] * 3
+        let lastBotActionTime = performance.now()
+        const botActionInterval = speedIntervals[state.speed] * 3
         let lastSummaryTime = performance.now()
         const summaryInterval = 10000
 
         const gameLoop = () => {
             const now = performance.now()
 
-            // Process all queued actions (human + AI)
+            // Process all queued actions (Human + Bot)
             if (actionQueue.length > 0) {
                 state = { ...state }
                 while (actionQueue.length > 0) {
@@ -105,25 +106,20 @@ export const play = async (
                 lastTickTime = now
             }
 
-            // AI actions
-            if (now - lastAIActionTime >= aiActionInterval) {
+            // Bot actions
+            if (now - lastBotActionTime >= botActionInterval) {
                 for (const player of state.players) {
-                    if (player.ai) {
-                        console.debug(`Processing AI actions for ${player.name} (${player.id})`)
-                        const action = processAI(
-                            { id: player.id, difficulty: player.ai },
-                            state.planets,
-                            state.ships,
-                            state.platoons,
-                        )
+                    if (player.bot) {
+                        console.debug(`Processing Bot actions for ${player.name} (${player.id})`)
+                        const action = processBot(player, state.planets, state.ships, state.platoons)
 
                         if (action) {
-                            console.debug("AI action:", action)
+                            console.debug("Bot action:", action)
                             actionQueue.push(translateAction(action))
                         }
                     }
                 }
-                lastAIActionTime = now
+                lastBotActionTime = now
             }
 
             if (now - lastSummaryTime >= summaryInterval) {
@@ -131,7 +127,7 @@ export const play = async (
                 const population = colonizedPlanets.reduce((sum, planet) => sum + planet.population, 0)
 
                 console.debug(
-                    `Game Summary: Date: ${state.date}, Planets: ${colonizedPlanets.length}, Population: ${population}`,
+                    `** Game Summary: Date: ${state.date}, Planets: ${colonizedPlanets.length}, Population: ${population} **`,
                 )
 
                 lastSummaryTime = now

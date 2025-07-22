@@ -9,6 +9,8 @@ import {
     applyCrewShip,
     canRepositionShip,
     applyRepositionShip,
+    applyActivateShip,
+    canActivateShip,
 } from "./actions/index"
 import { getShipBlueprint } from "./data/ships"
 import { ColonizedPlanet, Ship, ShipClass, ShipDocked, ShipPosition } from "./entities"
@@ -301,10 +303,17 @@ export const actionHandlers: {
     },
     "toggle-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'toggle-ship'.")
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
+
+            const targetState = action.payload.active ?? (ship.position === "surface" && !ship.active)
+
+            return !!ship && !!planet && canActivateShip(ship, planet, targetState)
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'toggle-ship'.")
+            const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
+
+            const modifiedShip = applyActivateShip(ship, planet, action.payload.active ?? false)
+            return apply(state, "ships", modifiedShip)
         },
     },
     "modify-platoon-troops": {
