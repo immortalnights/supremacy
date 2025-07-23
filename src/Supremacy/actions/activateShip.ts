@@ -8,6 +8,8 @@ export const canActivateShip = (ship: Ship, planet: ColonizedPlanet, active: boo
             console.error(`Cannot activate ship ${ship.name} from position ${ship.position}.`)
         } else if (ship.requiredCrew !== "remote" && ship.crew !== ship.requiredCrew) {
             console.error(`Cannot activate ship ${ship.name} without full crew (${ship.crew}/${ship.requiredCrew}).`)
+        } else if (planet.energy === 0) {
+            console.error(`Cannot activate ship ${ship.name} without energy on planet ${planet.name}.`)
         } else {
             canActivate = true
         }

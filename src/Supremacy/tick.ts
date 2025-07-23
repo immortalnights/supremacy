@@ -2,16 +2,18 @@ import { ColonizedPlanet } from "./entities"
 import { isColonizedPlanet } from "./entities"
 import type { GameState } from "./types"
 import { GameAction, translateAction } from "./actions"
-import { simulatePlanets } from "./simulate"
+import { simulatePlanets, simulateShips, simulatePlatoons } from "./simulate"
 import { processBot } from "./bot/cpu"
 
 /**
  * Modify game state by simulating one tick
  */
 export const tick = (initialState: GameState): GameState => {
-    let state = { ...initialState }
+    let state = { ...initialState, date: initialState.date + 1 }
 
-    state.planets = simulatePlanets([...state.planets])
+    ;[state.ships, state.planets] = simulateShips([...state.ships], [...state.planets])
+    state.planets = simulatePlanets(state.date, [...state.planets])
+    ;[state.platoons, state.planets] = simulatePlatoons([...state.platoons], [...state.planets])
 
     // Check win/loose conditions
     // For each player,

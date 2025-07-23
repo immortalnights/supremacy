@@ -20,39 +20,41 @@ const calculateGrowth = ({ morale, tax }: ColonizedPlanet) => {
     return morale * 0.33 - tax * 0.5
 }
 
-const simulatePlanet = (planet: ColonizedPlanet): Planet => {
+const simulatePlanet = (date: number, planet: ColonizedPlanet): Planet => {
     const modifiedPlanet = { ...planet }
 
+    // Consume food
+    modifiedPlanet.food = Math.max(Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004), 0)
     // Adjust morale
     modifiedPlanet.morale = calculateMorale(modifiedPlanet)
     // Adjust growth
     modifiedPlanet.growth = calculateGrowth(modifiedPlanet)
     // Apply population growth
-    // Consume food
-    modifiedPlanet.food = Math.max(Math.floor(modifiedPlanet.food - modifiedPlanet.population * 0.004), 0)
-
     const change = Math.floor(modifiedPlanet.population * (modifiedPlanet.growth / 100))
     if (change < 0) {
         // console.debug(
         //     `Planet ${modifiedPlanet.name} (${modifiedPlanet.id}) has decreasing population ${modifiedPlanet.morale}/${modifiedPlanet.growth}/${change}`,
         // )
     }
-    modifiedPlanet.population = Math.min(modifiedPlanet.population + change, PLANET_POPULATION_LIMIT)
-    // Collect taxes
-    // FIXME tax should only be applied every _other_ day
-    modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
+    // Population growth only applies every even day, tax every odd day
+    if (date % 2 === 0) {
+        modifiedPlanet.population = Math.min(modifiedPlanet.population + change, PLANET_POPULATION_LIMIT)
+    } else {
+        // Collect taxes
+        modifiedPlanet.credits += modifiedPlanet.population * (planet.tax * 0.008)
+    }
 
     return modifiedPlanet
 }
 
 // Pure simulation function
-export const simulatePlanets = (planets: Planet[]): Planet[] => {
+export const simulatePlanets = (date: number, planets: Planet[]): Planet[] => {
     return planets.map((planet) => {
         let modifiedPlanet
         if (planet.type === "lifeless") {
             modifiedPlanet = planet
         } else {
-            modifiedPlanet = simulatePlanet(planet)
+            modifiedPlanet = simulatePlanet(date, planet)
         }
 
         return modifiedPlanet

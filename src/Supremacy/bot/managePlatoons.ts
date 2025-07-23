@@ -1,5 +1,6 @@
+import type { BotPlayer } from "../types"
 import type { ColonizedPlanet, Platoon, Ship } from "../entities"
-import type { BotPlayer, BotActionObject } from "./types"
+import type { BotActionObject } from "./types"
 
 export const managePlatoons = (
     player: BotPlayer,
