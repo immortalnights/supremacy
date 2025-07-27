@@ -137,7 +137,7 @@ export const applyPurchaseShip = (
     capital: ColonizedPlanet,
     ownedShips: Ship[],
     blueprint: ShipBlueprint,
-    name: string,
+    name: string | undefined,
     date: number,
     difficulty: Difficulty,
 ): [ColonizedPlanet, Ship] => {

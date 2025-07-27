@@ -1,7 +1,8 @@
 import { type ShipClass } from "../entities"
-import { type AIDifficulty } from "./types"
+import { type BotDifficulty } from "./types"
 
-export const shipLimits: Record<ShipClass, Record<AIDifficulty, number>> = {
+// ShipClass to BotDifficulty, max
+export const shipLimits: Record<ShipClass, Record<BotDifficulty, number>> = {
     "Atmosphere Processor": {
         Easy: 1,
         Normal: 1,

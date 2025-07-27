@@ -15,8 +15,20 @@ export const processBot = (
 
     console.log(planets[0].id, planets[0].type === "lifeless" ? "??" : planets[0].owner, player.id)
 
-    const ownedPlanets = planets.filter(
-        (planet): planet is ColonizedPlanet => planet.type !== "lifeless" && planet.owner === player.id,
+    const { ownedPlanets, otherPlanets } = planets.reduce<{
+        ownedPlanets: ColonizedPlanet[]
+        otherPlanets: Planet[]
+    }>(
+        (acc, planet) => {
+            if (planet.type !== "lifeless" && planet.owner === player.id) {
+                acc.ownedPlanets.push(planet)
+            } else {
+                acc.otherPlanets.push(planet)
+            }
+
+            return acc
+        },
+        { ownedPlanets: [], otherPlanets: [] },
     )
     const ownedShips = ships.filter((ship) => ship.owner === player.id)
     const ownedPlatoons = platoons.filter((platoon) => platoon.owner === player.id)
@@ -27,7 +39,7 @@ export const processBot = (
 
     // Gather all possible actions
     actions.push(...managePlanets(player, ownedPlanets, ownedShips, ownedPlatoons))
-    actions.push(...manageFleets(player, ownedShips, ownedPlanets, ownedPlatoons))
+    actions.push(...manageFleets(player, ownedShips, ownedPlanets, otherPlanets, ownedPlatoons))
     actions.push(...managePlatoons(player, ownedPlatoons, ownedPlanets, ownedShips))
 
     console.debug(`Bot ${player.id} (${player.difficulty}) has ${actions.length} actions to choose from`)

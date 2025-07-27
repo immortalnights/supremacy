@@ -27,7 +27,7 @@ export interface ActionPayloads {
         amount: number
     }
     "modify-planet-aggression": { id: string; aggression: number }
-    "purchase-ship": { class: ShipClass; name: string }
+    "purchase-ship": { class: ShipClass; name?: string }
     "crew-ship": { id: string; crew: number }
     "unload-ship": { id: string }
     "decommission-ship": { id: string }
@@ -36,7 +36,7 @@ export interface ActionPayloads {
     "load-cargo": { id: string; cargoType: string; amount: number }
     "unload-cargo": { id: string; cargoType: string; amount: number }
     "reposition-ship": { id: string; destination: ShipPosition }
-    "transfer-ship": { id: string; planetId: string }
+    "transfer-ship": { id: string; destination: string }
     "toggle-ship": { id: string; active?: boolean }
     "modify-platoon-troops": { id: string; troops: number }
     "modify-platoon-suit": { id: string; suitType: string }
