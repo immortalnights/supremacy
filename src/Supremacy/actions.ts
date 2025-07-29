@@ -19,31 +19,33 @@ import { GameState } from "./types"
 export type GameAction = (state: GameState) => GameState
 
 export interface ActionPayloads {
-    "rename-planet": { id: string; name: string }
-    "set-planet-tax": { id: string; tax: number }
+    "planet-terraform": { id: string; name?: string }
+    "rename-planet": { id: string; name: string } // planet-rename
+    "set-planet-tax": { id: string; tax: number } // planet-set-tax
     "transfer-planet-credits": {
+        // planet-transfer-credits
         fromid: string
         toid: string
         amount: number
     }
-    "modify-planet-aggression": { id: string; aggression: number }
-    "purchase-ship": { class: ShipClass; name?: string }
-    "crew-ship": { id: string; crew: number }
-    "unload-ship": { id: string }
-    "decommission-ship": { id: string }
-    "modify-passengers": { id: string; passengers: number }
-    "modify-fuel": { id: string; fuel: number }
-    "load-cargo": { id: string; cargoType: string; amount: number }
-    "unload-cargo": { id: string; cargoType: string; amount: number }
-    "reposition-ship": { id: string; destination: ShipPosition }
-    "transfer-ship": { id: string; destination: string }
-    "toggle-ship": { id: string; active?: boolean }
-    "modify-platoon-troops": { id: string; troops: number }
-    "modify-platoon-suit": { id: string; suitType: string }
-    "modify-platoon-weapon": { id: string; weaponType: string }
-    "equip-platoon": { id: string; equipment: string }
-    "load-platoon": { id: string; shipId: string }
-    "unload-platoon": { id: string; shipId: string }
+    "modify-planet-aggression": { id: string; aggression: number } //planet-set-aggression
+    "purchase-ship": { class: ShipClass; name?: string } // ship-purchase
+    "crew-ship": { id: string; crew: number } // ship-crew
+    "unload-ship": { id: string } // ship-unload
+    "decommission-ship": { id: string } // ship-decommission
+    "modify-passengers": { id: string; passengers: number } // ship-modify-passengers
+    "modify-fuel": { id: string; fuel: number } // ship-modify-fuel
+    "load-cargo": { id: string; cargoType: string; amount: number } // ship-load-cargo
+    "unload-cargo": { id: string; cargoType: string; amount: number } // ??
+    "reposition-ship": { id: string; destination: ShipPosition } // ship-reposition
+    "transfer-ship": { id: string; destination: string } // ship-transfer
+    "toggle-ship": { id: string; active?: boolean } // ship-toggle
+    "modify-platoon-troops": { id: string; troops: number } // platoon-modify-troops
+    "modify-platoon-suit": { id: string; suitType: string } //platoon-set-suit
+    "modify-platoon-weapon": { id: string; weaponType: string } // platoon-set-weapon
+    "equip-platoon": { id: string; equipment: string } // platoon-equip
+    "load-platoon": { id: string; shipId: string } // platoon-load
+    "unload-platoon": { id: string; shipId: string } // platoon-unload
 }
 
 export type Action = keyof ActionPayloads
@@ -130,6 +132,19 @@ const getShipAndPlanet = (state: GameState, player: string, shipId: string): [Sh
 export const actionHandlers: {
     [K in Action]: ActionHandler<K>
 } = {
+    "planet-terraform": {
+        validate: (action, state) => {
+            throw new Error("Function not implemented 'planet-terraform'.")
+            const planet = state.planets.find((p) => p.id === action.payload.id)
+            return !!planet && canRenamePlanet(action.playerId, planet, action.payload.name)
+        },
+        apply: (action, state) => {
+            throw new Error("Function not implemented 'planet-terraform'.")
+            const planet = state.planets.find((p) => p.id === action.payload.id) as ColonizedPlanet
+            const modifiedPlanet = applyRenamePlanet(planet, action.payload.name)
+            return apply(state, "planets", modifiedPlanet)
+        },
+    },
     "rename-planet": {
         validate: (action, state) => {
             const planet = state.planets.find((p) => p.id === action.payload.id)

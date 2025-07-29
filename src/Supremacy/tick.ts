@@ -3,7 +3,7 @@ import { isColonizedPlanet } from "./entities"
 import type { GameState } from "./types"
 import { GameAction, translateAction } from "./actions"
 import { simulatePlanets, simulateShips, simulatePlatoons } from "./simulate"
-import { processBot } from "./bot/cpu"
+import { calculateBot } from "./bot/cpu"
 
 /**
  * Modify game state by simulating one tick
@@ -36,7 +36,7 @@ export const tick = (initialState: GameState): GameState => {
         if (!hasCapital) {
             // Player is eliminated
             eliminated = true
-            console.log(`Player ${player.name} (${player.id}) has last their capital and is eliminated`)
+            console.log(`Player ${player.name} (${player.id}) has lost their capital and is eliminated`)
         } else if (!hasPopulationOnPlanets && !hasPopulationInShips && !hasPopulationInPlatoons) {
             // Player is eliminated
             eliminated = true
@@ -94,7 +94,6 @@ export const play = async (
                 state = { ...state }
                 while (actionQueue.length > 0) {
                     const action = actionQueue.shift()
-                    console.debug("Processing action")
                     if (action) state = action(state)
                 }
             }
@@ -112,11 +111,11 @@ export const play = async (
             if (now - lastBotActionTime >= botActionInterval) {
                 for (const player of state.players) {
                     if (player.bot) {
-                        console.debug(`Processing Bot actions for ${player.name} (${player.id})`)
-                        const action = processBot(player, state.planets, state.ships, state.platoons)
+                        console.debug(`Bot ${player.name} (${player.id}) is calculating their actions`)
+                        const action = calculateBot(player, state)
 
                         if (action) {
-                            console.debug("Bot action:", action)
+                            console.debug(`Bot action (${state.date}):`, action)
                             actionQueue.push(translateAction(action))
                         }
                     }

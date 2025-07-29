@@ -1,19 +1,17 @@
-import type { BotPlayer } from "../types"
+import type { BotPlayer, GameState } from "../types"
 import type { ColonizedPlanet, Planet, Platoon, Ship } from "../entities"
 import type { BotActionObject } from "./types"
 import { manageFleets } from "./manageFleet"
 import { managePlanets } from "./managePlanets"
 import { managePlatoons } from "./managePlatoons"
+import { manageExploration } from "./manageExploration"
+import { pushAction } from "./utils"
 
-export const processBot = (
+export const calculateBot = (
     player: BotPlayer,
-    planets: Planet[],
-    ships: Ship[],
-    platoons: Platoon[],
+    { date, planets, ships, platoons }: GameState,
 ): BotActionObject | undefined => {
     const actions: BotActionObject[] = []
-
-    console.log(planets[0].id, planets[0].type === "lifeless" ? "??" : planets[0].owner, player.id)
 
     const { ownedPlanets, otherPlanets } = planets.reduce<{
         ownedPlanets: ColonizedPlanet[]
@@ -32,17 +30,19 @@ export const processBot = (
     )
     const ownedShips = ships.filter((ship) => ship.owner === player.id)
     const ownedPlatoons = platoons.filter((platoon) => platoon.owner === player.id)
+    const activePlatoons = ownedPlatoons.filter((platoon) => platoon.state === "equipped")
 
     console.debug(
-        `Bot ${player.id} has ${ownedPlanets.length} planets, ${ownedShips.length} ships, and ${ownedPlatoons.length} platoons`,
+        `Bot ${player.id} has ${ownedPlanets.length} planets, ${ownedShips.length} ships, and ${activePlatoons.length} (active) platoons`,
     )
 
     // Gather all possible actions
-    actions.push(...managePlanets(player, ownedPlanets, ownedShips, ownedPlatoons))
-    actions.push(...manageFleets(player, ownedShips, ownedPlanets, otherPlanets, ownedPlatoons))
+    actions.push(...managePlanets(player, ownedPlanets, ownedShips, activePlatoons))
+    actions.push(...manageFleets(player, ownedShips, ownedPlanets, otherPlanets, activePlatoons))
     actions.push(...managePlatoons(player, ownedPlatoons, ownedPlanets, ownedShips))
+    pushAction(manageExploration(player, ownedPlanets, otherPlanets, ownedShips, date), actions)
 
-    console.debug(`Bot ${player.id} (${player.difficulty}) has ${actions.length} actions to choose from`)
+    // console.debug(`Bot ${player.id} (${player.difficulty}) has ${actions.length} actions to choose from`)
 
     let chosenAction: BotActionObject | undefined
     switch (player.difficulty) {
@@ -73,6 +73,6 @@ export const processBot = (
         }
     }
 
-    console.debug(`Bot ${player.id} chosen action`, chosenAction)
+    // console.debug(`Bot ${player.id} chosen action`, chosenAction)
     return chosenAction
 }

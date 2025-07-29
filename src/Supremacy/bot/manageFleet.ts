@@ -105,6 +105,8 @@ const manageStations = (
         (ship) => ship.position !== "outer-space" && ship.location.planet === planet.id,
     )
 
+    // console.debug(`Planet ${planet.name} has ${stations.length} ${shipClass}s`)
+
     const { activeShips, inactiveShips } = shipsAtPlanet.reduce<{
         activeShips: Ship[]
         inactiveShips: Ship[]
@@ -126,90 +128,91 @@ const manageStations = (
     const [min, max] = getShipLimit(shipClass, planet, botDifficulty)
 
     // If the planet doesn't have the minimum stations, and there is available inactive ones,
-    if (activeShips.length < min && activeShips.length < max && inactiveShips.length > 0) {
+    if (activeShips.length < min && activeShips.length < max) {
         console.log(
             `Below minimum (${min}) threshold for active ${shipClass} on planet`,
             planet.name,
             `(${shipsAtPlanet.length}/${activeShips.length}/${min})`,
         )
 
-        action = manageStationsAtPlanet(planet, activeShips, inactiveShips, priority)
-    } else if (planet.capital) {
-        // Don't transfer to the capital from other planets
-        console.debug(`No ${shipClass} available for planet ${planet.name}, purchasing one`)
-        action = {
-            type: "purchase-ship",
-            payload: {
-                class: shipClass,
-                name: undefined,
-            },
-            playerId: planet.owner,
-            priority,
-        }
-    } else {
-        const inbound = stations.filter((ship) => ship.position === "outer-space" && ship.heading.to === planet.id)
-
-        if (inbound) {
-            // Do nothing for this planet until it arrives
+        if (inactiveShips.length > 0) {
+            action = manageStationsAtPlanet(planet, activeShips, inactiveShips, priority)
+        } else if (planet.capital) {
+            // Don't transfer to the capital from other planets
+            action = {
+                type: "purchase-ship",
+                payload: {
+                    class: shipClass,
+                    name: undefined,
+                },
+                playerId: planet.owner,
+                priority,
+            }
         } else {
-            // Exclude ships that are active
-            const stationsAtCapital = stations.filter(
-                (ship) =>
-                    ship.position !== "outer-space" &&
-                    ship.position !== "surface" &&
-                    ship.location.planet !== capital.id,
-            )
+            const inbound = stations.filter((ship) => ship.position === "outer-space" && ship.heading.to === planet.id)
 
-            // If a ship is in orbit, it might actually be "assigned" to another planet, but that is not handled at this time.
-            const { docked, inOrbit } = stationsAtCapital.reduce<{
-                docked: Ship[]
-                inOrbit: Ship[]
-            }>(
-                (acc, ship) => {
-                    if (ship.position === "docked" && ship.location.planet !== planet.id) {
-                        acc.docked.push(ship)
-                    } else if (ship.position === "orbit" && ship.location.planet !== planet.id) {
-                        acc.inOrbit.push(ship)
-                    }
-                    return acc
-                },
-                {
-                    docked: [],
-                    inOrbit: [],
-                },
-            )
-
-            if (docked.length > 0) {
-                action = {
-                    type: "reposition-ship",
-                    payload: {
-                        id: docked[0].id,
-                        destination: "orbit",
-                    },
-                    playerId: planet.owner,
-                    priority,
-                }
-            } else if (inOrbit.length > 0) {
-                action = {
-                    type: "transfer-ship",
-                    payload: {
-                        id: docked[0].id,
-                        destination: planet.id,
-                    },
-                    playerId: planet.owner,
-                    priority,
-                }
+            if (inbound) {
+                // Do nothing for this planet until it arrives
             } else {
-                // This planet has no available stations, try to purchase one.
-                console.debug(`No ${shipClass} available for planet ${planet.name}, purchasing one`)
-                action = {
-                    type: "purchase-ship",
-                    payload: {
-                        class: shipClass,
-                        name: undefined,
+                // Exclude ships that are active
+                const stationsAtCapital = stations.filter(
+                    (ship) =>
+                        ship.position !== "outer-space" &&
+                        ship.position !== "surface" &&
+                        ship.location.planet !== capital.id,
+                )
+
+                // If a ship is in orbit, it might actually be "assigned" to another planet, but that is not handled at this time.
+                const { docked, inOrbit } = stationsAtCapital.reduce<{
+                    docked: Ship[]
+                    inOrbit: Ship[]
+                }>(
+                    (acc, ship) => {
+                        if (ship.position === "docked" && ship.location.planet !== planet.id) {
+                            acc.docked.push(ship)
+                        } else if (ship.position === "orbit" && ship.location.planet !== planet.id) {
+                            acc.inOrbit.push(ship)
+                        }
+                        return acc
                     },
-                    playerId: planet.owner,
-                    priority,
+                    {
+                        docked: [],
+                        inOrbit: [],
+                    },
+                )
+
+                if (docked.length > 0) {
+                    action = {
+                        type: "reposition-ship",
+                        payload: {
+                            id: docked[0].id,
+                            destination: "orbit",
+                        },
+                        playerId: planet.owner,
+                        priority,
+                    }
+                } else if (inOrbit.length > 0) {
+                    action = {
+                        type: "transfer-ship",
+                        payload: {
+                            id: docked[0].id,
+                            destination: planet.id,
+                        },
+                        playerId: planet.owner,
+                        priority,
+                    }
+                } else {
+                    // This planet has no available stations, try to purchase one.
+                    console.debug(`No ${shipClass} available for planet ${planet.name}, purchasing one`)
+                    action = {
+                        type: "purchase-ship",
+                        payload: {
+                            class: shipClass,
+                            name: undefined,
+                        },
+                        playerId: planet.owner,
+                        priority,
+                    }
                 }
             }
         }
@@ -225,7 +228,7 @@ const manageSolarSatellites = (
     activeStations: number,
 ): BotActionObject | undefined => {
     let action: BotActionObject | undefined
-    const min = Math.ceil((activeStations * 1) / 4)
+    const min = activeStations > 0 ? Math.ceil((activeStations * 1) / 4) : 0
     const max = shipLimits["Solar-Satellite Generator"][botDifficulty]
 
     // FIXME this wont handle Solars that are in orbit around the Capital, that are not intended to be moved to another planet...
@@ -234,6 +237,8 @@ const manageSolarSatellites = (
     const shipsAtPlanet = solarSatellites.filter(
         (ship) => ship.position !== "outer-space" && ship.location.planet === planet.id,
     )
+
+    // console.debug(`Planet ${planet.name} has ${solarSatellites.length} Solar-Satellites`)
 
     if (planet.capital) {
         // Only the Capital will have docked Solars

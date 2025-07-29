@@ -59,7 +59,7 @@ const commissionShip = (
 
 const canPurchaseAtmos = (date: number, owned: number) => {
     // Unlock on the first day of the second year
-    const unlock_day = import.meta.env.MODE === "development" ? 1 : 1 + DAYS_PER_YEAR
+    const unlock_day = DAYS_PER_YEAR
     let available = false
 
     if (date < unlock_day) {
