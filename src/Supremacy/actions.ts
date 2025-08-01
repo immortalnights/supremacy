@@ -18,41 +18,47 @@ import { GameState } from "./types"
 
 export type GameAction = (state: GameState) => GameState
 
-export interface ActionPayloads {
+export interface PlanetActions {
     "planet-terraform": { id: string; name?: string }
-    "rename-planet": { id: string; name: string } // planet-rename
-    "set-planet-tax": { id: string; tax: number } // planet-set-tax
-    "transfer-planet-credits": {
-        // planet-transfer-credits
+    "planet-rename": { id: string; name: string }
+    "planet-set-tax": { id: string; tax: number }
+    "planet-transfer-credits": {
         fromid: string
         toid: string
         amount: number
     }
-    "modify-planet-aggression": { id: string; aggression: number } //planet-set-aggression
-    "purchase-ship": { class: ShipClass; name?: string } // ship-purchase
-    "crew-ship": { id: string; crew: number } // ship-crew
-    "unload-ship": { id: string } // ship-unload
-    "decommission-ship": { id: string } // ship-decommission
-    "modify-passengers": { id: string; passengers: number } // ship-modify-passengers
-    "modify-fuel": { id: string; fuel: number } // ship-modify-fuel
-    "load-cargo": { id: string; cargoType: string; amount: number } // ship-load-cargo
-    "unload-cargo": { id: string; cargoType: string; amount: number } // ??
-    "reposition-ship": { id: string; destination: ShipPosition } // ship-reposition
-    "transfer-ship": { id: string; destination: string } // ship-transfer
-    "toggle-ship": { id: string; active?: boolean } // ship-toggle
-    "modify-platoon-troops": { id: string; troops: number } // platoon-modify-troops
-    "modify-platoon-suit": { id: string; suitType: string } //platoon-set-suit
-    "modify-platoon-weapon": { id: string; weaponType: string } // platoon-set-weapon
-    "equip-platoon": { id: string; equipment: string } // platoon-equip
-    "load-platoon": { id: string; shipId: string } // platoon-load
-    "unload-platoon": { id: string; shipId: string } // platoon-unload
+    "planet-set-aggression": { id: string; aggression: number }
 }
 
-export type Action = keyof ActionPayloads
+export interface ShipActions {
+    "ship-purchase": { class: ShipClass; name?: string }
+    "ship-crew": { id: string; crew: number }
+    "ship-decommission": { id: string }
+    "ship-modify-passengers": { id: string; passengers: number }
+    "ship-modify-fuel": { id: string; fuel: number }
+    "ship-load-cargo": { id: string; cargoType: string; amount: number }
+    "ship-unload-cargo": { id: string }
+    "ship-reposition": { id: string; destination: ShipPosition }
+    "ship-transfer": { id: string; destination: string }
+    "ship-toggle": { id: string; active?: boolean }
+}
+
+export interface PlatoonActions {
+    "platoon-modify-troops": { id: string; troops: number }
+    "platoon-modify-suit": { id: string; suitType: string }
+    "platoon-modify-weapon": { id: string; weaponType: string }
+    "platoon-equip": { id: string; equipment: string }
+    "platoon-board-ship": { id: string; shipId: string }
+    "platoon-disembark-ship": { id: string; shipId: string }
+}
+
+export type Actions = PlanetActions & ShipActions & PlatoonActions
+
+export type Action = keyof Actions
 
 export interface ActionObject<T extends Action = Action> {
     type: T
-    payload: ActionPayloads[T]
+    payload: Actions[T]
     playerId: string
 }
 
@@ -145,7 +151,7 @@ export const actionHandlers: {
             return apply(state, "planets", modifiedPlanet)
         },
     },
-    "rename-planet": {
+    "planet-rename": {
         validate: (action, state) => {
             const planet = state.planets.find((p) => p.id === action.payload.id)
             return !!planet && canRenamePlanet(action.playerId, planet, action.payload.name)
@@ -156,7 +162,7 @@ export const actionHandlers: {
             return apply(state, "planets", modifiedPlanet)
         },
     },
-    "set-planet-tax": {
+    "planet-set-tax": {
         validate: function (action, state): boolean {
             const planet = state.planets.find((p) => p.id === action.payload.id)
             return !!planet && canModifyTax(action.playerId, planet, action.payload.tax)
@@ -167,23 +173,23 @@ export const actionHandlers: {
             return apply(state, "planets", modifiedPlanet)
         },
     },
-    "transfer-planet-credits": {
+    "planet-transfer-credits": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'transfer-planet-credits'.")
+            throw new Error("Function not implemented 'planet-transfer-credits'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'transfer-planet-credits'.")
+            throw new Error("Function not implemented 'planet-transfer-credits'.")
         },
     },
-    "modify-planet-aggression": {
+    "planet-set-aggression": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-planet-aggression'.")
+            throw new Error("Function not implemented 'planet-set-aggression'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-planet-aggression'.")
+            throw new Error("Function not implemented 'planet-set-aggression'.")
         },
     },
-    "purchase-ship": {
+    "ship-purchase": {
         validate: function (action, state): boolean {
             // Purchases happen at the capital, only
             const planet = state.planets.find(
@@ -225,7 +231,7 @@ export const actionHandlers: {
             return state
         },
     },
-    "crew-ship": {
+    "ship-crew": {
         validate: function (action, state): boolean {
             const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
 
@@ -241,55 +247,47 @@ export const actionHandlers: {
             return state
         },
     },
-    "unload-ship": {
+    "ship-decommission": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'unload-ship'.")
+            throw new Error("Function not implemented 'ship-decommission'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'unload-ship'.")
+            throw new Error("Function not implemented 'ship-decommission'.")
         },
     },
-    "decommission-ship": {
+    "ship-modify-passengers": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'decommission-ship'.")
+            throw new Error("Function not implemented 'ship-modify-passengers'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'decommission-ship'.")
+            throw new Error("Function not implemented 'ship-modify-passengers'.")
         },
     },
-    "modify-passengers": {
+    "ship-modify-fuel": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-passengers'.")
+            throw new Error("Function not implemented 'ship-modify-fuel'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-passengers'.")
+            throw new Error("Function not implemented 'ship-modify-fuel'.")
         },
     },
-    "modify-fuel": {
+    "ship-load-cargo": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-fuel'.")
+            throw new Error("Function not implemented 'ship-load-cargo'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-fuel'.")
+            throw new Error("Function not implemented 'ship-load-cargo'.")
         },
     },
-    "load-cargo": {
+    "ship-unload-cargo": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'load-cargo'.")
+            throw new Error("Function not implemented 'ship-unload-cargo'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'load-cargo'.")
+            throw new Error("Function not implemented 'ship-unload-cargo'.")
         },
     },
-    "unload-cargo": {
-        validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'unload-cargo'.")
-        },
-        apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'unload-cargo'.")
-        },
-    },
-    "reposition-ship": {
+    "ship-reposition": {
         validate: function (action, state): boolean {
             const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
             const shipsAtPlanet = state.ships.filter(
@@ -308,15 +306,15 @@ export const actionHandlers: {
             return apply(state, "ships", modifiedShip)
         },
     },
-    "transfer-ship": {
+    "ship-transfer": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'transfer-ship'.")
+            throw new Error("Function not implemented 'ship-transfer'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'transfer-ship'.")
+            throw new Error("Function not implemented 'ship-transfer'.")
         },
     },
-    "toggle-ship": {
+    "ship-toggle": {
         validate: function (action, state): boolean {
             const [ship, planet] = getShipAndPlanet(state, action.playerId, action.payload.id)
 
@@ -331,52 +329,52 @@ export const actionHandlers: {
             return apply(state, "ships", modifiedShip)
         },
     },
-    "modify-platoon-troops": {
+    "platoon-modify-troops": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-platoon-troops'.")
+            throw new Error("Function not implemented 'platoon-modify-troops'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-platoon-troops'.")
+            throw new Error("Function not implemented 'platoon-modify-troops'.")
         },
     },
-    "modify-platoon-suit": {
+    "platoon-modify-suit": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-platoon-suit'.")
+            throw new Error("Function not implemented 'platoon-modify-suit'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-platoon-suit'.")
+            throw new Error("Function not implemented 'platoon-modify-suit'.")
         },
     },
-    "modify-platoon-weapon": {
+    "platoon-modify-weapon": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'modify-platoon-weapon'.")
+            throw new Error("Function not implemented 'platoon-modify-weapon'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'modify-platoon-weapon'.")
+            throw new Error("Function not implemented 'platoon-modify-weapon'.")
         },
     },
-    "equip-platoon": {
+    "platoon-equip": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'equip-platoon'.")
+            throw new Error("Function not implemented 'platoon-equip'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'equip-platoon'.")
+            throw new Error("Function not implemented 'platoon-equip'.")
         },
     },
-    "load-platoon": {
+    "platoon-board-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'load-platoon'.")
+            throw new Error("Function not implemented 'platoon-board-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'load-platoon'.")
+            throw new Error("Function not implemented 'platoon-board-ship'.")
         },
     },
-    "unload-platoon": {
+    "platoon-disembark-ship": {
         validate: function (action, state): boolean {
-            throw new Error("Function not implemented 'unload-platoon'.")
+            throw new Error("Function not implemented 'platoon-disembark-ship'.")
         },
         apply: function (action, state): GameState {
-            throw new Error("Function not implemented 'unload-platoon'.")
+            throw new Error("Function not implemented 'platoon-disembark-ship'.")
         },
     },
 }

@@ -1,7 +1,7 @@
-import { Action, ActionObject, ActionPayloads, GameAction } from "#Supremacy/actions"
+import { Action, Actions, GameAction } from "#Supremacy/actions"
 import { createContext, useContext } from "react"
 
-export type ExecFn = <T extends Action = Action>(command: T, data: ActionPayloads[T]) => void
+export type ExecFn = <T extends Action = Action>(command: T, data: Actions[T]) => void
 
 export const CommandContext = createContext<{
     queue: GameAction[]

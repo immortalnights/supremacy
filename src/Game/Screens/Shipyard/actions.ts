@@ -6,5 +6,5 @@ export function usePurchaseShip() {
     const { exec } = useContext(CommandContext)
 
     return (blueprint: ShipBlueprint, planet: ColonizedPlanet, name: string) =>
-        exec("purchase-ship", { blueprint, name })
+        exec("ship-purchase", { blueprint, name })
 }

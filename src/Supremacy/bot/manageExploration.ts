@@ -95,7 +95,7 @@ export const manageExploration = (
             action = manageAtmosphereProcessor(player, atmos, planets, otherPlanets)
         } else {
             action = {
-                type: "purchase-ship",
+                type: "ship-purchase",
                 payload: {
                     class: "Atmosphere Processor",
                     name: undefined,

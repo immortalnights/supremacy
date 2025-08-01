@@ -39,7 +39,7 @@ const manageStationsAtPlanet = (
         if (shipToActivate) {
             // Activate any horticultural stations on the surface
             action = {
-                type: "toggle-ship",
+                type: "ship-toggle",
                 payload: {
                     id: shipToActivate.id,
                     active: true,
@@ -49,7 +49,7 @@ const manageStationsAtPlanet = (
             }
         } else if (shipToTransition) {
             action = {
-                type: "reposition-ship",
+                type: "ship-reposition",
                 payload: {
                     id: shipToTransition.id,
                     destination: "surface",
@@ -61,7 +61,7 @@ const manageStationsAtPlanet = (
             // FIXME this should be known, if the ship class has been identified?
             if (shipToCrew.requiredCrew !== "remote") {
                 action = {
-                    type: "crew-ship",
+                    type: "ship-crew",
                     payload: {
                         id: shipToCrew.id,
                         crew: shipToCrew.requiredCrew,
@@ -73,7 +73,7 @@ const manageStationsAtPlanet = (
         } else if (shipToLand) {
             // FIXME this should be known, if the ship class has been identified?
             action = {
-                type: "reposition-ship",
+                type: "ship-reposition",
                 payload: {
                     id: shipToLand.id,
                     destination: "docked",
@@ -140,7 +140,7 @@ const manageStations = (
         } else if (planet.capital) {
             // Don't transfer to the capital from other planets
             action = {
-                type: "purchase-ship",
+                type: "ship-purchase",
                 payload: {
                     class: shipClass,
                     name: undefined,
@@ -183,7 +183,7 @@ const manageStations = (
 
                 if (docked.length > 0) {
                     action = {
-                        type: "reposition-ship",
+                        type: "ship-reposition",
                         payload: {
                             id: docked[0].id,
                             destination: "orbit",
@@ -193,7 +193,7 @@ const manageStations = (
                     }
                 } else if (inOrbit.length > 0) {
                     action = {
-                        type: "transfer-ship",
+                        type: "ship-transfer",
                         payload: {
                             id: docked[0].id,
                             destination: planet.id,
@@ -205,7 +205,7 @@ const manageStations = (
                     // This planet has no available stations, try to purchase one.
                     console.debug(`No ${shipClass} available for planet ${planet.name}, purchasing one`)
                     action = {
-                        type: "purchase-ship",
+                        type: "ship-purchase",
                         payload: {
                             class: shipClass,
                             name: undefined,
@@ -263,7 +263,7 @@ const manageSolarSatellites = (
         // If the capital has a docked Solar, launch it
         if (docked.length > 0) {
             action = {
-                type: "reposition-ship",
+                type: "ship-reposition",
                 payload: {
                     id: docked[0].id,
                     destination: "orbit",
@@ -276,7 +276,7 @@ const manageSolarSatellites = (
         else if (inOrbit.length < min && inOrbit.length < max) {
             console.debug(`No Solar-Satellite available for capital ${planet.name}, purchasing one`)
             action = {
-                type: "purchase-ship",
+                type: "ship-purchase",
                 payload: {
                     class: "Solar-Satellite Generator",
                     name: undefined,
@@ -305,7 +305,7 @@ const manageSolarSatellites = (
 
                 if (atCapital.length > 0) {
                     action = {
-                        type: "transfer-ship",
+                        type: "ship-transfer",
                         payload: {
                             id: atCapital[0].id,
                             destination: planet.id,
@@ -316,7 +316,7 @@ const manageSolarSatellites = (
                 } else {
                     console.debug(`No Solar-Satellite available for planet ${planet.name}, purchasing one`)
                     action = {
-                        type: "purchase-ship",
+                        type: "ship-purchase",
                         payload: {
                             class: "Solar-Satellite Generator",
                             name: undefined,

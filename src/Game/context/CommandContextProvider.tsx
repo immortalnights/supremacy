@@ -21,7 +21,7 @@ import { applyModifyTax, applyRenamePlanet, modifyAggression, transferCreditsToC
 import { useSetNotification } from "../components/Notification"
 import { Platoon } from "Supremacy/entities"
 import { useSession } from "Game/hooks/session"
-import { Action, actionHandlers, ActionObject, ActionPayloads, GameAction, translateAction } from "#Supremacy/actions"
+import { GameAction, translateAction } from "#Supremacy/actions"
 
 const isPlatoon = (obj: unknown): obj is Platoon => {
     return Boolean(obj && typeof obj === "object" && "id" in obj)
@@ -77,25 +77,25 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                 //     set(planetsAtom, modifiedPlanets)
                 // }
 
-                if (command === "rename-planet") {
+                if (command === "planet-rename") {
                     // Apply the change locally
                     modifiedPlanets = applyRenamePlanet(localPlayer, originalPlanets, data.planet, data.newName)
 
                     set(planetsAtom, modifiedPlanets)
-                } else if (command === "set-planet-tax") {
+                } else if (command === "planet-set-tax") {
                     modifiedPlanets = applyModifyTax(localPlayer, originalPlanets, data.planet, data.newTax)
                     set(planetsAtom, modifiedPlanets)
-                } else if (command === "transfer-planet-credits") {
+                } else if (command === "planet-transfer-credits") {
                     modifiedPlanets = transferCreditsToCapital(
                         localPlayer,
                         originalPlanets,
                         // notify,
                     )
                     set(planetsAtom, modifiedPlanets)
-                } else if (command === "modify-planet-aggression") {
+                } else if (command === "planet-set-aggression") {
                     modifiedPlanets = modifyAggression(localPlayer, originalPlanets, data.planet, data.aggression)
                     set(planetsAtom, modifiedPlanets)
-                } else if (command === "purchase-ship") {
+                } else if (command === "ship-purchase") {
                     // Purchases are (currently) only made on the capital
                     ;[modifiedPlanets, modifiedShips] = purchaseShip(
                         localPlayer,
@@ -109,11 +109,11 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "crew-ship") {
+                } else if (command === "ship-crew") {
                     ;[modifiedPlanets, modifiedShips] = crewShip(localPlayer, originalPlanets, originalShips, data.ship)
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "unload-ship") {
+                } else if (command === "ship-unload-cargo") {
                     ;[modifiedPlanets, modifiedShips] = unloadShipCargo(
                         localPlayer,
                         originalPlanets,
@@ -122,7 +122,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "decommission-ship") {
+                } else if (command === "ship-decommission") {
                     ;[modifiedPlanets, modifiedShips] = decommissionShip(
                         localPlayer,
                         originalPlanets,
@@ -131,7 +131,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "modify-passengers") {
+                } else if (command === "ship-modify-passengers") {
                     ;[modifiedPlanets, modifiedShips] = modifyShipPassengers(
                         localPlayer,
                         originalPlanets,
@@ -141,7 +141,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "modify-fuel") {
+                } else if (command === "ship-modify-fuel") {
                     ;[modifiedPlanets, modifiedShips] = modifyShipFuel(
                         localPlayer,
                         originalPlanets,
@@ -151,7 +151,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "load-cargo") {
+                } else if (command === "ship-load-cargo") {
                     ;[modifiedPlanets, modifiedShips] = modifyCargo(
                         localPlayer,
                         originalPlanets,
@@ -162,7 +162,7 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "unload-cargo") {
+                } else if (command === "ship-unload-cargo") {
                     ;[modifiedPlanets, modifiedShips] = modifyCargo(
                         localPlayer,
                         originalPlanets,
@@ -182,13 +182,13 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                         data.position,
                     )
                     set(shipsAtom, modifiedShips)
-                } else if (command === "transfer-ship") {
+                } else if (command === "ship-transfer") {
                     modifiedShips = transferShip(localPlayer, originalPlanets, originalShips, data.ship, data.planet)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "toggle-ship") {
+                } else if (command === "ship-toggle") {
                     modifiedShips = toggleShip(localPlayer, originalPlanets, originalShips, data.ship, data.enabled)
                     set(shipsAtom, modifiedShips)
-                } else if (command === "modify-platoon-troops") {
+                } else if (command === "platoon-modify-troops") {
                     ;[modifiedPlanets, modifiedPlatoons] = modifyTroops(
                         localPlayer,
                         originalPlanets,
@@ -198,13 +198,13 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(platoonsAtom, modifiedPlatoons)
-                } else if (command === "modify-platoon-suit") {
+                } else if (command === "platoon-modify-suit") {
                     modifiedPlatoons = modifySuit(localPlayer, originalPlatoons, data.platoon, data.suit)
                     set(platoonsAtom, modifiedPlatoons)
-                } else if (command === "modify-platoon-weapon") {
+                } else if (command === "platoon-modify-weapon") {
                     modifiedPlatoons = modifyWeapon(localPlayer, originalPlatoons, data.platoon, data.weapon)
                     set(platoonsAtom, modifiedPlatoons)
-                } else if (command === "equip-platoon") {
+                } else if (command === "platoon-equip") {
                     ;[modifiedPlanets, modifiedPlatoons] = equip(
                         localPlayer,
                         originalPlanets,
@@ -213,11 +213,11 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     )
                     set(planetsAtom, modifiedPlanets)
                     set(platoonsAtom, modifiedPlatoons)
-                } else if (command === "load-platoon") {
+                } else if (command === "platoon-board-ship") {
                     modifiedPlatoons = loadPlatoon(localPlayer, originalPlatoons, data.platoon, data.ship)
                     set(planetsAtom, modifiedPlanets)
                     set(platoonsAtom, modifiedPlatoons)
-                } else if (command === "unload-platoon") {
+                } else if (command === "platoon-disembark-ship") {
                     if ("platoon" in data && isPlatoon(data.platoon))
                         modifiedPlatoons = unloadPlatoon(localPlayer, originalPlatoons, data.platoon, data.planet)
                     set(planetsAtom, modifiedPlanets)
