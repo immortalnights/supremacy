@@ -1,7 +1,6 @@
-import type { BotPlayer, GameState } from "../types"
+import type { ActionObject, BotPlayer, GameState, BotActionObject } from "../types"
 import type { ColonizedPlanet, Planet, Platoon, Ship } from "../entities"
-import type { BotActionObject } from "./types"
-import { manageFleets } from "./manageFleet"
+import { manageBattleCruisers, manageCargoCarriers, managePlanetShips } from "./manageFleet"
 import { managePlanets } from "./managePlanets"
 import { managePlatoons } from "./managePlatoons"
 import { manageExploration } from "./manageExploration"
@@ -38,9 +37,12 @@ export const calculateBot = (
 
     // Gather all possible actions
     actions.push(...managePlanets(player, ownedPlanets, ownedShips, activePlatoons))
-    actions.push(...manageFleets(player, ownedShips, ownedPlanets, otherPlanets, activePlatoons))
+    actions.push(...managePlanetShips(player, ownedShips, ownedPlanets, otherPlanets, activePlatoons))
     actions.push(...managePlatoons(player, ownedPlatoons, ownedPlanets, ownedShips))
     pushAction(manageExploration(player, ownedPlanets, otherPlanets, ownedShips, date), actions)
+    actions.push(...manageCargoCarriers(player, ownedShips, ownedPlanets))
+    // actions.push(...manageEspionage(player, ownedPlanets, otherPlanets))
+    actions.push(...manageBattleCruisers(player, ownedShips, ownedPlanets, otherPlanets, ownedPlatoons))
 
     // console.debug(`Bot ${player.id} (${player.difficulty}) has ${actions.length} actions to choose from`)
 
@@ -75,4 +77,11 @@ export const calculateBot = (
 
     // console.debug(`Bot ${player.id} chosen action`, chosenAction)
     return chosenAction
+}
+
+export const completeAction = (player: BotPlayer, action: BotActionObject) => {
+    // Iterate shipOrders index and remove the action
+    Object.entries(player.shipOrders).forEach(([shipId, orders]) => {
+        player.shipOrders[shipId] = orders.filter((order) => order.id !== action.id)
+    })
 }

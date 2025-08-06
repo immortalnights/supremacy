@@ -1,7 +1,7 @@
 import type { ColonizedPlanet, LifelessPlanet, Planet, Ship } from "../entities"
-import type { BotPlayer } from "../types"
+import type { BotPlayer, BotActionObject } from "../types"
 import { DAYS_PER_YEAR } from "../consts"
-import { BotActionObject, BotDifficulty } from "./types"
+import { BotDifficulty } from "./types"
 
 const findTerraformTarget = (
     ownedPlanets: ColonizedPlanet[],

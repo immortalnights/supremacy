@@ -1,4 +1,13 @@
-export const planetTypes = ["metropolis", "volcanic", "dessert", "tropical"] as const
+export const planetTypes = [
+    // ??x credits
+    "metropolis",
+    // 5x minerals, 3x fuel
+    "volcanic",
+    // ??x energy
+    "dessert",
+    // ??x food
+    "tropical",
+] as const
 export type PlanetType = "lifeless" | (typeof planetTypes)[number]
 
 export const resourceTypes = ["food", "minerals", "fuels", "energy"] as const

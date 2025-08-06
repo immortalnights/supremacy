@@ -1,4 +1,4 @@
-import { BotActionObject } from "./types"
+import { BotActionObject } from "../types"
 
 /**
  * Pushes an action to the actions array if it is defined. Some bot functions may return undefined if no action is needed.

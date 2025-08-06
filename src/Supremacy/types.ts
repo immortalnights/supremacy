@@ -1,4 +1,4 @@
-import type { Planet, Platoon, Ship } from "./entities"
+import type { Planet, Platoon, Ship, ShipClass, ShipPosition } from "./entities"
 import type { BotDifficulty } from "./bot/types"
 
 interface Player {
@@ -16,6 +16,8 @@ export interface HumanPlayer extends Player {
 export interface BotPlayer extends Player {
     bot: true
     difficulty: BotDifficulty
+    // Ship ID to a ordered list of actions
+    shipOrders: Record<string, BotActionObject[]>
 }
 
 export type AnyPlayer = HumanPlayer | BotPlayer
@@ -81,4 +83,57 @@ export interface LastSaveData {
     started: string
     playtime: number
     playerName: string
+}
+
+export type GameAction = (state: GameState) => GameState
+
+export interface PlanetActions {
+    "planet-terraform": { id: string; name?: string }
+    "planet-rename": { id: string; name: string }
+    "planet-set-tax": { id: string; tax: number }
+    "planet-transfer-credits": {
+        fromid: string
+        toid: string
+        amount: number
+    }
+    "planet-set-aggression": { id: string; aggression: number }
+}
+
+export interface ShipActions {
+    "ship-purchase": { class: ShipClass; name?: string }
+    "ship-crew": { id: string; crew: number }
+    "ship-decommission": { id: string }
+    "ship-modify-passengers": { id: string; passengers: number }
+    "ship-modify-fuel": { id: string; fuel: number }
+    "ship-load-cargo": { id: string; cargoType: string; amount: number }
+    "ship-unload-cargo": { id: string }
+    "ship-reposition": { id: string; destination: ShipPosition }
+    "ship-transfer": { id: string; destination: string }
+    "ship-toggle": { id: string; active?: boolean }
+}
+
+export interface PlatoonActions {
+    "platoon-modify-troops": { id: string; troops: number }
+    "platoon-modify-suit": { id: string; suitType: string }
+    "platoon-modify-weapon": { id: string; weaponType: string }
+    "platoon-equip": { id: string; equipment: string }
+    "platoon-board-ship": { id: string; shipId: string }
+    "platoon-disembark-ship": { id: string; shipId: string }
+}
+
+export type Actions = PlanetActions & ShipActions & PlatoonActions
+
+export type Action = keyof Actions
+
+export interface ActionObject<T extends Action = Action> {
+    type: T
+    payload: Actions[T]
+    playerId: string
+}
+
+export type ActionPriority = "High" | "Medium" | "Low"
+
+export type BotActionObject = ActionObject & {
+    id?: string
+    priority: ActionPriority
 }

@@ -1,10 +1,11 @@
-import type { BotPlayer } from "../types"
-import type { ColonizedPlanet, Ship, Platoon, ShipClass, Planet } from "../entities"
+import type { BotPlayer, BotActionObject, ActionPriority } from "../types"
+import type { ColonizedPlanet, Ship, Platoon, ShipClass, Planet, Resource } from "../entities"
 import { shipLimits } from "./consts"
-import type { BotDifficulty, BotActionObject, ActionPriority } from "./types"
+import type { BotDifficulty } from "./types"
 import { pushAction } from "./utils"
 
 // Each Bot is limited to a number of ships of a specific class based on their difficulty
+// TODO: Also consider the planet type
 const getShipLimit = (cls: ShipClass, planet: ColonizedPlanet, botDifficulty: BotDifficulty) => {
     const min = Math.ceil(planet.population / 3000)
     const max = shipLimits[cls][botDifficulty]
@@ -332,7 +333,7 @@ const manageSolarSatellites = (
     return action
 }
 
-export const manageFleets = (
+export const managePlanetShips = (
     player: BotPlayer,
     ships: Ship[],
     planets: ColonizedPlanet[],
@@ -386,8 +387,163 @@ export const manageFleets = (
         )
     })
 
-    // TODO manage Atmos?
-    // TODO manage Battle Cruisers
+    return actions
+}
+
+export const manageCargoCarriers = (
+    player: BotPlayer,
+    ships: Ship[],
+    planets: ColonizedPlanet[],
+): BotActionObject[] => {
+    const actions: BotActionObject[] = []
+
+    const capital = planets.find((planet) => planet.capital)
+    if (!capital) {
+        throw new Error(`Failed to find capital for player ${player.id}`)
+    }
+
+    // Implement cargo ship management logic here
+    const cargoShips = ships.filter((ship) => ship.class === "Cargo Store / Carrier")
+
+    cargoShips.forEach((ship) => {
+        const shipOrders = player.shipOrders[ship.id] || []
+
+        if (shipOrders.length > 0) {
+            // Apply the next oder from the ship (it's not removed as it may not be completed)
+            actions.push(shipOrders[0])
+        } else {
+            // It is assumed that the cargo ship is idle at the capital
+            // The cargo ship needs to collect the maximum amount of resources from the
+            // target planet, and deliver them to the capital planet.
+            // Prioritizing food, minerals, fuels and then energy.
+            const targetPlanets: { planet: Planet; resource: Resource; priority: ActionPriority }[] = []
+            planets.forEach((planet) => {
+                if (!planet.capital) {
+                    if (planet.type === "tropical") {
+                        if (planet.food > ship.capacity.cargo) {
+                            targetPlanets.push({ planet, resource: "food", priority: "High" })
+                        }
+                    } else if (planet.type === "volcanic") {
+                        if (planet.minerals + planet.fuels > ship.capacity.cargo) {
+                            targetPlanets.push({ planet, resource: "minerals", priority: "Medium" })
+                        }
+                    } else if (planet.type === "dessert") {
+                        if (planet.energy > ship.capacity.cargo) {
+                            targetPlanets.push({ planet, resource: "energy", priority: "Low" })
+                        }
+                    }
+                }
+            })
+
+            // Sort by priority
+            targetPlanets.sort((a, b) => {
+                const priorities: Record<ActionPriority, number> = { High: 3, Medium: 2, Low: 1 }
+                return priorities[b.priority] - priorities[a.priority]
+            })
+            // Take the first target planet
+            const target = targetPlanets[0]
+            const orders: BotActionObject[] = []
+            if (target) {
+                // The ship should be in the docking bay, but check that it is before transferring
+                if (ship.position === "docked") {
+                    orders.push({
+                        type: "ship-reposition",
+                        payload: { id: ship.id, destination: "orbit" },
+                        playerId: player.id,
+                        priority: "Medium",
+                    })
+                }
+
+                // Transfer to the target planet
+                orders.push({
+                    type: "ship-transfer",
+                    payload: { id: ship.id, destination: target.planet.id },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                // Dock the ship at the target planet
+                orders.push({
+                    type: "ship-reposition",
+                    payload: { id: ship.id, destination: "docked" },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                // Load the cargo from the target planet
+                orders.push({
+                    type: "ship-load-cargo",
+                    payload: { id: ship.id, cargoType: target.resource, amount: ship.capacity.cargo },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                if (target.resource === "minerals") {
+                    // Also try and load fuels
+                    orders.push({
+                        type: "ship-load-cargo",
+                        payload: { id: ship.id, cargoType: "fuels", amount: ship.capacity.cargo },
+                        playerId: player.id,
+                        priority: "Medium",
+                    })
+                }
+
+                // Launch the ship
+                orders.push({
+                    type: "ship-reposition",
+                    payload: { id: ship.id, destination: "orbit" },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                // Transfer to the capital planet
+                orders.push({
+                    type: "ship-transfer",
+                    payload: { id: ship.id, destination: capital.id },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                // Dock the ship at the capital planet
+                orders.push({
+                    type: "ship-reposition",
+                    payload: { id: ship.id, destination: "docked" },
+                    playerId: player.id,
+                    priority: "Medium",
+                })
+
+                // Unload the cargo
+                orders.push({
+                    type: "ship-unload-cargo",
+                    payload: { id: ship.id, cargoType: target.resource, amount: ship.capacity.cargo },
+                    playerId: player.id,
+                    priority: "High",
+                })
+            }
+
+            if (orders.length > 0) {
+                // Record the orders for the ship
+                player.shipOrders[ship.id] = orders
+                // Push the first order to the actions
+                actions.push(orders[0])
+            }
+        }
+    })
+
+    return actions
+}
+
+export const manageBattleCruisers = (
+    player: BotPlayer,
+    ships: Ship[],
+    planets: ColonizedPlanet[],
+    otherPlanets: Planet[],
+    platoons: Platoon[],
+): BotActionObject[] => {
+    const actions: BotActionObject[] = []
+
+    // Implement carrier ship management logic here
+    const carrierShips = ships.filter((ship) => ship.class === "B-29 Battle Cruiser")
 
     return actions
 }
