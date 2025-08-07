@@ -1,3 +1,4 @@
+import { applySpyOnPlanet, canSpyOnPlanet } from "./actions/espionage"
 import {
     canRenamePlanet,
     applyRenamePlanet,
@@ -15,6 +16,7 @@ import {
 import { getShipBlueprint } from "./data/ships"
 import { ColonizedPlanet, Ship } from "./entities"
 import { Action, ActionObject, GameAction, GameState } from "./types"
+import { throwError } from "./utilities"
 
 export const translateAction = <T extends Action>(action: ActionObject<T>): GameAction => {
     const handler = actionHandlers[action.type]
@@ -107,22 +109,36 @@ export const actionHandlers: {
     },
     "planet-rename": {
         validate: (action, state) => {
-            const planet = state.planets.find((p) => p.id === action.payload.id)
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id,
+            )
             return !!planet && canRenamePlanet(action.playerId, planet, action.payload.name)
         },
         apply: (action, state) => {
-            const planet = state.planets.find((p) => p.id === action.payload.id) as ColonizedPlanet
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id,
+            )
+            if (!planet) {
+                throw new Error(`Planet not found for id ${action.payload.id}`)
+            }
             const modifiedPlanet = applyRenamePlanet(planet, action.payload.name)
             return apply(state, "planets", modifiedPlanet)
         },
     },
     "planet-set-tax": {
         validate: function (action, state): boolean {
-            const planet = state.planets.find((p) => p.id === action.payload.id)
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id,
+            )
             return !!planet && canModifyTax(action.playerId, planet, action.payload.tax)
         },
         apply: function (action, state): GameState {
-            const planet = state.planets.find((p) => p.id === action.payload.id) as ColonizedPlanet
+            const planet = state.planets.find(
+                (p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id,
+            )
+            if (!planet) {
+                throw new Error(`Planet not found for id ${action.payload.id}`)
+            }
             const modifiedPlanet = applyModifyTax(planet, action.payload.tax)
             return apply(state, "planets", modifiedPlanet)
         },
@@ -141,6 +157,34 @@ export const actionHandlers: {
         },
         apply: function (action, state): GameState {
             throw new Error("Function not implemented 'planet-set-aggression'.")
+        },
+    },
+    "planet-spy": {
+        validate: function (action, state): boolean {
+            const player =
+                state.players.find((p) => p.id === action.playerId) ??
+                throwError(`Player not found for id ${action.playerId}`)
+            const capital =
+                state.planets.find((p): p is ColonizedPlanet => p.type !== "lifeless" && p.owner === player?.id) ??
+                throwError(`No capital planet found for player ${action.playerId}`)
+            const planet =
+                state.planets.find((p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id) ??
+                throwError(`Planet not found for id ${action.payload.id}`)
+            return canSpyOnPlanet(player, capital, planet, action.payload.level)
+        },
+        apply: function (action, state): GameState {
+            const player =
+                state.players.find((p) => p.id === action.playerId) ??
+                throwError(`Player not found for id ${action.playerId}`)
+            const capital =
+                state.planets.find((p): p is ColonizedPlanet => p.type !== "lifeless" && p.owner === player?.id) ??
+                throwError(`No capital planet found for player ${action.playerId}`)
+            const planet =
+                state.planets.find((p): p is ColonizedPlanet => p.type !== "lifeless" && p.id === action.payload.id) ??
+                throwError(`Planet not found for id ${action.payload.id}`)
+            // player.espionageReports is modified in applySpyOnPlanet, capital is returned
+            const modifiedPlanet = applySpyOnPlanet(player, capital, planet, action.payload.level)
+            return apply(state, "planets", modifiedPlanet)
         },
     },
     "ship-purchase": {

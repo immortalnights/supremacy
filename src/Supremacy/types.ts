@@ -1,7 +1,7 @@
 import type { Planet, Platoon, Ship, ShipClass, ShipPosition } from "./entities"
 import type { BotDifficulty } from "./bot/types"
 
-interface Player {
+interface BasePlayer {
     id: string
     name: string
     host: boolean
@@ -9,18 +9,19 @@ interface Player {
     bot: true | false
 }
 
-export interface HumanPlayer extends Player {
+export interface HumanPlayer extends BasePlayer {
     bot: false
 }
 
-export interface BotPlayer extends Player {
+export interface BotPlayer extends BasePlayer {
     bot: true
     difficulty: BotDifficulty
     // Ship ID to a ordered list of actions
     shipOrders: Record<string, BotActionObject[]>
+    espionageReports: Record<string, EspionageReport>
 }
 
-export type AnyPlayer = HumanPlayer | BotPlayer
+export type Player = HumanPlayer | BotPlayer
 
 export interface GameConfiguration {
     seed?: string
@@ -34,7 +35,7 @@ export interface GameState {
     seed: string
     difficulty: Difficulty
     date: number
-    players: AnyPlayer[]
+    players: Player[]
     planets: Planet[]
     ships: Ship[]
     platoons: Platoon[]
@@ -46,6 +47,17 @@ export interface GameState {
 
 export const difficulties = ["Easy", "Normal", "Hard", "Custom"] as const
 export type Difficulty = (typeof difficulties)[number]
+
+export type SpyLevel = "Resources" | "Population" | "War Status" | "Everything"
+
+export interface EspionageReport {
+    food: number
+    minerals: number
+    fuels: number
+    energy: number
+    strength: number
+    population: number
+}
 
 export interface GameData {
     planets: Planet[]
@@ -97,6 +109,7 @@ export interface PlanetActions {
         amount: number
     }
     "planet-set-aggression": { id: string; aggression: number }
+    "planet-spy": { id: string; level: SpyLevel }
 }
 
 export interface ShipActions {
