@@ -16,10 +16,10 @@ export const shipLimits: Record<ShipClass, Record<BotDifficulty, number>> = {
         Elite: 3,
     },
     "Cargo Store / Carrier": {
-        Easy: 0,
-        Normal: 0,
-        Hard: 0,
-        Elite: 0,
+        Easy: 1,
+        Normal: 1,
+        Hard: 1,
+        Elite: 1,
     },
     "Core Mining Station": {
         Easy: 0,

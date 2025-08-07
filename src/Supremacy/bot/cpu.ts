@@ -75,6 +75,10 @@ export const calculateBot = (
         }
     }
 
+    if (chosenAction?.id) {
+        completeAction(player, chosenAction)
+    }
+
     // console.debug(`Bot ${player.id} chosen action`, chosenAction)
     return chosenAction
 }
@@ -82,6 +86,13 @@ export const calculateBot = (
 export const completeAction = (player: BotPlayer, action: BotActionObject) => {
     // Iterate shipOrders index and remove the action
     Object.entries(player.shipOrders).forEach(([shipId, orders]) => {
-        player.shipOrders[shipId] = orders.filter((order) => order.id !== action.id)
+        //player.shipOrders[shipId] = orders.filter((order) => order.id !== action.id)
+        const index = orders.findIndex((order) => order.id === action.id)
+
+        if (index === -1) {
+            console.warn(`Action ${action.id} not found in shipOrders for ship ${shipId}`)
+        } else {
+            orders.splice(index, 1)
+        }
     })
 }
