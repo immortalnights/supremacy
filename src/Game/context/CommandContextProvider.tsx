@@ -1,19 +1,16 @@
 import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
-import { dateAtom, gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
+import { gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
 import { usePeerConnection } from "webrtc-lobby-lib"
 import { CommandContext, ExecFn } from "./CommandContext"
 import {
-    crewShip,
     decommissionShip,
     modifyCargo,
     modifyShipFuel,
     modifyShipPassengers,
-    purchaseShip,
     toggleShip,
     transferShip,
-    transitionShip,
     unloadShipCargo,
 } from "Supremacy/ships"
 import { modifyTroops, modifySuit, modifyWeapon, equip, loadPlatoon, unloadPlatoon } from "Supremacy/platoons"
@@ -21,7 +18,9 @@ import { applyModifyTax, applyRenamePlanet, modifyAggression, transferCreditsToC
 import { useSetNotification } from "../components/Notification"
 import { Platoon } from "Supremacy/entities"
 import { useSession } from "Game/hooks/session"
-import { GameAction, translateAction } from "#Supremacy/actions"
+import { translateAction } from "#Supremacy/actions"
+
+type GameAction = {}
 
 const isPlatoon = (obj: unknown): obj is Platoon => {
     return Boolean(obj && typeof obj === "object" && "id" in obj)
@@ -97,22 +96,22 @@ export function CommandProvider({ children }: { children: ReactNode }) {
                     set(planetsAtom, modifiedPlanets)
                 } else if (command === "ship-purchase") {
                     // Purchases are (currently) only made on the capital
-                    ;[modifiedPlanets, modifiedShips] = purchaseShip(
-                        localPlayer,
-                        originalPlanets,
-                        originalShips,
-                        data.blueprint,
-                        data.name,
-                        "Easy",
-                        get(dateAtom),
-                        notify,
-                    )
-                    set(planetsAtom, modifiedPlanets)
-                    set(shipsAtom, modifiedShips)
+                    // ;[modifiedPlanets, modifiedShips] = purchaseShip(
+                    //     localPlayer,
+                    //     originalPlanets,
+                    //     originalShips,
+                    //     data.blueprint,
+                    //     data.name,
+                    //     "Easy",
+                    //     get(dateAtom),
+                    //     notify,
+                    // )
+                    // set(planetsAtom, modifiedPlanets)
+                    // set(shipsAtom, modifiedShips)
                 } else if (command === "ship-crew") {
-                    ;[modifiedPlanets, modifiedShips] = crewShip(localPlayer, originalPlanets, originalShips, data.ship)
-                    set(planetsAtom, modifiedPlanets)
-                    set(shipsAtom, modifiedShips)
+                    // ;[modifiedPlanets, modifiedShips] = crewShip(localPlayer, originalPlanets, originalShips, data.ship)
+                    // set(planetsAtom, modifiedPlanets)
+                    // set(shipsAtom, modifiedShips)
                 } else if (command === "ship-unload-cargo") {
                     ;[modifiedPlanets, modifiedShips] = unloadShipCargo(
                         localPlayer,

@@ -2,7 +2,7 @@ import { useContext } from "react"
 import { CommandContext } from "../../context/CommandContext"
 import { ColonizedPlanet, Planet } from "Supremacy/entities"
 import { clamp } from "Supremacy/utilities"
-import { canRenamePlanet } from "#Supremacy/actions/planet"
+import { canRenamePlanet } from "#Supremacy/actions/renamePlanet"
 import { useSession } from "Game/hooks/session"
 
 export function useRenamePlanet() {

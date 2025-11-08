@@ -1,6 +1,6 @@
 import { FormEvent, useCallback, useMemo, useState } from "react"
 import { ColonizedPlanet, ShipBlueprint, ShipClass } from "Supremacy/entities"
-import { canPurchaseAtmos } from "Supremacy/ships"
+import { canPurchaseShip } from "Supremacy/actions/purchaseShip"
 import { blueprints } from "Supremacy/data/ships"
 import battleship from "/images/ship-battle-cruiser.gif"
 import solar from "/images/ship-solar-satellite.gif"
@@ -129,7 +129,7 @@ function Controls({
     }
 
     const handleBuy = () => {
-        if (blueprint.class === "Atmosphere Processor" && !canPurchaseAtmos(date, owned)) {
+        if (canPurchaseShip(planet, owned, blueprint, date, "Normal")) {
         } else if (dockedShips.length >= 3) {
             notify(`There is no room in the docking bays on ${planet.name}`)
         } else if (planet.credits < blueprint.cost.credits) {
