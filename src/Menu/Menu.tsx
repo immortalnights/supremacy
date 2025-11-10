@@ -23,6 +23,7 @@ export default function Main() {
                 Continue
             </MenuButton>
             <MenuButton onClick={() => navigate("/Create")}>New Game</MenuButton>
+            <MenuButton onClick={() => navigate("/Load")}>Load Game</MenuButton>
             <MenuButton onClick={handleMultiplayerClick}>Multiplayer</MenuButton>
         </div>
     )

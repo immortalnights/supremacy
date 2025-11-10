@@ -3,6 +3,10 @@
     "private": true,
     "version": "0.5.0",
     "type": "module",
+    "workspaces": [
+        ".",
+        "tools/save-editor"
+    ],
     "scripts": {
         "dev": "vite",
         "test": "vitest",
