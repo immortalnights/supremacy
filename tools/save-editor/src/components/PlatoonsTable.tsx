@@ -4,6 +4,7 @@ import type { Player } from "../../../../src/Supremacy/types"
 interface PlatoonsTableProps {
     platoons: Platoon[]
     players: Player[]
+    onUpdate?: (platoons: Platoon[]) => void
 }
 
 export default function PlatoonsTable({ platoons, players }: PlatoonsTableProps) {

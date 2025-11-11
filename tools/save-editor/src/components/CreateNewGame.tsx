@@ -43,7 +43,8 @@ export default function CreateNewGame({ onCreate, onCancel }: CreateNewGameProps
 
     return (
         <div style={{ padding: "2rem", maxWidth: "600px", margin: "0 auto" }}>
-            <h1>Create New Game</h1>
+            <h1>Supremacy Save Game Editor</h1>
+            <h2 style={{ marginTop: 0, color: "#7f8c8d" }}>Create New Game</h2>
 
             <div style={{ marginBottom: "1.5rem" }}>
                 <label style={{ display: "block", marginBottom: "0.5rem", fontWeight: "bold" }}>Difficulty</label>
