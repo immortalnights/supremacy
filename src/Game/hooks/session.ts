@@ -1,4 +1,3 @@
-import { throwError } from "Supremacy/utilities"
 import { sessionAtom } from "Game/store"
 import { useAtomValue } from "jotai"
 

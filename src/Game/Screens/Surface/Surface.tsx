@@ -4,7 +4,7 @@ import surfaceBackground from "/images/surface_background.png"
 import Navigation from "Game/components/Navigation"
 import { Ship } from "Supremacy/entities"
 import { useMoveShip, useSelectedColonizedPlanet } from "Game/hooks"
-import { throwError } from "game-signaling-server/client"
+import { throwError } from "#Supremacy/utilities"
 import Screen from "Game/components/Screen"
 
 export default function Surface() {

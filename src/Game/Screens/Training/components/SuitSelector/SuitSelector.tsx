@@ -1,4 +1,4 @@
-import { throwError } from "game-signaling-server/client"
+import { throwError } from "#Supremacy/utilities"
 import Button from "components/Button"
 import { Platoon, PlatoonState, SuitClass, WeaponClass } from "Supremacy/entities"
 import equipment from "Supremacy/data/equipment.json"

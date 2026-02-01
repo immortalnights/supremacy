@@ -7,7 +7,7 @@ import { sessionAtom } from "Game/store"
 import { useAtomValue } from "jotai"
 import { useAdjustTax } from "../../actions"
 import { useSelectedColonizedPlanet } from "Game/hooks"
-import { throwError } from "game-signaling-server/client"
+import { throwError } from "#Supremacy/utilities"
 import { useSession } from "Game/hooks/session"
 
 function TaxRate({
