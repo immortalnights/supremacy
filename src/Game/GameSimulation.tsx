@@ -4,7 +4,7 @@ import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulation
 import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
-import { usePeerConnection } from "webrtc-lobby-lib"
+import { usePeerConnection } from "webrtc-lobby"
 import { ColonizedPlanet, Planet, Platoon, Ship } from "Supremacy/entities"
 import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
 import { GameState, play } from "Supremacy"

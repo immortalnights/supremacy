@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Lobby as RTCLobby, useManager } from "webrtc-lobby-lib"
+import { Lobby as RTCLobby, useManager } from "webrtc-lobby"
 
 export default function Lobby() {
     const navigate = useNavigate()

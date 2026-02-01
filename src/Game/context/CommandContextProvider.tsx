@@ -2,7 +2,7 @@ import { Getter, Setter, useAtomValue, useSetAtom } from "jotai"
 import { useAtomCallback } from "jotai/utils"
 import { ReactNode, useCallback, useEffect, useMemo, useRef } from "react"
 import { gameStateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom } from "../store"
-import { usePeerConnection } from "webrtc-lobby-lib"
+import { usePeerConnection } from "webrtc-lobby"
 import { CommandContext, ExecFn } from "./CommandContext"
 import {
     decommissionShip,

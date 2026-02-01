@@ -1,4 +1,4 @@
-import { useManager } from "webrtc-lobby-lib"
+import { useManager } from "webrtc-lobby"
 import { useNavigate } from "react-router-dom"
 import { MenuButton } from "components/Button"
 import { useAtomValue } from "jotai"

@@ -3,7 +3,7 @@ import { store, sessionAtom, dateAtom, planetsAtom, shipsAtom, platoonsAtom } fr
 import { GameConfiguration, GameData, GameSession } from "Supremacy/types"
 import { Navigate } from "react-router-dom"
 import { Platoon, Ship } from "Supremacy/entities"
-import { DataChannelMessageHandler, useManager, usePeerConnection } from "webrtc-lobby-lib"
+import { DataChannelMessageHandler, useManager, usePeerConnection } from "webrtc-lobby"
 import { useCallback, useEffect, useState } from "react"
 import { useAtom } from "jotai"
 import { initializeMultiplayerGame, initializeSinglePlayerGame, saveGame } from "Supremacy/setup"
