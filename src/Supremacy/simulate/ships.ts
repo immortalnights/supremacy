@@ -1,0 +1,193 @@
+import { Planet, Ship, Atmos, isColonizedPlanet, ColonizedPlanet, LifelessPlanet, ShipOnSurface } from "../entities"
+
+const simulateTravel = (ship: Ship): Ship => {
+    let modifiedShip
+    if (ship.position === "outer-space") {
+        const destination = ship.heading.to
+
+        modifiedShip = {
+            ...ship,
+            position: "orbit" as const,
+            location: { planet: destination },
+        }
+    } else {
+        modifiedShip = ship
+    }
+    return modifiedShip
+}
+
+const gatherFood = (ship: Ship, planet?: Planet) => {
+    let modifiedShip = ship
+    let modifiedPlanet
+    if (planet && isColonizedPlanet(planet)) {
+        if (ship.position === "surface" && ship.active) {
+            if (planet.energy > 1) {
+                modifiedPlanet = {
+                    ...planet,
+                    energy: planet.energy - 1,
+                    food: planet.food + 12,
+                } satisfies ColonizedPlanet
+            } else {
+                modifiedShip = { ...ship, active: false }
+            }
+        }
+    }
+
+    return [modifiedShip, modifiedPlanet] as const
+}
+
+const gatherFuelAndMinerals = (ship: Ship, planet?: Planet) => {
+    let modifiedShip = ship
+    let modifiedPlanet
+    if (planet && isColonizedPlanet(planet)) {
+        if (ship.position === "surface" && ship.active) {
+            if (planet.energy > 1) {
+                modifiedPlanet = {
+                    ...planet,
+                    energy: planet.energy - 1,
+                    fuels: planet.fuels + 7,
+                    minerals: planet.minerals + 2,
+                } satisfies ColonizedPlanet
+            } else {
+                modifiedShip = { ...ship, active: false }
+            }
+        }
+    }
+
+    return [modifiedShip, modifiedPlanet] as const
+}
+
+const gatherEnergy = (ship: Ship, planet?: Planet) => {
+    let modifiedShip = ship
+    let modifiedPlanet
+    if (planet && isColonizedPlanet(planet) && ship.position === "orbit") {
+        modifiedPlanet = { ...planet, energy: planet.energy + 6 }
+        modifiedShip = ship
+    } else {
+        modifiedShip = ship
+    }
+
+    return [modifiedShip, modifiedPlanet] as const
+}
+
+const terraformPlanet = (ship: Atmos, planet: LifelessPlanet) => {
+    let modifiedShip = { ...ship } as Atmos & ShipOnSurface
+    let modifiedPlanet
+    if (ship.terraforming.remaining === 0) {
+        modifiedPlanet = {
+            id: planet.id,
+            gridIndex: planet.gridIndex,
+            name: "unnamed", // FIXME
+            type: planet.terraformedType,
+            owner: ship.owner,
+            capital: false,
+            credits: 0,
+            food: 0,
+            minerals: 0,
+            fuels: 0,
+            energy: 0,
+            population: 2000, // FIXME
+            morale: 75,
+            growth: 0,
+            tax: 25,
+            aggression: {},
+        } as ColonizedPlanet
+        modifiedShip.active = false
+    } else {
+        modifiedShip.terraforming.remaining -= 1
+    }
+
+    return [modifiedShip, modifiedPlanet] as const
+}
+
+// Pure simulation function
+export const simulateShips = (ships: Ship[], planets: Planet[]): [Ship[], Planet[]] => {
+    // console.log(`Simulating ${ships.length} ships`)
+    const getPlanet = (ship: Ship) =>
+        ship.position !== "outer-space"
+            ? modifiedPlanets.find((planet) => planet.id === ship.location.planet)
+            : undefined
+
+    const modifiedPlanets = [...planets]
+    const modifiedShips = ships.map((ship) => {
+        let modifiedShip: Ship = ship
+        let modifiedPlanet: Planet | undefined
+        switch (ship.class) {
+            case "B-29 Battle Cruiser": {
+                modifiedShip = simulateTravel(modifiedShip)
+                break
+            }
+            case "Solar-Satellite Generator": {
+                const planet = getPlanet(modifiedShip)
+                ;[modifiedShip, modifiedPlanet] = gatherEnergy(modifiedShip, planet)
+                modifiedShip = simulateTravel(modifiedShip)
+                break
+            }
+            case "Atmosphere Processor": {
+                const planet = getPlanet(modifiedShip)
+
+                if (planet?.type === "lifeless" && ship.position === "surface" && ship.active) {
+                    ;[modifiedShip, modifiedPlanet] = terraformPlanet(modifiedShip as Atmos, planet)
+                } else if (ship.position === "outer-space") {
+                    modifiedShip = simulateTravel(modifiedShip) as Atmos
+                    // Atmos automatically lands on the destination planet
+                    if (modifiedShip.position === "orbit") {
+                        const terraformPlanet = getPlanet(modifiedShip)
+
+                        if (!terraformPlanet) {
+                            throw new Error(
+                                `Failed to find planet ${modifiedShip.location.planet} which ship is orbiting`,
+                            )
+                        }
+
+                        let terraforming
+                        if (terraformPlanet.type === "lifeless") {
+                            terraforming = {
+                                duration: terraformPlanet.terraformDuration,
+                                remaining: terraformPlanet.terraformDuration,
+                            }
+                        }
+
+                        modifiedShip = {
+                            ...modifiedShip,
+                            position: "surface",
+                            location: {
+                                planet: terraformPlanet.id,
+                                index: 0,
+                            },
+                            terraforming,
+                            active: !!terraforming,
+                        }
+                    }
+                }
+
+                break
+            }
+            case "Cargo Store / Carrier": {
+                modifiedShip = simulateTravel(modifiedShip)
+                break
+            }
+            case "Core Mining Station": {
+                const planet = getPlanet(ship)
+                ;[modifiedShip, modifiedPlanet] = gatherFuelAndMinerals(modifiedShip, planet)
+                modifiedShip = simulateTravel(modifiedShip)
+                break
+            }
+            case "Horticultural Station": {
+                const planet = getPlanet(ship)
+                ;[modifiedShip, modifiedPlanet] = gatherFood(modifiedShip, planet)
+                modifiedShip = simulateTravel(modifiedShip)
+                break
+            }
+        }
+
+        if (modifiedPlanet) {
+            const index = planets.findIndex((planet) => planet.id === modifiedPlanet.id)
+            modifiedPlanets[index] = modifiedPlanet
+        }
+
+        return modifiedShip
+    })
+
+    return [modifiedShips, modifiedPlanets] as const
+}

@@ -1,22 +1,13 @@
-import { useManager } from "webrtc-lobby-lib"
+import { useManager } from "webrtc-lobby"
 import { useNavigate } from "react-router-dom"
-import { useMemo } from "react"
-import { LastSaveData } from "../Game/types"
 import { MenuButton } from "components/Button"
+import { useAtomValue } from "jotai"
+import { gameStateAtom } from "Game/store"
 
 export default function Main() {
     const { joinLobby } = useManager()
     const navigate = useNavigate()
-    const savedGame = useMemo((): LastSaveData | undefined => {
-        const lastSave = localStorage.getItem("last-save")
-        let data
-
-        if (lastSave) {
-            data = JSON.parse(lastSave) as LastSaveData
-        }
-
-        return data
-    }, [])
+    const savedGame = useAtomValue(gameStateAtom)
 
     const handleMultiplayerClick = async () => {
         await joinLobby()
@@ -27,18 +18,13 @@ export default function Main() {
         <div>
             <MenuButton
                 disabled={!savedGame}
-                onClick={() =>
-                    savedGame ? navigate(`/Game/${savedGame.id}/`) : undefined
-                }
+                onClick={() => (savedGame ? navigate(`/Game/${savedGame.id}/`) : undefined)}
             >
                 Continue
             </MenuButton>
-            <MenuButton onClick={() => navigate("/Create")}>
-                New Game
-            </MenuButton>
-            <MenuButton onClick={handleMultiplayerClick}>
-                Multiplayer
-            </MenuButton>
+            <MenuButton onClick={() => navigate("/Create")}>New Game</MenuButton>
+            <MenuButton onClick={() => navigate("/Load")}>Load Game</MenuButton>
+            <MenuButton onClick={handleMultiplayerClick}>Multiplayer</MenuButton>
         </div>
     )
 }

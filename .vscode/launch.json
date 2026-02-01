@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Simulator",
+            "program": "${workspaceFolder}/simulator.ts",
+            "runtimeArgs": ["--enable-source-maps", "--experimental-strip-types"],
+            "outFiles": ["${workspaceFolder}/Supremacy.mjs"]
+        }
+    ]
+}

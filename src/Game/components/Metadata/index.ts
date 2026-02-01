@@ -1,6 +1,1 @@
-export {
-    default,
-    MetadataLabel,
-    MetadataValue,
-    type MetadataAlignment,
-} from "./Metadata"
+export { default, MetadataLabel, MetadataValue, type MetadataAlignment } from "./Metadata"

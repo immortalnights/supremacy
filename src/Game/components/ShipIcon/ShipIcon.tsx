@@ -1,4 +1,4 @@
-import { Ship } from "../../entities"
+import { Ship } from "Supremacy/entities"
 import emptyIcon from "/images/empty.png"
 import atmosIcon from "/images/atmos_icon.png"
 import battleIcon from "/images/battle_icon.png"
@@ -16,13 +16,7 @@ const iconMap: { [Key in Ship["class"]]: string } = {
     "Horticultural Station": farmingIcon,
 }
 
-export default function ShipIcon({
-    ship,
-    style,
-}: {
-    ship?: Ship
-    style?: React.CSSProperties
-}) {
+export default function ShipIcon({ ship, style }: { ship?: Ship; style?: React.CSSProperties }) {
     let img = emptyIcon
     if (ship) {
         img = iconMap[ship.class]

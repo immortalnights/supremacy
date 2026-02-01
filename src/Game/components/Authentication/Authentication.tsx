@@ -1,40 +1,25 @@
-import {
-    useCapitalPlanet,
-    useSelectedColonizedPlanet,
-    useSelectedPlanet,
-} from "Game/hooks"
-import { selectedPlanetAtom, sessionAtom } from "Game/store"
-import { platoonsOnPlanetAtom } from "Game/utilities/platoons"
-import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
+import { useCapitalPlanet, useSelectedColonizedPlanet, useSelectedPlanet } from "Game/hooks"
+import { useSession } from "Game/hooks/session"
+import { platoonsOnPlanetAtom, selectedPlanetAtom, sessionAtom, shipsDocketAtPlanetAtom } from "Game/store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useEffect } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 
 const useCanAccessPlanet = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const selectedPlanet = useSelectedPlanet()
-    return (
-        selectedPlanet &&
-        selectedPlanet.type !== "lifeless" &&
-        selectedPlanet.owner === localPlayer
-    )
+    return localPlayer && selectedPlanet && selectedPlanet.type !== "lifeless" && selectedPlanet.owner === localPlayer
 }
 
 const useIsPlanetContested = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const selectedPlanet = useSelectedColonizedPlanet()
-    const ships = useAtomValue(shipsDocketAtPlanetAtom).filter(
-        selectedPlanet,
-        localPlayer,
-    )
-    const platoons = useAtomValue(platoonsOnPlanetAtom).filter(
-        selectedPlanet,
-        localPlayer,
-    )
+    const ships = useAtomValue(shipsDocketAtPlanetAtom).filter(selectedPlanet, localPlayer)
+    const platoons = useAtomValue(platoonsOnPlanetAtom).filter(selectedPlanet, localPlayer)
 
     // A side effect is that the player is immediately navigated away
     // from a contested planet as soon as it becomes none contested.
-    return ships.length > 0 || platoons.length > 0
+    return localPlayer && (ships.length > 0 || platoons.length > 0)
 }
 
 export function AuthenticationWithRedirect() {

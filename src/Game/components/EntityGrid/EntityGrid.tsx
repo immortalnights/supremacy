@@ -8,21 +8,15 @@ type Entity = {
     gridIndex?: number
 }
 
-function Cell({
-    color = "#715fc3",
-    children,
-}: {
-    color?: string
-    children?: ReactNode
-}) {
+function Cell({ color = "#715fc3", children }: { color?: string; children?: ReactNode }) {
     return (
         <td
             // key={entity?.id ??}
             style={{
                 borderBottom: `2px solid ${color}`,
                 borderRight: `2px solid ${color}`,
-                width: "6em",
-                height: "24px",
+                height: "16px",
+                overflow: "hidden",
             }}
         >
             {children}
@@ -30,7 +24,7 @@ function Cell({
     )
 }
 
-function EntityCell<T extends Entity>({
+function EntityCell<T extends { name: string; owner?: string }>({
     entity,
     localPlayer,
     onClick,
@@ -56,7 +50,15 @@ function EntityCell<T extends Entity>({
 
     return (
         <Cell color={color}>
-            <Button onClick={handleClick} style={{ textTransform: "uppercase" }}>
+            <Button
+                onClick={handleClick}
+                style={{
+                    fontFamily: "monospace",
+                    fontSize: "13px",
+                    display: "block",
+                    textTransform: "uppercase",
+                }}
+            >
                 {entity.name}
             </Button>
         </Cell>
@@ -97,14 +99,13 @@ function EntityRow<T extends Entity>({
                 .fill(undefined)
                 .map((_, col) => {
                     const index = col + row * 4
-                    const entity = fixedPositions
-                        ? gridEntity(entities, index)
-                        : entities[index]
+                    const entity = fixedPositions ? gridEntity(entities, index) : entities[index]
 
                     return entity ? (
                         <EntityCell
                             key={`cell-${row}-${col}`}
-                            entity={entity}
+                            // FIXME
+                            entity={entity as T}
                             localPlayer={localPlayer}
                             onClick={onClick}
                         />
@@ -131,7 +132,14 @@ export default function EntityGrid<T extends Entity>({
     const columns = 4
 
     return (
-        <table style={{ userSelect: "none" }}>
+        <table
+            style={{
+                tableLayout: "fixed",
+                userSelect: "none",
+                flexGrow: 1,
+                width: "100%",
+            }}
+        >
             <tbody>
                 {Array(rows)
                     .fill(undefined)

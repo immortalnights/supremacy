@@ -1,10 +1,10 @@
 import { useAtomValue } from "jotai"
 import { planetsAtom, selectedPlanetAtom, sessionAtom } from "../store"
-import type { ColonizedPlanet, Planet } from "../entities"
-import { throwError } from "game-signaling-server/client"
+import type { ColonizedPlanet, Planet } from "Supremacy/entities"
+import { useSession } from "./session"
+import { throwError } from "#Supremacy/utilities"
 
-const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet =>
-    planet.type !== "lifeless"
+const isColonizedPlanet = (planet: Planet): planet is ColonizedPlanet => planet.type !== "lifeless"
 
 export const useSelectedPlanet = () => {
     const planet = useAtomValue(selectedPlanetAtom)
@@ -17,15 +17,12 @@ export const useSelectedColonizedPlanet = () => {
 }
 
 export const useCapitalPlanet = () => {
-    const { localPlayer } = useAtomValue(sessionAtom)
+    const { localPlayer } = useSession()
     const planets = useAtomValue(planetsAtom)
 
     const capital = planets.find(
-        (planet) =>
-            isColonizedPlanet(planet) && planet.capital && planet.owner === localPlayer,
+        (planet) => isColonizedPlanet(planet) && planet.capital && planet.owner === localPlayer,
     )
 
-    return capital && isColonizedPlanet(capital)
-        ? capital
-        : throwError("Failed to find capital planet")
+    return capital && isColonizedPlanet(capital) ? capital : throwError("Failed to find capital planet")
 }

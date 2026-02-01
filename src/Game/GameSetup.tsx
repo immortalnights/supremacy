@@ -1,42 +1,16 @@
 import { useActionData } from "react-router-dom"
-import {
-    store,
-    sessionAtom,
-    dateAtom,
-    planetsAtom,
-    shipsAtom,
-    platoonsAtom,
-} from "./store"
-import { GameConfiguration, GameData, GameSession } from "./types"
+import { store, sessionAtom, dateAtom, planetsAtom, shipsAtom, platoonsAtom } from "./store"
+import { GameConfiguration, GameData, GameSession } from "Supremacy/types"
 import { Navigate } from "react-router-dom"
-import { Platoon, Ship } from "./entities"
-import {
-    DataChannelMessageHandler,
-    useManager,
-    usePeerConnection,
-} from "webrtc-lobby-lib"
+import { Platoon, Ship } from "Supremacy/entities"
+import { DataChannelMessageHandler, useManager, usePeerConnection } from "webrtc-lobby"
 import { useCallback, useEffect, useState } from "react"
 import { useAtom } from "jotai"
-import {
-    initializeMultiplayerGame,
-    initializeSinglePlayerGame,
-    saveGame,
-} from "./gameSetupUtilities"
+import { initializeMultiplayerGame, initializeSinglePlayerGame, saveGame } from "Supremacy/setup"
 
-type SetupState =
-    | "initializing"
-    | "synchronizing"
-    | "creating"
-    | "waiting"
-    | "ready"
-    | "error"
+type SetupState = "initializing" | "synchronizing" | "creating" | "waiting" | "ready" | "error"
 
-const useMultiplayer2 = ({
-    onReady,
-}: {
-    onReady: () => void
-    onError: () => void
-}) => {
+const useMultiplayer2 = ({ onReady }: { onReady: () => void; onError: () => void }) => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
     const { player: localPlayer, game } = useManager()
     const [session, setSession] = useAtom(sessionAtom)
@@ -58,8 +32,8 @@ const useMultiplayer2 = ({
                     console.debug("Host received message", name)
                     if (name === "session-synchronization") {
                         setSession({
-                            id: game,
-                            difficulty: "easy",
+                            id: game ?? "unknown",
+                            difficulty: "Easy",
                             multiplayer: true,
                             host: localPlayer?.host,
                             localPlayer: localPlayer.id,
@@ -67,7 +41,9 @@ const useMultiplayer2 = ({
                                 id: localPlayer.id,
                                 name: localPlayer.name,
                             },
-                            player2: body.player2,
+                            player2: (body as any).player2,
+                            created: "",
+                            playtime: 0,
                         })
                         setState("creating")
                     } else if (name === "initialize-synchronization-complete") {
@@ -81,16 +57,18 @@ const useMultiplayer2 = ({
                     console.debug("Client received message", name)
                     if (name === "session-synchronization") {
                         setSession({
-                            id: game,
-                            difficulty: body.difficulty,
+                            id: game ?? "unknown",
+                            difficulty: (body as any).difficulty,
                             multiplayer: true,
                             host: localPlayer?.host,
                             localPlayer: localPlayer?.id,
-                            player1: body.player1,
+                            player1: (body as any).player1,
                             player2: {
                                 id: localPlayer?.id,
                                 name: localPlayer?.name,
                             },
+                            created: "",
+                            playtime: 0,
                         })
                         setState("waiting")
                     } else if (name === "initial-game-data") {
@@ -111,16 +89,7 @@ const useMultiplayer2 = ({
                 unsubscribe(peerMessageHandler)
             }
         }
-    }, [
-        localPlayer,
-        subscribe,
-        unsubscribe,
-        send,
-        setSession,
-        game,
-        hydrateAtoms,
-        onReady,
-    ])
+    }, [localPlayer, subscribe, unsubscribe, send, setSession, game, hydrateAtoms, onReady])
 
     useEffect(() => {
         switch (state) {
@@ -150,17 +119,8 @@ const useMultiplayer2 = ({
                 break
             }
             case "creating": {
-                if (
-                    localPlayer?.host &&
-                    session?.player1?.id &&
-                    session?.player2?.id
-                ) {
-                    const data = initializeMultiplayerGame(
-                        "easy",
-                        8,
-                        session?.player1?.id,
-                        session?.player2?.id,
-                    )
+                if (localPlayer?.host && session?.player1?.id && session?.player2?.id) {
+                    const data = initializeMultiplayerGame("Easy", 8, session?.player1?.id, session?.player2?.id)
                     hydrateAtoms(data)
                     send("initial-game-data", data)
                     setState("waiting")
@@ -213,11 +173,7 @@ export default function GameSetup() {
                 setup()
             } else {
                 const playerId = configuration.player1Id
-                const data = initializeSinglePlayerGame(
-                    configuration.difficulty,
-                    configuration.planets,
-                    playerId,
-                )
+                const data = initializeSinglePlayerGame(configuration.difficulty, configuration.planets, playerId)
 
                 const sessionData = {
                     id: crypto.randomUUID(),
@@ -234,13 +190,7 @@ export default function GameSetup() {
                     localPlayer: playerId,
                 } satisfies GameSession
 
-                saveGame(
-                    sessionData,
-                    "paused",
-                    data.planets,
-                    data.ships,
-                    data.platoons,
-                )
+                saveGame(sessionData, "paused", data.planets, data.ships, data.platoons)
 
                 hydrateAtoms(data)
                 setSession(sessionData)

@@ -1,37 +1,26 @@
-import { Getter, Setter, useAtom, useAtomValue } from "jotai"
-import { Outlet } from "react-router-dom"
-import {
-    dateAtom,
-    planetsAtom,
-    platoonsAtom,
-    sessionAtom,
-    shipsAtom,
-    simulationSpeedAtom,
-} from "./store"
-import { CommandProvider } from "./CommandContextProvider"
+import { Getter, Setter, useAtom, useAtomValue, useSetAtom } from "jotai"
+import { Outlet, useNavigate } from "react-router-dom"
+import { dateAtom, planetsAtom, platoonsAtom, sessionAtom, shipsAtom, simulationSpeedAtom, store } from "./store"
+import { CommandProvider } from "./context/CommandContextProvider"
 import { useCallback, useEffect, useMemo, useRef } from "react"
 import { useAtomCallback } from "jotai/utils"
-import { usePeerConnection } from "webrtc-lobby-lib"
-import { ColonizedPlanet, Planet, Platoon, Ship } from "./entities"
-import { PLANET_POPULATION_LIMIT } from "./settings"
-import { simulatePlanets, simulatePlatoons, simulateShips } from "./logic/tick"
-
-const speedMap = {
-    slow: 2,
-    paused: 0,
-    normal: 1,
-    fast: 0.5,
-} as const
+import { usePeerConnection } from "webrtc-lobby"
+import { ColonizedPlanet, Planet, Platoon, Ship } from "Supremacy/entities"
+import { PLANET_POPULATION_LIMIT } from "Supremacy/consts"
+import { GameState, play } from "Supremacy"
+import { useSession } from "./hooks/session"
+import { gameStateAtom } from "./store"
+import { useCommandContext } from "./context/CommandContext"
 
 const useMultiplayerSync = () => {
     const { send, subscribe, unsubscribe } = usePeerConnection()
-    const { host, multiplayer } = useAtomValue(sessionAtom)
+    const { host, multiplayer } = useSession()
 
     useEffect(() => {
         let peerMessageHandler
 
         if (multiplayer) {
-            peerMessageHandler = (_peer, { _name, _body }) => {}
+            peerMessageHandler = (peer: unknown, { name, body }: any) => {}
         } else {
             peerMessageHandler = () => {}
         }
@@ -44,12 +33,7 @@ const useMultiplayerSync = () => {
     }, [multiplayer, subscribe, unsubscribe])
 
     const sync = useCallback(
-        (changes: {
-            date: number
-            planets: Planet[]
-            ships: Ship[]
-            platoons: Platoon[]
-        }) => {
+        (changes: { date: number; planets: Planet[]; ships: Ship[]; platoons: Platoon[] }) => {
             if (host && multiplayer) {
                 send("update-world", { ...changes })
             }
@@ -60,7 +44,7 @@ const useMultiplayerSync = () => {
     return sync
 }
 
-function Simulation() {
+function Simulation1() {
     const sync = useMultiplayerSync()
     const [speed, setSpeed] = useAtom(simulationSpeedAtom)
     const tickTime = useMemo(() => 1000 * speedMap[speed], [speed])
@@ -83,18 +67,21 @@ function Simulation() {
                 ;[modifiedPlatoons, modifiedPlanets] = simulatePlatoons(
                     modifiedPlatoons,
                     modifiedPlanets,
-                    newDate,
+                    // newDate,
                 )
 
                 // Ships on the planet surface effect planet resources, so resolve second
                 ;[modifiedShips, modifiedPlanets] = simulateShips(
                     modifiedShips,
                     modifiedPlanets,
-                    newDate,
+                    // newDate,
                 )
 
                 // Finally resolve planets
-                modifiedPlanets = simulatePlanets(modifiedPlanets, newDate)
+                modifiedPlanets = simulatePlanets(
+                    modifiedPlanets,
+                    // newDate
+                )
 
                 // No op in single player
                 sync({
@@ -103,6 +90,17 @@ function Simulation() {
                     ships: modifiedShips,
                     platoons: modifiedPlatoons,
                 })
+
+                // if (ai) {
+                //     // The AI knows of the state of all planets, but should only know resources for it's own
+                //     const filteredPlanets = modifiedPlanets.filter(() => true)
+                //     // The AI knows about own ships, and enemy ships located in orbit or in the docking bays of owned planets
+                //     const filteredShips = modifiedShips.filter(() => true)
+                //     // The AI knows about own platoons and enemy platoons on it's planets
+                //     const filteredPlatoons = modifiedPlatoons.filter(() => true)
+
+                //     ai.process(filteredPlanets, filteredShips, filteredPlatoons)
+                // }
 
                 set(dateAtom, newDate)
                 set(planetsAtom, modifiedPlanets)
@@ -132,18 +130,48 @@ function Simulation() {
     return null
 }
 
-export function GameSimulation() {
-    const session = useAtomValue(sessionAtom)
+export function Simulation() {
+    console.log("Starting game loop...")
+    const gameState = store.get(gameStateAtom)
+    // const gameState = useAtomValue(gameStateAtom)
+    const setGameState = useSetAtom(gameStateAtom)
+    const { queue } = useCommandContext()
+    const navigate = useNavigate()
 
-    if (!session) {
-        throw Error("Missing session data!")
-    }
+    useEffect(() => {
+        if (!gameState) return
+
+        const control = { timer: undefined, stop: false }
+
+        // FIXME Need to setGameState, but it causes re-render
+        play(gameState, queue, control, setGameState)
+            .then(() => {
+                console.log("Game loop finished")
+                navigate("/Game/Ended", { replace: true })
+            })
+            .catch((err) => {
+                console.error("Error during game loop:", err)
+            })
+
+        return () => {
+            control.stop = true
+            // Optionally trigger save here
+        }
+    }, [])
+
+    return null
+}
+
+export function GameSimulation() {
+    // Might have a Game state, loaded from local storage, but wont have a Session state.
+
+    // console.log("GameSimulation", state, session)
 
     return (
         <>
             {/* <Provider store={store}> */}
-            <Simulation />
             <CommandProvider>
+                <Simulation />
                 <Outlet />
             </CommandProvider>
             {/* </Provider> */}

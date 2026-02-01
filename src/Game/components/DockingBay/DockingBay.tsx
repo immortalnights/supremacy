@@ -1,17 +1,9 @@
-import { ColonizedPlanet, Planet, Ship } from "Game/entities"
+import { ColonizedPlanet, Planet, Ship } from "Supremacy/entities"
 import Button from "components/Button"
-import { shipsDocketAtPlanetAtom } from "Game/utilities/ships"
+import { shipsDocketAtPlanetAtom } from "../../store"
 import { useAtomValue } from "jotai"
 
-function Bay({
-    number,
-    ship,
-    onClick,
-}: {
-    number: number
-    ship?: Ship
-    onClick: (ship: Ship) => void
-}) {
+function Bay({ number, ship, onClick }: { number: number; ship?: Ship; onClick: (ship: Ship) => void }) {
     const handleClick = () => {
         if (ship) {
             onClick(ship)
@@ -23,10 +15,7 @@ function Bay({
             <div>{number}</div>
             <div style={{ width: "6em", height: "1em" }}>
                 {ship ? (
-                    <Button
-                        onClick={handleClick}
-                        style={{ textTransform: "uppercase" }}
-                    >
+                    <Button onClick={handleClick} style={{ textTransform: "uppercase" }}>
                         {ship.name}
                     </Button>
                 ) : (
@@ -37,13 +26,7 @@ function Bay({
     )
 }
 
-export default function DockingBay({
-    planet,
-    onClick,
-}: {
-    planet: ColonizedPlanet
-    onClick: (ship: Ship) => void
-}) {
+export default function DockingBay({ planet, onClick }: { planet: ColonizedPlanet; onClick: (ship: Ship) => void }) {
     const ships = useAtomValue(shipsDocketAtPlanetAtom).filter(planet)
 
     return (
@@ -58,14 +41,7 @@ export default function DockingBay({
                     .fill(undefined)
                     .map((_, index) => {
                         const ship = ships.find((ship) => ship.location.index === index)
-                        return (
-                            <Bay
-                                key={`B${index}${ship?.name}`}
-                                number={1 + index}
-                                ship={ship}
-                                onClick={onClick}
-                            />
-                        )
+                        return <Bay key={`B${index}${ship?.name}`} number={1 + index} ship={ship} onClick={onClick} />
                     })}
             </div>
         </div>
